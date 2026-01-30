@@ -1,0 +1,41 @@
+# @package _global_
+
+run_name: "mgm_omni_ots_on_background_clean"
+device: "cuda:0"
+base_dir: "."
+
+vc:
+  mode: "ots"
+  model: "mgm_omni"
+
+output_paths:
+  metrics_file: "results/mgm_omni_ots_on_background_clean/metrics.json"
+
+adversary:
+  repo_root: "checkpoints/MGM-Omni"
+  checkpoint_path: "wcy1122/MGM-Omni-TTS-2B-0927"
+  cosyvoice_path: null
+  device_map: "auto"
+  load_8bit: false
+  load_4bit: false
+  use_flash_attn: true
+  do_sample: true
+  generation_temperature: 0.3
+  max_new_tokens: 4096
+  instruction_template: "Please read the following text using the same voice as the provided audio sample: {text}"
+  include_prompt_transcript: true
+  max_samples: null
+  seed: null
+
+batch_size: 16 # not used in VC
+
+defaults:
+  - _self_
+  - /dataset: background_noise
+
+evaluation:
+  bootstrap:
+    enabled: true
+    num_samples: 1000
+    confidence_level: 0.95
+    seed: null

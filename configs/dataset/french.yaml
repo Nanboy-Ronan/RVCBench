@@ -1,0 +1,28 @@
+# Dataset Configuration for Common Voice French dev subset
+
+name: "CommonVoiceFR_dev"
+root_path: "./data/CommonVoiceFR_dev"
+
+# Use all speakers discovered under this path
+speaker_id: null
+
+max_wav_value: 32768.0
+
+# Common Voice clips are 48 kHz by default (change if you resampled)
+sampling_rate: 48000
+
+# Spectrogram / mel parameters aligned with your Long_librispeech config
+filter_length: 2048
+hop_length: 512
+win_length: 2048
+n_mel_channels: 128
+mel_fmin: 0.0
+mel_fmax: null
+
+add_blank: true
+
+# Safe upper bound on number of speakers in the dev split
+n_speakers: 40
+
+cleaned_text: true
+return_path: true

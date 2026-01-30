@@ -1,0 +1,35 @@
+# @package _global_
+
+run_name: "vall_e_ots_on_bilingual_uedin"
+device: "cuda:0"
+base_dir: "."
+
+vc:
+  mode: "ots"
+  model: "vall_e"
+
+output_paths:
+  metrics_file: "results/vall_e_ots_on_bilingual_uedin/metrics.json"
+
+adversary:
+  code_path: "checkpoints/vall-e"
+  checkpoint_path: "checkpoints/vall-e/examples/libritts/exp/valle/best-valid-loss.pt"
+  text_extractor: "espeak"
+  top_k: -100
+  temperature: 1.0
+  output_sample_rate: 24000
+  reference_assignment: "round_robin"
+  max_samples: null
+  default_prompt_text: "Here is a sample of the desired voice. Use this voice while speaking the text in its original language."
+
+batch_size: 16 # not used in VC
+
+defaults:
+  - _self_
+  - /dataset: bilingual_uedin
+evaluation:
+  bootstrap:
+    enabled: true
+    num_samples: 1000
+    confidence_level: 0.95
+    seed: null

@@ -1,0 +1,17 @@
+# Dataset Configuration
+
+name: "Robotcall"
+root_path: "./data/robotcall"
+speaker_id: null # Default speaker: p227, p232, p234, p237, p238, p251, p253, p262, p283, p288
+max_wav_value: 32768.0
+sampling_rate: 48000
+filter_length: 2048
+hop_length: 512
+win_length: 2048
+n_mel_channels: 128
+mel_fmin: 0.0
+mel_fmax: null
+add_blank: true
+n_speakers: 10
+cleaned_text: true
+return_path: true

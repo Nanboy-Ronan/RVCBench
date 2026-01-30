@@ -1,0 +1,76 @@
+# @package _global_
+
+run_name: "higgs_audio_ots_on_multispeaker_libri"
+device: "cuda:0"
+base_dir: "."
+
+vc:
+  mode: "ots"
+  model: "higgs_audio"
+
+output_paths:
+  metrics_file: "results/higgs_audio_ots_on_multispeaker_libri/metrics.json"
+
+adversary:
+  code_path: "checkpoints/higgs_audio/higgs-audio"
+  model_path: "bosonai/higgs-audio-v2-generation-3B-base"
+  audio_tokenizer_path: "bosonai/higgs-audio-v2-tokenizer"
+  scene_prompt_path: null
+  scene_prompt_text: |
+    CRITICAL: Generate audio using the SAME speaker voice/timbre as the reference, speaking in English.
+    
+    LANGUAGE RULES (MANDATORY):
+    - All input text is in English (LibriSpeech dataset)
+    - Speak natural, clear English with the reference speaker's voice
+    - NEVER translate the text to a different language
+    - The reference audio provides ONLY the speaker identity/timbre
+    
+    VOICE CLONING:
+    - Clone the reference speaker's voice quality, timbre, pitch range, and speaking style
+    - Maintain natural prosody appropriate for English
+    - Keep the speaker's natural characteristics (male/female, accent, speaking rate)
+    
+    QUALITY:
+    - Keep pacing natural, follow punctuation
+    - Maintain clarity and naturalness
+    - Do not read any markup/tags aloud
+
+
+    <|scene_desc_start|>
+    Audio is recorded in a quiet, dry room. No background music or SFX.
+    <|scene_desc_end|>
+
+  # Tuned decoding for stability on English
+  temperature: 0.1
+  top_k: 50
+  top_p: 0.95
+  ras_win_len: 7
+  ras_win_max_num_repeat: 2
+  max_new_tokens: 2048
+
+  chunk_method: word
+  chunk_max_word_num: 200
+  chunk_max_num_turns: 1
+  generation_chunk_buffer_size: 2
+
+  # Reproducibility and reference behavior
+  seed: 1234
+  reference_prompt_text: ""
+  use_static_kv_cache: false
+  reference_assignment: "first"
+  reference_role: user
+  reference_audio_first: true
+  max_samples: null
+
+batch_size: 8  # Not used in VC generation, but used for dataset collation
+
+defaults:
+  - _self_
+  - /dataset: multispeaker_libri
+
+evaluation:
+  bootstrap:
+    enabled: true
+    num_samples: 1000
+    confidence_level: 0.95
+    seed: 1234

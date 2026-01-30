@@ -1,0 +1,28 @@
+# Dataset Configuration for AISHELL-1 dev subset
+
+name: "AISHELL1_dev"
+root_path: "./data/AISHELL1_dev"
+
+# Use all speakers discovered under this path
+speaker_id: null
+
+max_wav_value: 32768.0
+
+# AISHELL-1 audio is 16 kHz, 16-bit
+sampling_rate: 16000
+
+# Spectrogram / mel parameters copied from your Long_librispeech config
+filter_length: 2048
+hop_length: 512
+win_length: 2048
+n_mel_channels: 128
+mel_fmin: 0.0
+mel_fmax: null
+
+add_blank: true
+
+# AISHELL-1 dev set has 40 speakers
+n_speakers: 40
+
+cleaned_text: true
+return_path: true

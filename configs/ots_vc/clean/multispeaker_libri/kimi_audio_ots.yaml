@@ -1,0 +1,43 @@
+# @package _global_
+
+run_name: "kimi_audio_ots_on_multispeaker_libri"
+device: "cuda:0"
+base_dir: "."
+
+vc:
+  mode: "ots"
+  model: "kimi_audio"
+
+output_paths:
+  metrics_file: "results/kimi_audio_ots_on_multispeaker_libri/metrics.json"
+
+adversary:
+  code_path: "checkpoints/Kimi-Audio"
+  model_path: "moonshotai/Kimi-Audio-7B-Instruct"
+  load_detokenizer: true
+  audio_temperature: 0.9
+  audio_top_k: 10
+  text_temperature: 0.0
+  text_top_k: 5
+  audio_repetition_penalty: 1.0
+  audio_repetition_window_size: 64
+  text_repetition_penalty: 1.0
+  text_repetition_window_size: 16
+  max_new_tokens: -1
+  reference_assignment: "round_robin"
+  # instruction_template: "Please perform voice clone with the following text sentence using the same voice as the provided audio sample. Text: {text}"
+  instruction_template: "Read the following text using the voice in above example. Text: {text}"
+  max_samples: null
+  seed: null
+
+batch_size: 16 # not used in VC
+
+defaults:
+  - _self_
+  - /dataset: multispeaker_libri
+evaluation:
+  bootstrap:
+    enabled: true
+    num_samples: 1000
+    confidence_level: 0.95
+    seed: null

@@ -1,0 +1,54 @@
+# @package _global_
+
+run_name: qwen3_omni_ots_on_libritts_with_enkidu
+device: cuda:0
+base_dir: .
+protected_audio_dir: /tealab-data/rjin02/AudioWatermarkBench/results/enkidu_on_libritts/20251129-161242/protected_audio
+vc:
+  mode: ots
+  model: qwen3_omni
+output_paths:
+  metrics_file: results/qwen3_omni_ots_on_libritts_with_enkidu/metrics.json
+adversary:
+  checkpoint_path: checkpoints/Qwen3-Omni
+  device_map: auto
+  torch_dtype: auto
+  use_flash_attn2: false
+  thinker_temperature: 0.7
+  thinker_top_p: 0.8
+  thinker_top_k: 20
+  thinker_max_new_tokens: 2048
+  thinker_do_sample: true
+  return_audio: true
+  use_audio_in_video: true
+  speaker: null
+  system_prompt: |
+    You are a virtual voice assistant with no gender or age.
+    You are communicating with the user.
+    In user messages, 'I/me/my/we/our' refer to the user and 'you/your' refer to the assistant.
+    In your replies, address the user as 'you/your' and yourself as 'I/me/my'; never mirror the user's pronouns.
+    Keep original pronouns only in direct quotes; if a reference is unclear, ask a brief clarifying question.
+    Interact with users using short (no more than 50 words), brief, straightforward language, maintaining a natural tone.
+    Never use formal phrasing, mechanical expressions, bullet points, or overly structured language.
+    Your output must consist only of the spoken content you want the user to hear.
+    Do not include any descriptions of actions, emotions, sounds, or voice changes.
+    Do not use asterisks, brackets, parentheses, or any other symbols to indicate tone or actions.
+    You must answer users' audio or text questions and should communicate in the same language as the user unless they request otherwise.
+    When uncertain, use brief questions to guide the user to continue the conversation.
+    Keep replies concise and conversational, as if talking face-to-face.
+  instruction_template: 'Please read the following text using the same voice as the provided audio sample: {text}'
+  include_prompt_transcript: false
+  additional_messages: []
+  max_samples: null
+  seed: null
+  clean_up_tokenization_spaces: false
+batch_size: 16 # not used in VC
+defaults:
+  - _self_
+  - /dataset: libritts
+evaluation:
+  bootstrap:
+    enabled: true
+    num_samples: 1000
+    confidence_level: 0.95
+    seed: null

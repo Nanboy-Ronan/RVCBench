@@ -1,0 +1,38 @@
+# @package _global_
+
+run_name: vibevoice_ots_on_libritts_with_gaussian_noise
+device: cuda:0
+base_dir: .
+protected_audio_dir: /tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/protected_audio
+vc:
+  mode: ots
+  model: vibevoice
+output_paths:
+  metrics_file: results/vibevoice_ots_on_libritts_with_gaussian_noise/metrics.json
+adversary:
+  code_path: checkpoints/VibeVoice
+  model_path: vibevoice/VibeVoice-1.5B
+  checkpoint_path: null
+  torch_dtype: bfloat16
+  attn_implementation: flash_attention_2
+  allow_attn_fallback: true
+  cfg_scale: 1.3
+  disable_prefill: false
+  num_inference_steps: 10
+  max_new_tokens: null
+  generation:
+    generation_config:
+      do_sample: false
+  verbose: false
+  reference_assignment: round_robin
+  max_samples: null
+batch_size: 16 # not used in VC
+defaults:
+  - _self_
+  - /dataset: libritts
+evaluation:
+  bootstrap:
+    enabled: true
+    num_samples: 1000
+    confidence_level: 0.95
+    seed: null

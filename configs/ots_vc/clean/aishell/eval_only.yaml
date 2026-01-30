@@ -1,0 +1,27 @@
+# @package _global_
+run_name: "moss_ots_eval_only_aishell"
+device: "cuda:0"
+base_dir: "."
+
+vc:
+  mode: "ots"
+  evaluate_only: true
+  evaluation:
+    generated_audio_dir: "/tealab-data/rjin02/AudioWatermarkBench/results/moss_ttsd_ots_on_aishell/20260114-160523/generated_audio"
+    max_samples: null
+    generated_audio_max_seconds: 180
+
+output_paths:
+  metrics_file: "results/moss_ots_eval_only_aishell/metrics.json"
+
+batch_size: 16
+
+defaults:
+  - _self_
+  - /dataset: aishell
+evaluation:
+  bootstrap:
+    enabled: true
+    num_samples: 1000
+    confidence_level: 0.95
+    seed: null

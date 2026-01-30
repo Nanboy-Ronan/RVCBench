@@ -1,0 +1,37 @@
+# @package _global_
+
+run_name: "cosyvoice_ots_on_multispeaker_libri"
+device: "cuda:0"
+base_dir: "."
+
+vc:
+  mode: "ots"
+  model: "cosyvoice"
+
+output_paths:
+  metrics_file: "results/cosyvoice_ots_on_multispeaker_libri/metrics.json"
+
+adversary:
+  code_path: "checkpoints/CosyVoice"
+  model_dir: "checkpoints/CosyVoice/pretrained_models/CosyVoice2-0.5B"
+  variant: cosyvoice2
+  stream: false
+  speed: 1.0
+  prompt_sample_rate: 16000
+  seed: null
+  text_frontend: false
+  reference_assignment: "round_robin"
+  max_samples: null
+  default_prompt_text: "Here is a sample of the desired voice."
+
+batch_size: 16 # not used in VC
+
+defaults:
+  - _self_
+  - /dataset: multispeaker_libri
+evaluation:
+  bootstrap:
+    enabled: true
+    num_samples: 1000
+    confidence_level: 0.95
+    seed: null

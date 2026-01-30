@@ -1,0 +1,26 @@
+# @package _global_
+run_name: "fish_ots_eval_only"
+device: "cuda:0"
+base_dir: "."
+
+vc:
+  mode: "ots"
+  evaluate_only: true
+  evaluation:
+    generated_audio_dir: "/data/rjin02/project/AudioWatermarkBench/results/fishspeech_ots_on_french/20251030-151008/generated_audio"
+    max_samples: null
+
+output_paths:
+  metrics_file: "results/fish_ots_eval_only/metrics.json"
+
+batch_size: 16
+
+defaults:
+  - _self_
+  - /dataset: french
+evaluation:
+  bootstrap:
+    enabled: true
+    num_samples: 1000
+    confidence_level: 0.95
+    seed: null

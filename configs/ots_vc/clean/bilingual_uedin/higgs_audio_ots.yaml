@@ -1,0 +1,76 @@
+# @package _global_
+
+run_name: "higgs_audio_ots_on_bilingual_uedin"
+device: "cuda:0"
+base_dir: "."
+
+vc:
+  mode: "ots"
+  model: "higgs_audio"
+
+output_paths:
+  metrics_file: "results/higgs_audio_ots_on_bilingual_uedin/metrics.json"
+
+adversary:
+  code_path: "checkpoints/higgs_audio/higgs-audio"
+  model_path: "bosonai/higgs-audio-v2-generation-3B-base"
+  audio_tokenizer_path: "bosonai/higgs-audio-v2-tokenizer"
+  scene_prompt_path: null
+  scene_prompt_text: |
+    CRITICAL: Generate audio using the SAME speaker voice/timbre as the reference, BUT speak in the EXACT language of the input text.
+    
+    LANGUAGE RULES (MANDATORY):
+    - If input text contains Chinese characters (汉字), speak Standard Mandarin Chinese
+    - If input text is English (Latin alphabet only), speak natural English with the reference speaker's voice
+    - NEVER translate the text to a different language
+    - NEVER speak in the reference audio's language if it differs from the input text language
+    - The reference audio provides ONLY the speaker identity/timbre, NOT the target language
+    
+    VOICE CLONING:
+    - Clone the reference speaker's voice quality, timbre, pitch range, and speaking style
+    - Maintain natural prosody appropriate for the TARGET language (not reference language)
+    - If reference is Chinese speaker but text is English, use their voice to speak English
+    - If reference is English speaker but text is Chinese, use their voice to speak Chinese
+    
+    QUALITY:
+    - Keep pacing natural, follow punctuation
+    - Do not read any markup/tags aloud
+
+
+    <|scene_desc_start|>
+    Audio is recorded in a quiet, dry room. No background music or SFX.
+    <|scene_desc_end|>
+
+  # Tuned decoding for stability on Chinese/English
+  temperature: 0.1
+  top_k: 50
+  top_p: 0.95
+  ras_win_len: 7
+  ras_win_max_num_repeat: 2
+  max_new_tokens: 2048
+
+  chunk_method: word
+  chunk_max_word_num: 200
+  chunk_max_num_turns: 1
+  generation_chunk_buffer_size: 2
+
+  # Reproducibility and reference behavior
+  seed: 1234
+  reference_prompt_text: ""
+  use_static_kv_cache: false
+  reference_assignment: "first"
+  reference_role: user
+  reference_audio_first: true
+  max_samples: null
+
+batch_size: 8  # Not used in VC generation, but used for dataset collation
+
+defaults:
+  - _self_
+  - /dataset: bilingual_uedin
+evaluation:
+  bootstrap:
+    enabled: true
+    num_samples: 1000
+    confidence_level: 0.95
+    seed: 1234

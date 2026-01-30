@@ -1,0 +1,3 @@
+name: "SpeakerRecognition"
+source: "speechbrain/spkrec-ecapa-voxceleb"
+checkpoint_path: "checkpoints/enkidu/speechbrain/SpeakerRecognition" #ozspeech.pt

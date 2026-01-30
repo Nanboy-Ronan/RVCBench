@@ -1,0 +1,61 @@
+# General Configuration
+run_name: "spec_on_libritts"
+device: "cuda:0"
+base_dir: "." # Root directory of the project
+
+vc:
+  mode: "ots"  # ots | finetune
+  model: "bertvits2"
+
+evaluation:
+  bootstrap:
+    enabled: true
+    num_samples: 1000
+    confidence_level: 0.95
+    seed: null
+
+# Protection Algorithm Configuration
+protection:
+  name: "SafeSpeechProtector"
+  mode: "SPEC" # or "SafeSpeech"
+  checkpoint_path: "checkpoints"
+  epsilon: 0.03137255 # 8/255
+  perturbation_epochs: 200 # For quick testing, you can reduce this to ~5-10
+  batch_size: 8
+  weight_alpha: 0.05
+  weight_beta: 10
+  sampling_rate: 24000
+  log_interval: 10
+  eval_interval: 10
+  seed: 42
+  epochs: 100
+  learning_rate: 0.0002
+  betas:
+    - 0.8
+    - 0.99
+  eps: 1e-09
+  bf16_run: false
+  lr_decay: 0.99995
+  segment_size: 16384
+  init_lr_ratio: 1
+  warmup_epochs: 0
+  c_mel: 45
+  c_kl: 1.0
+  c_commit: 100
+  skip_optimizer: true
+  freeze_ZH_bert: false
+  freeze_JP_bert: false
+  freeze_EN_bert: false
+  freeze_emo: false
+  output_dir: "results"
+
+# Paths for results
+output_paths:
+  generated_audio: "results/generated_audio"
+  metrics_file: "results/metrics.json"
+
+defaults:
+  - _self_
+  - model: BertVits2 # OZSpeech #
+  - dataset: libritts
+#- adversary: bertvits2_ots

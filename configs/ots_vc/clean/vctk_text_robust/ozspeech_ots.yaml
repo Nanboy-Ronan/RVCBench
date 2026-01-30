@@ -1,0 +1,34 @@
+# @package _global_
+
+run_name: "ozspeech_ots_on_vctk_text_robust"
+device: "cuda:0"
+base_dir: "."
+
+vc:
+  mode: "ots"
+  model: "ozspeech"
+
+output_paths:
+  metrics_file: "results/ozspeech_ots_on_vctk_text_robust/metrics.json"
+
+adversary:
+  code_path: "checkpoints/ozspeech/OZSpeech"
+  checkpoint_path: "checkpoints/ozspeech/OZSpeech/checkpoints/ozspeech.pt"
+  config_path: "checkpoints/ozspeech/OZSpeech/configs/ozspeech.yaml"
+  codec_encoder_path: null
+  codec_decoder_path: null
+  temperature: 0.01
+  reference_assignment: "round_robin"
+  max_samples: null
+
+batch_size: 16 # not used in VC
+
+defaults:
+  - _self_
+  - /dataset: vctk_text_robust
+evaluation:
+  bootstrap:
+    enabled: true
+    num_samples: 1000
+    confidence_level: 0.95
+    seed: null

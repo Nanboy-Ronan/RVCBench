@@ -1,0 +1,7 @@
+name: 'OZSpeech'
+code_path: "checkpoints/ozspeech/OZSpeech"
+checkpoint_path: "checkpoints/ozspeech/OZSpeech/checkpoints/ozspeech-base-500h.ckpt" #ozspeech.pt
+config_path: "checkpoints/ozspeech/OZSpeech/configs/config.yaml" # /ozspeech.yaml
+temperature: 0.01
+reference_assignment: "round_robin"
+max_samples: null

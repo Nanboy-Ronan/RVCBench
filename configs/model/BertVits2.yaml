@@ -1,0 +1,57 @@
+name: 'BertVits2'
+repo_id: "OedoSoldier/Bert-VITS2-2.3"
+net_wd:
+  model_name_or_path: "./checkpoints/safespeech/bert_vits2/slm/wavlm-base-plus"
+  slm_sr: 16000
+  hidden: 768
+  nlayers: 13
+  initial_channel: 64
+  use_spectral_norm: false
+
+
+net_d:       # MPD configuration is placed in &model_d
+  use_spectral_norm: false # TODO: check if this must match the WD setting
+
+net_dur_disc:   # Duration discriminator configuration is placed in &model_dur_disc
+  in_channels: 192
+  filter_channels: 192
+  kernel_size: 3
+  p_dropout: 0.1
+  gin_channels: 512
+
+net_g:
+  n_vocab: null                 # 加载时写成 len(symbols)
+  spec_channels: null           # = filter_length//2 + 1024-> 513）
+  segment_size: null
+  inter_channels: 192
+  hidden_channels: 192
+  filter_channels: 768
+  n_heads: 2
+  n_layers: 6
+  kernel_size: 3
+  p_dropout: 0.1
+  resblock: "1"
+  resblock_kernel_sizes: [ 3, 7, 11 ]
+  resblock_dilation_sizes:
+    - [ 1, 3, 5 ]
+    - [ 1, 3, 5 ]
+    - [ 1, 3, 5 ]
+  upsample_rates: [ 8, 8, 2, 2, 2 ]
+  upsample_initial_channel: 512
+  upsample_kernel_sizes: [ 16, 16, 8, 2, 2 ]
+  n_speakers: null
+  gin_channels: 512
+  use_sdp: true
+  n_flow_layer: 4
+  n_layers_trans_flow: 4
+  flow_share_parameter: false
+  use_transformer_flow: true
+  use_spk_conditioned_encoder: true
+  use_noise_scaled_mas: true
+  mas_noise_scale_initial: 0.01
+  noise_scale_delta: 2e-6
+  current_mas_noise_scale: 0.01
+
+
+num_speakers: 0
+version: "2.3"

@@ -1,0 +1,95 @@
+# General Configuration
+run_name: "enkidu_on_libritts"
+device: "cuda:0"
+base_dir: "." # Root directory of the project
+
+vc:
+  mode: "ots"  # ots | finetune
+  model: "ozspeech"
+
+evaluation:
+  bootstrap:
+    enabled: true
+    num_samples: 1000
+    confidence_level: 0.95
+    seed: null
+
+# Protection Algorithm Configuration
+protection:
+  name: "EnkiduProtector"
+  checkpoint_path: "checkpoints"
+  perturbation_epochs: 5 #1000  # todo check  # For quick testing, you can reduce this to ~5-10
+  batch_size: 1 # todo check
+  learning_rate: 0.02
+  lr_decay: 0.9
+  lr_decay_iter: 100
+  mask_ratio: 0.3  # for augmentation
+  random_offset: false  # for augmentation
+  noise_smooth: true
+  lambda_perceptual: 0.1
+  steps: 40
+  alpha: 0.1
+  augmentation: true
+  noise_level: 0.1
+  frame_length: 30
+  # waveform info
+  sampling_rate: 16000  # for frequency options
+  n_fft: 1024
+  hop_length: 512
+  win_length: 1024
+  eps_loss_weight: 1e-8
+  # config by antifake
+  quality_weight_snr: 0.005
+  quality_weight_L2: 0.05
+  quality_weight_frequency: 0.3
+  avc_scale: 0.18
+  coqui_scale: 0.85
+  tortoise_autoregressive_scale: 0.02
+  tortoise_diffusion_scale: 0.014
+  rtvc_scale: 1
+  rtvc_loss: true
+  avc_loss: true
+  coqui_loss: true
+  tortoise_autoregressive_loss: false
+  tortoise_diffusion_loss: false
+  threshold_base: false
+  target_speaker_datavase: None # todo
+  num_random_target_speaker: 24 # todo
+  rtvc_default_model_path: './checkpoints/antifake'
+  avc_config_path: "./checkpoints/antifake/adaptive_voice_conversion/config.yaml"
+  # for rtvc model splitting
+  ## Mel-filterbank
+  mel_window_length: 25  # In milliseconds
+  mel_window_step: 10    # In milliseconds
+  mel_n_channels: 40
+  # Number of spectrogram frames in a partial utterance
+  partials_n_frames: 160     # 1600 ms
+  # Number of spectrogram frames at inference
+  inference_n_frames: 80     #  800 ms
+  ## Voice Activation Detection
+  # Window size of the VAD. Must be either 10, 20 or 30 milliseconds.
+  # This sets the granularity of the VAD. Should not need to be changed.
+  vad_window_length: 30  # In milliseconds
+  # Number of frames to average together when performing the moving average smoothing.
+  # The larger this value, the larger the VAD variations must be to not get smoothed out.
+  vad_moving_average_width: 8
+  # Maximum number of consecutive silent frames a segment can have.
+  vad_max_silence_length: 6
+  ## Audio volume normalization
+  audio_norm_target_dBFS: -30
+
+
+#  COQUI_YOURTTS_PATH = "tts_models/multilingual/multi-dataset/your_tts"
+
+
+
+# Paths for results
+output_paths:
+  generated_audio: "results/generated_audio"
+  metrics_file: "results/metrics.json"
+
+defaults:
+  - _self_
+  - model: SpeakerRecognition
+  - dataset: libritts
+#- adversary: bertvits2_ots

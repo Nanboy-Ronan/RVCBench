@@ -1,0 +1,52 @@
+data/LibriTTS/5339/5339_14134_000082_000000.wav|What then? and your mother away.
+evaluation/data/LibriTTS/SPEC/0_5339_0.wav|What then? and your mother away.
+data/LibriTTS/5339/5339_14133_000018_000000.wav|Sylvia sat in the house-place, her back to the long low window, in order to have all the light the afternoon hour afforded for her work.
+evaluation/data/LibriTTS/SPEC/0_5339_1.wav|Sylvia sat in the house-place, her back to the long low window, in order to have all the light the afternoon hour afforded for her work.
+data/LibriTTS/5339/5339_14134_000064_000001.wav|Her father was right in saying that she might not have set out for Yesterbarrow.
+evaluation/data/LibriTTS/SPEC/0_5339_2.wav|Her father was right in saying that she might not have set out for Yesterbarrow.
+data/LibriTTS/5339/5339_14134_000095_000001.wav|Just at that moment the little casement window of Sylvia's room was opened, and she said--
+evaluation/data/LibriTTS/SPEC/0_5339_3.wav|Just at that moment the little casement window of Sylvia's room was opened, and she said--
+data/LibriTTS/5339/5339_14133_000017_000000.wav|Out of respect to him, Philip asked no more questions although there were many things that he fain would have known.
+evaluation/data/LibriTTS/SPEC/0_5339_4.wav|Out of respect to him, Philip asked no more questions although there were many things that he fain would have known.
+data/LibriTTS/5339/5339_14133_000020_000002.wav|She felt his eyes were upon her, watching every motion, and grew more and more confused in her expression and behaviour.
+evaluation/data/LibriTTS/SPEC/0_5339_5.wav|She felt his eyes were upon her, watching every motion, and grew more and more confused in her expression and behaviour.
+data/LibriTTS/5339/5339_14134_000024_000002.wav|It's the Lord's doing, and luck's the devil's way of putting it.
+evaluation/data/LibriTTS/SPEC/0_5339_6.wav|It's the Lord's doing, and luck's the devil's way of putting it.
+data/LibriTTS/5339/5339_14134_000043_000000.wav|Daniel was deeply struck with the fact that he was talking to a man setting off for London at a day's notice.
+evaluation/data/LibriTTS/SPEC/0_5339_7.wav|Daniel was deeply struck with the fact that he was talking to a man setting off for London at a day's notice.
+data/LibriTTS/5339/5339_14134_000030_000000.wav|Philip knows, said Hester, and then, somehow, her voice failed her and she stopped.
+evaluation/data/LibriTTS/SPEC/0_5339_8.wav|Philip knows, said Hester, and then, somehow, her voice failed her and she stopped.
+data/LibriTTS/5339/5339_14134_000047_000000.wav|No, I shan't, he replied, shortly.
+evaluation/data/LibriTTS/SPEC/0_5339_9.wav|No, I shan't, he replied, shortly.
+data/LibriTTS/5339/5339_14134_000055_000000.wav|He turned away, and began to whistle, as if he did not wish for any further conversation with his interrogator.
+evaluation/data/LibriTTS/SPEC/0_5339_10.wav|He turned away, and began to whistle, as if he did not wish for any further conversation with his interrogator.
+data/LibriTTS/5339/5339_14134_000009_000002.wav|Philip, indeed, was quite idle when John Foster opened the parlour-door, and, half doubtfully, called him into the room.
+evaluation/data/LibriTTS/SPEC/0_5339_11.wav|Philip, indeed, was quite idle when John Foster opened the parlour-door, and, half doubtfully, called him into the room.
+data/LibriTTS/5339/5339_14134_000092_000004.wav|Sylvie!
+evaluation/data/LibriTTS/SPEC/0_5339_12.wav|Sylvie!
+data/LibriTTS/5339/5339_14134_000072_000000.wav|Well?
+evaluation/data/LibriTTS/SPEC/0_5339_13.wav|Well?
+data/LibriTTS/5339/5339_14133_000005_000000.wav|Things were much in this state when the frost broke, and milder weather succeeded.
+evaluation/data/LibriTTS/SPEC/0_5339_14.wav|Things were much in this state when the frost broke, and milder weather succeeded.
+data/LibriTTS/5339/5339_14133_000004_000001.wav|She was rather thinner and paler; but whatever change there was in her was always an improvement in Philip's eyes, so long as she spoke graciously to him.
+evaluation/data/LibriTTS/SPEC/0_5339_15.wav|She was rather thinner and paler; but whatever change there was in her was always an improvement in Philip's eyes, so long as she spoke graciously to him.
+data/LibriTTS/5339/5339_14133_000035_000000.wav|He came in, not seeing that any one was there at first; for they had never thought of lighting a candle.
+evaluation/data/LibriTTS/SPEC/0_5339_16.wav|He came in, not seeing that any one was there at first; for they had never thought of lighting a candle.
+data/LibriTTS/5339/5339_14134_000009_000003.wav|As the door of communication shut the three in, Coulson felt himself a little aggrieved.
+evaluation/data/LibriTTS/SPEC/0_5339_17.wav|As the door of communication shut the three in, Coulson felt himself a little aggrieved.
+data/LibriTTS/5339/5339_14134_000070_000000.wav|You see, Sylvie, I've had a deal to think on; before long I intend telling you all about it; just now I'm not free to do it.
+evaluation/data/LibriTTS/SPEC/0_5339_18.wav|You see, Sylvie, I've had a deal to think on; before long I intend telling you all about it; just now I'm not free to do it.
+data/LibriTTS/5339/5339_14133_000026_000004.wav|He asked her about her mother; not sorry in his heart at Bell Robson's absence.
+evaluation/data/LibriTTS/SPEC/0_5339_19.wav|He asked her about her mother; not sorry in his heart at Bell Robson's absence.
+data/LibriTTS/5339/5339_14133_000023_000001.wav|Then he said
+evaluation/data/LibriTTS/SPEC/0_5339_20.wav|Then he said
+data/LibriTTS/5339/5339_14133_000010_000000.wav|Is he here again? said Philip; I didn't see him.
+evaluation/data/LibriTTS/SPEC/0_5339_21.wav|Is he here again? said Philip; I didn't see him.
+data/LibriTTS/5339/5339_14133_000025_000000.wav|He made for the door.
+evaluation/data/LibriTTS/SPEC/0_5339_22.wav|He made for the door.
+data/LibriTTS/5339/5339_14133_000003_000002.wav|By degrees both Hepburn and Coulson were introduced to distant manufacturers and wholesale dealers.
+evaluation/data/LibriTTS/SPEC/0_5339_23.wav|By degrees both Hepburn and Coulson were introduced to distant manufacturers and wholesale dealers.
+data/LibriTTS/5339/5339_14133_000034_000000.wav|Dolly Reid came in, and went out softly, unheeded by them.
+evaluation/data/LibriTTS/SPEC/0_5339_24.wav|Dolly Reid came in, and went out softly, unheeded by them.
+data/LibriTTS/5339/5339_14134_000091_000003.wav|He sate till it grew dusk, dark; the wood fire, not gathered together by careful hands, died out into gray ashes.
+evaluation/data/LibriTTS/SPEC/0_5339_25.wav|He sate till it grew dusk, dark; the wood fire, not gathered together by careful hands, died out into gray ashes.

@@ -1,0 +1,25 @@
+# Dataset Configuration for Background Noise
+
+name: "Background_noise"
+root_path: "./data/Background_noise"
+
+# Use all speakers discovered under this path
+speaker_id: null
+
+max_wav_value: 32768.0
+
+# Background noise audio is 48 kHz
+sampling_rate: 48000
+
+# Spectrogram / mel parameters
+filter_length: 2048
+hop_length: 512
+win_length: 2048
+n_mel_channels: 128
+mel_fmin: 0.0
+mel_fmax: null
+
+add_blank: true
+n_speakers: 20  # Update based on actual speaker count if needed
+cleaned_text: true
+return_path: true

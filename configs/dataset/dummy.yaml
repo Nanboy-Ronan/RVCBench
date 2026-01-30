@@ -1,0 +1,11 @@
+# @package _group_
+name: dummy
+path: data/dummy_dataset
+collection: dummy
+speaker_id_field: speaker_id
+audio_file_field: audio_path
+text_field: text
+
+train_file: train.json
+test_file: test.json
+val_file: val.json

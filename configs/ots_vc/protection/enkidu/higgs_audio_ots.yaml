@@ -1,0 +1,43 @@
+# @package _global_
+
+run_name: higgs_audio_ots_on_libritts_with_enkidu
+device: cuda:0
+base_dir: .
+protected_audio_dir: /tealab-data/rjin02/AudioWatermarkBench/results/enkidu_on_libritts/20251129-161242/protected_audio
+vc:
+  mode: ots
+  model: higgs_audio
+output_paths:
+  metrics_file: results/higgs_audio_ots_on_libritts_with_enkidu/metrics.json
+adversary:
+  code_path: checkpoints/higgs_audio/higgs-audio
+  model_path: bosonai/higgs-audio-v2-generation-3B-base
+  audio_tokenizer_path: bosonai/higgs-audio-v2-tokenizer
+  scene_prompt_path: null
+  temperature: 0.1
+  top_k: 50
+  top_p: 0.95
+  ras_win_len: 7
+  ras_win_max_num_repeat: 2
+  max_new_tokens: 2048
+  chunk_method: null
+  chunk_max_word_num: 200
+  chunk_max_num_turns: 1
+  generation_chunk_buffer_size: null
+  seed: null
+  reference_prompt_text: ''
+  use_static_kv_cache: false
+  reference_assignment: round_robin
+  reference_role: user
+  reference_audio_first: true
+  max_samples: null
+batch_size: 16 # not used in VC
+defaults:
+  - _self_
+  - /dataset: libritts
+evaluation:
+  bootstrap:
+    enabled: true
+    num_samples: 1000
+    confidence_level: 0.95
+    seed: null

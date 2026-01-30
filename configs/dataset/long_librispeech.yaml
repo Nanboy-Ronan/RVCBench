@@ -1,0 +1,18 @@
+# Dataset Configuration for Long Librispeech
+
+name: "Long_librispeech"
+root_path: "./data/Long_context"
+# Set to null to include all speakers discovered under audios/
+speaker_id: null
+max_wav_value: 32768.0
+sampling_rate: 16000
+filter_length: 2048
+hop_length: 512
+win_length: 2048
+n_mel_channels: 128
+mel_fmin: 0.0
+mel_fmax: null
+add_blank: true
+n_speakers: 14
+cleaned_text: true
+return_path: true

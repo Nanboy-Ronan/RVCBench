@@ -1,0 +1,47 @@
+# @package _global_
+
+run_name: "playdiffusion_ots_on_long_librispeech"
+device: "cuda:0"
+base_dir: "."
+
+vc:
+  mode: "ots"
+  model: "playdiffusion"
+
+output_paths:
+  metrics_file: "results/playdiffusion_ots_on_long_librispeech/metrics.json"
+
+adversary:
+  code_path: "checkpoints/PlayDiffusion"
+  preset_dir: null  # populate with a directory containing PlayDiffusion checkpoints to avoid downloads
+  cache_dir: null
+  num_steps: 100
+  init_temp: 1.0
+  init_diversity: 1.0
+  guidance: 0.5
+  rescale: 0.7
+  top_k: 25
+  audio_token_syllable_ratio: null
+  vocoder_checkpoint: "v090_g_01105000"
+  tokenizer_file: "tokenizer-multi_bpe16384_merged_extended_58M.json"
+  speech_tokenizer_checkpoint: "xlsr2_1b_v2_custom.pt"
+  kmeans_layer_checkpoint: "kmeans_10k.npy"
+  voice_encoder_checkpoint: "voice_encoder_1992000.pt"
+  inpainter_checkpoint: "last_250k_fixed.pkl"
+  speech_tokenizer_sample_rate: 16000
+  reference_assignment: "round_robin"
+  max_samples: null
+  seed: null
+  default_prompt_text: "Here is a short sample of the desired voice."
+
+batch_size: 16 # not used in VC
+
+defaults:
+  - _self_
+  - /dataset: long_librispeech
+evaluation:
+  bootstrap:
+    enabled: true
+    num_samples: 1000
+    confidence_level: 0.95
+    seed: null

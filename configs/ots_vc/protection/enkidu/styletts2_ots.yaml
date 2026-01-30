@@ -1,0 +1,33 @@
+# @package _global_
+
+run_name: styletts2_ots_on_libritts_with_enkidu
+device: cuda:0
+base_dir: .
+protected_audio_dir: /tealab-data/rjin02/AudioWatermarkBench/results/enkidu_on_libritts/20251129-161242/protected_audio
+vc:
+  mode: ots
+  model: styletts2
+output_paths:
+  metrics_file: results/styletts2_ots_on_libritts_with_enkidu/metrics.json
+adversary:
+  code_path: checkpoints/styletts2/StyleTTS2
+  config_path: checkpoints/styletts2/StyleTTS2/Models/LibriTTS/config.yml
+  checkpoint_path: checkpoints/styletts2/StyleTTS2/Models/LibriTTS/epochs_2nd_00020.pth
+  alpha: 0.3
+  beta: 0.7
+  diffusion_steps: 5
+  embedding_scale: 1.0
+  sample_rate: 24000
+  tail_trim: 50
+  reference_assignment: round_robin
+  max_samples: null
+batch_size: 16 # not used in VC
+defaults:
+  - _self_
+  - /dataset: libritts
+evaluation:
+  bootstrap:
+    enabled: true
+    num_samples: 1000
+    confidence_level: 0.95
+    seed: null

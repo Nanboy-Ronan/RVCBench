@@ -1,0 +1,28 @@
+# General Configuration
+run_name: "safespeech_on_libritts_eval_only"
+device: "cuda:0"
+base_dir: "."
+
+protection:
+  name: "SafeSpeechProtector"
+  evaluate_only: true
+  evaluation:
+    protected_audio_dir: "/tealab-data/rjin02/AudioWatermarkBench/results/safespeech_on_libritts/20251122-134710/protected_audio"
+  batch_size: 8
+  sampling_rate: 24000
+
+# Paths for results
+output_paths:
+  metrics_file: "results/metrics.json"
+
+defaults:
+  - _self_
+  - model: BertVits2
+  - dataset: libritts
+
+evaluation:
+  bootstrap:
+    enabled: true
+    num_samples: 1000
+    confidence_level: 0.95
+    seed: null

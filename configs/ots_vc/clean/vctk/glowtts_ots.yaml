@@ -1,0 +1,40 @@
+# @package _global_
+
+run_name: "glowtts_ots_on_vctk"
+device: "cuda:0"
+base_dir: "."
+
+vc:
+  mode: "ots"
+  model: "glowtts"
+
+output_paths:
+  metrics_file: "results/glowtts_ots_on_vctk/metrics.json"
+
+adversary:
+  code_path: "checkpoints/glowtts/Glow-TTS"
+  config_path: "checkpoints/glowtts/Glow-TTS/configs/glowtts_vctk.json"
+  checkpoint_path: "checkpoints/glowtts/Glow-TTS/pretrained_vctk.pt"
+  noise_scale: 0.667
+  length_scale: 1.0
+  vocoder: "waveglow"
+  waveglow_checkpoint: "checkpoints/glowtts/Glow-TTS/waveglow/waveglow_256channels.pt"
+  waveglow_code_path: "checkpoints/glowtts/Glow-TTS/waveglow"
+  waveglow_sigma: 0.666
+  sample_rate: 22050
+  griffinlim_iters: 60
+  speaker_map_path: null
+  reference_assignment: "round_robin"
+  max_samples: null
+
+batch_size: 16 # not used in VC
+
+defaults:
+  - _self_
+  - /dataset: vctk
+evaluation:
+  bootstrap:
+    enabled: true
+    num_samples: 1000
+    confidence_level: 0.95
+    seed: null

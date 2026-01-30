@@ -1,0 +1,33 @@
+# @package _global_
+
+run_name: "sparktts_ots_on_background_noise"
+device: "cuda:0"
+base_dir: "."
+
+vc:
+  mode: "ots"
+  model: "sparktts"
+
+output_paths:
+  metrics_file: "results/sparktts_ots_on_background_noise/metrics.json"
+
+adversary:
+  code_path: "checkpoints/Spark-TTS"
+  model_dir: "pretrained_models/Spark-TTS-0.5B"
+  temperature: 0.3
+  top_k: 50
+  top_p: 0.95
+  reference_assignment: "round_robin"
+  max_samples: null
+
+batch_size: 16 # not used in VC
+
+defaults:
+  - _self_
+  - /dataset: background_noise
+evaluation:
+  bootstrap:
+    enabled: true
+    num_samples: 1000
+    confidence_level: 0.95
+    seed: null
