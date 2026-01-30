@@ -1,4 +1,4 @@
-# RVCBench
+# RVCBench: Benchmarking the Robustness of Voice Cloning Across Modern Audio Generation Models
 
 Benchmarking the robustness of modern voice-cloning (VC) systems and audio generation models.
 
@@ -35,6 +35,9 @@ Notes:
 - Some scripts contain hard-coded paths (e.g., `scripts/download_safespeech_models.py`). Update them to your environment before running.
 - Several adversary wrappers expect checkpoints and configs under `checkpoints/` or `model/`. See the corresponding YAML in `configs/` for exact paths.
 - The SafeSpeech reference code lives in `src/protection/safespeech/original_code` and may require its own setup.
+
+## Dataset Downloading
+We provide our preprocessed dataset in the S3 link here.
 
 ## Quick usage
 
@@ -101,6 +104,14 @@ results/<run_name>/<timestamp>/
 ```
 
 Metrics are stored as JSON (fidelity metrics for protection/denoiser runs, generation metrics for VC runs).
+
+
+## Example Notebooks
+Below, we provide runnable Colab notebooks to help illustrate our usage.
+
+
+## Citation
+Coming soon.
 
 ## License
 
