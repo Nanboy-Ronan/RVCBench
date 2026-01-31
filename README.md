@@ -1,6 +1,8 @@
-# RVCBench: Benchmarking the Robustness of Voice Cloning Across Modern Audio Generation Models
+# <img src="figs/logo.png" alt="RVCBench logo" width="40" style="vertical-align: middle; margin-right: 8px;"> RVCBench: Benchmarking the Robustness of Voice Cloning Across Modern Audio Generation Models
 
 Benchmarking the robustness of modern voice-cloning (VC) systems and audio generation models.
+
+![RVCBench main figure](figs/main.png)
 
 RVCBench provides a modular pipeline to:
 - prepare datasets for zero-shot or fine-tuned VC,
