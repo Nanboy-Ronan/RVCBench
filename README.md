@@ -1,10 +1,10 @@
 # <img src="figs/logo.png" alt="RVCBench logo" width="40" style="vertical-align: middle; margin-right: 8px;"> RVCBench
 
-**RVCBench** is a research benchmark for evaluating how robust modern voice cloning systems are against audio protection methods.
+**RVCBench** is an open benchmark for studying how robust modern voice cloning systems are against audio protection methods.
 
 ![RVCBench main figure](figs/main.png)
 
-It provides an end-to-end, reproducible pipeline to:
+RVCBench gives you an end-to-end, reproducible pipeline to:
 - apply protection to source prompts (SafeSpeech, Enkidu, EM, noise/spec perturbations),
 - run voice cloning adversaries on clean or protected inputs,
 - optionally denoise protected audio and re-evaluate,
@@ -12,10 +12,16 @@ It provides an end-to-end, reproducible pipeline to:
 
 ## Why RVCBench
 
-- Unified benchmark for protection vs. cloning across multiple setups.
-- Hydra-based configuration for reproducible experiments.
-- Modular codebase for extending datasets, protection methods, and adversaries.
-- Structured results with machine-readable metrics.
+- Compare protection vs. cloning under one consistent framework.
+- Reproduce runs with Hydra-based configs instead of one-off scripts.
+- Extend quickly with your own datasets, methods, and adversary wrappers.
+- Get structured outputs (`metrics.json`) that are easy to aggregate.
+
+## Who It Is For
+
+- Researchers benchmarking anti-voice-cloning defenses.
+- Engineers evaluating attack/defense tradeoffs on new models.
+- Contributors who want a common baseline for robust VC evaluation.
 
 ## Repository Layout
 
@@ -29,14 +35,15 @@ It provides an end-to-end, reproducible pipeline to:
 
 ## Dataset
 
-We are preparing a Hugging Face release.  
-For now, use the temporary download link:
+We are currently preparing to release our dataset on Hugging Face.
 
-**[Download dataset](https://drive.google.com/file/d/1ZDOMorDGV8i5oVNtA5BaJLbFj2dVo5AU/view?usp=drive_link)**
+Until then, you can download it here:
+
+👉 **[Download the dataset](https://drive.google.com/file/d/1ZDOMorDGV8i5oVNtA5BaJLbFj2dVo5AU/view?usp=drive_link)**
 
 ## Setup
 
-Use a Python environment with `PyTorch`, `torchaudio`, and `hydra-core` plus model-specific dependencies.
+Create a Python environment with `PyTorch`, `torchaudio`, and `hydra-core`, then add model-specific dependencies based on the configs you plan to run.
 
 Model checkpoints and third-party components are not bundled and must be downloaded separately.
 
@@ -48,6 +55,16 @@ python src/protection/safespeech/original_code/download_models.py
 ```
 
 - Some wrappers expect local paths like `checkpoints/` or `model/`; verify each config under `configs/`.
+
+## 5-Minute Start
+
+If you only want to verify your setup quickly, run:
+
+```bash
+python run_vc.py --config-name ozspeech_ots vc.max_samples=5
+```
+
+Then check `results/<run_name>/<timestamp>/metrics.json`.
 
 ## Quickstart
 
@@ -115,6 +132,16 @@ results/<run_name>/<timestamp>/
 ```
 
 `metrics.json` stores experiment metrics (fidelity for protection/denoiser runs and generation quality for VC runs).
+
+## Contributing
+
+Contributions are welcome, especially:
+- new protection methods,
+- new VC adversary wrappers,
+- dataset adapters and evaluation improvements,
+- reproducibility and documentation fixes.
+
+If you plan a substantial change, open an issue first so we can align on scope and config layout.
 
 ## Citation
 
