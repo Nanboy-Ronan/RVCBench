@@ -133,19 +133,45 @@ results/<run_name>/<timestamp>/
 
 `metrics.json` stores experiment metrics (fidelity for protection/denoiser runs and generation quality for VC runs).
 
-## Contributing
+## 🤝 Contributing
 
-Contributions are welcome, especially:
-- new protection methods,
-- new VC adversary wrappers,
-- dataset adapters and evaluation improvements,
-- reproducibility and documentation fixes.
+We welcome contributions of all kinds! In particular, we appreciate:
 
-If you plan a substantial change, open an issue first so we can align on scope and config layout.
+- 🛡️ New protection or defense methods  
+- 🎭 New VC adversary wrappers  
+- 📊 Dataset adapters and evaluation improvements  
+- 🔁 Reproducibility enhancements  
+- 📝 Documentation improvements and fixes  
+
+### Before You Start
+
+If you're planning a **substantial change**, please open an issue first to discuss:
+- Scope and design
+- Configuration layout
+- Compatibility considerations
+
+This helps ensure alignment and avoids duplicated effort.
+
+### Questions?
+
+If you have questions about the project, feel free to open an issue or contact:  
+📧 **ruinanjin@alumni.ubc.ca**
+
+---
+
+Thank you for contributing and helping improve the project! 🚀
+
 
 ## Citation
 
-Coming soon.
+```
+@article{liao2026rvcbench,
+  title={RVCBench: Benchmarking the Robustness of Voice Cloning Across Modern Audio Generation Models},
+  author={Liao, Xinting and Jin, Ruinan and Yu, Hanlin and Pandya, Deval and Li, Xiaoxiao},
+  journal={arXiv preprint arXiv:2602.00443},
+  year={2026}
+}
+```
 
 ## License
 
