@@ -37,7 +37,7 @@ RVCBench gives you an end-to-end, reproducible pipeline to:
 
 We are currently preparing to release our dataset on Hugging Face.
 
-Until then, you can download it here:
+Before that, you can download it here:
 
 👉 **[Download the dataset](https://drive.google.com/file/d/1ZDOMorDGV8i5oVNtA5BaJLbFj2dVo5AU/view?usp=drive_link)**
 
