@@ -47,14 +47,9 @@ Create a Python environment with `PyTorch`, `torchaudio`, and `hydra-core`, then
 
 Model checkpoints and third-party components are not bundled and must be downloaded separately.
 
-- SafeSpeech reference code is under `src/protection/safespeech/original_code/`.
-- SafeSpeech model downloads are handled by:
+- Some wrappers expect local paths like `checkpoints/`; verify each config under `configs/`. We will provide the link to them soon.
 
-```bash
-python src/protection/safespeech/original_code/download_models.py
-```
-
-- Some wrappers expect local paths like `checkpoints/` or `model/`; verify each config under `configs/`.
+- If you need to add new models, simply clone their model into `checkpoints/` and write similar wrapper under `src/models/`.
 
 ## 5-Minute Start
 
@@ -103,7 +98,7 @@ python run_denoiser.py --config-name denoise/denoiser_dns64_on_protected_libritt
 
 ## Experiment Flow
 
-`protect -> vc_protect -> (optional) denoise -> evaluate`
+`prompt voice + prompt text -> (optional) vc_protect -> (optional) denoise -> voice clone --> evaluate`
 
 This makes it easy to compare clean, protected, and recovered performance under a single framework.
 
