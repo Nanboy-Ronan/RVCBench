@@ -41,6 +41,9 @@ Before that, you can download it here:
 
 👉 **[Download the dataset](https://drive.google.com/file/d/1ZDOMorDGV8i5oVNtA5BaJLbFj2dVo5AU/view?usp=drive_link)**
 
+We also provided all pretrained checkpoints together so that you don't need to download them one by one (original code and checkpoints are all inside)
+👉 **[Download the pretrained checkpoints](https://arbutus.cloud.alliancecan.ca/api/swift/containers/rjin/object/AudioBench/checkpoint.zip)**
+
 ## Setup
 
 Create a Python environment with `PyTorch`, `torchaudio`, and `hydra-core`, then add model-specific dependencies based on the configs you plan to run.
@@ -137,15 +140,6 @@ We welcome contributions of all kinds! In particular, we appreciate:
 - 📊 Dataset adapters and evaluation improvements  
 - 🔁 Reproducibility enhancements  
 - 📝 Documentation improvements and fixes  
-
-### Before You Start
-
-If you're planning a **substantial change**, please open an issue first to discuss:
-- Scope and design
-- Configuration layout
-- Compatibility considerations
-
-This helps ensure alignment and avoids duplicated effort.
 
 ### Questions?
 
