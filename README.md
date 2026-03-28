@@ -67,15 +67,17 @@ python src/datasets/build_canonical_manifests.py --force
 
 Existing launch commands do not change. Dataset selection still happens through the configs under `configs/dataset/`, and `speaker_id` filtering still works per dataset.
 
-## Dataset
+## Dataset and Checkpoints
 
-We are currently preparing to release our dataset on Hugging Face.
+The public Hugging Face dataset is available here:
 
-Before that, you can download it here:
+👉 **[Nanboy/RVCBench](https://huggingface.co/datasets/Nanboy/RVCBench)**
+
+You can also download the dataset snapshot directly from Google Drive:
 
 👉 **[Download the dataset](https://drive.google.com/file/d/1ZDOMorDGV8i5oVNtA5BaJLbFj2dVo5AU/view?usp=drive_link)**
 
-We also provided all pretrained checkpoints together so that you don't need to download them one by one (original code and checkpoints are all inside)
+We expect user to git clone the corresponding models and download their checkpoints in the `checkpoints` folder. If you just want to launch the evaluation for one model, then just clone that one is the fastest way. We also provided all pretrained checkpoints together so that you don't need to download them one by one (original code and checkpoints are all inside)
 👉 **[Download the pretrained checkpoints](https://arbutus.cloud.alliancecan.ca/api/swift/containers/rjin/object/AudioBench/checkpoint.zip)**
 
 ## Setup
