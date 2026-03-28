@@ -33,6 +33,40 @@ RVCBench gives you an end-to-end, reproducible pipeline to:
 - `src/`: core modules (datasets, protection, adversaries, workflows, evaluation).
 - `data/`: local data folders and manifests used by experiments.
 
+## Canonical Dataset Layout
+
+Datasets now use a canonical root-level manifest format to make Hugging Face uploads and local loading consistent:
+
+```text
+data/<dataset>/
+├── audios/
+│   └── <speaker>/*.wav
+├── filelists/                  # legacy source manifests kept for compatibility/migration
+└── metadata.parquet            # canonical manifest used by loaders
+```
+
+`metadata.parquet` stores one row per benchmark pair with clean Hugging Face-friendly columns such as:
+
+- `speaker_id`
+- `prompt_file_name`, `prompt_text`, `prompt_language`
+- `target_file_name`, `target_text`, `target_language`
+- `pair_id`, `dataset_name`, `split`
+
+Training-related text features are also preserved in the canonical manifest when available:
+
+- `prompt_phonemes`, `prompt_tone`, `prompt_word2ph`
+- `target_phonemes`, `target_tone`, `target_word2ph`
+
+Dataset-specific metadata such as `spam_type` in `robotcall` is preserved as additional columns.
+
+To rebuild canonical manifests from the legacy per-speaker JSON files:
+
+```bash
+python src/datasets/build_canonical_manifests.py --force
+```
+
+Existing launch commands do not change. Dataset selection still happens through the configs under `configs/dataset/`, and `speaker_id` filtering still works per dataset.
+
 ## Dataset
 
 We are currently preparing to release our dataset on Hugging Face.
@@ -83,7 +117,7 @@ python run_vc.py --config-name ozspeech_ots
 Example dataset-specific config:
 
 ```bash
-python run_vc.py --config-name ots_vc/clean/vctk/bert_ots
+python run_vc.py --config-name ots_vc/clean/vctk/higgs_audio_ots
 ```
 
 3. Run VC on protected prompts:

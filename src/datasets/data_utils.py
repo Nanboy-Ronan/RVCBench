@@ -15,6 +15,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 import src.utils.commons as commons
+from src.datasets.manifest_utils import discover_speakers, load_dataset_manifest, to_internal_manifest
 from src.datasets.mel_preprocessing import spectrogram_torch, mel_spectrogram_torch
 from src.models.text import cleaned_text_to_sequence
 from src.utils.commons import load_wav_to_torch
@@ -44,22 +45,21 @@ class TextAudioSpeakerDataset(torch.utils.data.Dataset):
         
         self.max_wav_value = float(data_conf.max_wav_value)
 
-        json_file_path = os.path.join(
-            data_conf.root_path,
-            "filelists",
-            f"{sid}.json"
-        )
         self.data_root = Path(data_conf.root_path)
-
         try:
-            self.audiopaths_sid_text = pd.read_json(json_file_path)
+            manifest_df = load_dataset_manifest(
+                self.data_root,
+                speaker_id=sid,
+                dataset_name=getattr(data_conf, "name", self.data_root.name),
+            )
+            self.audiopaths_sid_text = to_internal_manifest(manifest_df)
             if not isinstance(self.audiopaths_sid_text, pd.DataFrame):
-                raise TypeError(f"Expected pandas DataFrame after reading JSON, but got {type(self.audiopaths_sid_text)}")
+                raise TypeError(f"Expected pandas DataFrame for manifest, but got {type(self.audiopaths_sid_text)}")
             if self.logger:
-                self.logger.debug("Successfully loaded JSON into DataFrame.")
+                self.logger.debug("Successfully loaded manifest into DataFrame.")
         except Exception as e:
             if self.logger:
-                self.logger.error(f"Error loading JSON file {json_file_path}: {e}", exc_info=True)
+                self.logger.error(f"Error loading manifest for speaker {sid} under {self.data_root}: {e}", exc_info=True)
             raise
 
         self._spk_mem = {}
@@ -122,8 +122,8 @@ class TextAudioSpeakerDataset(torch.utils.data.Dataset):
         for _, item in tqdm(
                 self.audiopaths_sid_text.iterrows()
         ):
-            item.ori_pth = self.data_root / item.ori_pth
-            item.gt_pth = self.data_root / item.gt_pth
+            item.ori_pth = (self.data_root / str(item.ori_pth)).resolve()
+            item.gt_pth = (self.data_root / str(item.gt_pth)).resolve()
 
             # Ensure phonemes are parsed as a list of strings
             ori_phonemes_str = str(item.ori_phonemes)
@@ -151,17 +151,24 @@ class TextAudioSpeakerDataset(torch.utils.data.Dataset):
             item.gt_tone = [int(i) for i in str(item.gt_tone).split(" ") if i.strip().isdigit()]
             item.gt_word2ph = [int(i) for i in str(item.gt_word2ph).split(" ") if i.strip().isdigit()]
 
-            audiopaths_sid_text_new.append(item)
-
             if not item.ori_pth.exists():
                 self.skipped += 1
                 if self.logger:
                     self.logger.warning(f"[Dataset] Original audio path not found: {item.ori_pth}; skipping item.")
                 continue
 
+            if not item.gt_pth.exists():
+                self.skipped += 1
+                if self.logger:
+                    self.logger.warning(f"[Dataset] Target audio path not found: {item.gt_pth}; skipping item.")
+                continue
+
+            audiopaths_sid_text_new.append(item)
+
             lengths.append(os.path.getsize(item.ori_pth) // (2 * self.hop_length))
 
-        print("Skipped: ", self.skipped/ len(self))
+        if len(self.audiopaths_sid_text) > 0:
+            print("Skipped: ", self.skipped / len(self.audiopaths_sid_text))
         self.audiopaths_sid_text = audiopaths_sid_text_new
         self.lengths = lengths
 
@@ -384,20 +391,14 @@ class AllSpeakerData:
 
         root_path = Path(to_absolute_path(str(self.dataset_config.root_path))).resolve()
         self._dataset_root = root_path
-        self._filelists_dir = self._dataset_root / "filelists"
         self._data_root = self._dataset_root.parent
         if self.dataset_config.speaker_id is not None:
             self.speakers_ids = [self.dataset_config.speaker_id]
         else:
-            audios_root = self._dataset_root / "audios"
-            if audios_root.exists():
-                self.speakers_ids = sorted(d for d in os.listdir(audios_root) if not d.startswith("."))
-            else:
-                # Fallback to manual listing to remain compatible with legacy layouts.
-                self.speakers_ids = sorted(
-                    d for d in os.listdir(os.path.join(self.dataset_config.root_path, "audios"))
-                    if not d.startswith(".")
-                )
+            self.speakers_ids = discover_speakers(
+                self._dataset_root,
+                dataset_name=getattr(self.dataset_config, "name", self._dataset_root.name),
+            )
         self.speaker_id_indices = {}
         for idx, sid in enumerate(self.speakers_ids):
             self.speaker_id_indices[sid] = idx
@@ -475,42 +476,39 @@ class AllSpeakerData:
             return
 
         samples: List[ZeroShotSample] = []
-        for speaker_id in self.speakers_ids:
-            manifest_path = self._filelists_dir / f"{speaker_id}.json"
-            if not manifest_path.exists():
-                if self.logger:
-                    self.logger.warning("Missing filelist for speaker %s at %s", speaker_id, manifest_path)
-                continue
-            try:
-                with open(manifest_path, "r", encoding="utf-8") as handle:
-                    records = json.load(handle)
-            except json.JSONDecodeError as exc:
-                if self.logger:
-                    self.logger.error("Failed to parse %s: %s", manifest_path, exc)
-                continue
+        manifest_df = load_dataset_manifest(
+            self._dataset_root,
+            dataset_name=getattr(self.dataset_config, "name", self._dataset_root.name),
+        )
+        if manifest_df.empty:
+            self._zero_shot_samples = []
+            self._zero_shot_samples_loaded = True
+            self._zero_shot_eval_cache = None
+            return
 
-            for idx, record in enumerate(records):
-                prompt_path = self._resolve_audio_path(record.get("ori_pth"))
-                target_path = self._resolve_audio_path(record.get("gt_pth")) or prompt_path
+        for idx, record in enumerate(manifest_df.to_dict(orient="records")):
+            prompt_path = self._resolve_audio_path(record.get("prompt_file_name"))
+            target_path = self._resolve_audio_path(record.get("target_file_name")) or prompt_path
 
-                prompt_text = record.get("ori_text", "") or ""
-                target_text = record.get("gt_text", "") or prompt_text
+            prompt_text = record.get("prompt_text", "") or ""
+            target_text = record.get("target_text", "") or prompt_text
 
-                prompt_lang = record.get("ori_lang")
-                target_lang = record.get("gt_lang")
+            prompt_lang = record.get("prompt_language")
+            target_lang = record.get("target_language")
+            speaker_id = record.get("speaker_id") or record.get("prompt_speaker_id") or record.get("target_speaker_id")
 
-                sample = ZeroShotSample(
-                    speaker_id=str(speaker_id),
-                    index=idx,
-                    prompt_path=prompt_path,
-                    prompt_text=prompt_text,
-                    prompt_language=prompt_lang,
-                    target_path=target_path,
-                    target_text=target_text,
-                    target_language=target_lang,
-                    extra=dict(record),
-                )
-                samples.append(sample)
+            sample = ZeroShotSample(
+                speaker_id=str(speaker_id),
+                index=idx,
+                prompt_path=prompt_path,
+                prompt_text=prompt_text,
+                prompt_language=prompt_lang,
+                target_path=target_path,
+                target_text=target_text,
+                target_language=target_lang,
+                extra=dict(record),
+            )
+            samples.append(sample)
 
         self._zero_shot_samples = samples
         self._zero_shot_samples_loaded = True

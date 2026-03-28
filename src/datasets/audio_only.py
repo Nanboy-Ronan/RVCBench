@@ -1,5 +1,4 @@
 """Lightweight audio-only dataset loader for denoiser (no text/BERT dependencies)."""
-import json
 import os
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -9,6 +8,8 @@ import torch.utils.data
 import torchaudio
 from hydra.utils import to_absolute_path
 from torch.utils.data import DataLoader
+
+from src.datasets.manifest_utils import discover_speakers, load_dataset_manifest
 
 
 class SimpleAudioDataset(torch.utils.data.Dataset):
@@ -27,7 +28,6 @@ class SimpleAudioDataset(torch.utils.data.Dataset):
         self.sampling_rate = sampling_rate
         self.max_wav_value = float(data_conf.max_wav_value)
 
-        json_file_path = os.path.join(data_conf.root_path, "filelists", f"{speaker_id}.json")
         self.data_root = Path(data_conf.root_path)
 
         self.audio_paths = []
@@ -36,14 +36,16 @@ class SimpleAudioDataset(torch.utils.data.Dataset):
         if audio_paths is not None:
             self.audio_paths = list(audio_paths)
         else:
-            if os.path.exists(json_file_path):
-                with open(json_file_path, "r", encoding="utf-8") as f:
-                    records = json.load(f)
-                for record in records:
-                    ori_pth = self.data_root / record.get("ori_pth", "")
-                    if ori_pth.exists():
-                        self.audio_paths.append(ori_pth)
-                        self.transcripts[str(ori_pth.resolve())] = record.get("ori_text", "")
+            manifest_df = load_dataset_manifest(
+                self.data_root,
+                speaker_id=speaker_id,
+                dataset_name=getattr(data_conf, "name", self.data_root.name),
+            )
+            for record in manifest_df.to_dict(orient="records"):
+                ori_pth = (self.data_root / str(record.get("prompt_file_name", ""))).resolve()
+                if ori_pth.exists():
+                    self.audio_paths.append(ori_pth)
+                    self.transcripts[str(ori_pth.resolve())] = str(record.get("prompt_text", "") or "")
 
         if logger:
             logger.info(f"[SimpleAudioDataset] Loaded {len(self.audio_paths)} files for speaker {speaker_id}")
@@ -136,8 +138,6 @@ class SimpleAllSpeakerData:
         root_path = Path(to_absolute_path(str(dataset_config.root_path))).resolve()
         self._dataset_root = root_path
         self.dataset_root = root_path
-        self._filelists_dir = self._dataset_root / "filelists"
-        
         self._speaker_dirs = {}
         if dataset_config.speaker_id is not None:
             speaker = str(dataset_config.speaker_id)
@@ -146,12 +146,11 @@ class SimpleAllSpeakerData:
             if speaker_dir.exists():
                 self._speaker_dirs[speaker] = speaker_dir
         else:
-            filelist_paths = []
-            if self._filelists_dir.exists():
-                filelist_paths = sorted(self._filelists_dir.glob("*.json"))
-            if filelist_paths:
-                self.speakers_ids = [p.stem for p in filelist_paths]
-            else:
+            self.speakers_ids = discover_speakers(
+                self._dataset_root,
+                dataset_name=getattr(dataset_config, "name", self._dataset_root.name),
+            )
+            if not self.speakers_ids:
                 speaker_dirs = [
                     p for p in self._dataset_root.iterdir()
                     if p.is_dir() and not p.name.startswith(".")
