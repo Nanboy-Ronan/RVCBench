@@ -1,0 +1,46 @@
+# @package _global_
+
+run_name: "f5_tts_ots_on_libritts"
+device: "cuda:0"
+base_dir: "."
+
+vc:
+  mode: "ots"
+  model: "f5_tts"
+
+output_paths:
+  metrics_file: "results/f5_tts_ots_on_libritts/metrics.json"
+
+adversary:
+  model: "F5TTS_v1_Base"
+  ckpt_file: ""
+  vocab_file: ""
+  ode_method: "euler"
+  use_ema: true
+  vocoder_local_path: null
+  hf_cache_dir: null
+  default_prompt_text: "Here is a sample of the desired voice."
+  auto_transcribe_missing_ref_text: true
+  transcription_language: null
+  target_rms: 0.1
+  cross_fade_duration: 0.15
+  sway_sampling_coef: -1.0
+  cfg_strength: 2.0
+  nfe_step: 32
+  speed: 1.0
+  fix_duration: null
+  remove_silence: false
+  max_samples: null
+  seed: null
+
+batch_size: 16 # not used in VC
+
+defaults:
+  - _self_
+  - /dataset: libritts
+evaluation:
+  bootstrap:
+    enabled: true
+    num_samples: 1000
+    confidence_level: 0.95
+    seed: null

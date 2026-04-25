@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import re
 import random
@@ -15,10 +16,56 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 import src.utils.commons as commons
-from src.datasets.manifest_utils import discover_speakers, load_dataset_manifest, to_internal_manifest
+from src.datasets.manifest_utils import (
+    discover_speakers,
+    load_dataset_manifest,
+    resolve_hf_dataset_root,
+    to_internal_manifest,
+)
 from src.datasets.mel_preprocessing import spectrogram_torch, mel_spectrogram_torch
 from src.models.text import cleaned_text_to_sequence
 from src.utils.commons import load_wav_to_torch
+
+
+def _resolve_dataset_root(dataset_config, *, logger=None) -> Path:
+    """Return the local dataset root directory.
+
+    When ``use_hf_dataset`` is true (the default) and ``hf_config_name`` is
+    provided, the dataset is downloaded from HuggingFace Hub on first use and
+    the local cache path is returned.  Falls back to ``root_path`` on any
+    error or when HF loading is disabled.
+    """
+    use_hf: bool = bool(getattr(dataset_config, "use_hf_dataset", True))
+    hf_config_name: Optional[str] = getattr(dataset_config, "hf_config_name", None) or None
+
+    local_root = Path(to_absolute_path(str(dataset_config.root_path))).resolve()
+
+    if not use_hf or not hf_config_name:
+        return local_root
+
+    hf_dataset_id: str = str(getattr(dataset_config, "hf_dataset_id", "Nanboy/RVCBench"))
+    hf_cache_dir_val = getattr(dataset_config, "hf_cache_dir", None)
+    hf_cache_dir: Optional[Path] = (
+        Path(to_absolute_path(str(hf_cache_dir_val))).resolve()
+        if hf_cache_dir_val not in (None, "")
+        else None
+    )
+
+    try:
+        return resolve_hf_dataset_root(
+            hf_dataset_id,
+            hf_config_name,
+            hf_cache_dir=hf_cache_dir,
+            logger=logger,
+        )
+    except Exception as exc:
+        _warn_log = logger or logging.getLogger(__name__)
+        _warn_log.warning(
+            "[Dataset] HuggingFace download failed (%s); falling back to local root: %s",
+            exc,
+            local_root,
+        )
+        return local_root
 
 
 class TextAudioSpeakerDataset(torch.utils.data.Dataset):
@@ -28,7 +75,7 @@ class TextAudioSpeakerDataset(torch.utils.data.Dataset):
     3) computes spectrograms from audio files.
     """
 
-    def __init__(self, data_conf, sid, sidx, sampling_rate, logger=None):
+    def __init__(self, data_conf, sid, sidx, sampling_rate, logger=None, root_path_override=None):
         self.logger = logger
         if self.logger:
             self.logger.debug(f"TextAudioSpeakerDataset __init__: data_conf type: {type(data_conf)}")
@@ -42,10 +89,10 @@ class TextAudioSpeakerDataset(torch.utils.data.Dataset):
         self.hop_length = int(getattr(data_conf, "hop_length", 512))
         self.data_conf = data_conf
         self.logger = logger
-        
+
         self.max_wav_value = float(data_conf.max_wav_value)
 
-        self.data_root = Path(data_conf.root_path)
+        self.data_root = Path(root_path_override) if root_path_override is not None else Path(data_conf.root_path)
         try:
             manifest_df = load_dataset_manifest(
                 self.data_root,
@@ -389,7 +436,7 @@ class AllSpeakerData:
             logger.debug("AllSpeakerData __init__: config and dataset_config set")
         self.logger = logger
 
-        root_path = Path(to_absolute_path(str(self.dataset_config.root_path))).resolve()
+        root_path = _resolve_dataset_root(dataset_config, logger=logger)
         self._dataset_root = root_path
         self._data_root = self._dataset_root.parent
         if self.dataset_config.speaker_id is not None:
@@ -415,6 +462,7 @@ class AllSpeakerData:
                 speaker_idx,
                 sampling_rate=getattr(config, "sampling_rate", None),
                 logger=logger,
+                root_path_override=str(root_path),
             )
             num_workers = int(os.environ.get("DATA_LOADER_WORKERS", 4))
             try:

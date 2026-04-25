@@ -2,6 +2,10 @@
 
 name: "CommonVoiceFR_dev"
 root_path: "./data/CommonVoiceFR_dev"
+use_hf_dataset: true
+hf_dataset_id: "Nanboy/RVCBench"
+hf_config_name: "CommonVoiceFR_dev"
+hf_cache_dir: null
 
 # Use all speakers discovered under this path
 speaker_id: null

@@ -1,0 +1,48 @@
+# @package _global_
+
+run_name: "xtts_ots_on_libritts"
+device: "cuda:0"
+base_dir: "."
+
+vc:
+  mode: "ots"
+  model: "xtts"
+
+output_paths:
+  metrics_file: "results/xtts_ots_on_libritts/metrics.json"
+
+adversary:
+  checkpoint: "coqui/XTTS-v2"
+  cache_dir: null
+  use_deepspeed: false
+  strict_checkpoint: true
+  language: "en"
+  language_source: "target"
+  speed: 1.0
+  enable_text_splitting: false
+  gpt_cond_len: 30
+  gpt_cond_chunk_len: 6
+  max_ref_len: 10
+  sound_norm_refs: false
+  temperature: 0.75
+  length_penalty: 1.0
+  repetition_penalty: 10.0
+  top_k: 50
+  top_p: 0.85
+  do_sample: true
+  num_beams: 1
+  seed: null
+  max_samples: null
+  default_prompt_text: "Here is a sample of the desired voice."
+
+batch_size: 16 # not used in VC
+
+defaults:
+  - _self_
+  - /dataset: libritts
+evaluation:
+  bootstrap:
+    enabled: true
+    num_samples: 1000
+    confidence_level: 0.95
+    seed: null

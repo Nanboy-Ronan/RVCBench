@@ -2,6 +2,10 @@
 
 name: "Bilingual_UEDIN"
 root_path: "./data/Bilingual_uedin"
+use_hf_dataset: true
+hf_dataset_id: "Nanboy/RVCBench"
+hf_config_name: "Bilingual_uedin"
+hf_cache_dir: null
 # Set to null to include all speakers discovered under audios/
 speaker_id: null
 max_wav_value: 32768.0

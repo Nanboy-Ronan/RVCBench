@@ -1,0 +1,45 @@
+# @package _global_
+
+run_name: "qwen3_tts_ots_on_libritts"
+device: "cuda:0"
+base_dir: "."
+
+vc:
+  mode: "ots"
+  model: "qwen3_tts"
+
+output_paths:
+  metrics_file: "results/qwen3_tts_ots_on_libritts/metrics.json"
+
+adversary:
+  checkpoint_path: "Qwen/Qwen3-TTS-12Hz-1.7B-Base"
+  device_map: "cuda:0"
+  torch_dtype: "auto"
+  use_flash_attn2: false
+  attn_implementation: null
+  language: "Auto"
+  language_source: "target"
+  default_prompt_text: "Here is a sample of the desired voice."
+  x_vector_only_mode: false
+  fallback_to_x_vector_only_mode_on_missing_ref_text: true
+  reuse_voice_clone_prompt: true
+  max_new_tokens: null
+  top_k: null
+  top_p: null
+  temperature: null
+  do_sample: null
+  repetition_penalty: null
+  max_samples: null
+  seed: null
+
+batch_size: 16 # not used in VC
+
+defaults:
+  - _self_
+  - /dataset: libritts
+evaluation:
+  bootstrap:
+    enabled: true
+    num_samples: 1000
+    confidence_level: 0.95
+    seed: null

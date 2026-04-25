@@ -2,6 +2,10 @@
 
 name: "Multispeaker_libri"
 root_path: "./data/Multispeaker_libri"
+use_hf_dataset: true
+hf_dataset_id: "Nanboy/RVCBench"
+hf_config_name: "Multispeaker_libri"
+hf_cache_dir: null
 # Set to null to include all speakers discovered under audios/
 speaker_id: null  # Will use all 10 speakers: 61, 237, 908, 1221, 1284, 2300, 2830, 4970, 6829, 7729
 max_wav_value: 32768.0

@@ -2,6 +2,10 @@
 
 name: "Long_librispeech"
 root_path: "./data/Long_context"
+use_hf_dataset: true
+hf_dataset_id: "Nanboy/RVCBench"
+hf_config_name: "Long_context"
+hf_cache_dir: null
 # Set to null to include all speakers discovered under audios/
 speaker_id: null
 max_wav_value: 32768.0

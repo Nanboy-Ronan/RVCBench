@@ -1,0 +1,39 @@
+# @package _global_
+
+run_name: "openvoice_ots_on_libritts"
+device: "cuda:0"
+base_dir: "."
+
+vc:
+  mode: "ots"
+  model: "openvoice"
+
+output_paths:
+  metrics_file: "results/openvoice_ots_on_libritts/metrics.json"
+
+adversary:
+  code_path: "checkpoints/OpenVoice"
+  melo_code_path: null
+  converter_config_path: "checkpoints/OpenVoice/checkpoints_v2/converter/config.json"
+  converter_checkpoint_path: "checkpoints/OpenVoice/checkpoints_v2/converter/checkpoint.pth"
+  base_speaker_dir: "checkpoints/OpenVoice/checkpoints_v2/base_speakers/ses"
+  speed: 1.0
+  tau: 0.3
+  enable_watermark: false
+  melo_use_hf: true
+  default_language: "EN"
+  language_source: "target"
+  source_speaker_key: null
+  max_samples: null
+
+batch_size: 16
+
+defaults:
+  - _self_
+  - /dataset: libritts
+evaluation:
+  bootstrap:
+    enabled: true
+    num_samples: 1000
+    confidence_level: 0.95
+    seed: null

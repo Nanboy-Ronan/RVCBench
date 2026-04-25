@@ -1,0 +1,52 @@
+# @package _global_
+
+run_name: "index_tts_ots_on_libritts"
+device: "cuda:0"
+base_dir: "."
+
+vc:
+  mode: "ots"
+  model: "index_tts"
+
+output_paths:
+  metrics_file: "results/index_tts_ots_on_libritts/metrics.json"
+
+adversary:
+  code_path: "checkpoints/index-tts"
+  model_dir: "checkpoints/index-tts/checkpoints"
+  config_path: "checkpoints/index-tts/checkpoints/config.yaml"
+  runtime_python: "${oc.env:INDEXTTS_RUNTIME_PYTHON,}"
+  worker_script_path: "scripts/index_tts_worker.py"
+  use_fp16: true
+  use_cuda_kernel: true
+  use_deepspeed: false
+  use_accel: false
+  use_torch_compile: false
+  interval_silence: 200
+  max_text_tokens_per_segment: 120
+  emo_alpha: 1.0
+  use_prompt_as_emo_audio: false
+  emo_audio_prompt: null
+  default_prompt_text: "Here is a sample of the desired voice."
+  top_p: 0.8
+  top_k: 30
+  temperature: 0.8
+  length_penalty: 0.0
+  num_beams: 1
+  repetition_penalty: 10.0
+  max_mel_tokens: 1500
+  do_sample: true
+  verbose: false
+  max_samples: null
+
+batch_size: 16 # not used in VC
+
+defaults:
+  - _self_
+  - /dataset: libritts
+evaluation:
+  bootstrap:
+    enabled: true
+    num_samples: 1000
+    confidence_level: 0.95
+    seed: null

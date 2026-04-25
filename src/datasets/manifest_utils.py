@@ -1,4 +1,5 @@
 import json
+import logging
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Sequence
 
@@ -6,6 +7,7 @@ import pandas as pd
 
 
 CANONICAL_MANIFEST_FILENAME = "metadata.parquet"
+HF_DATASET_ID = "Nanboy/RVCBench"
 
 CANONICAL_COLUMNS: Sequence[str] = (
     "dataset_name",
@@ -225,6 +227,52 @@ def to_internal_manifest(df: pd.DataFrame) -> pd.DataFrame:
         if internal_key not in internal.columns and canonical_key in internal.columns:
             internal[internal_key] = internal[canonical_key]
     return internal
+
+
+def resolve_hf_dataset_root(
+    hf_dataset_id: str,
+    hf_config_name: str,
+    *,
+    hf_cache_dir: Optional[Path] = None,
+    logger=None,
+) -> Path:
+    """Download the named config from a HuggingFace Hub dataset and return its local root.
+
+    The returned path is ``<snapshot_dir>/<hf_config_name>/`` and mirrors the
+    local ``data/<dataset>/`` layout expected by the rest of the pipeline.
+    """
+    try:
+        from huggingface_hub import snapshot_download
+    except ImportError as exc:
+        raise ImportError(
+            "huggingface_hub is required for HF dataset loading. "
+            "Install with: pip install huggingface_hub"
+        ) from exc
+
+    _log = logger or logging.getLogger(__name__)
+    _log.info(
+        "[Dataset] Fetching '%s' (config '%s') from Hugging Face Hub …",
+        hf_dataset_id,
+        hf_config_name,
+    )
+
+    snapshot_kwargs = {
+        "repo_id": hf_dataset_id,
+        "repo_type": "dataset",
+        "allow_patterns": [f"{hf_config_name}/*"],
+    }
+    if hf_cache_dir is not None:
+        snapshot_kwargs["cache_dir"] = str(hf_cache_dir)
+
+    local_dir = snapshot_download(**snapshot_kwargs)
+    dataset_root = Path(local_dir) / hf_config_name
+    if not dataset_root.exists():
+        raise FileNotFoundError(
+            f"HF snapshot downloaded to '{local_dir}' but expected subfolder "
+            f"'{hf_config_name}' was not found inside it."
+        )
+    _log.info("[Dataset] Dataset root resolved to %s", dataset_root)
+    return dataset_root
 
 
 def discover_speakers(root_path: Path, *, explicit_speaker_id: Optional[str] = None, dataset_name: Optional[str] = None) -> List[str]:

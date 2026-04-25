@@ -1,0 +1,3 @@
+# Minimal placeholder model config used by protection methods that
+# do not require a surrogate neural model (e.g. GRNoiseProtector).
+name: "default"

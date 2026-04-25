@@ -2,6 +2,10 @@
 
 name: "Background_noise"
 root_path: "./data/Background_noise"
+use_hf_dataset: true
+hf_dataset_id: "Nanboy/RVCBench"
+hf_config_name: "Background_noise"
+hf_cache_dir: null
 
 # Use all speakers discovered under this path
 speaker_id: null
