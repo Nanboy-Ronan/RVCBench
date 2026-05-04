@@ -226,8 +226,10 @@ wav2vec2_checkpoints/
 .cache/
 .idea/
 .numba_cache/
+.hf_upload_staging/
 jsonl_per_model/
 data/
+
 
 *.noise
 *.pdf
