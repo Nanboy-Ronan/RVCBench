@@ -37,21 +37,17 @@ Voice cloning technology poses a growing threat to speaker privacy. Audio protec
 | VALL-E | `vall_e` |
 | StyleTTS 2 | `styletts2` |
 | GLM-TTS | `glm_tts` |
-| GlowTTS | `glowtts` |
-| Kimi Audio | `kimi_audio` |
 | MOSS TTSD | `moss_ttsd` |
 | PlayDiffusion | `playdiffusion` |
 | Bark Voice Clone | `bark_voice_clone` |
 | OZSpeech | `ozspeech` |
-| BERTVits2 | `bertvits2` |
-| Qwen3 Omni | `qwen3_omni` |
 | VibeVoice | `vibevoice` |
 
 ### Protection Methods
 
 | Method | Description |
 |---|---|
-| SafeSpeech | Adversarial perturbation optimised against a BERTVits2 surrogate |
+| SafeSpeech | Adversarial perturbation optimised against a surrogate VC model |
 | Enkidu | Perceptual-loss adversarial perturbation |
 | EM | Expectation–Maximisation perturbation |
 | GRNoise | Gaussian random noise (no surrogate model required) |
@@ -109,7 +105,7 @@ python scripts/run_qwen3tts_quickstart.py \
 # Protection + voice clone attack (two-step pipeline)
 python scripts/run_protect_qwen3tts_quickstart.py            # Gaussian noise protection (no checkpoints needed)
 python scripts/run_protect_qwen3tts_quickstart.py \
-    --protect-config safespeech_on_libritts                    # SafeSpeech (requires BERTVits2 checkpoints)
+    --protect-config safespeech_on_libritts                    # SafeSpeech (requires surrogate-model checkpoints)
 
 # FishSpeech zero-shot voice cloning
 python scripts/run_fishspeech_quickstart.py
