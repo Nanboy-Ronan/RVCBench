@@ -1,0 +1,46 @@
+# @package _global_
+
+run_name: "voxcpm_ots_on_libratts"
+device: "cuda:0"
+base_dir: "."
+
+vc:
+  mode: "ots"
+  model: "voxcpm"
+
+output_paths:
+  metrics_file: "results/voxcpm_ots_on_libratts/metrics.json"
+
+adversary:
+  model_path: "openbmb/VoxCPM2"
+  code_path: null
+  cache_dir: null
+  local_files_only: false
+  optimize: false
+  load_denoiser: false
+  zipenhancer_model_id: "iic/speech_zipenhancer_ans_multiloss_16k_base"
+  use_prompt_text: true
+  include_reference_audio: true
+  default_prompt_text: "Here is a sample of the desired voice."
+  cfg_value: 2.0
+  inference_timesteps: 10
+  min_len: 2
+  max_len: 4096
+  normalize: false
+  denoise: false
+  retry_badcase: true
+  retry_badcase_max_times: 3
+  retry_badcase_ratio_threshold: 6.0
+  max_samples: null
+
+batch_size: 16 # not used in VC
+
+defaults:
+  - _self_
+  - /dataset: libritts
+evaluation:
+  bootstrap:
+    enabled: true
+    num_samples: 1000
+    confidence_level: 0.95
+    seed: null

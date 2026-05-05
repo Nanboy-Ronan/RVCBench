@@ -1,0 +1,35 @@
+# @package _global_
+
+run_name: "fireredtts2_ots_on_libratts"
+device: "cuda:0"
+base_dir: "."
+
+vc:
+  mode: "ots"
+  model: "fireredtts2"
+
+output_paths:
+  metrics_file: "results/fireredtts2_ots_on_libratts/metrics.json"
+
+adversary:
+  code_path: "checkpoints/FireRedTTS2"
+  pretrained_dir: "checkpoints/FireRedTTS2/pretrained_models/FireRedTTS2"
+  gen_type: "monologue"
+  use_bf16: false
+  temperature: 0.75
+  topk: 20
+  max_samples: null
+  default_prompt_text: "Here is a sample of the desired voice."
+  require_prompt_text: false
+
+batch_size: 16 # not used in VC
+
+defaults:
+  - _self_
+  - /dataset: libritts
+evaluation:
+  bootstrap:
+    enabled: true
+    num_samples: 1000
+    confidence_level: 0.95
+    seed: null
