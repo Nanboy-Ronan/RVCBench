@@ -6,6 +6,26 @@ few require extra runtime packages or a local repo checkout.
 
 The commands below make those dependencies explicit.
 
+## 0. Environment Choice
+
+The quickstarts and full benchmark runs should be launched from a
+model-specific environment. The public release includes the same environment
+specs that were maintained internally at
+`/tealab-data/rjin02/AudioWatermarkBench/envs`; use the checked-in copies under
+[`../envs/`](../envs/) instead of relying on that absolute path.
+
+For example:
+
+```bash
+cd envs
+conda env create -f qwen3-tts.yml
+conda activate qwen3
+cd ..
+```
+
+See [`model_environments.md`](model_environments.md) for the full
+model-to-environment map and notes on lock files or containers.
+
 ## 1. Common Login
 
 Accept the gated model terms first, then log in once:

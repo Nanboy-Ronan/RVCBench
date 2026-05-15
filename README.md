@@ -62,7 +62,10 @@ Voice cloning technology poses a growing threat to speaker privacy. Audio protec
 - Python 3.9+
 - PyTorch ≥ 2.0 with CUDA
 - `hydra-core`, `omegaconf`, `pandas`, `pyarrow`, `soundfile`, `librosa`
-- Model-specific packages (installed per environment; see each model's config)
+- Model-specific packages. Many supported VC/TTS models need mutually
+  incompatible dependency stacks, so launch each model from its matching
+  environment in [`envs/`](envs/); see
+  [docs/model_environments.md](docs/model_environments.md).
 
 ### Installation
 
@@ -71,6 +74,15 @@ git clone https://github.com/Nanboy-Ronan/RVCBench.git
 cd RVCBench
 pip install hydra-core omegaconf pandas pyarrow soundfile librosa \
             jiwer openai-whisper pymcd huggingface_hub
+```
+
+For model-specific runs, prefer the checked-in Conda environment files:
+
+```bash
+cd envs
+conda env create -f qwen3-tts.yml
+conda activate qwen3
+cd ..
 ```
 
 Model checkpoints and third-party inference code are **not bundled**. Download instructions are provided in the [Data & Checkpoints](#data--checkpoints) section.
@@ -88,7 +100,7 @@ Three end-to-end examples are provided as both Jupyter notebooks and standalone 
 | Protection (GRNoise / SafeSpeech) + Qwen3-TTS | `notebooks/rvcbench_safespeech_qwen3tts_quickstart.ipynb` | `scripts/run_protect_qwen3tts_quickstart.py` |
 
 Model setup for the quickstarts, including gated downloads and exact commands:
-[docs/quickstart_model_setup.md](/tealab-data/rjin02/RVCBench/docs/quickstart_model_setup.md)
+[docs/quickstart_model_setup.md](docs/quickstart_model_setup.md)
 
 ### Running the scripts
 
@@ -164,14 +176,21 @@ python run_denoiser.py --config-name denoise/denoiser_dns64_on_protected_libritt
 
 The zero-shot VC configs are under `configs/ots_vc/clean/`. Most older examples use `configs/ots_vc/clean/libritts/`, while some newer model integrations currently live under `configs/ots_vc/clean/libratts/`. Despite the directory name difference, the added configs here still default to the `libritts` dataset internally.
 
+Before launching a model, activate the matching environment from
+[`envs/`](envs/). The internal development copies lived at
+`/tealab-data/rjin02/AudioWatermarkBench/envs`; for public use, the release
+copy in this repository should be treated as the source of truth. See
+[docs/model_environments.md](docs/model_environments.md) for the full map.
+
 ### If You Only Want One Model
 
 You do not need to download every checkpoint bundle. For a single model, the workflow is:
 
 1. Pick the Hydra config for that model under `configs/ots_vc/clean/...`.
-2. Download or install only that model's runtime and checkpoints.
-3. Point any local paths with Hydra overrides such as `adversary.code_path=...` or `adversary.checkpoint_path=...`.
-4. Run `run_vc.py` against the dataset/config you want.
+2. Create and activate that model's environment from `envs/`.
+3. Download or install only that model's runtime and checkpoints.
+4. Point any local paths with Hydra overrides such as `adversary.code_path=...` or `adversary.checkpoint_path=...`.
+5. Run `run_vc.py` against the dataset/config you want.
 
 Generic pattern:
 
@@ -213,7 +232,7 @@ python run_vc.py --config-name ots_vc/clean/vctk/fishspeech_ots \
 ```
 
 For the full command list for the quickstart models, see
-[docs/quickstart_model_setup.md](/tealab-data/rjin02/RVCBench/docs/quickstart_model_setup.md).
+[docs/quickstart_model_setup.md](docs/quickstart_model_setup.md).
 
 ### Additional Examples
 

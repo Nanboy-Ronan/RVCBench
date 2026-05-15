@@ -221,7 +221,8 @@ logs/
 /tmp_bert_vits2/bert_gen.py
 /tmp_bert_vits2/
 /outputs/
-/docs/
+/docs/*
+!/docs/model_environments.md
 wav2vec2_checkpoints/
 .cache/
 .idea/
