@@ -13,6 +13,8 @@ At a glance, this release supports **26 VC/TTS adversary models**, **5 audio pro
 
 **Canonical resources:** [paper](https://arxiv.org/abs/2602.00443) · [Hugging Face dataset](https://huggingface.co/datasets/Nanboy/RVCBench) · [quickstart notebooks](notebooks/) · [model environments](docs/model_environments.md) · [citation](#citation)
 
+**Contents:** [Results](#benchmark-results) · [Models](#supported-models) · [Getting Started](#getting-started) · [Quickstart](#quickstart-path) · [Full Pipeline](#full-benchmark-path) · [Data & Checkpoints](#data--checkpoints) · [Citation](#citation)
+
 ![RVCBench main figure](figs/main.png)
 
 ---
@@ -27,6 +29,93 @@ Voice cloning technology poses a growing threat to speaker privacy. Audio protec
 - computes standardised fidelity and generation-quality metrics with bootstrap confidence intervals.
 
 RVCBench is intended for researchers and engineers working on voice cloning benchmarks, audio deepfake robustness, speaker verification resilience, anti-spoofing, synthetic speech detection, TTS safety, and privacy-preserving speech generation.
+
+---
+
+## Benchmark Results
+
+> [!NOTE]
+> **Metric guide** — SIM: speaker cosine similarity ↑ · WER: word error rate ↓ · MOS: SpeechMOS perceptual score ↑ · MCD: mel cepstral distortion ↓ · RTF: real-time factor (< 1 = faster-than-real-time) ↓ · SVA: speaker verification accuracy ↑ · Emo: emotion match rate ↑
+>
+> **Bold** marks the best value per column. All results on clean (unprotected) prompts, averaged over the full speaker set for each dataset.
+
+### Leaderboard — LibriTTS
+
+| Rank | Model | SIM ↑ | WER ↓ | MOS ↑ | MCD ↓ | RTF ↓ | SVA ↑ | Emo ↑ |
+|:----:|-------|------:|------:|------:|------:|------:|------:|------:|
+| 1 | **Qwen3-TTS** | **0.614** | 0.052 | **4.39** | **5.79** | 2.02 | **0.974** | **0.731** |
+| 2 | **IndexTTS** | 0.606 | 0.052 | 4.06 | 6.61 | 2.23 | 0.972 | 0.693 |
+| 3 | **CosyVoice 2** | 0.602 | 0.175 | **4.39** | 6.17 | 4.58 | **0.974** | 0.729 |
+| 4 | ZipVoice | 0.579 | 0.053 | 4.13 | 7.09 | 1.46 | 0.952 | 0.675 |
+| 5 | MaskGCT | 0.570 | 0.088 | 3.93 | 6.91 | 1.36 | 0.939 | 0.682 |
+| 6 | GLM-TTS | 0.570 | 0.087 | 4.08 | 6.41 | 1.74 | 0.951 | 0.678 |
+| 7 | F5-TTS | 0.559 | 0.116 | 3.99 | 6.96 | 0.61 | 0.937 | 0.676 |
+| 8 | Higgs Audio | 0.559 | 0.250 | 4.30 | 6.06 | 1.42 | 0.941 | 0.717 |
+| 9 | MGM-Omni | 0.539 | 0.095 | 4.28 | 5.82 | 0.84 | 0.933 | 0.676 |
+| 10 | PlayDiffusion | 0.506 | 0.055 | 4.15 | 8.06 | 0.73 | 0.936 | 0.681 |
+| 11 | MOSS-TTSD | 0.492 | 0.383 | 4.10 | 7.09 | — | 0.876 | 0.667 |
+| 12 | VibeVoice | 0.480 | 0.228 | 3.83 | 6.76 | 1.86 | 0.852 | 0.624 |
+| 13 | FishSpeech | 0.472 | 0.166 | 4.37 | 6.47 | 3.61 | 0.907 | 0.682 |
+| 14 | XTTS-v2 | 0.454 | 0.073 | 3.81 | 8.62 | 0.62 | 0.908 | 0.639 |
+| 15 | SparkTTS | 0.408 | 0.326 | 4.06 | 5.83 | 1.56 | 0.764 | 0.672 |
+| 16 | OZSpeech | 0.388 | 0.060 | 3.21 | 6.87 | 8.75 | 0.840 | 0.636 |
+| 17 | OpenVoice V2 | 0.244 | 0.075 | 4.30 | 7.06 | **0.08** | 0.474 | 0.601 |
+| 18 | StyleTTS 2 | 0.228 | **0.049** | 4.30 | 6.81 | 0.11 | 0.388 | 0.589 |
+
+### Protection Robustness — SIM on LibriTTS
+
+Speaker similarity under each audio protection method. Models sorted by clean SIM. A larger drop from **Clean** indicates more effective protection. **Bold** marks the lowest protected SIM per column (most effectively protected model per method).
+
+| Model | Clean | SafeSpeech | Enkidu | Spectral | GR-Noise | AntiFake |
+|-------|------:|-----------:|-------:|---------:|---------:|---------:|
+| Qwen3-TTS | 0.614 | 0.384 | 0.502 | 0.363 | 0.408 | 0.582 |
+| IndexTTS | 0.606 | 0.346 | 0.475 | 0.318 | 0.392 | 0.572 |
+| CosyVoice 2 | 0.602 | 0.321 | 0.447 | 0.301 | 0.384 | 0.549 |
+| ZipVoice | 0.579 | 0.287 | 0.435 | 0.262 | 0.258 | 0.543 |
+| MaskGCT | 0.570 | 0.303 | 0.407 | 0.281 | 0.312 | 0.530 |
+| GLM-TTS | 0.570 | 0.330 | 0.445 | 0.311 | 0.388 | 0.532 |
+| F5-TTS | 0.559 | 0.207 | 0.431 | 0.176 | 0.137 | 0.520 |
+| Higgs Audio | 0.559 | 0.264 | 0.435 | 0.236 | 0.272 | 0.521 |
+| MGM-Omni | 0.539 | 0.184 | 0.316 | 0.166 | 0.229 | 0.491 |
+| PlayDiffusion | 0.506 | 0.173 | — | 0.149 | 0.162 | 0.466 |
+| MOSS-TTSD | 0.492 | 0.242 | 0.335 | 0.216 | 0.247 | 0.453 |
+| VibeVoice | 0.480 | 0.272 | 0.367 | 0.253 | 0.280 | 0.442 |
+| FishSpeech | 0.472 | 0.238 | 0.334 | 0.212 | 0.235 | 0.439 |
+| XTTS-v2 | 0.454 | 0.260 | 0.308 | 0.241 | 0.237 | 0.414 |
+| SparkTTS | 0.408 | 0.129 | 0.137 | 0.108 | 0.062 | 0.359 |
+| OZSpeech | 0.388 | 0.156 | 0.187 | 0.147 | 0.148 | 0.337 |
+| OpenVoice V2 | 0.244 | 0.185 | 0.188 | 0.180 | 0.175 | 0.236 |
+| StyleTTS 2 | **0.228** | **0.089** | **0.125** | **0.081** | **0.030** | **0.207** |
+
+<details>
+<summary><strong>Cross-Dataset Generalisation — SIM across all 10 datasets (click to expand)</strong></summary>
+
+Speaker similarity (SIM) on clean prompts across all benchmark datasets. — indicates the model was not evaluated on that dataset.
+
+| Model | LibriTTS | VCTK | Multi-spk | Long | AISHELL | French | Bilingual | BG-clean | BG-noise | Hallucin. |
+|-------|------:|------:|------:|------:|------:|------:|------:|------:|------:|------:|
+| Qwen3-TTS | 0.614 | 0.618 | 0.495 | 0.561 | **0.721** | **0.536** | **0.673** | **0.689** | **0.572** | 0.515 |
+| IndexTTS | 0.606 | 0.567 | 0.473 | **0.775** | **0.721** | 0.397 | **0.673** | 0.589 | 0.528 | 0.529 |
+| CosyVoice 2 | 0.602 | **0.582** | 0.448 | 0.530 | 0.717 | 0.378 | 0.653 | 0.626 | 0.515 | 0.518 |
+| ZipVoice | 0.579 | 0.554 | **0.531** | 0.729 | 0.712 | 0.363 | 0.322 | 0.625 | 0.462 | 0.509 |
+| MaskGCT | 0.570 | 0.555 | 0.431 | 0.194 | 0.674 | 0.494 | — | 0.610 | 0.487 | 0.499 |
+| GLM-TTS | 0.570 | 0.573 | 0.445 | 0.757 | 0.690 | 0.398 | 0.657 | 0.622 | 0.528 | **0.533** |
+| F5-TTS | 0.559 | 0.537 | 0.507 | 0.607 | 0.696 | 0.304 | 0.653 | 0.582 | 0.414 | 0.455 |
+| Higgs Audio | 0.559 | 0.516 | 0.418 | 0.520 | 0.581 | 0.349 | 0.543 | 0.592 | 0.421 | 0.425 |
+| MGM-Omni | 0.539 | 0.447 | 0.370 | 0.442 | 0.713 | 0.227 | 0.630 | 0.523 | 0.332 | 0.396 |
+| PlayDiffusion | 0.506 | 0.426 | 0.360 | 0.637 | 0.441 | 0.283 | 0.465 | 0.433 | 0.305 | 0.408 |
+| MOSS-TTSD | 0.492 | 0.440 | 0.379 | 0.644 | 0.437 | 0.327 | 0.471 | 0.494 | **0.488** | 0.416 |
+| VibeVoice | 0.480 | 0.436 | 0.348 | 0.625 | 0.564 | 0.343 | 0.531 | 0.513 | 0.364 | 0.408 |
+| FishSpeech | 0.472 | 0.430 | 0.383 | 0.572 | 0.611 | 0.374 | 0.566 | 0.495 | 0.387 | 0.351 |
+| XTTS-v2 | 0.454 | 0.454 | 0.328 | 0.613 | 0.569 | **0.445** | 0.506 | **0.546** | 0.394 | **0.488** |
+| SparkTTS | 0.408 | **0.532** | 0.228 | 0.345 | 0.569 | 0.164 | 0.480 | 0.588 | 0.332 | 0.336 |
+| OZSpeech | 0.388 | 0.253 | 0.271 | — | — | 0.109 | — | 0.272 | 0.164 | 0.281 |
+| OpenVoice V2 | 0.244 | 0.392 | 0.192 | 0.278 | 0.431 | 0.271 | 0.298 | 0.484 | 0.358 | 0.365 |
+| StyleTTS 2 | 0.228 | 0.236 | 0.162 | — | — | — | 0.213 | 0.196 | 0.166 | 0.184 |
+
+</details>
+
+---
 
 ## Supported Models
 
@@ -139,7 +228,10 @@ Model checkpoints and third-party inference code are **not bundled**. Download i
 
 ## Quickstart Path
 
-Use this path when you want to run a small, end-to-end example with automatic data download. All outputs--data, generated audio, and metrics--are written **inside the repository directory**. The Qwen3-TTS examples assume the `qwen3` environment is active and the Qwen checkpoint is available from Hugging Face or a local path.
+> [!TIP]
+> If you only want to evaluate a single model, skip directly to [Running Specific VC Models](#running-specific-vc-models) — you do not need to download every checkpoint bundle.
+
+Use this path when you want to run a small, end-to-end example with automatic data download. All outputs — data, generated audio, and metrics — are written **inside the repository directory**. The Qwen3-TTS examples assume the `qwen3` environment is active and the Qwen checkpoint is available from Hugging Face or a local path.
 
 ### Fastest quickstart
 
@@ -247,10 +339,7 @@ python run_denoiser.py --config-name denoise/denoiser_dns64_on_protected_libritt
 The zero-shot VC configs are under `configs/ots_vc/clean/`. Most older examples use `configs/ots_vc/clean/libritts/`, while some newer model integrations currently live under `configs/ots_vc/clean/libratts/`. Despite the directory name difference, the added configs here still default to the `libritts` dataset internally.
 
 Before launching a model, activate the matching environment from
-[`envs/`](envs/). The internal development copies lived at
-`/tealab-data/rjin02/AudioWatermarkBench/envs`; for public use, the release
-copy in this repository should be treated as the source of truth. See
-[docs/model_environments.md](docs/model_environments.md) for the full map.
+[`envs/`](envs/). See [docs/model_environments.md](docs/model_environments.md) for the full map.
 
 ### If You Only Want One Model
 
