@@ -9,6 +9,8 @@
 
 RVCBench provides a unified, reproducible pipeline covering the full attack-defense cycle: source-audio protection, zero-shot or fine-tuning voice cloning, optional denoising, and evaluation of speaker similarity, intelligibility, perceptual quality, and runtime.
 
+At a glance, this release supports **26 VC/TTS adversary models**, **5 audio protection methods**, **10 public benchmark dataset configurations**, and both fidelity and generation-quality metrics.
+
 **Canonical resources:** [paper](https://arxiv.org/abs/2602.00443) · [Hugging Face dataset](https://huggingface.co/datasets/Nanboy/RVCBench) · [quickstart notebooks](notebooks/) · [model environments](docs/model_environments.md) · [citation](#citation)
 
 ![RVCBench main figure](figs/main.png)
@@ -30,9 +32,13 @@ RVCBench is intended for researchers and engineers working on voice cloning benc
 
 ### Voice Cloning Adversaries (Zero-Shot OTS)
 
+RVCBench currently includes wrappers or configs for **26 VC/TTS adversary models**:
+
 | Model | Key |
 |---|---|
+| BertVITS2 | `bert` |
 | Qwen3-TTS | `qwen3_tts` |
+| Qwen3-Omni | `qwen3_omni` |
 | FireRedTTS-2 | `fireredtts2` |
 | VoxCPM | `voxcpm` |
 | F5-TTS | `f5_tts` |
@@ -48,6 +54,9 @@ RVCBench is intended for researchers and engineers working on voice cloning benc
 | VALL-E | `vall_e` |
 | StyleTTS 2 | `styletts2` |
 | GLM-TTS | `glm_tts` |
+| GlowTTS | `glowtts` |
+| Kimi Audio | `kimi_audio` |
+| MGM-Omni | `mgm_omni` |
 | MOSS TTSD | `moss_ttsd` |
 | PlayDiffusion | `playdiffusion` |
 | Bark Voice Clone | `bark_voice_clone` |
@@ -56,6 +65,8 @@ RVCBench is intended for researchers and engineers working on voice cloning benc
 
 ### Protection Methods
 
+RVCBench currently supports **5 audio protection methods**:
+
 | Method | Description |
 |---|---|
 | SafeSpeech | Adversarial perturbation optimised against a surrogate VC model |
@@ -63,6 +74,32 @@ RVCBench is intended for researchers and engineers working on voice cloning benc
 | EM | Expectation–Maximisation perturbation |
 | GRNoise | Gaussian random noise (no surrogate model required) |
 | AntiFake | AntiFake adversarial perturbation |
+
+## Supported Datasets
+
+The public Hugging Face dataset release exposes **10 benchmark dataset configurations**:
+
+| Dataset config | Typical use |
+|---|---|
+| `Libritts` | English zero-shot VC/TTS benchmark prompts |
+| `VCTK` | Multi-speaker English voice cloning |
+| `Multispeaker_libri` | Multi-speaker LibriSpeech-style evaluation |
+| `Long_context` | Longer-context voice cloning prompts |
+| `AISHELL1_dev` | Mandarin speech evaluation |
+| `CommonVoiceFR_dev` | French speech evaluation |
+| `Bilingual_uedin` | Bilingual speech evaluation |
+| `Background_noise` | Noisy prompt robustness |
+| `robotcall` | Robocall-style speech robustness |
+| `vctk_text_robust` | Text robustness on VCTK-style prompts |
+
+## Evaluated Metrics
+
+RVCBench reports fidelity metrics for protection/denoising runs and generation-quality metrics for VC/TTS runs.
+
+| Stage | Metrics |
+|---|---|
+| Protection and denoising fidelity | SNR, STOI, MCD, WER, SpeechMOS, DNSMOS, speaker similarity |
+| Voice cloning / TTS generation | MCD, WER, speaker similarity, SpeechMOS, DNSMOS, emotion match rate, real-time factor (RTF) |
 
 ---
 
@@ -100,9 +137,31 @@ Model checkpoints and third-party inference code are **not bundled**. Download i
 
 ---
 
-## Quickstart Examples
+## Quickstart Path
 
-Three end-to-end examples are provided as both Jupyter notebooks and standalone Python scripts. All outputs—data, generated audio, and metrics—are written **inside the repository directory**. Benchmark data is downloaded automatically from `Nanboy/RVCBench` on Hugging Face.
+Use this path when you want to run a small, end-to-end example with automatic data download. All outputs--data, generated audio, and metrics--are written **inside the repository directory**. The Qwen3-TTS examples assume the `qwen3` environment is active and the Qwen checkpoint is available from Hugging Face or a local path.
+
+### Fastest quickstart
+
+Simplest voice-cloning run:
+
+```bash
+conda activate qwen3
+python scripts/run_qwen3tts_quickstart.py --max-samples 5
+```
+
+Protection plus voice-cloning run:
+
+```bash
+conda activate qwen3
+python scripts/run_protect_qwen3tts_quickstart.py --max-samples 5
+```
+
+Both commands download the selected LibriTTS speaker data from `Nanboy/RVCBench` unless `--no-hf-download` is passed.
+
+### Quickstart examples
+
+Three end-to-end examples are provided as both Jupyter notebooks and standalone Python scripts.
 
 | Example | Notebook | Script |
 |---|---|---|
@@ -113,7 +172,7 @@ Three end-to-end examples are provided as both Jupyter notebooks and standalone 
 Model setup for the quickstarts, including gated downloads and exact commands:
 [docs/quickstart_model_setup.md](docs/quickstart_model_setup.md)
 
-### Running the scripts
+### Additional script commands
 
 ```bash
 conda activate qwen3
@@ -141,9 +200,9 @@ Pass `--help` to either script for the full list of options.
 
 ---
 
-## Full Pipeline
+## Full Benchmark Path
 
-All entry points use [Hydra](https://hydra.cc) for configuration. Config values can be overridden directly on the command line.
+Use this path when you want to run the configurable benchmark entry points directly. All full benchmark entry points use [Hydra](https://hydra.cc) for configuration, and config values can be overridden on the command line.
 
 ### Experiment flow
 
