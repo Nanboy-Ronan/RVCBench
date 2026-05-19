@@ -1,6 +1,15 @@
 # <img src="figs/logo.png" alt="RVCBench logo" width="40" style="vertical-align: middle; margin-right: 8px;"> RVCBench
 
-**RVCBench** is an open-source benchmark for evaluating the robustness of modern voice cloning (VC) systems against audio protection methods. It provides a unified, reproducible pipeline covering the full attack–defense cycle: protection, voice cloning, optional denoising, and multi-metric evaluation.
+[![Paper](https://img.shields.io/badge/arXiv-2602.00443-b31b1b.svg)](https://arxiv.org/abs/2602.00443)
+[![Dataset](https://img.shields.io/badge/Hugging%20Face-Dataset-ffcc00.svg)](https://huggingface.co/datasets/Nanboy/RVCBench)
+[![License: CC0-1.0](https://img.shields.io/badge/License-CC0--1.0-lightgrey.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](#requirements)
+
+**RVCBench** is an open-source benchmark for **robust voice cloning**, **speaker privacy**, **audio protection**, and **adversarial audio perturbation** research. It evaluates how modern voice cloning (VC), text-to-speech (TTS), and audio generation models behave under protection, denoising, and multi-metric generation-quality evaluation.
+
+RVCBench provides a unified, reproducible pipeline covering the full attack-defense cycle: source-audio protection, zero-shot or fine-tuning voice cloning, optional denoising, and evaluation of speaker similarity, intelligibility, perceptual quality, and runtime.
+
+**Canonical resources:** [paper](https://arxiv.org/abs/2602.00443) · [Hugging Face dataset](https://huggingface.co/datasets/Nanboy/RVCBench) · [quickstart notebooks](notebooks/) · [model environments](docs/model_environments.md) · [citation](#citation)
 
 ![RVCBench main figure](figs/main.png)
 
@@ -14,6 +23,8 @@ Voice cloning technology poses a growing threat to speaker privacy. Audio protec
 - runs a broad suite of zero-shot and fine-tuning VC adversaries on clean or protected inputs,
 - optionally denoises protected audio and re-evaluates,
 - computes standardised fidelity and generation-quality metrics with bootstrap confidence intervals.
+
+RVCBench is intended for researchers and engineers working on voice cloning benchmarks, audio deepfake robustness, speaker verification resilience, anti-spoofing, synthetic speech detection, TTS safety, and privacy-preserving speech generation.
 
 ## Supported Models
 

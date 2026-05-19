@@ -1,0 +1,65 @@
+{
+  "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+  "@type": "SoftwareSourceCode",
+  "name": "RVCBench",
+  "description": "Open-source benchmark for robust voice cloning, speaker privacy, audio protection, adversarial audio perturbations, and multi-model TTS/VC evaluation.",
+  "codeRepository": "https://github.com/Nanboy-Ronan/RVCBench",
+  "issueTracker": "https://github.com/Nanboy-Ronan/RVCBench/issues",
+  "license": "https://spdx.org/licenses/CC0-1.0",
+  "programmingLanguage": "Python",
+  "runtimePlatform": "Python 3.9+",
+  "applicationCategory": [
+    "Speech Processing",
+    "Machine Learning",
+    "Benchmark"
+  ],
+  "keywords": [
+    "voice cloning",
+    "text-to-speech",
+    "TTS",
+    "speaker privacy",
+    "audio protection",
+    "adversarial audio",
+    "audio deepfake robustness",
+    "speaker verification",
+    "speech synthesis",
+    "benchmark",
+    "Hugging Face dataset"
+  ],
+  "author": [
+    {
+      "@type": "Person",
+      "givenName": "Xinting",
+      "familyName": "Liao"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Ruinan",
+      "familyName": "Jin",
+      "email": "ruinanjin@alumni.ubc.ca"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Hanlin",
+      "familyName": "Yu"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Deval",
+      "familyName": "Pandya"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Xiaoxiao",
+      "familyName": "Li"
+    }
+  ],
+  "citation": "https://arxiv.org/abs/2602.00443",
+  "referencePublication": {
+    "@type": "ScholarlyArticle",
+    "name": "RVCBench: Benchmarking the Robustness of Voice Cloning Across Modern Audio Generation Models",
+    "identifier": "arXiv:2602.00443",
+    "url": "https://arxiv.org/abs/2602.00443"
+  },
+  "isBasedOn": "https://huggingface.co/datasets/Nanboy/RVCBench"
+}

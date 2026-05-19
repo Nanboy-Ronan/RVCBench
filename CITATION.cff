@@ -1,0 +1,48 @@
+cff-version: 1.2.0
+message: "If you use RVCBench in your research, please cite the paper and this repository."
+title: "RVCBench: Benchmarking the Robustness of Voice Cloning Across Modern Audio Generation Models"
+type: software
+authors:
+  - family-names: Liao
+    given-names: Xinting
+  - family-names: Jin
+    given-names: Ruinan
+    email: ruinanjin@alumni.ubc.ca
+  - family-names: Yu
+    given-names: Hanlin
+  - family-names: Pandya
+    given-names: Deval
+  - family-names: Li
+    given-names: Xiaoxiao
+repository-code: "https://github.com/Nanboy-Ronan/RVCBench"
+url: "https://github.com/Nanboy-Ronan/RVCBench"
+abstract: "RVCBench is an open-source benchmark for robust voice cloning, speaker privacy, audio protection, adversarial audio perturbations, and multi-model TTS/VC evaluation."
+keywords:
+  - voice cloning
+  - text-to-speech
+  - speaker privacy
+  - audio protection
+  - adversarial audio
+  - audio deepfake robustness
+  - benchmark
+  - speaker verification
+license: CC0-1.0
+preferred-citation:
+  type: article
+  title: "RVCBench: Benchmarking the Robustness of Voice Cloning Across Modern Audio Generation Models"
+  authors:
+    - family-names: Liao
+      given-names: Xinting
+    - family-names: Jin
+      given-names: Ruinan
+    - family-names: Yu
+      given-names: Hanlin
+    - family-names: Pandya
+      given-names: Deval
+    - family-names: Li
+      given-names: Xiaoxiao
+  journal: "arXiv preprint arXiv:2602.00443"
+  year: 2026
+  identifiers:
+    - type: url
+      value: "https://arxiv.org/abs/2602.00443"
