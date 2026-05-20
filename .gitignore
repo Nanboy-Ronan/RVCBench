@@ -234,3 +234,6 @@ data/
 
 *.noise
 *.pdf
+
+# HuggingFace Spaces (deployed separately via huggingface_hub)
+spaces/

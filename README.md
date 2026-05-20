@@ -2,6 +2,7 @@
 
 [![Paper](https://img.shields.io/badge/arXiv-2602.00443-b31b1b.svg)](https://arxiv.org/abs/2602.00443)
 [![Dataset](https://img.shields.io/badge/Hugging%20Face-Dataset-ffcc00.svg)](https://huggingface.co/datasets/Nanboy/RVCBench)
+[![Demo](https://img.shields.io/badge/HuggingFace-Demo%20Space-ff6f00.svg)](https://huggingface.co/spaces/Nanboy/RVCBench)
 [![License: CC0-1.0](https://img.shields.io/badge/License-CC0--1.0-lightgrey.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](#requirements)
 
@@ -11,7 +12,7 @@ RVCBench provides a unified, reproducible pipeline covering the full attack-defe
 
 At a glance, this release supports **26 VC/TTS adversary models**, **5 audio protection methods**, **10 public benchmark dataset configurations**, and both fidelity and generation-quality metrics.
 
-**Canonical resources:** [paper](https://arxiv.org/abs/2602.00443) · [Hugging Face dataset](https://huggingface.co/datasets/Nanboy/RVCBench) · [quickstart notebooks](notebooks/) · [model environments](docs/model_environments.md) · [citation](#citation)
+**Canonical resources:** [paper](https://arxiv.org/abs/2602.00443) · [Hugging Face dataset](https://huggingface.co/datasets/Nanboy/RVCBench) · [interactive demo](https://huggingface.co/spaces/Nanboy/RVCBench) · [quickstart notebooks](notebooks/) · [model environments](docs/model_environments.md) · [citation](#citation)
 
 **Contents:** [Results](#benchmark-results) · [Models](#supported-models) · [Getting Started](#getting-started) · [Quickstart](#quickstart-path) · [Full Pipeline](#full-benchmark-path) · [Data & Checkpoints](#data--checkpoints) · [Citation](#citation)
 
