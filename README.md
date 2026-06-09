@@ -1,4 +1,5 @@
-# <img src="figs/logo.png" alt="RVCBench logo" width="40" style="vertical-align: middle; margin-right: 8px;"> RVCBench
+# RVCBench — Voice Cloning Benchmark
+<img src="figs/logo.png" alt="RVCBench logo" width="40" style="vertical-align: middle; margin-right: 8px;">
 
 [![Paper](https://img.shields.io/badge/arXiv-2602.00443-b31b1b.svg)](https://arxiv.org/abs/2602.00443)
 [![Dataset](https://img.shields.io/badge/Hugging%20Face-Dataset-ffcc00.svg)](https://huggingface.co/datasets/Nanboy/RVCBench)
@@ -6,7 +7,7 @@
 [![License: CC0-1.0](https://img.shields.io/badge/License-CC0--1.0-lightgrey.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](#requirements)
 
-**RVCBench** is an open-source benchmark for **robust voice cloning**, **speaker privacy**, **audio protection**, and **adversarial audio perturbation** research. It evaluates how modern voice cloning (VC), text-to-speech (TTS), and audio generation models behave under protection, denoising, and multi-metric generation-quality evaluation.
+**RVCBench** is the first large-scale benchmark for **voice cloning robustness**, **voice clone evaluation**, **speaker privacy**, and **audio deepfake protection** — covering **26 TTS/VC models**, **10 datasets**, and **5 audio protection methods**.
 
 RVCBench provides a unified, reproducible pipeline covering the full attack-defense cycle: source-audio protection, zero-shot or fine-tuning voice cloning, optional denoising, and evaluation of speaker similarity, intelligibility, perceptual quality, and runtime.
 
