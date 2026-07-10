@@ -6,12 +6,13 @@
 [![Demo](https://img.shields.io/badge/HuggingFace-Demo%20Space-ff6f00.svg)](https://huggingface.co/spaces/Nanboy/RVCBench)
 [![License: CC0-1.0](https://img.shields.io/badge/License-CC0--1.0-lightgrey.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](#requirements)
+[![GitHub stars](https://img.shields.io/github/stars/Nanboy-Ronan/RVCBench?style=social)](https://github.com/Nanboy-Ronan/RVCBench/stargazers)
 
-**RVCBench** is the first large-scale benchmark for **voice cloning robustness**, **voice clone evaluation**, **speaker privacy**, and **audio deepfake protection** — covering **26 TTS/VC models**, **10 datasets**, and **5 audio protection methods**.
+**RVCBench** is the first large-scale benchmark for **voice cloning robustness**, **voice clone evaluation**, **speaker privacy**, and **audio deepfake protection** — covering **27 TTS/VC models**, **10 datasets**, and **5 audio protection methods**.
 
 RVCBench provides a unified, reproducible pipeline covering the full attack-defense cycle: source-audio protection, zero-shot or fine-tuning voice cloning, optional denoising, and evaluation of speaker similarity, intelligibility, perceptual quality, and runtime.
 
-At a glance, this release supports **26 VC/TTS adversary models**, **5 audio protection methods**, **10 public benchmark dataset configurations**, and both fidelity and generation-quality metrics.
+At a glance, this release supports **27 VC/TTS adversary models**, **5 audio protection methods**, **10 public benchmark dataset configurations**, and both fidelity and generation-quality metrics.
 
 **Canonical resources:** [paper](https://arxiv.org/abs/2602.00443) · [Hugging Face dataset](https://huggingface.co/datasets/Nanboy/RVCBench) · [interactive demo](https://huggingface.co/spaces/Nanboy/RVCBench) · [quickstart notebooks](notebooks/) · [model environments](docs/model_environments.md) · [citation](#citation)
 
@@ -31,6 +32,21 @@ Voice cloning technology poses a growing threat to speaker privacy. Audio protec
 - computes standardised fidelity and generation-quality metrics with bootstrap confidence intervals.
 
 RVCBench is intended for researchers and engineers working on voice cloning benchmarks, audio deepfake robustness, speaker verification resilience, anti-spoofing, synthetic speech detection, TTS safety, and privacy-preserving speech generation.
+
+### Why RVCBench
+
+Most protection papers evaluate against one or two surrogate VC models on one dataset — a defense that looks strong there can fail completely against a model or language it was never tested on. RVCBench exists to close that gap:
+
+| | Typical single-paper eval | RVCBench |
+|---|---|---|
+| Adversary models | 1–3 | **26**, zero-shot and fine-tuning |
+| Datasets / languages | 1 | **10**, incl. Mandarin, French, bilingual, noisy |
+| Protection methods compared | Usually just the paper's own | **5**, on equal footing |
+| Denoising-adaptive attacker | Rarely modeled | Built into the pipeline |
+| Metrics | Ad hoc | Standardised fidelity + generation metrics with bootstrap CIs |
+| Reproducibility | Custom scripts per paper | One Hydra-configured pipeline, public HF dataset |
+
+If you're deciding whether a protection method actually generalises — or whether a new TTS model breaks existing defenses — this is the benchmark to run it against.
 
 ---
 
@@ -123,7 +139,7 @@ Speaker similarity (SIM) on clean prompts across all benchmark datasets. — ind
 
 ### Voice Cloning Adversaries (Zero-Shot OTS)
 
-RVCBench currently includes wrappers or configs for **26 VC/TTS adversary models**:
+RVCBench currently includes wrappers or configs for **27 VC/TTS adversary models**:
 
 | Model | Key |
 |---|---|
@@ -139,6 +155,7 @@ RVCBench currently includes wrappers or configs for **26 VC/TTS adversary models
 | IndexTTS | `index_tts` |
 | ZipVoice | `zipvoice` |
 | FishSpeech | `fishspeech` |
+| Fish Audio S2 | `fishspeech_s2` |
 | CosyVoice / CosyVoice 2 | `cosyvoice` |
 | Higgs Audio | `higgs_audio` |
 | SparkTTS | `sparktts` |
@@ -260,6 +277,7 @@ Three end-to-end examples are provided as both Jupyter notebooks and standalone 
 | Example | Notebook | Script |
 |---|---|---|
 | FishSpeech zero-shot VC on VCTK | `notebooks/rvcbench_fishspeech_quickstart.ipynb` | `scripts/run_fishspeech_quickstart.py` |
+| Fish Audio S2 zero-shot VC on VCTK | — | `scripts/run_fishspeech_s2_quickstart.py` |
 | Qwen3-TTS zero-shot VC on LibriTTS | `notebooks/rvcbench_qwen3tts_quickstart.ipynb` | `scripts/run_qwen3tts_quickstart.py` |
 | Protection (GRNoise / SafeSpeech) + Qwen3-TTS | `notebooks/rvcbench_safespeech_qwen3tts_quickstart.ipynb` | `scripts/run_protect_qwen3tts_quickstart.py` |
 
@@ -285,6 +303,9 @@ python scripts/run_protect_qwen3tts_quickstart.py \
 
 # FishSpeech zero-shot voice cloning
 python scripts/run_fishspeech_quickstart.py
+
+# Fish Audio S2 zero-shot voice cloning
+python scripts/run_fishspeech_s2_quickstart.py
 
 # Smoke-test the notebook companion scripts against local HF-formatted data only
 python scripts/validate_quickstarts.py
@@ -409,6 +430,7 @@ python run_vc.py --config-name ots_vc/clean/libratts/voxcpm_ots
 
 - `Qwen3-TTS` can use either the Hugging Face model ID `Qwen/Qwen3-TTS-12Hz-1.7B-Base` directly or a local directory passed via `adversary.checkpoint_path=...`. It also needs the `qwen-tts` Python package.
 - `FishSpeech` needs both a local checkout of `fishaudio/fish-speech` and the `fishaudio/s1-mini` checkpoint directory. Pass them with `adversary.code_path=...`, `adversary.llama_checkpoint_path=...`, and `adversary.decoder_checkpoint_path=...`.
+- `Fish Audio S2` ([paper](https://arxiv.org/abs/2603.08823)) reuses the same `fishaudio/fish-speech` checkout as `FishSpeech`, pointed at the `fishaudio/s2-pro` checkpoint instead of `s1-mini`. S2 uses a different dual-AR decoder architecture than S1; the wrapper defaults `decoder_config_name` to `modded_dac_vq` as a best-effort setting that has not been validated against a downloaded `s2-pro` checkpoint — see [docs/quickstart_model_setup.md](docs/quickstart_model_setup.md#4-fish-audio-s2-quickstart).
 - `FireRedTTS-2` expects a local upstream checkout at `checkpoints/FireRedTTS2` and pretrained weights under `checkpoints/FireRedTTS2/pretrained_models/FireRedTTS2` by default.
 - `VoxCPM` defaults to the Hugging Face model ID `openbmb/VoxCPM2`. If you want to force offline/local loading, override `adversary.local_files_only=true` and optionally set `adversary.cache_dir=/path/to/cache`.
 - All model-specific paths and generation knobs can be overridden at launch time with Hydra, for example: `adversary.code_path=/path/to/model_repo` or `adversary.max_samples=20`.
@@ -445,7 +467,7 @@ Each VC adversary requires its own inference code and pretrained weights. Clone 
 
 A bundled archive with all supported model code and checkpoints is available here:
 
-👉 **[Download pretrained checkpoints](https://arbutus.cloud.alliancecan.ca/api/swift/containers/rjin/object/AudioBench/checkpoint.zip)**
+👉 **[Download pretrained checkpoints](https://object-arbutus.alliancecan.ca/swift/v1/86581f3bb67c4c04bbccbcb839de730a/rjin/AudioBench/checkpoint.zip)** (~58 GB)
 
 If you only need a single model, cloning just that repository is the fastest option.
 
@@ -581,6 +603,12 @@ If you use RVCBench in your research, please cite:
   year    = {2026}
 }
 ```
+
+## Star History
+
+If RVCBench is useful for your work, consider giving it a star — it helps others discover the benchmark.
+
+[![Star History Chart](https://api.star-history.com/svg?repos=Nanboy-Ronan/RVCBench&type=Date)](https://star-history.com/#Nanboy-Ronan/RVCBench&Date)
 
 ## License
 

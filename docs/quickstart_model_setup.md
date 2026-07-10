@@ -91,7 +91,42 @@ python scripts/run_fishspeech_quickstart.py \
   --fish-ckpt-dir checkpoints/fish_speech/openaudio-s1-mini
 ```
 
-## 4. SafeSpeech / BertVITS2 Setup
+## 4. Fish Audio S2 Quickstart
+
+Fish Audio S2 ([paper](https://arxiv.org/abs/2603.08823)) ships from the same
+`fishaudio/fish-speech` repo as S1, so it reuses the `fishspeech` conda
+environment and code checkout above — make sure your checkout is up to date:
+
+```bash
+cd checkpoints/fish_speech && git pull && cd -
+python -m pip install -e checkpoints/fish_speech
+```
+
+Download the S2-Pro checkpoint:
+
+```bash
+huggingface-cli download fishaudio/s2-pro \
+  --local-dir checkpoints/fish_speech/s2-pro
+```
+
+Launch:
+
+```bash
+python scripts/run_fishspeech_s2_quickstart.py \
+  --fish-repo-dir checkpoints/fish_speech \
+  --fish-ckpt-dir checkpoints/fish_speech/s2-pro
+```
+
+> [!WARNING]
+> S2 uses a different generation architecture from S1 (a dual autoregressive
+> "slow AR / fast AR" decoder over a 10-codebook codec, vs. S1's single-AR
+> LLaMA-style model). The wrapper reuses S1's `ModelManager`/`TTSInferenceEngine`
+> code path with `decoder_config_name: "modded_dac_vq"` as a best-effort default —
+> confirm this still matches the codec config shipped with `s2-pro` once you've
+> downloaded the checkpoint, and update the `configs/ots_vc/clean/*/fishspeech_s2_ots.yaml`
+> files if upstream exposes a different config name for the S2 codec.
+
+## 5. SafeSpeech / BertVITS2 Setup
 
 `grnoise_on_libritts` does not require the SafeSpeech surrogate checkpoints, but
 `safespeech_on_libritts` does.
@@ -126,7 +161,7 @@ python scripts/run_protect_qwen3tts_quickstart.py \
   --qwen-checkpoint-path checkpoints/Qwen3-TTS-12Hz-1.7B-Base
 ```
 
-## 5. Public Dataset Only
+## 6. Public Dataset Only
 
 All three quickstart scripts already support the public dataset release from
 `Nanboy/RVCBench`. They download only the dataset subset they need into
