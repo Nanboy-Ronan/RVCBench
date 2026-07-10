@@ -33,6 +33,7 @@ _ADVERSARY_REGISTRY: Dict[str, Dict[str, str]] = {
         "playdiffusion": "src.adversary.playdiffusion_ots:PlayDiffusionZeroShotAdversary",
         "bark_voice_clone": "src.adversary.bark_voice_clone_ots:BarkVoiceCloneZeroShotAdversary",
         "fishspeech": "src.adversary.fishspeech_ots:FishSpeechZeroShotAdversary",
+        "fishspeech_s2": "src.adversary.fishspeech_ots:FishSpeechZeroShotAdversary",
         "qwen3_omni": "src.adversary.qwen3_omni_ots:Qwen3OmniZeroShotAdversary",
         "mgm_omni": "src.adversary.mgm_omni_ots:MGMOmniZeroShotAdversary",
         "vibevoice": "src.adversary.vibevoice_ots:VibeVoiceZeroShotAdversary",

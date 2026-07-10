@@ -51,6 +51,7 @@ cd ..
 | CosyVoice | `envs/cosyvoice.yml` | `cosyvoice` |
 | F5-TTS | `envs/f5-tts.yml` | `audiobench` |
 | FishSpeech | `envs/fishspeech.yml` | `fishspeech` |
+| Fish Audio S2 | `envs/fishspeech.yml` | `fishspeech` |
 | GLM-TTS | `envs/glm-tts.yml` | `audiobench` |
 | GlowTTS | `envs/glowtts.yml` | `glowtts` |
 | Higgs Audio | `envs/higgs-audio.yml` | `higgs-audio` |
