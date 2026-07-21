@@ -1,6 +1,6 @@
 # @package _global_
 
-run_name: "fireredtts2_ots_on_libratts"
+run_name: "fireredtts2_ots_on_libritts"
 device: "cuda:0"
 base_dir: "."
 
@@ -9,7 +9,7 @@ vc:
   model: "fireredtts2"
 
 output_paths:
-  metrics_file: "results/fireredtts2_ots_on_libratts/metrics.json"
+  metrics_file: "results/fireredtts2_ots_on_libritts/metrics.json"
 
 adversary:
   code_path: "checkpoints/FireRedTTS2"

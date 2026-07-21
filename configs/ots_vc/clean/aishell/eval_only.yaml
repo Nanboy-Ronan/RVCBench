@@ -7,7 +7,7 @@ vc:
   mode: "ots"
   evaluate_only: true
   evaluation:
-    generated_audio_dir: "/tealab-data/rjin02/AudioWatermarkBench/results/moss_ttsd_ots_on_aishell/20260114-160523/generated_audio"
+    generated_audio_dir: null
     max_samples: null
     generated_audio_max_seconds: 180
 

@@ -31,7 +31,7 @@ adversary:
 
 defaults:
   - _self_
-  - /dataset: background_noise
+  - /dataset: background_clean
 evaluation:
   bootstrap:
     enabled: true

@@ -7,7 +7,7 @@ vc:
   mode: "ots"
   evaluate_only: true
   evaluation:
-    generated_audio_dir: "/tealab-data/rjin02/AudioWatermarkBench/results/cosyvoice_ots_on_vctk/20251122-145159/generated_audio"
+    generated_audio_dir: null
     max_samples: null
 
 output_paths:

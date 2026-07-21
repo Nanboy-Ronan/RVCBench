@@ -1,6 +1,6 @@
 # @package _global_
 
-run_name: "voxcpm_ots_on_libratts"
+run_name: "voxcpm_ots_on_libritts"
 device: "cuda:0"
 base_dir: "."
 
@@ -9,7 +9,7 @@ vc:
   model: "voxcpm"
 
 output_paths:
-  metrics_file: "results/voxcpm_ots_on_libratts/metrics.json"
+  metrics_file: "results/voxcpm_ots_on_libritts/metrics.json"
 
 adversary:
   model_path: "openbmb/VoxCPM2"

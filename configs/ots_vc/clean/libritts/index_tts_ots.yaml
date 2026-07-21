@@ -15,7 +15,7 @@ adversary:
   code_path: "checkpoints/index-tts"
   model_dir: "checkpoints/index-tts/checkpoints"
   config_path: "checkpoints/index-tts/checkpoints/config.yaml"
-  runtime_python: "${oc.env:INDEXTTS_RUNTIME_PYTHON,}"
+  runtime_python: "${oc.env:INDEXTTS_RUNTIME_PYTHON,null}"
   worker_script_path: "scripts/index_tts_worker.py"
   use_fp16: true
   use_cuda_kernel: true

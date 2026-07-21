@@ -2,7 +2,9 @@
 run_name: "bert_ots_on_libritts_with_enkidu"
 device: "cuda:0"
 base_dir: "."
-protected_audio_dir: "/tealab-data/rjin02/AudioWatermarkBench/results/enkidu_on_libritts/20251129-161242/protected_audio"
+protected_audio_dir: null
+protection_run_name: enkidu_on_libritts
+protected_audio_subdir: protected_audio
 
 vc:
   mode: "ots"

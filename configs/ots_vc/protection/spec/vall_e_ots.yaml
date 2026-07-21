@@ -3,7 +3,9 @@
 run_name: vall_e_ots_on_libritts_with_spec
 device: cuda:0
 base_dir: .
-protected_audio_dir: /tealab-data/rjin02/AudioWatermarkBench/results/spec_on_libritts/20251201-141229/protected_audio
+protected_audio_dir: null
+protection_run_name: spec_on_libritts
+protected_audio_subdir: protected_audio
 vc:
   mode: ots
   model: vall_e

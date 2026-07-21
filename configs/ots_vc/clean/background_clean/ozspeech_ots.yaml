@@ -25,7 +25,7 @@ batch_size: 16 # not used in VC
 
 defaults:
   - _self_
-  - /dataset: background_noise
+  - /dataset: background_clean
 evaluation:
   bootstrap:
     enabled: true

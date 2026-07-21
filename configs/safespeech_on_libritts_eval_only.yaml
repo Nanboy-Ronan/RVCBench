@@ -7,7 +7,7 @@ protection:
   name: "SafeSpeechProtector"
   evaluate_only: true
   evaluation:
-    protected_audio_dir: "/tealab-data/rjin02/AudioWatermarkBench/results/safespeech_on_libritts/20251122-134710/protected_audio"
+    protected_audio_dir: null
   batch_size: 8
   sampling_rate: 24000
 

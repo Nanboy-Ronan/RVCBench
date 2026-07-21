@@ -1,5 +1,5 @@
 # @package _global_
-run_name: "fish_ots_eval_only"
+run_name: "fish_ots_eval_only_on_libritts"
 device: "cuda:0"
 base_dir: "."
 
@@ -7,11 +7,11 @@ vc:
   mode: "ots"
   evaluate_only: true
   evaluation:
-    generated_audio_dir: "/data/rjin02/project/AudioWatermarkBench/results/fishspeech_ots_on_libritts/20251030-151008/generated_audio"
+    generated_audio_dir: null
     max_samples: null
 
 output_paths:
-  metrics_file: "results/fish_ots_eval_only/metrics.json"
+  metrics_file: "results/fish_ots_eval_only_on_libritts/metrics.json"
 
 batch_size: 16
 

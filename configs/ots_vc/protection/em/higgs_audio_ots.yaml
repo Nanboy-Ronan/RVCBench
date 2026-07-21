@@ -1,14 +1,16 @@
 # @package _global_
 
-run_name: higgs_audio_ots_on_libritts_with_pop
+run_name: higgs_audio_ots_on_libritts_with_em
 device: cuda:0
 base_dir: .
-protected_audio_dir: /tealab-data/rjin02/AudioWatermarkBench/results/em_on_libritts/20260117-225925/protected_audio
+protected_audio_dir: null
+protection_run_name: em_on_libritts
+protected_audio_subdir: protected_audio
 vc:
   mode: ots
   model: higgs_audio
 output_paths:
-  metrics_file: results/higgs_audio_ots_on_libritts_with_pop/metrics.json
+  metrics_file: results/higgs_audio_ots_on_libritts_with_em/metrics.json
 adversary:
   code_path: checkpoints/higgs_audio/higgs-audio
   model_path: bosonai/higgs-audio-v2-generation-3B-base

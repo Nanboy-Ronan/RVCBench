@@ -13,8 +13,8 @@ output_paths:
 
 adversary:
   code_path: "checkpoints/GLM-TTS"
-  ckpt_dir: "/tealab-data/rjin02/GLM-TTS-ckpt"
-  frontend_dir: "/tealab-data/rjin02/AudioWatermarkBench/checkpoints/GLM-TTS/frontend"
+  ckpt_dir: "checkpoints/GLM-TTS/ckpt"
+  frontend_dir: "checkpoints/GLM-TTS/frontend"
   sample_rate: 24000
   use_cache: true
   use_phoneme: false
@@ -27,7 +27,7 @@ batch_size: 16 # not used in VC
 
 defaults:
   - _self_
-  - /dataset: background_noise
+  - /dataset: background_clean
 
 evaluation:
   bootstrap:

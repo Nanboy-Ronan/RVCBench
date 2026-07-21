@@ -14,7 +14,7 @@ output_paths:
 adversary:
   code_path: "checkpoints/Amphion-maskgct"
   config_path: "checkpoints/Amphion-maskgct/models/tts/maskgct/config/maskgct.json"
-  runtime_python: "${oc.env:MASKGCT_RUNTIME_PYTHON,}"
+  runtime_python: "${oc.env:MASKGCT_RUNTIME_PYTHON,null}"
   worker_script_path: "scripts/maskgct_worker.py"
   repo_id: "amphion/MaskGCT"
   default_language: "en"

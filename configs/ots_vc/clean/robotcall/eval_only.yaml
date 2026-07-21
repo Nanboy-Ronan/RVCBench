@@ -7,11 +7,11 @@ vc:
   mode: "ots"
   evaluate_only: true
   evaluation:
-    generated_audio_dir: "/tealab-data/rjin02/AudioWatermarkBench/results/fishspeech_ots_on_robotcall/20251229-033610/generated_audio"
+    generated_audio_dir: null
     max_samples: null
 
 output_paths:
-  metrics_file: "results/fish_ots_eval_only/metrics.json"
+  metrics_file: "results/fish_ots_eval_only_robocall/metrics.json"
 
 batch_size: 16
 

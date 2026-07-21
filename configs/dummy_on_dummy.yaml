@@ -2,9 +2,8 @@
 
 defaults:
   - _self_
-  - override /dataset: dummy
-  - override /model: default
-  - override /protection: default
+  - /dataset: dummy
+  - /model: default
 
 base_dir: .
 run_name: dummy_on_dummy

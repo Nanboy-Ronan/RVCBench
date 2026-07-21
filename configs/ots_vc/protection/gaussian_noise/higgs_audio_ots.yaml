@@ -3,7 +3,9 @@
 run_name: higgs_audio_ots_on_libritts_with_gaussian_noise
 device: cuda:0
 base_dir: .
-protected_audio_dir: /tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/protected_audio
+protected_audio_dir: null
+protection_run_name: grnoise_on_libritts
+protected_audio_subdir: protected_audio
 vc:
   mode: ots
   model: higgs_audio

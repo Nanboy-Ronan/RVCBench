@@ -6,6 +6,7 @@ use_hf_dataset: true
 hf_dataset_id: "Nanboy/RVCBench"
 hf_config_name: "Background_noise"
 hf_cache_dir: null
+manifest_filename: "filelists_noise/pairs_10dB_cross.json"
 
 # Use all speakers discovered under this path
 speaker_id: null

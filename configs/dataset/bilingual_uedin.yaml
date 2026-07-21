@@ -25,7 +25,7 @@ mel_fmax: 48000.0
 add_blank: true
 
 
-n_speakers: 30
+n_speakers: 13
 
 cleaned_text: false
 

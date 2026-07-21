@@ -3,7 +3,9 @@
 run_name: cosyvoice_ots_on_libritts_with_denoiser_dns64_on_spec
 device: cuda:0
 base_dir: .
-protected_audio_dir: /tealab-data/rjin02/AudioWatermarkBench/results/denoiser_dns64_on_spec_libritts/20260104-071333/denoised_audio/protected_audio
+protected_audio_dir: null
+protection_run_name: denoiser_dns64_on_spec_libritts
+protected_audio_subdir: denoised_audio/protected_audio
 vc:
   mode: ots
   model: cosyvoice

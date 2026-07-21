@@ -1,6 +1,6 @@
 # @package _global_
 
-run_name: "glm_tts_ots_on_libratts"
+run_name: "glm_tts_ots_on_long_librispeech"
 device: "cuda:0"
 base_dir: "."
 
@@ -9,12 +9,12 @@ vc:
   model: "glm_tts"
 
 output_paths:
-  metrics_file: "results/glm_tts_ots_on_libratts/metrics.json"
+  metrics_file: "results/glm_tts_ots_on_long_librispeech/metrics.json"
 
 adversary:
   code_path: "checkpoints/GLM-TTS"
-  ckpt_dir: "/tealab-data/rjin02/GLM-TTS-ckpt"
-  frontend_dir: "/tealab-data/rjin02/AudioWatermarkBench/checkpoints/GLM-TTS/frontend"
+  ckpt_dir: "checkpoints/GLM-TTS/ckpt"
+  frontend_dir: "checkpoints/GLM-TTS/frontend"
   sample_rate: 24000
   use_cache: true
   use_phoneme: false

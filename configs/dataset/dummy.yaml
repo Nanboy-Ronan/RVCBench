@@ -1,11 +1,16 @@
-# @package _group_
 name: dummy
-path: data/dummy_dataset
-collection: dummy
-speaker_id_field: speaker_id
-audio_file_field: audio_path
-text_field: text
-
-train_file: train.json
-test_file: test.json
-val_file: val.json
+root_path: "./data/dummy_dataset"
+use_hf_dataset: false
+speaker_id: null
+max_wav_value: 32768.0
+sampling_rate: 16000
+filter_length: 1024
+hop_length: 256
+win_length: 1024
+n_mel_channels: 80
+mel_fmin: 0.0
+mel_fmax: null
+add_blank: true
+n_speakers: 1
+cleaned_text: true
+return_path: true

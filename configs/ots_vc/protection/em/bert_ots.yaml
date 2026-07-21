@@ -1,8 +1,10 @@
 # @package _global_
-run_name: "bert_ots_on_libritts_with_pop"
+run_name: "bert_ots_on_libritts_with_em"
 device: "cuda:0"
 base_dir: "."
-protected_audio_dir: "/tealab-data/rjin02/AudioWatermarkBench/results/em_on_libritts/20251216-124950/protected_audio"
+protected_audio_dir: null
+protection_run_name: em_on_libritts
+protected_audio_subdir: protected_audio
 
 vc:
   mode: "ots"
@@ -16,7 +18,7 @@ evaluation:
     seed: null
 
 output_paths:
-  metrics_file: "results/bert_ots_on_libritts_with_pop/metrics.json"
+  metrics_file: "results/bert_ots_on_libritts_with_em/metrics.json"
 
 batch_size: 16 # not used in VC
 

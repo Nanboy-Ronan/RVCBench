@@ -1,0 +1,18 @@
+# BertVITS2 zero-shot adversary defaults.
+# Checkpoints and the upstream Bert-VITS2 checkout are intentionally external
+# to this repository and can be overridden from the Hydra command line.
+code_path: "checkpoints/safespeech/bert_vits2"
+config_path: "checkpoints/safespeech/bert_vits2/configs/config.json"
+generator_checkpoint: "checkpoints/safespeech/base_models/G_0.pth"
+yml_config_path: "checkpoints/safespeech/bert_vits2/config.yml"
+language: "EN"
+emotion: -1
+sdp_ratio: 0.2
+noise_scale: 0.2
+noise_scale_w: 0.9
+length_scale: 1.0
+reference_audio_sr: 48000
+reference_assignment: "round_robin"
+default_target_text: "This is a synthesized sample for evaluation."
+max_samples: null
+

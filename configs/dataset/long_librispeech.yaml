@@ -17,6 +17,6 @@ n_mel_channels: 128
 mel_fmin: 0.0
 mel_fmax: null
 add_blank: true
-n_speakers: 14
+n_speakers: 10
 cleaned_text: true
 return_path: true
