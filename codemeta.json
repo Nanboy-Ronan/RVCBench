@@ -29,14 +29,14 @@
   "author": [
     {
       "@type": "Person",
-      "givenName": "Xinting",
-      "familyName": "Liao"
-    },
-    {
-      "@type": "Person",
       "givenName": "Ruinan",
       "familyName": "Jin",
       "email": "ruinanjin@alumni.ubc.ca"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Xinting",
+      "familyName": "Liao"
     },
     {
       "@type": "Person",

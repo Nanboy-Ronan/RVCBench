@@ -3,11 +3,11 @@ message: "If you use RVCBench in your research, please cite the paper and this r
 title: "RVCBench: Benchmarking the Robustness of Voice Cloning Across Modern Audio Generation Models"
 type: software
 authors:
-  - family-names: Liao
-    given-names: Xinting
   - family-names: Jin
     given-names: Ruinan
     email: ruinanjin@alumni.ubc.ca
+  - family-names: Liao
+    given-names: Xinting
   - family-names: Yu
     given-names: Hanlin
   - family-names: Pandya
@@ -31,10 +31,10 @@ preferred-citation:
   type: article
   title: "RVCBench: Benchmarking the Robustness of Voice Cloning Across Modern Audio Generation Models"
   authors:
-    - family-names: Liao
-      given-names: Xinting
     - family-names: Jin
       given-names: Ruinan
+    - family-names: Liao
+      given-names: Xinting
     - family-names: Yu
       given-names: Hanlin
     - family-names: Pandya

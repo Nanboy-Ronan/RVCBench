@@ -14,6 +14,9 @@ RVCBench provides a unified, reproducible pipeline covering the full attack-defe
 
 At a glance, this release supports **27 VC/TTS adversary models**, **5 audio protection methods**, **10 public benchmark dataset configurations**, and both fidelity and generation-quality metrics.
 
+> [!NOTE]
+> **Paper vs. codebase.** The [arXiv v2 paper](https://arxiv.org/abs/2602.00443) reports results for **18 models** across **18 robustness evaluations, 225 speakers, and 14,370 utterances**. This repository is under active development and currently supports **27 models**; treat any count beyond the paper's 18 as codebase-only until covered by a future paper revision.
+
 **Canonical resources:** [paper](https://arxiv.org/abs/2602.00443) · [Hugging Face dataset](https://huggingface.co/datasets/Nanboy/RVCBench) · [interactive demo](https://huggingface.co/spaces/Nanboy/RVCBench) · [quickstart notebooks](notebooks/) · [model environments](docs/model_environments.md) · [citation](#citation)
 
 **Contents:** [Results](#benchmark-results) · [Models](#supported-models) · [Getting Started](#getting-started) · [Quickstart](#quickstart-path) · [Full Pipeline](#full-benchmark-path) · [Data & Checkpoints](#data--checkpoints) · [Citation](#citation)
@@ -84,7 +87,7 @@ If you're deciding whether a protection method actually generalises — or wheth
 
 Speaker similarity under each audio protection method. Models sorted by clean SIM. A larger drop from **Clean** indicates more effective protection. **Bold** marks the lowest protected SIM per column (most effectively protected model per method).
 
-| Model | Clean | SafeSpeech | Enkidu | Spectral | GR-Noise | AntiFake |
+| Model | Clean | SafeSpeech | Enkidu | Spectral | GR-Noise | EM |
 |-------|------:|-----------:|-------:|---------:|---------:|---------:|
 | Qwen3-TTS | 0.614 | 0.384 | 0.502 | 0.363 | 0.408 | 0.582 |
 | IndexTTS | 0.606 | 0.346 | 0.475 | 0.318 | 0.392 | 0.572 |
@@ -181,7 +184,7 @@ RVCBench currently supports **5 audio protection methods**:
 | Enkidu | Perceptual-loss adversarial perturbation |
 | EM | Expectation–Maximisation perturbation |
 | GRNoise | Gaussian random noise (no surrogate model required) |
-| AntiFake | AntiFake adversarial perturbation |
+| Spectral | SafeSpeech spectral perturbation mode |
 
 ## Supported Datasets
 
@@ -359,7 +362,7 @@ python run_denoiser.py --config-name denoise/denoiser_dns64_on_protected_libritt
 
 ## Running Specific VC Models
 
-The zero-shot VC configs are under `configs/ots_vc/clean/`. Most older examples use `configs/ots_vc/clean/libritts/`, while some newer model integrations currently live under `configs/ots_vc/clean/libratts/`. Despite the directory name difference, the added configs here still default to the `libritts` dataset internally.
+The zero-shot VC configs are under `configs/ots_vc/clean/`. All LibriTTS model integrations now use the canonical `configs/ots_vc/clean/libritts/` directory.
 
 Before launching a model, activate the matching environment from
 [`envs/`](envs/). See [docs/model_environments.md](docs/model_environments.md) for the full map.
@@ -420,10 +423,10 @@ For the full command list for the quickstart models, see
 
 ```bash
 # FireRedTTS-2
-python run_vc.py --config-name ots_vc/clean/libratts/fireredtts2_ots
+python run_vc.py --config-name ots_vc/clean/libritts/fireredtts2_ots
 
 # VoxCPM
-python run_vc.py --config-name ots_vc/clean/libratts/voxcpm_ots
+python run_vc.py --config-name ots_vc/clean/libritts/voxcpm_ots
 ```
 
 ### Model-specific setup notes
@@ -438,11 +441,11 @@ python run_vc.py --config-name ots_vc/clean/libratts/voxcpm_ots
 ### Example overrides
 
 ```bash
-python run_vc.py --config-name ots_vc/clean/libratts/fireredtts2_ots \
+python run_vc.py --config-name ots_vc/clean/libritts/fireredtts2_ots \
     adversary.max_samples=20 \
     dataset.speaker_id=1089
 
-python run_vc.py --config-name ots_vc/clean/libratts/voxcpm_ots \
+python run_vc.py --config-name ots_vc/clean/libritts/voxcpm_ots \
     adversary.local_files_only=true \
     adversary.cache_dir=/path/to/hf-cache
 ```
@@ -596,9 +599,9 @@ Please open an issue or pull request on GitHub. For questions, contact:
 If you use RVCBench in your research, please cite:
 
 ```bibtex
-@article{liao2026rvcbench,
+@article{jin2026rvcbench,
   title   = {RVCBench: Benchmarking the Robustness of Voice Cloning Across Modern Audio Generation Models},
-  author  = {Liao, Xinting and Jin, Ruinan and Yu, Hanlin and Pandya, Deval and Li, Xiaoxiao},
+  author  = {Jin, Ruinan and Liao, Xinting and Yu, Hanlin and Pandya, Deval and Li, Xiaoxiao},
   journal = {arXiv preprint arXiv:2602.00443},
   year    = {2026}
 }

@@ -29,6 +29,7 @@ from torch import nn
 import librosa
 import numpy as np
 import pickle
+from typing import List, Sequence
 
 sys.path.insert(0, "../../checkpoints/antifake/rtvc")
 from encoder import inference as encoder
@@ -386,8 +387,23 @@ class AntiFakeProtector(BaseProtector):
 
     def extract_speaker_embedding_torch(self, original_wav, target_wav):
         # Note Inferencer== self.modal
-        original_wav, original_mel, _ = get_spectrograms(original_wav, self.dataset_config...) # todo: 1 add params in self
-        target_wav, target_mel, _ = get_spectrograms(target_wav, self.dataset_config...)
+        spectrogram_kwargs = {
+            "top_db": 60,
+            "preemphasis": 0.97,
+            "n_fft": self.n_fft,
+            "hop_length": self.hop_length,
+            "win_length": self.win_length,
+            "sampling_ratio": self.sampling_rate,
+            "n_mels": int(self.config.mel_n_channels),
+            "ref_db": 20,
+            "max_db": 100,
+        }
+        original_wav, original_mel, _ = get_spectrograms(
+            original_wav, **spectrogram_kwargs
+        )
+        target_wav, target_mel, _ = get_spectrograms(
+            target_wav, **spectrogram_kwargs
+        )
         original_mel = torch.from_numpy(self.normalize(original_mel)).cuda()
         target_mel = torch.from_numpy(self.normalize(target_mel)).cuda()
         original_mel.requires_grad_()

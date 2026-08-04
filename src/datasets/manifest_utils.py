@@ -67,8 +67,10 @@ CANONICAL_TO_INTERNAL: Dict[str, str] = {
 }
 
 
-def canonical_manifest_path(root_path: Path) -> Path:
-    return Path(root_path) / CANONICAL_MANIFEST_FILENAME
+def canonical_manifest_path(
+    root_path: Path, manifest_filename: str = CANONICAL_MANIFEST_FILENAME
+) -> Path:
+    return Path(root_path) / manifest_filename
 
 
 def _stringify(value) -> str:
@@ -149,11 +151,21 @@ def _load_json_records(path: Path) -> List[Dict[str, object]]:
     return []
 
 
-def load_canonical_manifest(root_path: Path) -> Optional[pd.DataFrame]:
-    manifest_path = canonical_manifest_path(root_path)
+def load_canonical_manifest(
+    root_path: Path, manifest_filename: str = CANONICAL_MANIFEST_FILENAME
+) -> Optional[pd.DataFrame]:
+    manifest_path = canonical_manifest_path(root_path, manifest_filename)
     if not manifest_path.exists():
         return None
-    df = pd.read_parquet(manifest_path)
+    if manifest_path.suffix.lower() == ".json":
+        records = _load_json_records(manifest_path)
+        df = canonicalize_records(
+            records,
+            dataset_name=Path(root_path).name,
+            source_manifest=manifest_path.name,
+        )
+    else:
+        df = pd.read_parquet(manifest_path)
     for column in CANONICAL_COLUMNS:
         if column not in df.columns:
             df[column] = ""
@@ -201,11 +213,19 @@ def load_legacy_manifest(root_path: Path, *, speaker_id: Optional[str] = None, d
     return pd.concat(frames, ignore_index=True)
 
 
-def load_dataset_manifest(root_path: Path, *, speaker_id: Optional[str] = None, dataset_name: Optional[str] = None) -> pd.DataFrame:
+def load_dataset_manifest(
+    root_path: Path,
+    *,
+    speaker_id: Optional[str] = None,
+    dataset_name: Optional[str] = None,
+    manifest_filename: Optional[str] = None,
+) -> pd.DataFrame:
     root_path = Path(root_path)
     dataset_name = dataset_name or root_path.name
 
-    df = load_canonical_manifest(root_path)
+    df = load_canonical_manifest(
+        root_path, manifest_filename or CANONICAL_MANIFEST_FILENAME
+    )
     if df is None:
         df = load_legacy_manifest(root_path, speaker_id=speaker_id, dataset_name=dataset_name)
     elif speaker_id is not None:
@@ -275,12 +295,22 @@ def resolve_hf_dataset_root(
     return dataset_root
 
 
-def discover_speakers(root_path: Path, *, explicit_speaker_id: Optional[str] = None, dataset_name: Optional[str] = None) -> List[str]:
+def discover_speakers(
+    root_path: Path,
+    *,
+    explicit_speaker_id: Optional[str] = None,
+    dataset_name: Optional[str] = None,
+    manifest_filename: Optional[str] = None,
+) -> List[str]:
     if explicit_speaker_id is not None:
         return [str(explicit_speaker_id)]
 
     root_path = Path(root_path)
-    df = load_dataset_manifest(root_path, dataset_name=dataset_name)
+    df = load_dataset_manifest(
+        root_path,
+        dataset_name=dataset_name,
+        manifest_filename=manifest_filename,
+    )
     if not df.empty:
         speakers = sorted({str(value) for value in df["speaker_id"].tolist() if str(value)})
         if speakers:

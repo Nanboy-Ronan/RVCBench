@@ -40,6 +40,7 @@ class SimpleAudioDataset(torch.utils.data.Dataset):
                 self.data_root,
                 speaker_id=speaker_id,
                 dataset_name=getattr(data_conf, "name", self.data_root.name),
+                manifest_filename=getattr(data_conf, "manifest_filename", None),
             )
             for record in manifest_df.to_dict(orient="records"):
                 ori_pth = (self.data_root / str(record.get("prompt_file_name", ""))).resolve()
@@ -149,6 +150,7 @@ class SimpleAllSpeakerData:
             self.speakers_ids = discover_speakers(
                 self._dataset_root,
                 dataset_name=getattr(dataset_config, "name", self._dataset_root.name),
+                manifest_filename=getattr(dataset_config, "manifest_filename", None),
             )
             if not self.speakers_ids:
                 speaker_dirs = [
