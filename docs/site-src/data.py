@@ -79,6 +79,17 @@ CROSS_DATASET_GROUPS = [
     {"label": "Generation Robustness", "dim": "generation", "cols": ["Long", "AISHELL", "French", "Bilingual"]},
 ]
 
+# "Why RVCBench" comparison — a real table (not two parallel lists) so each
+# row pairs its two values directly, both visually and when read as plain text.
+WHY_COMPARISON = [
+    {"dim": "Adversary models", "typical": "1–3", "rvcbench": "26, zero-shot + fine-tuning"},
+    {"dim": "Datasets / languages", "typical": "1", "rvcbench": "10, incl. ZH / FR / bilingual / noisy"},
+    {"dim": "Protection methods compared", "typical": "usually own only", "rvcbench": "5, equal footing"},
+    {"dim": "Denoising-adaptive attacker", "typical": "rarely modeled", "rvcbench": "built into the pipeline"},
+    {"dim": "Metrics", "typical": "ad hoc", "rvcbench": "standardised + bootstrap CIs"},
+    {"dim": "Reproducibility", "typical": "custom scripts", "rvcbench": "one Hydra pipeline, public HF data"},
+]
+
 STATS = [
     {"n": "27", "l": "VC / TTS models"},
     {"n": "5", "l": "protection methods"},

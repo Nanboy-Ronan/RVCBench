@@ -28,6 +28,23 @@ def render_stats():
     )
 
 
+# --------------------------------------------------------------- why-table -
+def render_why_table():
+    rows = "".join(
+        f'<tr><th scope="row">{esc(r["dim"])}</th>'
+        f'<td>{esc(r["typical"])}</td>'
+        f'<td class="why-win">{esc(r["rvcbench"])}</td></tr>'
+        for r in D.WHY_COMPARISON
+    )
+    return (
+        '<table class="why-table">'
+        '<thead><tr><th scope="col"></th>'
+        '<th scope="col">Typical single-paper eval</th>'
+        '<th scope="col">RVCBench</th></tr></thead>'
+        f'<tbody>{rows}</tbody></table>'
+    )
+
+
 # ----------------------------------------------------------- leaderboard ---
 def render_leaderboard_rows():
     rows = sorted(D.LEADERBOARD, key=lambda d: d["sim"], reverse=True)

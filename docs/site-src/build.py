@@ -53,6 +53,7 @@ def render_body(template: str) -> str:
         template
         .replace("__STATS_GRID__", R.render_stats())
         .replace("__DIMENSIONS_GRID__", R.render_dimensions())
+        .replace("__WHY_TABLE__", R.render_why_table())
         .replace("__LEADERBOARD_ROWS__", R.render_leaderboard_rows())
         .replace("__ROBUSTNESS_ROWS__", R.render_robustness_rows())
         .replace("__DUMBBELL_SVG__", R.render_dumbbell_svg())

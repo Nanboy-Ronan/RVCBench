@@ -469,17 +469,22 @@
   .stats-note b{color:var(--text-secondary);font-weight:600;}
 
   /* ============ WHY ============ */
-  .why-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
-  .why-col{background:var(--surface);padding:1.6rem 1.7rem;}
-  .why-col h3{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:1.1rem;}
-  .why-col.rvc h3{color:var(--signal);}
-  .why-row{display:flex;justify-content:space-between;gap:1rem;padding-block:.65rem;border-top:1px dashed var(--border);font-size:.92rem;}
-  .why-row:first-of-type{border-top:none;}
-  .why-row .k{color:var(--text-secondary);}
-  .why-row .v{font-family:var(--font-mono);font-weight:600;text-align:right;}
-  .why-col.rvc .v{color:var(--signal);}
+  .why-table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:12px;background:var(--surface);}
+  .why-table{width:100%;min-width:480px;border-collapse:collapse;font-size:.92rem;}
+  .why-table thead th{
+    text-align:left;padding:.8rem 1.2rem;font-family:var(--font-mono);font-size:.68rem;
+    letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);
+    background:var(--surface-2);border-bottom:1px solid var(--border);
+  }
+  .why-table thead th:last-child{color:var(--signal);}
+  .why-table tbody th{
+    text-align:left;padding:.8rem 1.2rem;font-weight:500;color:var(--text-secondary);
+    border-top:1px dashed var(--border);white-space:nowrap;
+  }
+  .why-table tbody td{padding:.8rem 1.2rem;border-top:1px dashed var(--border);color:var(--text-primary);}
+  .why-table tbody tr:first-child th, .why-table tbody tr:first-child td{border-top:none;}
+  .why-table td.why-win{font-weight:600;color:var(--signal);background:var(--signal-soft);}
   .why-quote{font-family:var(--font-quote);font-style:italic;font-size:1.2rem;line-height:1.55;color:var(--text-primary);margin-top:2rem;max-width:66ch;}
-  @media (max-width:760px){.why-grid{grid-template-columns:1fr;}}
 
   /* ============ PIPELINE ============ */
   .pipeline-rail{display:grid;grid-template-columns:repeat(5,1fr);gap:0;position:relative;}
@@ -738,26 +743,7 @@
           <h2>One surrogate model is not a threat model.</h2>
           <p>Most protection papers evaluate against one or two VC models on one dataset. A defense that looks strong there can fail completely against a model or language it was never tested on.</p>
         </div>
-        <div class="why-grid">
-          <div class="why-col typ">
-            <h3>Typical single-paper eval</h3>
-            <div class="why-row"><span class="k">Adversary models</span><span class="v">1–3</span></div>
-            <div class="why-row"><span class="k">Datasets / languages</span><span class="v">1</span></div>
-            <div class="why-row"><span class="k">Protection methods compared</span><span class="v">usually own only</span></div>
-            <div class="why-row"><span class="k">Denoising-adaptive attacker</span><span class="v">rarely modeled</span></div>
-            <div class="why-row"><span class="k">Metrics</span><span class="v">ad hoc</span></div>
-            <div class="why-row"><span class="k">Reproducibility</span><span class="v">custom scripts</span></div>
-          </div>
-          <div class="why-col rvc">
-            <h3>RVCBench</h3>
-            <div class="why-row"><span class="k">Adversary models</span><span class="v">26, zero-shot + fine-tuning</span></div>
-            <div class="why-row"><span class="k">Datasets / languages</span><span class="v">10, incl. ZH / FR / bilingual / noisy</span></div>
-            <div class="why-row"><span class="k">Protection methods compared</span><span class="v">5, equal footing</span></div>
-            <div class="why-row"><span class="k">Denoising-adaptive attacker</span><span class="v">built into the pipeline</span></div>
-            <div class="why-row"><span class="k">Metrics</span><span class="v">standardised + bootstrap CIs</span></div>
-            <div class="why-row"><span class="k">Reproducibility</span><span class="v">one Hydra pipeline, public HF data</span></div>
-          </div>
-        </div>
+        <div class="why-table-wrap"><table class="why-table"><thead><tr><th scope="col"></th><th scope="col">Typical single-paper eval</th><th scope="col">RVCBench</th></tr></thead><tbody><tr><th scope="row">Adversary models</th><td>1–3</td><td class="why-win">26, zero-shot + fine-tuning</td></tr><tr><th scope="row">Datasets / languages</th><td>1</td><td class="why-win">10, incl. ZH / FR / bilingual / noisy</td></tr><tr><th scope="row">Protection methods compared</th><td>usually own only</td><td class="why-win">5, equal footing</td></tr><tr><th scope="row">Denoising-adaptive attacker</th><td>rarely modeled</td><td class="why-win">built into the pipeline</td></tr><tr><th scope="row">Metrics</th><td>ad hoc</td><td class="why-win">standardised + bootstrap CIs</td></tr><tr><th scope="row">Reproducibility</th><td>custom scripts</td><td class="why-win">one Hydra pipeline, public HF data</td></tr></tbody></table></div>
         <p class="why-quote">“If you're deciding whether a protection method actually generalises — or whether a new TTS model breaks existing defenses — this is the benchmark to run it against.”</p>
       </div>
     </section>
@@ -1011,7 +997,7 @@ python scripts/run_protect_qwen3tts_quickstart.py --max-samples 5</pre>
           <p style="color:var(--text-secondary);max-width:50ch;">Contributions are welcome — new protection methods, adversary wrappers, dataset adapters, and evaluation metrics. Open an issue or PR on GitHub.</p>
           <div class="hero-ctas">
             <a class="btn" href="https://github.com/Nanboy-Ronan/RVCBench/issues" target="_blank" rel="noopener">Open an issue ↗</a>
-            <a class="btn" href="https://github.com/Nanboy-Ronan/RVCBench/stargazers" target="_blank" rel="noopener">★ Star on GitHub</a>
+            <a class="btn" href="https://github.com/Nanboy-Ronan/RVCBench" target="_blank" rel="noopener">★ Star on GitHub</a>
           </div>
         </div>
         <div class="code-block">
