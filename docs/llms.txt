@@ -1,0 +1,33 @@
+# RVCBench
+
+> A benchmark for voice-cloning robustness, speaker privacy, and audio-protection methods, covering 27 TTS/VC models, 5 protection methods, and 10 dataset configurations.
+
+RVCBench applies audio-protection perturbations to source speech, runs zero-shot and fine-tuning voice-cloning models against clean and protected prompts, optionally denoises protected audio, and scores every run on speaker similarity (SIM), word error rate (WER), SpeechMOS (MOS), mel-cepstral distortion (MCD), real-time factor (RTF), speaker-verification accuracy (SVA), and emotion match rate.
+
+## Key facts
+
+- Input Robustness (reference-audio and text-prompt shifts), Generation Robustness (model architecture, multilingual, long-form, and expressive generalisation), Output Robustness (post-processing resilience and deepfake detectability), and Audio Perturbation Robustness (passive noise, proactive protection methods, and counteract/denoising attacks).
+- RVCBench is a benchmark for voice-cloning robustness, speaker privacy, and audio-protection methods. It evaluates 27 zero-shot and fine-tuning TTS/VC models against 5 audio-protection methods across 10 dataset configurations, scoring speaker similarity, intelligibility, perceptual quality, and runtime.
+- The RVCBench codebase includes wrappers for 27 TTS/VC adversary models. The arXiv v2 paper reports results for 18 of those models across 18 robustness evaluations, 225 speakers, and 14,370 utterances.
+- Five methods on equal footing: SafeSpeech (adversarial perturbation against a surrogate VC model), Enkidu (perceptual-loss adversarial perturbation), EM (Expectation–Maximisation perturbation), Spectral (SafeSpeech's spectral perturbation mode), and GR-Noise (Gaussian random noise).
+- Across the LibriTTS leaderboard, StyleTTS 2 and OpenVoice V2 have the lowest clean speaker similarity and drop furthest under protection — GR-Noise pushes StyleTTS 2's similarity from 0.228 down to 0.030.
+- Yes. The benchmark dataset is hosted on Hugging Face at huggingface.co/datasets/Nanboy/RVCBench under a CC0-1.0 license, with 10 dataset configurations spanning English, Mandarin, and French.
+- Cite the arXiv preprint: Jin, Ruinan; Liao, Xinting; Yu, Hanlin; Pandya, Deval; Li, Xiaoxiao. “RVCBench: Benchmarking the Robustness of Voice Cloning Across Modern Audio Generation Models.” arXiv:2602.00443, 2026.
+
+## Links
+
+- [Paper (arXiv:2602.00443)](https://arxiv.org/abs/2602.00443)
+- [Dataset (Hugging Face)](https://huggingface.co/datasets/Nanboy/RVCBench)
+- [Interactive demo](https://huggingface.co/spaces/Nanboy/RVCBench)
+- [Code repository](https://github.com/Nanboy-Ronan/RVCBench)
+
+## Citation
+
+```
+@article{jin2026rvcbench,
+  title   = {RVCBench: Benchmarking the Robustness of Voice Cloning Across Modern Audio Generation Models},
+  author  = {Ruinan Jin and Xinting Liao and Hanlin Yu and Deval Pandya and Xiaoxiao Li},
+  journal = {arXiv preprint arXiv:2602.00443},
+  year    = {2026}
+}
+```

@@ -1,0 +1,1030 @@
+<style>
+  /* ============ FONTS ============ */
+  @font-face {
+    font-family: 'Fraunces Hero';
+    font-style: normal;
+    font-weight: 900;
+    font-display: swap;
+    src: __FONT_FRAUNCES_HERO_SRC__;
+  }
+  @font-face {
+    font-family: 'Fraunces Head';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: __FONT_FRAUNCES_H2_SRC__;
+  }
+  @font-face {
+    font-family: 'Fraunces Quote';
+    font-style: italic;
+    font-weight: 500;
+    font-display: swap;
+    src: __FONT_FRAUNCES_ITALIC_SRC__;
+  }
+  @font-face {
+    font-family: 'Plex Sans';
+    font-style: normal;
+    font-weight: 400 700;
+    font-display: swap;
+    src: __FONT_PLEXSANS_SRC__;
+  }
+  @font-face {
+    font-family: 'Plex Mono';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: __FONT_PLEXMONO_400_SRC__;
+  }
+  @font-face {
+    font-family: 'Plex Mono';
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: __FONT_PLEXMONO_500_SRC__;
+  }
+  @font-face {
+    font-family: 'Plex Mono';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: __FONT_PLEXMONO_600_SRC__;
+  }
+
+  /* ============ TOKENS — light (default) ============ */
+  :root{
+    --bg:#f5f6fb;
+    --surface:#ffffff;
+    --surface-2:#eceef7;
+    --surface-3:#e2e5f1;
+    --border:#dbdfec;
+    --border-strong:#c3c9dd;
+    --text-primary:#11141d;
+    --text-secondary:#454c62;
+    --text-muted:#7d84a0;
+    --text-on-accent:#f8f9fd;
+
+    --signal:#0d6ea8;      /* clean / output fidelity — teal */
+    --signal-soft:#0d6ea817;
+    --protect:#c81e5a;     /* protection / degradation — rose */
+    --protect-soft:#c81e5a17;
+    --counter:#a5680a;     /* denoise / counter-attack — amber */
+    --counter-soft:#a5680a17;
+    --judge:#6046c4;       /* evaluation / referee + brand — violet */
+    --judge-soft:#6046c417;
+
+    --grid-line:#d6dae9;
+    --shadow:0 20px 50px -30px rgba(20,24,50,.35);
+    --font-display:'Fraunces Hero', ui-serif, Georgia, serif;
+    --font-head:'Fraunces Head', ui-serif, Georgia, serif;
+    --font-quote:'Fraunces Quote', ui-serif, Georgia, serif;
+    --font-body:'Plex Sans', -apple-system, sans-serif;
+    --font-mono:'Plex Mono', ui-monospace, Menlo, monospace;
+  }
+
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0a0c12;
+      --surface:#10131c;
+      --surface-2:#161a26;
+      --surface-3:#1d2231;
+      --border:#262c3f;
+      --border-strong:#343c56;
+      --text-primary:#eef0f8;
+      --text-secondary:#a7aec4;
+      --text-muted:#6c7390;
+      --text-on-accent:#0a0c12;
+
+      --signal:#2fa0cf;
+      --signal-soft:#2fa0cf1f;
+      --protect:#e04e79;
+      --protect-soft:#e04e791f;
+      --counter:#c98328;
+      --counter-soft:#c983281f;
+      --judge:#8a6eea;
+      --judge-soft:#8a6eea1f;
+
+      --grid-line:#1c2131;
+      --shadow:0 20px 60px -25px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0a0c12;
+    --surface:#10131c;
+    --surface-2:#161a26;
+    --surface-3:#1d2231;
+    --border:#262c3f;
+    --border-strong:#343c56;
+    --text-primary:#eef0f8;
+    --text-secondary:#a7aec4;
+    --text-muted:#6c7390;
+    --text-on-accent:#0a0c12;
+
+    --signal:#2fa0cf;
+    --signal-soft:#2fa0cf1f;
+    --protect:#e04e79;
+    --protect-soft:#e04e791f;
+    --counter:#c98328;
+    --counter-soft:#c983281f;
+    --judge:#8a6eea;
+    --judge-soft:#8a6eea1f;
+
+    --grid-line:#1c2131;
+    --shadow:0 20px 60px -25px rgba(0,0,0,.6);
+  }
+
+  /* ============ RESET / BASE ============ */
+  *,*::before,*::after{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text-primary);
+    font-family:var(--font-body);
+    font-size:16px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  img{max-width:100%;display:block;}
+  a{color:inherit;}
+  h1,h2,h3,h4{margin:0;text-wrap:balance;font-weight:600;}
+  p{margin:0;}
+  ul{margin:0;padding:0;list-style:none;}
+  button{font-family:inherit;}
+  :focus-visible{outline:2px solid var(--judge);outline-offset:3px;border-radius:3px;}
+  ::selection{background:var(--signal);color:var(--text-on-accent);}
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;}
+  }
+
+  .mono{font-family:var(--font-mono);}
+  .tnum{font-variant-numeric:tabular-nums;}
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:.72rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--text-muted);
+    display:flex;align-items:center;gap:.6em;
+  }
+  .eyebrow::before{content:"";width:1.4em;height:1px;background:var(--border-strong);}
+  .dim-tag{
+    font-family:var(--font-mono);font-size:.66rem;letter-spacing:.04em;text-transform:none;
+    padding:.15rem .5rem;border-radius:99px;border:1px solid currentColor;
+  }
+  .dim-tag.dim-judge{color:var(--judge);}
+  .dim-tag.dim-signal{color:var(--signal);}
+  .dim-tag.dim-counter{color:var(--counter);}
+  .dim-tag.dim-protect{color:var(--protect);}
+
+  .wrap{max-width:1180px;margin-inline:auto;padding-inline:clamp(1.25rem,4vw,2.5rem);}
+  section{padding-block:clamp(3.5rem,7vw,6rem);}
+  section + section{border-top:1px solid var(--border);}
+  .section-head{max-width:640px;margin-bottom:clamp(2rem,4vw,3rem);}
+  .section-head h2{
+    font-family:var(--font-head);
+    font-weight:600;
+    font-size:clamp(1.9rem,3.4vw,2.6rem);
+    letter-spacing:-.01em;
+    margin-block:.5rem 0.75rem;
+    color:var(--text-primary);
+  }
+  .section-head p{color:var(--text-secondary);font-size:1.02rem;max-width:56ch;}
+
+  /* ============ NAV ============ */
+  .nav{
+    position:sticky;top:0;z-index:40;
+    background:color-mix(in oklab, var(--bg) 86%, transparent);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--border);
+  }
+  .nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:1.5rem;padding-block:.7rem;max-width:1180px;}
+  .brand{display:flex;align-items:center;gap:.6rem;text-decoration:none;font-family:var(--font-mono);font-weight:600;letter-spacing:-.01em;font-size:1.02rem;color:var(--text-primary);}
+  .brand img{width:26px;height:26px;border-radius:6px;}
+  .navlinks{display:flex;align-items:center;gap:1.6rem;font-size:.88rem;color:var(--text-secondary);}
+  .navlinks a{text-decoration:none;transition:color .15s;}
+  .navlinks a:hover{color:var(--text-primary);}
+  .navcta{display:flex;align-items:center;gap:.6rem;}
+  @media (max-width:860px){ .navlinks{display:none;} }
+
+  .btn{
+    display:inline-flex;align-items:center;gap:.5rem;
+    padding:.6rem 1.05rem;border-radius:8px;
+    font-size:.86rem;font-weight:600;text-decoration:none;
+    border:1px solid var(--border-strong);
+    color:var(--text-primary);background:var(--surface);
+    transition:transform .15s, border-color .15s, background .15s;
+    white-space:nowrap;
+  }
+  .btn:hover{border-color:var(--text-muted);transform:translateY(-1px);}
+  .btn-primary{background:var(--text-primary);color:var(--bg);border-color:var(--text-primary);}
+  .btn-primary:hover{background:var(--text-secondary);border-color:var(--text-secondary);}
+  .btn-ghost{border-color:transparent;background:transparent;padding-inline:.3rem;}
+
+  /* ============ HERO ============ */
+  .hero{padding-block:clamp(3rem,8vw,5.5rem) 0;border-top:none;}
+  .hero-grid{display:grid;gap:2.5rem;}
+  .hero h1{
+    font-family:var(--font-display);
+    font-weight:900;
+    font-size:clamp(2.4rem,5.6vw,4.4rem);
+    line-height:1.03;
+    letter-spacing:-.015em;
+    max-width:15ch;
+  }
+  .hero h1 em{font-style:normal;color:var(--protect);}
+  .hero h1 .sig{color:var(--signal);}
+  .hero-lead{margin-top:1.25rem;max-width:56ch;font-size:1.08rem;color:var(--text-secondary);}
+  .hero-ctas{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:2rem;}
+  .hero-meta{margin-top:1.25rem;font-family:var(--font-mono);font-size:.78rem;color:var(--text-muted);}
+
+  .scope-panel{
+    border:1px solid var(--border);
+    border-radius:14px;
+    background:var(--surface);
+    box-shadow:var(--shadow);
+    overflow:hidden;
+  }
+  .scope-head{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:.7rem 1rem;border-bottom:1px solid var(--border);
+    font-family:var(--font-mono);font-size:.72rem;color:var(--text-muted);
+    letter-spacing:.06em;text-transform:uppercase;
+  }
+  .scope-head .dot{width:7px;height:7px;border-radius:50%;background:var(--signal);display:inline-block;margin-right:.5em;box-shadow:0 0 0 3px var(--signal-soft);}
+  canvas#wave{display:block;width:100%;height:220px;background:var(--surface-2);}
+  .scope-foot{
+    display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+    padding:.85rem 1rem;font-family:var(--font-mono);font-size:.74rem;color:var(--text-secondary);
+    border-top:1px solid var(--border);
+  }
+  .scope-foot span.sig{color:var(--signal);}
+  .scope-foot span.prot{color:var(--protect);}
+
+  /* ============ STATS ============ */
+  .stats{padding-block:2.5rem;border-top:1px solid var(--border);}
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+  .stat{background:var(--surface);padding:1.4rem 1.2rem;}
+  .stat .n{font-family:var(--font-head);font-weight:600;font-size:2rem;letter-spacing:-.02em;}
+  .stat .l{margin-top:.25rem;font-size:.78rem;color:var(--text-muted);}
+  .stats-note{margin-top:1rem;font-size:.8rem;color:var(--text-muted);max-width:80ch;}
+  .stats-note b{color:var(--text-secondary);font-weight:600;}
+
+  /* ============ WHY ============ */
+  .why-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+  .why-col{background:var(--surface);padding:1.6rem 1.7rem;}
+  .why-col h3{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:1.1rem;}
+  .why-col.rvc h3{color:var(--signal);}
+  .why-row{display:flex;justify-content:space-between;gap:1rem;padding-block:.65rem;border-top:1px dashed var(--border);font-size:.92rem;}
+  .why-row:first-of-type{border-top:none;}
+  .why-row .k{color:var(--text-secondary);}
+  .why-row .v{font-family:var(--font-mono);font-weight:600;text-align:right;}
+  .why-col.rvc .v{color:var(--signal);}
+  .why-quote{font-family:var(--font-quote);font-style:italic;font-size:1.2rem;line-height:1.55;color:var(--text-primary);margin-top:2rem;max-width:66ch;}
+  @media (max-width:760px){.why-grid{grid-template-columns:1fr;}}
+
+  /* ============ PIPELINE ============ */
+  .pipeline-rail{display:grid;grid-template-columns:repeat(5,1fr);gap:0;position:relative;}
+  .pipeline-rail::before{
+    content:"";position:absolute;top:34px;left:5%;right:5%;height:1px;
+    background:repeating-linear-gradient(90deg,var(--border-strong) 0 6px, transparent 6px 12px);
+    z-index:0;
+  }
+  .pstep{position:relative;z-index:1;padding-inline:.6rem;text-align:left;}
+  .pstep .num{
+    width:68px;height:68px;border-radius:50%;background:var(--surface);border:1.5px solid var(--border-strong);
+    display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:600;font-size:1.2rem;
+    margin-bottom:1rem;
+  }
+  .pstep.src .num{color:var(--text-secondary);}
+  .pstep.protect .num{color:var(--protect);border-color:var(--protect);}
+  .pstep.denoise .num{color:var(--counter);border-color:var(--counter);border-style:dashed;}
+  .pstep.clone .num{color:var(--signal);border-color:var(--signal);}
+  .pstep.eval .num{color:var(--judge);border-color:var(--judge);}
+  .pstep h3{font-family:var(--font-head);font-size:1.05rem;font-weight:600;margin-bottom:.4rem;}
+  .pstep p{font-size:.86rem;color:var(--text-secondary);}
+  .pstep .tag{display:inline-block;margin-top:.6rem;font-family:var(--font-mono);font-size:.7rem;color:var(--text-muted);}
+  @media (max-width:920px){
+    .pipeline-rail{grid-template-columns:1fr 1fr;gap:2rem 1.2rem;}
+    .pipeline-rail::before{display:none;}
+  }
+  @media (max-width:520px){ .pipeline-rail{grid-template-columns:1fr;} }
+
+  /* ============ TABLE / LEADERBOARD ============ */
+  .table-scroll{overflow-x:auto;border:1px solid var(--border);border-radius:12px;background:var(--surface);}
+  table{width:100%;border-collapse:collapse;font-size:.86rem;min-width:760px;}
+  thead th{
+    position:sticky;top:0;background:var(--surface-2);
+    text-align:left;padding:0;font-family:var(--font-mono);font-size:.68rem;
+    letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);
+    border-bottom:1px solid var(--border);white-space:nowrap;
+  }
+  .sort-btn{display:block;padding:.65rem .8rem;cursor:pointer;user-select:none;border-radius:4px;}
+  .sort-btn:hover{color:var(--text-primary);}
+  .sort-btn.active{color:var(--signal);}
+  .sort-btn .arrow{opacity:.5;margin-left:.3em;}
+  tbody td{padding:.6rem .8rem;border-bottom:1px solid var(--border);vertical-align:middle;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:var(--surface-2);}
+  td.num,th.num{text-align:right;font-family:var(--font-mono);}
+  .rank{font-family:var(--font-mono);color:var(--text-muted);width:1.5em;display:inline-block;}
+  .rank.medal{color:var(--counter);font-weight:700;}
+  .model-cell{display:flex;align-items:center;gap:.6rem;font-weight:600;}
+  .sim-bar-wrap{display:flex;align-items:center;gap:.6rem;justify-content:flex-end;}
+  .sim-bar{width:64px;height:6px;border-radius:3px;background:var(--surface-3);overflow:hidden;flex-shrink:0;}
+  .sim-bar i{display:block;height:100%;background:var(--signal);border-radius:3px;}
+  .table-note{margin-top:.8rem;font-size:.78rem;color:var(--text-muted);}
+
+  /* ============ ROBUSTNESS DUMBBELL ============ */
+  .robust-panel{border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:1.4rem 1.4rem 1.1rem;}
+  .robust-legend{display:flex;gap:1.6rem;flex-wrap:wrap;margin-bottom:.6rem;font-size:.8rem;color:var(--text-secondary);}
+  .robust-legend .lg{display:flex;align-items:center;gap:.5em;}
+  .robust-legend i{width:9px;height:9px;border-radius:50%;display:inline-block;}
+  .robust-legend i.sig{background:var(--signal);}
+  .robust-legend i.prot{background:var(--protect);}
+  svg#dumbbell{width:100%;height:auto;overflow:visible;}
+  .db-row-label{font-family:var(--font-mono);font-size:11px;fill:var(--text-secondary);}
+  .db-method-label{font-family:var(--font-mono);font-size:10px;fill:var(--text-muted);}
+  .db-tick{font-family:var(--font-mono);font-size:10px;fill:var(--text-muted);}
+  .db-gridline{stroke:var(--grid-line);stroke-width:1;}
+  .db-line{stroke:var(--protect);stroke-width:2;opacity:.55;}
+  .db-clean{fill:var(--signal);}
+  .db-min{fill:var(--protect);}
+  details.data-toggle{margin-top:1.4rem;}
+  details.data-toggle > summary{
+    cursor:pointer;font-family:var(--font-mono);font-size:.78rem;color:var(--text-secondary);
+    padding:.5rem 0;list-style:none;display:flex;align-items:center;gap:.5em;
+  }
+  details.data-toggle > summary::-webkit-details-marker{display:none;}
+  details.data-toggle > summary::before{content:"▸";transition:transform .15s;}
+  details.data-toggle[open] > summary::before{transform:rotate(90deg);}
+  details.data-toggle > summary:hover{color:var(--text-primary);}
+
+  /* ============ HEATMAP ============ */
+  .heatmap-scroll{overflow-x:auto;border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:1rem;position:relative;}
+  .heatmap{border-collapse:separate;border-spacing:3px;font-family:var(--font-mono);font-size:.68rem;min-width:900px;}
+  .heatmap th{font-weight:500;color:var(--text-muted);padding:.3rem;text-align:center;}
+  .heatmap th.rowh{text-align:left;color:var(--text-secondary);font-weight:600;padding-right:.8rem;white-space:nowrap;}
+  .heatmap thead tr:first-child th{
+    font-size:.62rem;letter-spacing:.05em;text-transform:uppercase;padding-bottom:.5rem;
+    border-bottom:2px solid var(--border);color:var(--text-muted);
+  }
+  .heatmap thead tr:first-child th.dim-judge{color:var(--judge);border-bottom-color:var(--judge);}
+  .heatmap thead tr:first-child th.dim-signal{color:var(--signal);border-bottom-color:var(--signal);}
+  .heatmap td{
+    width:64px;height:30px;text-align:center;border-radius:5px;cursor:default;
+    color:var(--text-on-accent);position:relative;
+  }
+  .heatmap td.empty{background:var(--surface-2);color:var(--text-muted);}
+  .hm-tooltip{
+    position:fixed;pointer-events:none;z-index:60;
+    background:var(--text-primary);color:var(--bg);
+    font-family:var(--font-mono);font-size:.72rem;padding:.4rem .6rem;border-radius:6px;
+    opacity:0;transform:translateY(4px);transition:opacity .1s, transform .1s;white-space:nowrap;
+  }
+  .hm-tooltip.show{opacity:1;transform:translateY(0);}
+  .hm-scale{display:flex;align-items:center;gap:.6rem;margin-top:1rem;font-size:.75rem;color:var(--text-muted);font-family:var(--font-mono);}
+  .hm-scale .ramp{width:140px;height:8px;border-radius:4px;background:linear-gradient(90deg, var(--surface-3), var(--signal));}
+
+  /* ============ CHIP GRIDS (models / protections) ============ */
+  .chip-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:.7rem;}
+  .chip{
+    border:1px solid var(--border);border-radius:10px;padding:.75rem .85rem;background:var(--surface);
+    display:flex;flex-direction:column;gap:.3rem;
+  }
+  .chip .name{font-weight:600;font-size:.92rem;display:flex;align-items:center;gap:.5em;}
+  .chip .key{font-family:var(--font-mono);font-size:.74rem;color:var(--text-muted);}
+  .chip .badge{width:7px;height:7px;border-radius:50%;background:var(--signal);flex-shrink:0;}
+  .chip.other .badge{background:var(--border-strong);}
+  .models-legend{display:flex;gap:1.6rem;margin-bottom:1.1rem;font-size:.8rem;color:var(--text-secondary);flex-wrap:wrap;}
+  .models-legend .lg{display:flex;align-items:center;gap:.5em;}
+  .models-legend i{width:8px;height:8px;border-radius:50%;display:inline-block;}
+  .models-legend i.on{background:var(--signal);}
+  .models-legend i.off{background:var(--border-strong);}
+
+  /* ============ FOUR DIMENSIONS ============ */
+  .dim-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;}
+  .dim-card{
+    border:1px solid var(--border);border-radius:12px;padding:1.3rem 1.4rem;background:var(--surface);
+    border-top:3px solid var(--dim-color);display:flex;flex-direction:column;gap:.7rem;
+    overflow-wrap:anywhere;
+  }
+  .dim-card.dim-judge{--dim-color:var(--judge);}
+  .dim-card.dim-signal{--dim-color:var(--signal);}
+  .dim-card.dim-counter{--dim-color:var(--counter);}
+  .dim-card.dim-protect{--dim-color:var(--protect);}
+  .dim-card h3{font-family:var(--font-head);font-size:1.1rem;font-weight:600;color:var(--dim-color);}
+  .dim-card .dim-q{font-family:var(--font-quote);font-style:italic;font-size:1rem;line-height:1.45;color:var(--text-primary);}
+  .dim-card .dim-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.45rem;}
+  .dim-card .dim-list li{font-size:.83rem;color:var(--text-secondary);line-height:1.5;padding-left:1.1em;position:relative;}
+  .dim-card .dim-list li::before{content:"—";position:absolute;left:0;color:var(--dim-color);}
+  .dim-card .dim-link{margin-top:auto;padding-top:.5rem;font-family:var(--font-mono);font-size:.78rem;font-weight:600;color:var(--dim-color);text-decoration:none;}
+  .dim-card .dim-link:not(.dim-pending):hover{text-decoration:underline;}
+  .dim-card .dim-link.dim-pending{color:var(--text-muted);font-weight:500;font-size:.74rem;line-height:1.5;}
+
+  .protect-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1rem;}
+  .protect-card{border:1px solid var(--border);border-radius:12px;padding:1.1rem 1.2rem;background:var(--surface);border-left:3px solid var(--protect);}
+  .protect-card h3{font-family:var(--font-head);font-size:1.05rem;margin-bottom:.4rem;}
+  .protect-card p{font-size:.85rem;color:var(--text-secondary);}
+
+  /* ============ DATASETS TABLE ============ */
+  .ds-table td, .ds-table th{white-space:normal;}
+  .lang-tag{
+    display:inline-block;font-family:var(--font-mono);font-size:.68rem;padding:.1rem .4rem;
+    border-radius:4px;background:var(--judge-soft);color:var(--judge);margin-right:.3em;
+  }
+
+  /* ============ METRICS ============ */
+  .metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+  .metric{background:var(--surface);padding:1.1rem 1.2rem;}
+  .metric .m-name{font-family:var(--font-mono);font-weight:600;font-size:.92rem;}
+  .metric .m-dir{font-size:.72rem;color:var(--text-muted);margin-left:.3em;}
+  .metric .m-desc{font-size:.8rem;color:var(--text-secondary);margin-top:.35rem;}
+
+  /* ============ FAQ ============ */
+  .faq-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+  .faq-item{background:var(--surface);padding:1.2rem 1.3rem;}
+  .faq-item h3{font-family:var(--font-body);font-size:.96rem;font-weight:600;margin-bottom:.4rem;}
+  .faq-item p{font-size:.85rem;color:var(--text-secondary);}
+
+  /* ============ QUICKSTART ============ */
+  .code-block{
+    position:relative;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;
+    padding:1rem 1.1rem;overflow-x:auto;
+  }
+  .code-block pre{margin:0;font-family:var(--font-mono);font-size:.82rem;line-height:1.7;color:var(--text-primary);}
+  .code-block .c1{color:var(--text-muted);}
+  .copy-btn{
+    position:absolute;top:.6rem;right:.6rem;font-family:var(--font-mono);font-size:.68rem;
+    padding:.3rem .6rem;border-radius:6px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-secondary);
+    cursor:pointer;
+  }
+  .copy-btn:hover{color:var(--text-primary);}
+  .qs-steps{display:grid;gap:1.4rem;margin-top:1.6rem;}
+
+  /* ============ CITATION ============ */
+  .cite-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:2.5rem;align-items:start;}
+  @media (max-width:860px){.cite-grid{grid-template-columns:1fr;}}
+
+  /* ============ FOOTER ============ */
+  footer{border-top:1px solid var(--border);padding-block:2.5rem;}
+  .foot-grid{display:flex;justify-content:space-between;gap:2rem;flex-wrap:wrap;}
+  .foot-links{display:flex;gap:1.4rem;flex-wrap:wrap;font-size:.85rem;color:var(--text-secondary);}
+  .foot-links a{text-decoration:none;}
+  .foot-links a:hover{color:var(--text-primary);}
+  .foot-bottom{margin-top:1.6rem;padding-top:1.4rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;font-size:.76rem;color:var(--text-muted);}
+</style>
+
+<div class="page">
+
+  <header class="nav">
+    <div class="wrap">
+      <a class="brand" href="#top"><img src="__LOGO_SRC__" alt=""> RVCBench</a>
+      <nav class="navlinks">
+        <a href="#dimensions">Framework</a>
+        <a href="#leaderboard">Leaderboard</a>
+        <a href="#robustness">Robustness</a>
+        <a href="#models">Models</a>
+        <a href="#datasets">Datasets</a>
+        <a href="#quickstart">Quickstart</a>
+        <a href="#citation">Cite</a>
+      </nav>
+      <div class="navcta">
+        <a class="btn btn-ghost" href="https://arxiv.org/abs/2602.00443" target="_blank" rel="noopener">Paper</a>
+        <a class="btn btn-primary" href="https://github.com/Nanboy-Ronan/RVCBench" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+
+    <!-- ============ HERO ============ -->
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <span class="eyebrow">Voice-cloning robustness benchmark</span>
+          <h1>27 models will try to clone this voice. <span class="sig">5</span> defenses try to stop them.</h1>
+          <p class="hero-lead">RVCBench is a unified, reproducible pipeline for evaluating voice-cloning robustness, speaker privacy, and audio-protection methods — spanning <strong>27 TTS/VC adversary models</strong>, <strong>10 dataset conditions</strong>, and <strong>5 protection algorithms</strong>, scored on speaker similarity, intelligibility, perceptual quality, and runtime.</p>
+          <div class="hero-ctas">
+            <a class="btn btn-primary" href="#leaderboard">See the leaderboard</a>
+            <a class="btn" href="https://huggingface.co/datasets/Nanboy/RVCBench" target="_blank" rel="noopener">Get the dataset ↗</a>
+            <a class="btn" href="https://huggingface.co/spaces/Nanboy/RVCBench" target="_blank" rel="noopener">Try the demo ↗</a>
+          </div>
+          <p class="hero-meta">arXiv:2602.00443 · CC0-1.0 · Jin, Liao, Yu, Pandya, Li</p>
+        </div>
+
+        <div class="scope-panel">
+          <div class="scope-head"><span><span class="dot"></span>signal.monitor — source → protection → clone</span><span>live</span></div>
+          <canvas id="wave" aria-hidden="true"></canvas>
+          <div class="scope-foot">
+            <span><span class="sig">■</span> clean signal (SIM ↑)</span>
+            <span><span class="prot">■</span> after protection (SIM ↓)</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ STATS ============ -->
+    <section class="stats">
+      <div class="wrap">
+        <div class="stats-grid" id="statsGrid">__STATS_GRID__</div>
+        <p class="stats-note"><b>Paper vs. codebase.</b> The arXiv v2 paper reports <b>18 models</b> across 18 robustness evaluations, 225 speakers, and 14,370 utterances. This repository is under active development and currently ships <b>27 models</b>; treat any count beyond the paper's 18 as codebase-only until covered by a future revision.</p>
+      </div>
+    </section>
+
+    <!-- ============ WHY ============ -->
+    <section id="why">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">Why RVCBench</span>
+          <h2>One surrogate model is not a threat model.</h2>
+          <p>Most protection papers evaluate against one or two VC models on one dataset. A defense that looks strong there can fail completely against a model or language it was never tested on.</p>
+        </div>
+        <div class="why-grid">
+          <div class="why-col typ">
+            <h3>Typical single-paper eval</h3>
+            <div class="why-row"><span class="k">Adversary models</span><span class="v">1–3</span></div>
+            <div class="why-row"><span class="k">Datasets / languages</span><span class="v">1</span></div>
+            <div class="why-row"><span class="k">Protection methods compared</span><span class="v">usually own only</span></div>
+            <div class="why-row"><span class="k">Denoising-adaptive attacker</span><span class="v">rarely modeled</span></div>
+            <div class="why-row"><span class="k">Metrics</span><span class="v">ad hoc</span></div>
+            <div class="why-row"><span class="k">Reproducibility</span><span class="v">custom scripts</span></div>
+          </div>
+          <div class="why-col rvc">
+            <h3>RVCBench</h3>
+            <div class="why-row"><span class="k">Adversary models</span><span class="v">26, zero-shot + fine-tuning</span></div>
+            <div class="why-row"><span class="k">Datasets / languages</span><span class="v">10, incl. ZH / FR / bilingual / noisy</span></div>
+            <div class="why-row"><span class="k">Protection methods compared</span><span class="v">5, equal footing</span></div>
+            <div class="why-row"><span class="k">Denoising-adaptive attacker</span><span class="v">built into the pipeline</span></div>
+            <div class="why-row"><span class="k">Metrics</span><span class="v">standardised + bootstrap CIs</span></div>
+            <div class="why-row"><span class="k">Reproducibility</span><span class="v">one Hydra pipeline, public HF data</span></div>
+          </div>
+        </div>
+        <p class="why-quote">“If you're deciding whether a protection method actually generalises — or whether a new TTS model breaks existing defenses — this is the benchmark to run it against.”</p>
+      </div>
+    </section>
+
+    <!-- ============ PIPELINE ============ -->
+    <section id="pipeline">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">How it works</span>
+          <h2>Source audio → protect → (denoise) → clone → evaluate.</h2>
+          <p>Every run walks the same five-stage path, so protection methods and cloning adversaries are always compared on equal footing.</p>
+        </div>
+        <div class="pipeline-rail">
+          <div class="pstep src">
+            <div class="num">1</div>
+            <h3>Source audio</h3>
+            <p>Reference speaker prompt drawn from one of 10 benchmark dataset configs.</p>
+            <span class="tag">run_vc.py</span>
+          </div>
+          <div class="pstep protect">
+            <div class="num">2</div>
+            <h3>Protection</h3>
+            <p>An adversarial perturbation degrades the prompt: SafeSpeech, Enkidu, EM, Spectral, or Gaussian noise.</p>
+            <span class="tag">run_protect.py</span>
+          </div>
+          <div class="pstep denoise">
+            <div class="num">3</div>
+            <h3>Denoise <span style="font-weight:400;color:var(--text-muted);">(optional)</span></h3>
+            <p>An adaptive attacker tries to clean the protected prompt before cloning — a realistic worst case.</p>
+            <span class="tag">run_denoiser.py</span>
+          </div>
+          <div class="pstep clone">
+            <div class="num">4</div>
+            <h3>Voice cloning</h3>
+            <p>One of 27 zero-shot or fine-tuning TTS/VC adversaries attempts to reproduce the speaker.</p>
+            <span class="tag">run_vc_protect.py</span>
+          </div>
+          <div class="pstep eval">
+            <div class="num">5</div>
+            <h3>Evaluation</h3>
+            <p>SIM, WER, MOS, MCD, RTF, SVA and emotion match, with bootstrap confidence intervals.</p>
+            <span class="tag">metrics.json</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FOUR DIMENSIONS ============ -->
+    <section id="dimensions">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">The framework</span>
+          <h2>Four dimensions, one benchmark.</h2>
+          <p>Every result on this page demonstrates one of four robustness axes. This is the map — each card links to the visualization that proves it.</p>
+        </div>
+        <div class="dim-grid">__DIMENSIONS_GRID__</div>
+      </div>
+    </section>
+
+    <!-- ============ LEADERBOARD ============ -->
+    <section id="leaderboard">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow"><span class="dim-tag dim-signal">Generation Robustness</span> Leaderboard — LibriTTS, clean prompts</span>
+          <h2>Which model clones a voice best?</h2>
+          <p>Ranked by speaker similarity (SIM) on unprotected prompts, averaged across the full LibriTTS speaker set. Click a column to sort.</p>
+        </div>
+        <div class="table-scroll">
+          <table id="lbTable">
+            <thead>
+              <tr>
+                <th data-key="r" data-type="num" class="num" scope="col"><span class="sort-btn" role="button" tabindex="0">#</span></th>
+                <th data-key="m" data-type="text" scope="col"><span class="sort-btn" role="button" tabindex="0">Model</span></th>
+                <th data-key="sim" data-type="num" class="num" aria-sort="descending" scope="col"><span class="sort-btn active" role="button" tabindex="0">SIM ↑<span class="arrow">▾</span></span></th>
+                <th data-key="wer" data-type="num" class="num" scope="col"><span class="sort-btn" role="button" tabindex="0">WER ↓</span></th>
+                <th data-key="mos" data-type="num" class="num" scope="col"><span class="sort-btn" role="button" tabindex="0">MOS ↑</span></th>
+                <th data-key="mcd" data-type="num" class="num" scope="col"><span class="sort-btn" role="button" tabindex="0">MCD ↓</span></th>
+                <th data-key="rtf" data-type="num" class="num" scope="col"><span class="sort-btn" role="button" tabindex="0">RTF ↓</span></th>
+                <th data-key="sva" data-type="num" class="num" scope="col"><span class="sort-btn" role="button" tabindex="0">SVA ↑</span></th>
+                <th data-key="emo" data-type="num" class="num" scope="col"><span class="sort-btn" role="button" tabindex="0">Emo ↑</span></th>
+              </tr>
+            </thead>
+            <tbody id="lbBody">__LEADERBOARD_ROWS__</tbody>
+          </table>
+        </div>
+        <p class="table-note">SIM: speaker cosine similarity · WER: word error rate · MOS: SpeechMOS perceptual score · MCD: mel-cepstral distortion · RTF: real-time factor (&lt;1 = faster than real time) · SVA: speaker-verification accuracy · Emo: emotion match rate. All values on clean prompts.</p>
+      </div>
+    </section>
+
+    <!-- ============ ROBUSTNESS ============ -->
+    <section id="robustness">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow"><span class="dim-tag dim-protect">Audio Perturbation Robustness</span> Protection robustness — SIM, LibriTTS</span>
+          <h2>How far can protection push similarity down?</h2>
+          <p>Each row spans a model's clean SIM down to its lowest SIM under any of the 5 <em>proactive</em>-perturbation methods below — the larger the gap, the more that model's voice can be shielded. The pipeline's optional <a href="#pipeline">Denoise step</a> is the <em>counteract</em>-perturbation half of this dimension: an adaptive attacker trying to undo the protection before cloning.</p>
+        </div>
+        <div class="robust-panel">
+          <div class="robust-legend">
+            <span class="lg"><i class="sig"></i> Clean prompt</span>
+            <span class="lg"><i class="prot"></i> Best-case protection (lowest SIM reached, method labeled)</span>
+          </div>
+          __DUMBBELL_SVG__
+          <details class="data-toggle">
+            <summary>Show full data — every protection method, every model</summary>
+            <div class="table-scroll" style="margin-top:.8rem;">
+              <table id="rbTable">
+                <thead>
+                  <tr><th scope="col">Model</th><th class="num" scope="col">Clean</th><th class="num" scope="col">SafeSpeech</th><th class="num" scope="col">Enkidu</th><th class="num" scope="col">Spectral</th><th class="num" scope="col">GR-Noise</th><th class="num" scope="col">EM</th></tr>
+                </thead>
+                <tbody id="rbBody">__ROBUSTNESS_ROWS__</tbody>
+              </table>
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CROSS-DATASET HEATMAP ============ -->
+    <section id="generalisation">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow"><span class="dim-tag dim-judge">Input</span><span class="dim-tag dim-signal">Generation</span> Cross-dataset generalisation — SIM, clean prompts</span>
+          <h2>Does it still work outside LibriTTS?</h2>
+          <p>Speaker similarity across 10 dataset conditions, grouped by which dimension they test: <strong style="color:var(--judge);">Input Robustness</strong> shifts the reference audio or speaker mix, <strong style="color:var(--signal);">Generation Robustness</strong> shifts the language or utterance length. Hover a cell for the exact value.</p>
+        </div>
+        <div class="heatmap-scroll">
+          __HEATMAP_TABLE__
+        </div>
+        <div class="hm-scale"><span>0.0</span><span class="ramp"></span><span>0.78 SIM</span></div>
+        <div class="hm-tooltip" id="hmTooltip"></div>
+      </div>
+    </section>
+
+    <!-- ============ MODELS ============ -->
+    <section id="models">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">Supported adversaries</span>
+          <h2>27 voice-cloning models, one interface.</h2>
+          <p>Zero-shot and fine-tuning TTS/VC wrappers, each launched from its own Conda environment to keep incompatible dependency stacks apart.</p>
+        </div>
+        <div class="models-legend">
+          <span class="lg"><i class="on"></i> On the LibriTTS leaderboard (18)</span>
+          <span class="lg"><i class="off"></i> In the codebase, not yet leaderboard-scored (9)</span>
+        </div>
+        <div class="chip-grid" id="modelsGrid">__MODELS_GRID__</div>
+      </div>
+    </section>
+
+    <!-- ============ PROTECTION METHODS ============ -->
+    <section id="protections">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">Protection methods</span>
+          <h2>Five ways to make a voice harder to clone.</h2>
+        </div>
+        <div class="protect-grid" id="protectGrid">__PROTECT_GRID__</div>
+      </div>
+    </section>
+
+    <!-- ============ DATASETS ============ -->
+    <section id="datasets">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">Datasets</span>
+          <h2>10 benchmark conditions, publicly hosted.</h2>
+          <p>Every subset is a Hugging Face dataset config under <span class="mono">Nanboy/RVCBench</span>, fetched automatically by the data loader.</p>
+        </div>
+        <div class="table-scroll">
+          <table class="ds-table">
+            <thead><tr><th scope="col">Config</th><th scope="col">Language</th><th scope="col">Typical use</th></tr></thead>
+            <tbody id="dsBody">__DATASETS_ROWS__</tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ METRICS ============ -->
+    <section id="metrics">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">Evaluated metrics</span>
+          <h2>The referee's scorecard.</h2>
+        </div>
+        <div class="metrics-grid">
+          <div class="metric"><span class="m-name">SIM</span><span class="m-dir">↑</span><p class="m-desc">Speaker cosine similarity between cloned and target voice.</p></div>
+          <div class="metric"><span class="m-name">WER</span><span class="m-dir">↓</span><p class="m-desc">Word error rate — how intelligible the generated speech is.</p></div>
+          <div class="metric"><span class="m-name">MOS</span><span class="m-dir">↑</span><p class="m-desc">SpeechMOS perceptual quality score.</p></div>
+          <div class="metric"><span class="m-name">MCD</span><span class="m-dir">↓</span><p class="m-desc">Mel-cepstral distortion versus the reference.</p></div>
+          <div class="metric"><span class="m-name">RTF</span><span class="m-dir">↓</span><p class="m-desc">Real-time factor; below 1 is faster than real time.</p></div>
+          <div class="metric"><span class="m-name">SVA</span><span class="m-dir">↑</span><p class="m-desc">Speaker-verification accuracy against the target identity.</p></div>
+          <div class="metric"><span class="m-name">Emo</span><span class="m-dir">↑</span><p class="m-desc">Emotion match rate between clone and target.</p></div>
+          <div class="metric"><span class="m-name">SNR / STOI / DNSMOS</span><span class="m-dir"></span><p class="m-desc">Fidelity metrics reported for protection and denoising runs.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FAQ ============ -->
+    <section id="faq">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">FAQ</span>
+          <h2>Questions people ask about RVCBench.</h2>
+        </div>
+        <div class="faq-grid" itemscope itemtype="https://schema.org/FAQPage">__FAQ_ITEMS__</div>
+      </div>
+    </section>
+
+    <!-- ============ QUICKSTART ============ -->
+    <section id="quickstart">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">Getting started</span>
+          <h2>One clone, protected, in under a minute.</h2>
+          <p>All outputs — data, generated audio, metrics — are written inside the repository. No checkpoint bundle required to start.</p>
+        </div>
+        <div class="qs-steps">
+          <div>
+            <div class="code-block">
+              <button class="copy-btn" data-copy="git clone https://github.com/Nanboy-Ronan/RVCBench.git&#10;cd RVCBench&#10;conda env create -f envs/qwen3-tts.yml && conda activate qwen3">Copy</button>
+              <pre><span class="c1"># clone + environment</span>
+git clone https://github.com/Nanboy-Ronan/RVCBench.git
+cd RVCBench
+conda env create -f envs/qwen3-tts.yml && conda activate qwen3</pre>
+            </div>
+          </div>
+          <div>
+            <div class="code-block">
+              <button class="copy-btn" data-copy="python scripts/run_qwen3tts_quickstart.py --max-samples 5&#10;python scripts/run_protect_qwen3tts_quickstart.py --max-samples 5">Copy</button>
+              <pre><span class="c1"># zero-shot clone, then protect + clone</span>
+python scripts/run_qwen3tts_quickstart.py --max-samples 5
+python scripts/run_protect_qwen3tts_quickstart.py --max-samples 5</pre>
+            </div>
+          </div>
+        </div>
+        <div class="hero-ctas" style="margin-top:1.8rem;">
+          <a class="btn" href="https://github.com/Nanboy-Ronan/RVCBench#quickstart-path" target="_blank" rel="noopener">Full quickstart guide ↗</a>
+          <a class="btn" href="https://github.com/Nanboy-Ronan/RVCBench/tree/main/notebooks" target="_blank" rel="noopener">Notebooks ↗</a>
+          <a class="btn" href="https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/model_environments.md" target="_blank" rel="noopener">Model environments ↗</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CITATION ============ -->
+    <section id="citation">
+      <div class="wrap cite-grid">
+        <div>
+          <span class="eyebrow">Citation</span>
+          <h2 style="font-family:var(--font-head);font-weight:600;font-size:clamp(1.9rem,3.4vw,2.6rem);margin-block:.5rem .9rem;">If RVCBench is useful, cite it.</h2>
+          <p style="color:var(--text-secondary);max-width:50ch;">Contributions are welcome — new protection methods, adversary wrappers, dataset adapters, and evaluation metrics. Open an issue or PR on GitHub.</p>
+          <div class="hero-ctas">
+            <a class="btn" href="https://github.com/Nanboy-Ronan/RVCBench/issues" target="_blank" rel="noopener">Open an issue ↗</a>
+            <a class="btn" href="https://github.com/Nanboy-Ronan/RVCBench/stargazers" target="_blank" rel="noopener">★ Star on GitHub</a>
+          </div>
+        </div>
+        <div class="code-block">
+          <button class="copy-btn" id="citeCopy">Copy</button>
+          <pre id="citeText" class="mono">@article{jin2026rvcbench,
+  title   = {RVCBench: Benchmarking the Robustness of
+             Voice Cloning Across Modern Audio
+             Generation Models},
+  author  = {Jin, Ruinan and Liao, Xinting and Yu, Hanlin
+             and Pandya, Deval and Li, Xiaoxiao},
+  journal = {arXiv preprint arXiv:2602.00443},
+  year    = {2026}
+}</pre>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <div class="foot-grid">
+        <a class="brand" href="#top"><img src="__LOGO_SRC__" alt=""> RVCBench</a>
+        <div class="foot-links">
+          <a href="https://arxiv.org/abs/2602.00443" target="_blank" rel="noopener">Paper</a>
+          <a href="https://huggingface.co/datasets/Nanboy/RVCBench" target="_blank" rel="noopener">Dataset</a>
+          <a href="https://huggingface.co/spaces/Nanboy/RVCBench" target="_blank" rel="noopener">Demo</a>
+          <a href="https://github.com/Nanboy-Ronan/RVCBench" target="_blank" rel="noopener">GitHub</a>
+          <a href="https://github.com/Nanboy-Ronan/RVCBench/tree/main/notebooks" target="_blank" rel="noopener">Notebooks</a>
+          <a href="https://github.com/Nanboy-Ronan/RVCBench/blob/main/LICENSE" target="_blank" rel="noopener">License</a>
+        </div>
+      </div>
+      <div class="foot-bottom">
+        <span>CC0-1.0 · Built for researchers working on voice-cloning robustness, speaker privacy, and audio-deepfake defense.</span>
+        <span>Not an official Anthropic, Google, or OpenAI product.</span>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* All content below (leaderboard rows, robustness chart + table, heatmap,
+     models/protections/datasets, stats) is server-rendered into the HTML at
+     build time — see docs/site-src/render.py. This script only *enhances*
+     what's already in the DOM: it never creates content, so the page is
+     fully readable with JavaScript disabled. */
+
+  /* ---------------- LEADERBOARD: re-sort existing rows in place ---------------- */
+  (function(){
+    var table = document.getElementById("lbTable");
+    if (!table) return;
+    var tbody = document.getElementById("lbBody");
+    var ths = table.querySelectorAll("thead th");
+    var sortKey = "sim", sortDir = -1;
+
+    function applySort(key){
+      if (sortKey === key) { sortDir *= -1; } else { sortKey = key; sortDir = key === "m" ? 1 : -1; }
+      var type = table.querySelector('th[data-key="'+key+'"]').getAttribute("data-type");
+      var rows = Array.prototype.slice.call(tbody.querySelectorAll("tr"));
+      rows.sort(function(a, b){
+        var av = a.getAttribute("data-" + key), bv = b.getAttribute("data-" + key);
+        if (type === "text") return av.localeCompare(bv) * sortDir * -1;
+        var an = av === "" ? null : parseFloat(av), bn = bv === "" ? null : parseFloat(bv);
+        if (an === null) return 1; if (bn === null) return -1;
+        return (an - bn) * sortDir;
+      });
+      rows.forEach(function(r, i){
+        tbody.appendChild(r);
+        var rankEl = r.querySelector(".rank");
+        if (rankEl) {
+          rankEl.textContent = i + 1;
+          rankEl.classList.toggle("medal", i < 3);
+        }
+      });
+      ths.forEach(function(t){
+        t.removeAttribute("aria-sort");
+        var btn = t.querySelector(".sort-btn");
+        if (btn) btn.classList.remove("active");
+      });
+      var activeTh = table.querySelector('th[data-key="'+key+'"]');
+      activeTh.setAttribute("aria-sort", sortDir === 1 ? "ascending" : "descending");
+      var activeBtn = activeTh.querySelector(".sort-btn");
+      if (activeBtn) activeBtn.classList.add("active");
+    }
+
+    ths.forEach(function(th){
+      var key = th.getAttribute("data-key");
+      var btn = th.querySelector(".sort-btn");
+      if (!btn) return;
+      btn.addEventListener("click", function(){ applySort(key); });
+      btn.addEventListener("keydown", function(e){
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); applySort(key); }
+      });
+    });
+  })();
+
+  /* ---------------- HEATMAP: richer hover tooltip (native title= already works without JS) ---------------- */
+  (function(){
+    var table = document.getElementById("hmTable");
+    var tip = document.getElementById("hmTooltip");
+    if (!table || !tip) return;
+    table.addEventListener("mousemove", function(e){
+      var td = e.target.closest("td[data-v]");
+      if (!td) { tip.classList.remove("show"); return; }
+      tip.textContent = td.getAttribute("data-m") + " · " + td.getAttribute("data-c") + ": " + td.getAttribute("data-v");
+      tip.style.left = (e.clientX + 14) + "px";
+      tip.style.top = (e.clientY + 14) + "px";
+      tip.classList.add("show");
+    });
+    table.addEventListener("mouseleave", function(){ tip.classList.remove("show"); });
+  })();
+
+  /* ---------------- COPY BUTTONS ---------------- */
+  document.querySelectorAll(".copy-btn[data-copy]").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var text = btn.getAttribute("data-copy").replace(/&#10;/g,"\n");
+      copyText(text, btn);
+    });
+  });
+  var citeCopy = document.getElementById("citeCopy");
+  if (citeCopy) citeCopy.addEventListener("click", function(){
+    copyText(document.getElementById("citeText").textContent, citeCopy);
+  });
+  function copyText(text, btn){
+    var done = function(){ var old = btn.textContent; btn.textContent = "Copied"; setTimeout(function(){btn.textContent = old;}, 1400); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function(){ fallbackCopy(text, done); });
+    } else {
+      fallbackCopy(text, done);
+    }
+  }
+  function fallbackCopy(text, done){
+    var ta = document.createElement("textarea");
+    ta.value = text; ta.style.position="fixed"; ta.style.opacity="0";
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); done(); } catch(e){}
+    document.body.removeChild(ta);
+  }
+
+  /* ---------------- HERO WAVEFORM CANVAS ---------------- */
+  (function(){
+    var canvas = document.getElementById("wave");
+    var ctx = canvas.getContext("2d");
+    var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var t = 0;
+
+    function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+
+    function resize(){
+      var rect = canvas.getBoundingClientRect();
+      var dpr = Math.min(window.devicePixelRatio||1, 2);
+      canvas.width = rect.width*dpr; canvas.height = rect.height*dpr;
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+    }
+    window.addEventListener("resize", resize);
+    resize();
+
+    function draw(){
+      var rect = canvas.getBoundingClientRect();
+      var w = rect.width, h = rect.height, mid = h/2;
+      ctx.clearRect(0,0,w,h);
+
+      var sig = css('--signal'), prot = css('--protect'), grid = css('--grid-line');
+
+      // graticule
+      ctx.strokeStyle = grid; ctx.lineWidth = 1;
+      for (var gy=1; gy<4; gy++){
+        ctx.beginPath(); ctx.moveTo(0, h/4*gy); ctx.lineTo(w, h/4*gy); ctx.stroke();
+      }
+
+      var split = w*0.46;
+
+      function amp(px){
+        var d = Math.max(0, px - split) / (w - split);
+        return 1 + d*d*3.2;
+      }
+      function noiseAt(px, phase){
+        var n = Math.sin(px*0.11 + phase*2.3) * 0.5 + Math.sin(px*0.29 - phase*1.7) * 0.3 + Math.sin(px*0.53 + phase*3.1) * 0.2;
+        return n;
+      }
+
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (var px=0; px<=w; px+=2){
+        var base = Math.sin(px*0.045 + t) * 0.55 + Math.sin(px*0.021 - t*0.6) * 0.3;
+        var a = amp(px);
+        var jitter = px > split ? noiseAt(px, t) * (a-1) * 0.9 : 0;
+        var y = mid + (base + jitter) * (h*0.32) * (px>split ? a : 1);
+        y = Math.max(4, Math.min(h-4, y));
+        if (px===0) ctx.moveTo(px,y); else ctx.lineTo(px,y);
+      }
+      var grad = ctx.createLinearGradient(0,0,w,0);
+      grad.addColorStop(0, sig); grad.addColorStop(Math.max(0,Math.min(1,split/w - 0.03)), sig);
+      grad.addColorStop(Math.min(1,split/w + 0.05), prot); grad.addColorStop(1, prot);
+      ctx.strokeStyle = grad;
+      ctx.stroke();
+
+      // divider
+      ctx.setLineDash([3,4]);
+      ctx.strokeStyle = grid; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(split,8); ctx.lineTo(split,h-8); ctx.stroke();
+      ctx.setLineDash([]);
+
+      if (!reduced) t += 0.028;
+    }
+
+    function loop(){ draw(); if(!reduced) requestAnimationFrame(loop); }
+    if (reduced) { draw(); } else { requestAnimationFrame(loop); }
+  })();
+
+})();
+</script>

@@ -5,15 +5,9 @@ projects often pin incompatible versions of PyTorch, Transformers, ONNX Runtime,
 tokenizers, or model-specific helper packages, so one global Python environment
 is not expected to run every model.
 
-During internal development, the model environment files were maintained under:
-
-```text
-/tealab-data/rjin02/AudioWatermarkBench/envs
-```
-
-For the public release, the same environment specs are included in this
-repository under [`envs/`](../envs/). Use the environment that matches the model
-you are launching.
+The model environment specs are maintained in this repository under
+[`envs/`](../envs/). Use the environment that matches the model you are
+launching.
 
 ## Creating an Environment
 
@@ -49,10 +43,10 @@ cd ..
 | General benchmark / fallback | `envs/audiobench.yml` | `audiobench` |
 | BertVITS2 / SafeSpeech surrogate | `envs/bertvits2.yml` | `bertvits2` |
 | CosyVoice | `envs/cosyvoice.yml` | `cosyvoice` |
-| F5-TTS | `envs/f5-tts.yml` | `audiobench` |
+| F5-TTS | `envs/f5-tts.yml` | `f5-tts` |
 | FishSpeech | `envs/fishspeech.yml` | `fishspeech` |
 | Fish Audio S2 | `envs/fishspeech.yml` | `fishspeech` |
-| GLM-TTS | `envs/glm-tts.yml` | `audiobench` |
+| GLM-TTS | `envs/glm-tts.yml` | `glm-tts` |
 | GlowTTS | `envs/glowtts.yml` | `glowtts` |
 | Higgs Audio | `envs/higgs-audio.yml` | `higgs-audio` |
 | IndexTTS | `envs/indextts.yml` | `indextts` |
@@ -60,8 +54,8 @@ cd ..
 | MaskGCT | `envs/maskgct.yml` | `maskgct` |
 | MGM-Omni | `envs/mgm-omni.yml` | `mgm-omni` |
 | MOSS-TTSD | `envs/moss.yml` | `moss` |
-| OpenVoice | `envs/openvoice.yml` | `audiobench` |
-| OZSpeech | `envs/ozspeech.yml` | `audiobench` |
+| OpenVoice | `envs/openvoice.yml` | `openvoice` |
+| OZSpeech | `envs/ozspeech.yml` | `ozspeech` |
 | PlayDiffusion | `envs/playdiffusion.yml` | `playdiffusion` |
 | Qwen3-Omni | `envs/qwen3-omni.yml` | `qwen3-omni` |
 | Qwen3-TTS | `envs/qwen3-tts.yml` | `qwen3` |
@@ -69,8 +63,8 @@ cd ..
 | StyleTTS2 | `envs/styletts2.yml` | `styletts2` |
 | VALL-E | `envs/vall-e.yml` | `vall-e` |
 | VibeVoice | `envs/vibevoice.yml` | `vibevoice` |
-| XTTS-v2 | `envs/xtts-v2.yml` | `audiobench` |
-| ZipVoice | `envs/zipvoice.yml` | `audiobench` |
+| XTTS-v2 | `envs/xtts-v2.yml` | `xtts-v2` |
+| ZipVoice | `envs/zipvoice.yml` | `zipvoice` |
 
 ## Reproducibility Options
 
