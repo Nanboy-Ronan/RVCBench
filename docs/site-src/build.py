@@ -69,7 +69,7 @@ def build_head(canonical: bool = True) -> str:
     title = "RVCBench — Voice Cloning Robustness Benchmark"
     desc = (
         "RVCBench benchmarks voice-cloning robustness, speaker privacy, and audio-protection methods "
-        "across 27 TTS/VC models, 5 protection methods, and 10 dataset conditions, with a public "
+        "across 32 TTS/VC models, 5 protection methods, and 10 dataset conditions, with a public "
         "leaderboard, dataset, and reproducible evaluation pipeline."
     )
     url = D.SITE["url"]

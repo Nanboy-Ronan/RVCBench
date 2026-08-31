@@ -43,16 +43,20 @@ cd ..
 | General benchmark / fallback | `envs/audiobench.yml` | `audiobench` |
 | BertVITS2 / SafeSpeech surrogate | `envs/bertvits2.yml` | `bertvits2` |
 | CosyVoice | `envs/cosyvoice.yml` | `cosyvoice` |
+| dots.tts | `envs/dots-tts.yml` | `dots-tts` |
 | F5-TTS | `envs/f5-tts.yml` | `f5-tts` |
+| Fish Audio S2 (in-process, via FishSpeech checkout) | `envs/fishspeech.yml` | `fishspeech` |
+| Fish Audio S2 (local API server) | `envs/fish-speech-s2.yml` (base env; serves the model, see [README](../README.md)) | `fish-speech-s2` |
 | FishSpeech | `envs/fishspeech.yml` | `fishspeech` |
-| Fish Audio S2 | `envs/fishspeech.yml` | `fishspeech` |
 | GLM-TTS | `envs/glm-tts.yml` | `glm-tts` |
 | GlowTTS | `envs/glowtts.yml` | `glowtts` |
 | Higgs Audio | `envs/higgs-audio.yml` | `higgs-audio` |
+| Higgs TTS 3 | `envs/vllm-omni-cu129.yml` (base env; serves the model, see [README](../README.md)) | `vllm-omni-cu129` |
 | IndexTTS | `envs/indextts.yml` | `indextts` |
 | Kimi Audio | `envs/kimi-audio.yml` | `kimi-audio` |
 | MaskGCT | `envs/maskgct.yml` | `maskgct` |
 | MGM-Omni | `envs/mgm-omni.yml` | `mgm-omni` |
+| MOSS-TTS | `envs/moss-tts.yml` | `moss-tts` |
 | MOSS-TTSD | `envs/moss.yml` | `moss` |
 | OpenVoice | `envs/openvoice.yml` | `openvoice` |
 | OZSpeech | `envs/ozspeech.yml` | `ozspeech` |
@@ -65,6 +69,7 @@ cd ..
 | VibeVoice | `envs/vibevoice.yml` | `vibevoice` |
 | XTTS-v2 | `envs/xtts-v2.yml` | `xtts-v2` |
 | ZipVoice | `envs/zipvoice.yml` | `zipvoice` |
+| ZONOS2 | not a conda env — see `envs/zonos2.yml` (`uv`-managed `checkpoints/ZONOS2-repo/.venv`) | — |
 
 ## Reproducibility Options
 

@@ -1,0 +1,30 @@
+# @package _global_
+
+run_name: dots_tts_ots_on_libritts_with_spec
+device: cuda:0
+base_dir: .
+protected_audio_dir: null
+protection_run_name: spec_on_libritts
+protected_audio_subdir: protected_audio
+vc:
+  mode: ots
+  model: dots_tts
+output_paths:
+  metrics_file: results/dots_tts_ots_on_libritts_with_spec/metrics.json
+batch_size: 16 # not used in VC
+adversary:
+  checkpoint: checkpoints/dots.tts-soar
+  precision: bfloat16
+  optimize: true
+  num_steps: 10
+  guidance_scale: 1.2
+  max_samples: null
+defaults:
+  - _self_
+  - /dataset: libritts
+evaluation:
+  bootstrap:
+    enabled: true
+    num_samples: 1000
+    confidence_level: 0.95
+    seed: null

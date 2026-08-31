@@ -1,0 +1,13 @@
+name: fish-speech-s2
+channels:
+  - defaults
+dependencies:
+  - python=3.12
+  - pip
+  - git
+  - ffmpeg
+  - libsndfile
+  - portaudio
+  - pip:
+      - uv
+      - huggingface_hub[cli]

@@ -38,7 +38,7 @@ DIMENSIONS = [
         "name": "Generation Robustness",
         "question": "Does cloning quality hold up across model architectures, languages, and utterance length?",
         "subtests": [
-            "27 adversary models spanning codec-LM, diffusion, and hybrid architectures",
+            "32 adversary models spanning codec-LM, diffusion, and hybrid architectures",
             "Multilingual (EN/ZH/FR), long-form generation, and emotion preservation",
         ],
         "demo_anchor": "leaderboard",
@@ -91,7 +91,7 @@ WHY_COMPARISON = [
 ]
 
 STATS = [
-    {"n": "27", "l": "VC / TTS models"},
+    {"n": "32", "l": "VC / TTS models"},
     {"n": "5", "l": "protection methods"},
     {"n": "10", "l": "dataset configs"},
     {"n": "225", "l": "speakers (paper)"},
@@ -180,9 +180,11 @@ MODELS = [
     {"n": "IndexTTS", "key": "index_tts", "b": True},
     {"n": "ZipVoice", "key": "zipvoice", "b": True},
     {"n": "FishSpeech", "key": "fishspeech", "b": True},
-    {"n": "Fish Audio S2", "key": "fishspeech_s2", "b": False},
+    {"n": "Fish Audio S2 (in-proc)", "key": "fishspeech_s2", "b": False},
+    {"n": "Fish Audio S2 (server)", "key": "fish_audio_s2", "b": False},
     {"n": "CosyVoice / 2", "key": "cosyvoice", "b": True},
     {"n": "Higgs Audio", "key": "higgs_audio", "b": True},
+    {"n": "Higgs TTS 3", "key": "higgs_tts_3", "b": False},
     {"n": "SparkTTS", "key": "sparktts", "b": True},
     {"n": "VALL-E", "key": "vall_e", "b": False},
     {"n": "StyleTTS 2", "key": "styletts2", "b": True},
@@ -191,6 +193,9 @@ MODELS = [
     {"n": "Kimi Audio", "key": "kimi_audio", "b": False},
     {"n": "MGM-Omni", "key": "mgm_omni", "b": True},
     {"n": "MOSS TTSD", "key": "moss_ttsd", "b": True},
+    {"n": "MOSS-TTS", "key": "moss_tts", "b": False},
+    {"n": "dots.tts", "key": "dots_tts", "b": False},
+    {"n": "ZONOS2", "key": "zonos2", "b": False},
     {"n": "PlayDiffusion", "key": "playdiffusion", "b": True},
     {"n": "Bark Voice Clone", "key": "bark_voice_clone", "b": False},
     {"n": "OZSpeech", "key": "ozspeech", "b": True},
@@ -229,12 +234,12 @@ FAQ = [
     {
         "q": "What is RVCBench?",
         "a": "RVCBench is a benchmark for voice-cloning robustness, speaker privacy, and audio-protection methods. "
-             "It evaluates 27 zero-shot and fine-tuning TTS/VC models against 5 audio-protection methods across "
+             "It evaluates 32 zero-shot and fine-tuning TTS/VC models against 5 audio-protection methods across "
              "10 dataset configurations, scoring speaker similarity, intelligibility, perceptual quality, and runtime.",
     },
     {
         "q": "How many voice-cloning models does RVCBench evaluate?",
-        "a": "The RVCBench codebase includes wrappers for 27 TTS/VC adversary models. The arXiv v2 paper reports "
+        "a": "The RVCBench codebase includes wrappers for 32 TTS/VC adversary models. The arXiv v2 paper reports "
              "results for 18 of those models across 18 robustness evaluations, 225 speakers, and 14,370 utterances.",
     },
     {

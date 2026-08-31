@@ -1,0 +1,14 @@
+name: vllm-omni-cu129
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.12
+  - pip
+  - git
+  - ffmpeg
+  - libsndfile
+  - pip:
+      - uv
+      - huggingface_hub[cli]
+      - requests

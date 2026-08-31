@@ -244,7 +244,7 @@ def render_jsonld():
             "alternateName": "RVCBench: Voice Cloning Robustness Benchmark",
             "description": (
                 "A benchmark for voice-cloning robustness, speaker privacy, and audio-protection methods, "
-                "covering 27 TTS/VC models, 10 dataset configurations, and 5 audio-protection methods."
+                "covering 32 TTS/VC models, 10 dataset configurations, and 5 audio-protection methods."
             ),
             "url": D.SITE["url"],
             "sameAs": [D.SITE["repo"], D.SITE["dataset"], D.SITE["paper"]],
@@ -298,7 +298,7 @@ def render_llms_txt():
         "# RVCBench",
         "",
         "> A benchmark for voice-cloning robustness, speaker privacy, and audio-protection "
-        "methods, covering 27 TTS/VC models, 5 protection methods, and 10 dataset configurations.",
+        "methods, covering 32 TTS/VC models, 5 protection methods, and 10 dataset configurations.",
         "",
         "RVCBench applies audio-protection perturbations to source speech, runs zero-shot and "
         "fine-tuning voice-cloning models against clean and protected prompts, optionally denoises "

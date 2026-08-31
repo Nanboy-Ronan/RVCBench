@@ -143,7 +143,7 @@ Speaker similarity (SIM) on clean prompts across all benchmark datasets. — ind
 
 ### Voice Cloning Adversaries (Zero-Shot OTS)
 
-RVCBench currently includes wrappers or configs for **27 VC/TTS adversary models**:
+RVCBench currently includes wrappers or configs for **32 VC/TTS adversary models**:
 
 | Model | Key |
 |---|---|
@@ -159,9 +159,11 @@ RVCBench currently includes wrappers or configs for **27 VC/TTS adversary models
 | IndexTTS | `index_tts` |
 | ZipVoice | `zipvoice` |
 | FishSpeech | `fishspeech` |
-| Fish Audio S2 | `fishspeech_s2` |
+| Fish Audio S2 (in-process, via FishSpeech checkout) | `fishspeech_s2` |
+| Fish Audio S2 (local API server) | `fish_audio_s2` |
 | CosyVoice / CosyVoice 2 | `cosyvoice` |
 | Higgs Audio | `higgs_audio` |
+| Higgs TTS 3 (local API server) | `higgs_tts_3` |
 | SparkTTS | `sparktts` |
 | VALL-E | `vall_e` |
 | StyleTTS 2 | `styletts2` |
@@ -170,6 +172,9 @@ RVCBench currently includes wrappers or configs for **27 VC/TTS adversary models
 | Kimi Audio | `kimi_audio` |
 | MGM-Omni | `mgm_omni` |
 | MOSS TTSD | `moss_ttsd` |
+| MOSS-TTS | `moss_tts` |
+| dots.tts | `dots_tts` |
+| ZONOS2 | `zonos2` |
 | PlayDiffusion | `playdiffusion` |
 | Bark Voice Clone | `bark_voice_clone` |
 | OZSpeech | `ozspeech` |
@@ -428,6 +433,16 @@ python run_vc.py --config-name ots_vc/clean/libritts/fireredtts2_ots
 
 # VoxCPM
 python run_vc.py --config-name ots_vc/clean/libritts/voxcpm_ots
+
+# dots.tts (conda env: dots-tts)
+python run_vc.py --config-name ots_vc/clean/libritts/dots_tts_ots device=cuda:<gpu>
+
+# MOSS-TTS (conda env: moss-tts)
+python run_vc.py --config-name ots_vc/clean/libritts/moss_tts_ots device=cuda:<gpu>
+
+# ZONOS2 (uv-managed env; run with its own interpreter, GPU pinned via CUDA_VISIBLE_DEVICES)
+CUDA_VISIBLE_DEVICES=<gpu> checkpoints/ZONOS2-repo/.venv/bin/python run_vc.py \
+  --config-name ots_vc/clean/libritts/zonos2_ots
 ```
 
 ### Model-specific setup notes
@@ -437,7 +452,66 @@ python run_vc.py --config-name ots_vc/clean/libritts/voxcpm_ots
 - `Fish Audio S2` ([paper](https://arxiv.org/abs/2603.08823)) reuses the same `fishaudio/fish-speech` checkout as `FishSpeech`, pointed at the `fishaudio/s2-pro` checkpoint instead of `s1-mini`. S2 uses a different dual-AR decoder architecture than S1; the wrapper defaults `decoder_config_name` to `modded_dac_vq` as a best-effort setting that has not been validated against a downloaded `s2-pro` checkpoint — see [docs/quickstart_model_setup.md](docs/quickstart_model_setup.md#4-fish-audio-s2-quickstart).
 - `FireRedTTS-2` expects a local upstream checkout at `checkpoints/FireRedTTS2` and pretrained weights under `checkpoints/FireRedTTS2/pretrained_models/FireRedTTS2` by default.
 - `VoxCPM` defaults to the Hugging Face model ID `openbmb/VoxCPM2`. If you want to force offline/local loading, override `adversary.local_files_only=true` and optionally set `adversary.cache_dir=/path/to/cache`.
+- `dots.tts` (`rednote-hilab/dots.tts-soar`, pip-installable) needs its own env (`envs/dots-tts.yml`, see the file for the exact install order — it requires `torch>=2.8.0`, newer than the repo-wide `requirements.txt` pin). `device: cuda:N` is honoured.
+- `MOSS-TTS` (`OpenMOSS-Team/MOSS-TTS-v1.5`, plain `transformers` + `trust_remote_code`) also needs its own env (`envs/moss-tts.yml`; see the file for the sequential pip-install order — installing everything in one shot fails to resolve).
+- `ZONOS2` (`Zyphra/ZONOS2`) is not pip-installable; it's a `uv`-managed project (see `envs/zonos2.yml` for the clone + `uv sync` setup steps). Its `TTSLLM` scheduler ignores `device: cuda:N` — pin the GPU with `CUDA_VISIBLE_DEVICES` instead — and it pre-allocates a large KV cache (~55GB on an 80GB A100), so run it alone on its GPU.
+- `dots.tts`, `ZONOS2`, and `MOSS-TTS` each route the sample's `target_language` into the model runtime, which matters for AISHELL, French, and mixed-direction cross-lingual configs.
+- `Fish Audio S2` (local API server) and `Higgs TTS 3` talk to a locally running inference server instead of loading weights in-process — see [Server-backed models](#server-backed-models-fish-audio-s2-and-higgs-tts-3) below.
 - All model-specific paths and generation knobs can be overridden at launch time with Hydra, for example: `adversary.code_path=/path/to/model_repo` or `adversary.max_samples=20`.
+
+### Server-backed models: Fish Audio S2 and Higgs TTS 3
+
+Unlike the other adversaries, these two don't load weights in-process — they call
+a local HTTP server (`adversary.endpoint_url` in the config), so you start the
+server first and then point `run_vc.py` at it.
+
+**Fish Audio S2** (`fishaudio/s2-pro`, served via Fish Speech's `/v1/tts` API):
+```bash
+git clone https://github.com/fishaudio/fish-speech.git checkpoints/fish_speech
+conda env create -f envs/fish-speech-s2.yml
+conda activate fish-speech-s2
+uv pip install 'numba==0.63.1' 'llvmlite==0.46.0'
+cd checkpoints/fish_speech
+uv pip install -e '.[cu126]'
+uv pip install 'protobuf>=6.31.1,<7'
+cd ../..
+hf download fishaudio/s2-pro --local-dir checkpoints/s2-pro
+CUDA_VISIBLE_DEVICES=<gpu> python checkpoints/fish_speech/tools/api_server.py \
+  --llama-checkpoint-path checkpoints/s2-pro \
+  --decoder-checkpoint-path checkpoints/s2-pro/codec.pth \
+  --listen 0.0.0.0:8001 --half
+# in another shell, from the benchmark (audiobench) env — needs the `ormsgpack` dep in requirements.txt:
+python run_vc.py --config-name ots_vc/clean/libritts/fish_audio_s2_ots
+```
+
+**Higgs TTS 3** (`bosonai/higgs-tts-3-4b`, served via vLLM-Omni's OpenAI-compatible `/v1/audio/speech` API):
+```bash
+conda env create -f envs/vllm-omni-cu129.yml
+conda activate vllm-omni-cu129
+uv pip install --torch-backend=cu129 --extra-index-url https://wheels.vllm.ai/0.24.0/cu129 vllm==0.24.0
+uv pip install --torch-backend=cu129 vllm-omni==0.24.0
+hf download bosonai/higgs-tts-3-4b
+CUDA_VISIBLE_DEVICES=<gpu> vllm-omni serve bosonai/higgs-tts-3-4b \
+  --host 0.0.0.0 --port 8000 --trust-remote-code --omni \
+  --allowed-local-media-path "$(pwd)"
+# in another shell, from the benchmark env:
+python run_vc.py --config-name ots_vc/clean/libritts/higgs_tts3_ots
+```
+
+Both server configs default `device: cpu` at the top level (the client-side
+process does no GPU work) with `evaluation.device: cuda:0` for the metrics
+pass; point the server itself at a GPU via `CUDA_VISIBLE_DEVICES` as shown above.
+
+**Known metric gaps in the `dots-tts`, `moss-tts`, and `zonos2` envs** (env
+version conflicts, not model properties — see the `emotion_pairs` /
+`speechmos_pairs` fields in each run's `metrics.json`):
+- `dots-tts`, `moss-tts`: `emotion_pairs: 0` — the bundled speechbrain emotion
+  recognizer needs `AutoModelWithLMHead`, which is removed in the
+  `transformers` version these models require.
+- `zonos2`: `speechmos_pairs: 0`, `emotion_pairs: 0` — `torchcodec` fails to
+  load its native library against this env's torch/ffmpeg combination, so the
+  `torchaudio.load_with_torchcodec` path used for those two metrics fails.
+  WER, MCD, SIM, DNSMOS, and DNSMOS-C are unaffected.
 
 ### Example overrides
 

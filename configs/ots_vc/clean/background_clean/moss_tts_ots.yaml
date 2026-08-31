@@ -1,0 +1,31 @@
+# @package _global_
+
+run_name: "moss_tts_ots_on_background_clean"
+device: "cuda:0"
+base_dir: "."
+
+vc:
+  mode: "ots"
+  model: "moss_tts"
+
+output_paths:
+  metrics_file: "results/moss_tts_ots_on_background_clean/metrics.json"
+
+adversary:
+  checkpoint: "checkpoints/MOSS-TTS-v1.5"
+  attn_implementation: "sdpa"
+  max_new_tokens: 4096
+  language: null
+  max_samples: null
+
+batch_size: 16 # not used in VC
+
+defaults:
+  - _self_
+  - /dataset: background_clean
+evaluation:
+  bootstrap:
+    enabled: true
+    num_samples: 1000
+    confidence_level: 0.95
+    seed: null

@@ -1,0 +1,30 @@
+# @package _global_
+
+run_name: zonos2_ots_on_libritts_with_gaussian_noise
+device: cuda:0
+base_dir: .
+protected_audio_dir: null
+protection_run_name: grnoise_on_libritts
+protected_audio_subdir: protected_audio
+vc:
+  mode: ots
+  model: zonos2
+output_paths:
+  metrics_file: results/zonos2_ots_on_libritts_with_gaussian_noise/metrics.json
+batch_size: 16 # not used in VC
+adversary:
+  checkpoint: Zyphra/ZONOS2
+  seed: 42
+  clean_speaker_background: false
+  accurate_mode: true
+  max_tokens: null
+  max_samples: null
+defaults:
+  - _self_
+  - /dataset: libritts
+evaluation:
+  bootstrap:
+    enabled: true
+    num_samples: 1000
+    confidence_level: 0.95
+    seed: null

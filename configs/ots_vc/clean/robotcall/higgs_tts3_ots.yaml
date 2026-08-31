@@ -1,0 +1,43 @@
+# @package _global_
+
+run_name: "higgs_tts3_ots_on_robotcall"
+device: "cpu"
+base_dir: "."
+
+vc:
+  mode: "ots"
+  model: "higgs_tts_3"
+
+output_paths:
+  metrics_file: "results/higgs_tts3_ots_on_robotcall/metrics.json"
+
+adversary:
+  name: "HiggsTTS3"
+  endpoint_url: "http://localhost:8000/v1/audio/speech"
+  request_model: "bosonai/higgs-tts-3-4b"
+  response_format: "wav"
+  timeout: 600
+  temperature: 0.8
+  top_k: 50
+  max_new_tokens: 1024
+  default_reference_text: "Here is a sample of the desired voice."
+  min_reference_duration_sec: 1.0
+  reference_padding_sec: 0.05
+  max_samples: null
+
+batch_size: 16
+
+defaults:
+  - _self_
+  - /dataset: robotcall
+evaluation:
+  device: "cuda:0"
+  resume: true
+  progress_log_interval: 10
+  cpu_threads: 8
+  interop_threads: 1
+  bootstrap:
+    enabled: true
+    num_samples: 1000
+    confidence_level: 0.95
+    seed: null

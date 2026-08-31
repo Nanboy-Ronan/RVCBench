@@ -1,0 +1,38 @@
+# dots.tts requires torch>=2.8.0, newer than the repo-wide requirements.txt pin
+# (torch==2.3.1), so it gets its own isolated env instead of sharing `audiobench`.
+# Install order matters: the harness deps below pull in an older torch as a
+# transitive dependency, so torch/torchaudio must be (re-)installed last.
+name: dots-tts
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - ffmpeg
+  - libsndfile
+  - pip:
+      - "dots.tts"
+      - "setuptools<81" # pyworld (via pymcd) still imports pkg_resources
+      - hydra-core==1.3.2
+      - hydra-colorlog==0.1.4
+      - omegaconf==2.3.0
+      - jiwer==3.0.3
+      - librosa>=0.11.0 # dots.tts requires >=0.11.0
+      - matplotlib
+      - openai_whisper==20231117
+      - pymcd==0.2.1
+      - pysndfx==0.3.6
+      - speechbrain==1.0.2
+      - torch_stoi==0.2.1
+      - tqdm==4.64.1
+      - pandas
+      - GPUtil
+      - psutil
+      - onnxruntime # enables the DNSMOS metric
+      - monotonic-align # src/models/__init__.py unconditionally imports bertvits2_model
+      # Must be installed last: harness deps above drag torch back to an
+      # older, mismatched torch/torchaudio pair.
+      - --extra-index-url https://download.pytorch.org/whl/cu126
+      - torch==2.8.0
+      - torchaudio==2.8.0
