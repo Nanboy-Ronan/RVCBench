@@ -1,0 +1,15 @@
+name: indextts
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - ffmpeg
+  - libsndfile
+  - espeak-ng
+  - pip:
+      - --extra-index-url https://download.pytorch.org/whl/cu121
+      - -r ../requirements.txt
+      - onnxruntime-gpu==1.18.0
+      - ruamel.yaml==0.18.15

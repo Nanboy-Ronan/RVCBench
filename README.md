@@ -682,12 +682,6 @@ If you use RVCBench in your research, please cite:
 }
 ```
 
-## Star History
-
-If RVCBench is useful for your work, consider giving it a star — it helps others discover the benchmark.
-
-[![Star History Chart](https://api.star-history.com/svg?repos=Nanboy-Ronan/RVCBench&type=Date)](https://star-history.com/#Nanboy-Ronan/RVCBench&Date)
-
 ## License
 
 See `LICENSE`.

@@ -1,0 +1,15 @@
+name: mgm-omni
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - ffmpeg
+  - libsndfile
+  - espeak-ng
+  - pip:
+      - --extra-index-url https://download.pytorch.org/whl/cu121
+      - -r ../requirements.txt
+      - matcha-tts
+      - modelscope==1.31.0

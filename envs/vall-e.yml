@@ -1,0 +1,13 @@
+name: vall-e
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - ffmpeg
+  - libsndfile
+  - espeak-ng
+  - pip:
+      - --extra-index-url https://download.pytorch.org/whl/cu121
+      - -r ../requirements.txt
