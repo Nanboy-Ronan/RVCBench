@@ -11,9 +11,10 @@ launching.
 
 ## Creating an Environment
 
-The environment YAML files reference the repository-level
-[`requirements.txt`](../requirements.txt). Run the commands from the `envs/`
-directory so relative requirement paths resolve correctly:
+The Qwen environment installs only the core package and Qwen runtime. Other
+base templates install the core package and may require a separate
+upstream checkout or package. They are installation starting points, not tested
+lock files. Run from `envs/` so editable package paths resolve correctly:
 
 ```bash
 cd envs
@@ -25,7 +26,7 @@ cd ..
 Then run the corresponding benchmark command, for example:
 
 ```bash
-python run_vc.py --config-name ots_vc/clean/libritts/qwen3_tts_ots
+python scripts/run_qwen3tts_quickstart.py --max-samples 5
 ```
 
 To update an existing environment:
@@ -73,12 +74,25 @@ cd ..
 
 ## Reproducibility Options
 
-The checked-in Conda YAML files are the lowest-friction public interface. They
-make model-specific dependencies visible and let users install only the
-environment they need.
+The Qwen quickstart and CPU smoke path are covered by offline CI. The other
+model families have adapter integrations and base environment templates; they
+have not all been revalidated with current upstream packages. The root
+`requirements.txt` is a legacy aggregate and is not the recommended installation
+path. Follow each model runtime setup before using its adapter.
+
+Generation-only usage needs the core plus model runtime. Install `.[eval]`
+explicitly for full evaluation; run `rvcbench doctor --model qwen3 --eval --imports` to
+check dependency availability before launching. This check does not load models
+or certify CUDA compatibility. Training/protection runtimes need their own
+upstream dependencies.
 
 For stronger reproducibility, generate platform-specific lock files from these
 YAML files with `conda-lock`, or publish prebuilt Docker/Apptainer images per
 model family. Containers are usually the most reliable option for CUDA-heavy
 third-party inference stacks, while Conda or Micromamba specs are easier for
 users who need to adapt paths, CUDA versions, or local checkpoint locations.
+
+For models requiring a different Torch version, generate with `+vc.generate_only=true`
+in that model's environment and evaluate in a separate environment containing
+`.[eval]`. The Qwen and evaluation extras pin a matched Torch/Torchaudio 2.6 pair;
+other model base templates do not install the evaluation stack automatically.

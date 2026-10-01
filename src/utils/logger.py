@@ -1,13 +1,10 @@
 import logging
 import os
 import time
-from datetime import datetime
+import uuid
 from pathlib import Path
 
 from omegaconf import OmegaConf
-
-def get_timestamp():
-    return datetime.now().strftime("%Y%m%d-%H%M%S")
 
 def setup_logger(logger_name, root, phase, level=logging.INFO, screen=False, tofile=False):
     lg = logging.getLogger(logger_name)
@@ -54,7 +51,7 @@ def setup_exp(base_dir, run_name):
 def get_timestamp():
     timestampTime = time.strftime("%H%M%S")
     timestampDate = time.strftime("%Y%m%d")
-    return timestampDate + "-" + timestampTime
+    return timestampDate + "-" + timestampTime + "-" + uuid.uuid4().hex[:8]
 
 
 def log_config(logger, conf, *, resolve=True):

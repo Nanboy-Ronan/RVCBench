@@ -254,6 +254,7 @@ def resolve_hf_dataset_root(
     hf_config_name: str,
     *,
     hf_cache_dir: Optional[Path] = None,
+    revision: Optional[str] = None,
     logger=None,
 ) -> Path:
     """Download the named config from a HuggingFace Hub dataset and return its local root.
@@ -279,6 +280,7 @@ def resolve_hf_dataset_root(
     snapshot_kwargs = {
         "repo_id": hf_dataset_id,
         "repo_type": "dataset",
+        "revision": revision,
         "allow_patterns": [f"{hf_config_name}/*"],
     }
     if hf_cache_dir is not None:

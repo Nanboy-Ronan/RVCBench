@@ -573,6 +573,10 @@ class AllSpeakerData:
     ) -> List[ZeroShotSample]:
         self._load_zero_shot_samples()
 
+        if speaker_id is None:
+            speaker_id = getattr(self.dataset_config, "speaker_id", None)
+        if max_samples is not None and int(max_samples) <= 0:
+            raise ValueError("max_samples must be positive")
         filtered: Iterable[ZeroShotSample] = self._zero_shot_samples
         if speaker_id is not None:
             speaker_id = str(speaker_id)

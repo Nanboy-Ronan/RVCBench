@@ -507,8 +507,8 @@
       <div class="wrap hero-grid">
         <div>
           <span class="eyebrow">Voice-cloning robustness benchmark</span>
-          <h1>32 models will try to clone this voice. <span class="sig">5</span> defenses try to stop them.</h1>
-          <p class="hero-lead">RVCBench is a unified, reproducible pipeline for evaluating voice-cloning robustness, speaker privacy, and audio-protection methods — spanning <strong>32 TTS/VC adversary models</strong>, <strong>10 dataset conditions</strong>, and <strong>5 protection algorithms</strong>, scored on speaker similarity, intelligibility, perceptual quality, and runtime.</p>
+          <h1>How robust is voice cloning? <span class="sig">5</span> defenses try to stop them.</h1>
+          <p class="hero-lead">RVCBench is a unified, reproducible pipeline for evaluating voice-cloning robustness, speaker privacy, and audio-protection methods — spanning <strong>32 TTS/VC integration entries</strong>, <strong>10 dataset conditions</strong>, and <strong>5 protection algorithms</strong>, scored on speaker similarity, intelligibility, perceptual quality, and runtime.</p>
           <div class="hero-ctas">
             <a class="btn btn-primary" href="#leaderboard">See the leaderboard</a>
             <a class="btn" href="https://huggingface.co/datasets/Nanboy/RVCBench" target="_blank" rel="noopener">Get the dataset ↗</a>
@@ -532,7 +532,7 @@
     <section class="stats">
       <div class="wrap">
         <div class="stats-grid" id="statsGrid">__STATS_GRID__</div>
-        <p class="stats-note"><b>Paper vs. codebase.</b> The arXiv v2 paper reports <b>18 models</b> across 18 robustness evaluations, 225 speakers, and 14,370 utterances. This repository is under active development and currently ships <b>32 models</b>; treat any count beyond the paper's 18 as codebase-only until covered by a future revision.</p>
+        <p class="stats-note"><b>Paper vs. codebase.</b> The arXiv v2 paper reports <b>18 models</b> across 18 robustness evaluations, 225 speakers, and 14,370 utterances. This repository is under active development and currently ships <b>32 integration entries</b>; treat any count beyond the paper's 18 as codebase-only until covered by a future revision.</p>
       </div>
     </section>
 
@@ -679,17 +679,22 @@
       </div>
     </section>
 
+    <section id="validated-runs"><div class="wrap"><div class="section-head">
+      <span class="eyebrow">Reproducible runs</span><h2>Results with sample-level coverage</h2>
+      <p>The tables above preserve the historical release. New reports below are generated from complete run manifests with explicit sample counts and metric coverage; historical rows have not been retroactively certified.</p>
+      </div>__VALIDATED_RUNS__</div></section>
+
     <!-- ============ MODELS ============ -->
     <section id="models">
       <div class="wrap">
         <div class="section-head">
           <span class="eyebrow">Supported adversaries</span>
-          <h2>32 voice-cloning models, one interface.</h2>
-          <p>Zero-shot and fine-tuning TTS/VC wrappers, each launched from its own Conda environment to keep incompatible dependency stacks apart.</p>
+          <h2>32 integration entries, one interface.</h2>
+          <p>Adapters with published historical results are distinguished from experimental integrations. Environment templates require the corresponding upstream runtime; an adapter is not a guarantee of a tested installation.</p>
         </div>
         <div class="models-legend">
           <span class="lg"><i class="on"></i> On the LibriTTS leaderboard (18)</span>
-          <span class="lg"><i class="off"></i> In the codebase, not yet leaderboard-scored (9)</span>
+          <span class="lg"><i class="off"></i> Experimental adapters without leaderboard results (14)</span>
         </div>
         <div class="chip-grid" id="modelsGrid">__MODELS_GRID__</div>
       </div>

@@ -1,0 +1,194 @@
+[
+  {
+    "n": "BertVITS2",
+    "key": "bert",
+    "b": false,
+    "status": "experimental_adapter"
+  },
+  {
+    "n": "Qwen3-TTS",
+    "key": "qwen3_tts",
+    "b": true,
+    "status": "historical_results"
+  },
+  {
+    "n": "Qwen3-Omni",
+    "key": "qwen3_omni",
+    "b": false,
+    "status": "experimental_adapter"
+  },
+  {
+    "n": "FireRedTTS-2",
+    "key": "fireredtts2",
+    "b": false,
+    "status": "experimental_adapter"
+  },
+  {
+    "n": "VoxCPM",
+    "key": "voxcpm",
+    "b": false,
+    "status": "experimental_adapter"
+  },
+  {
+    "n": "F5-TTS",
+    "key": "f5_tts",
+    "b": true,
+    "status": "historical_results"
+  },
+  {
+    "n": "MaskGCT",
+    "key": "maskgct",
+    "b": true,
+    "status": "historical_results"
+  },
+  {
+    "n": "OpenVoice V2",
+    "key": "openvoice",
+    "b": true,
+    "status": "historical_results"
+  },
+  {
+    "n": "Coqui XTTS-v2",
+    "key": "xtts",
+    "b": true,
+    "status": "historical_results"
+  },
+  {
+    "n": "IndexTTS",
+    "key": "index_tts",
+    "b": true,
+    "status": "historical_results"
+  },
+  {
+    "n": "ZipVoice",
+    "key": "zipvoice",
+    "b": true,
+    "status": "historical_results"
+  },
+  {
+    "n": "FishSpeech",
+    "key": "fishspeech",
+    "b": true,
+    "status": "historical_results"
+  },
+  {
+    "n": "Fish Audio S2 (in-proc)",
+    "key": "fishspeech_s2",
+    "b": false,
+    "status": "experimental_adapter"
+  },
+  {
+    "n": "Fish Audio S2 (server)",
+    "key": "fish_audio_s2",
+    "b": false,
+    "status": "experimental_adapter"
+  },
+  {
+    "n": "CosyVoice / 2",
+    "key": "cosyvoice",
+    "b": true,
+    "status": "historical_results"
+  },
+  {
+    "n": "Higgs Audio",
+    "key": "higgs_audio",
+    "b": true,
+    "status": "historical_results"
+  },
+  {
+    "n": "Higgs TTS 3",
+    "key": "higgs_tts_3",
+    "b": false,
+    "status": "experimental_adapter"
+  },
+  {
+    "n": "SparkTTS",
+    "key": "sparktts",
+    "b": true,
+    "status": "historical_results"
+  },
+  {
+    "n": "VALL-E",
+    "key": "vall_e",
+    "b": false,
+    "status": "experimental_adapter"
+  },
+  {
+    "n": "StyleTTS 2",
+    "key": "styletts2",
+    "b": true,
+    "status": "historical_results"
+  },
+  {
+    "n": "GLM-TTS",
+    "key": "glm_tts",
+    "b": true,
+    "status": "historical_results"
+  },
+  {
+    "n": "GlowTTS",
+    "key": "glowtts",
+    "b": false,
+    "status": "experimental_adapter"
+  },
+  {
+    "n": "Kimi Audio",
+    "key": "kimi_audio",
+    "b": false,
+    "status": "experimental_adapter"
+  },
+  {
+    "n": "MGM-Omni",
+    "key": "mgm_omni",
+    "b": true,
+    "status": "historical_results"
+  },
+  {
+    "n": "MOSS TTSD",
+    "key": "moss_ttsd",
+    "b": true,
+    "status": "historical_results"
+  },
+  {
+    "n": "MOSS-TTS",
+    "key": "moss_tts",
+    "b": false,
+    "status": "experimental_adapter"
+  },
+  {
+    "n": "dots.tts",
+    "key": "dots_tts",
+    "b": false,
+    "status": "experimental_adapter"
+  },
+  {
+    "n": "ZONOS2",
+    "key": "zonos2",
+    "b": false,
+    "status": "experimental_adapter"
+  },
+  {
+    "n": "PlayDiffusion",
+    "key": "playdiffusion",
+    "b": true,
+    "status": "historical_results"
+  },
+  {
+    "n": "Bark Voice Clone",
+    "key": "bark_voice_clone",
+    "b": false,
+    "status": "experimental_adapter"
+  },
+  {
+    "n": "OZSpeech",
+    "key": "ozspeech",
+    "b": true,
+    "status": "historical_results"
+  },
+  {
+    "n": "VibeVoice",
+    "key": "vibevoice",
+    "b": true,
+    "status": "historical_results"
+  }
+]

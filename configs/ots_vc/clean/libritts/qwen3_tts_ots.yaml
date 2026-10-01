@@ -12,6 +12,7 @@ output_paths:
   metrics_file: "results/qwen3_tts_ots_on_libritts/metrics.json"
 
 adversary:
+  revision: null  # resolved to an immutable HF commit by the runner
   checkpoint_path: "Qwen/Qwen3-TTS-12Hz-1.7B-Base"
   device_map: "cuda:0"
   torch_dtype: "auto"

@@ -10,6 +10,6 @@ dependencies:
   - espeak-ng
   - pip:
       - --extra-index-url https://download.pytorch.org/whl/cu121
-      - -r ../requirements.txt
+      - -e ..
       - onnxruntime-gpu==1.18.0
       - ruamel.yaml==0.18.15

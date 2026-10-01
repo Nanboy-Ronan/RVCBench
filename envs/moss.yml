@@ -10,5 +10,5 @@ dependencies:
   - espeak-ng
   - pip:
       - --extra-index-url https://download.pytorch.org/whl/cu121
-      - -r ../requirements.txt
+      - -e ..
       - transformers==4.53.2

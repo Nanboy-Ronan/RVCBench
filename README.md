@@ -7,19 +7,19 @@
 [![Dataset](https://img.shields.io/badge/Hugging%20Face-Dataset-ffcc00.svg)](https://huggingface.co/datasets/Nanboy/RVCBench)
 [![Demo](https://img.shields.io/badge/HuggingFace-Demo%20Space-ff6f00.svg)](https://huggingface.co/spaces/Nanboy/RVCBench)
 [![License: CC0-1.0](https://img.shields.io/badge/License-CC0--1.0-lightgrey.svg)](LICENSE)
-[![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](#requirements)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](#requirements)
 [![GitHub stars](https://img.shields.io/github/stars/Nanboy-Ronan/RVCBench?style=social)](https://github.com/Nanboy-Ronan/RVCBench/stargazers)
 
 **News:** RVCBench has been accepted to **NeurIPS 2026**!
 
-**RVCBench** is the first large-scale benchmark for **voice cloning robustness**, **voice clone evaluation**, **speaker privacy**, and **audio deepfake protection** — covering **27 TTS/VC models**, **10 datasets**, and **5 audio protection methods**.
+**RVCBench** is the first large-scale benchmark for **voice cloning robustness**, **voice clone evaluation**, **speaker privacy**, and **audio deepfake protection** — covering **32 TTS/VC integration entries**, **10 datasets**, and **5 audio protection methods**.
 
 RVCBench provides a unified, reproducible pipeline covering the full attack-defense cycle: source-audio protection, zero-shot or fine-tuning voice cloning, optional denoising, and evaluation of speaker similarity, intelligibility, perceptual quality, and runtime.
 
-At a glance, this release supports **27 VC/TTS adversary models**, **5 audio protection methods**, **10 public benchmark dataset configurations**, and both fidelity and generation-quality metrics.
+At a glance, this release supports **32 VC/TTS integration entries**, **5 audio protection methods**, **10 public benchmark dataset configurations**, and both fidelity and generation-quality metrics.
 
 > [!NOTE]
-> **Paper vs. codebase.** The [arXiv v2 paper](https://arxiv.org/abs/2602.00443) reports results for **18 models** across **18 robustness evaluations, 225 speakers, and 14,370 utterances**. This repository is under active development and currently supports **27 models**; treat any count beyond the paper's 18 as codebase-only until covered by a future paper revision.
+> **Paper vs. codebase.** The [arXiv v2 paper](https://arxiv.org/abs/2602.00443) reports results for **18 models** across **18 robustness evaluations, 225 speakers, and 14,370 utterances**. This repository is under active development and currently includes **32 integration entries**; treat any count beyond the paper's 18 as codebase-only until covered by a future paper revision.
 
 **Canonical resources:** [website](https://nanboy-ronan.github.io/RVCBench/) · [paper](https://arxiv.org/abs/2602.00443) · [Hugging Face dataset](https://huggingface.co/datasets/Nanboy/RVCBench) · [interactive demo](https://huggingface.co/spaces/Nanboy/RVCBench) · [quickstart notebooks](notebooks/) · [model environments](docs/model_environments.md) · [citation](#citation)
 
@@ -46,7 +46,7 @@ Most protection papers evaluate against one or two surrogate VC models on one da
 
 | | Typical single-paper eval | RVCBench |
 |---|---|---|
-| Adversary models | 1–3 | **26**, zero-shot and fine-tuning |
+| Adversary models | 1–3 | **32 integration entries**, zero-shot and fine-tuning |
 | Datasets / languages | 1 | **10**, incl. Mandarin, French, bilingual, noisy |
 | Protection methods compared | Usually just the paper's own | **5**, on equal footing |
 | Denoising-adaptive attacker | Rarely modeled | Built into the pipeline |
@@ -146,7 +146,7 @@ Speaker similarity (SIM) on clean prompts across all benchmark datasets. — ind
 
 ### Voice Cloning Adversaries (Zero-Shot OTS)
 
-RVCBench currently includes wrappers or configs for **32 VC/TTS adversary models**:
+RVCBench currently includes **32 VC/TTS integration entries** (including separate backends for the same model):
 
 | Model | Key |
 |---|---|
@@ -182,6 +182,11 @@ RVCBench currently includes wrappers or configs for **32 VC/TTS adversary models
 | Bark Voice Clone | `bark_voice_clone` |
 | OZSpeech | `ozspeech` |
 | VibeVoice | `vibevoice` |
+
+`historical_results` means the existing release contains reported scores; it does
+not claim that every upstream version has been retested. Other integrations are
+`experimental_adapter`. See the [model catalog](src/benchmark/model_catalog.json)
+for the machine-readable status. Fish S2 in-process remains experimental.
 
 ### Protection Methods
 
@@ -225,9 +230,34 @@ RVCBench reports fidelity metrics for protection/denoising runs and generation-q
 
 ## Getting Started
 
+### Start here
+
+```bash
+git clone https://github.com/Nanboy-Ronan/RVCBench.git
+cd RVCBench
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -e .
+rvcbench doctor
+rvcbench smoke --output results/first-smoke
+```
+
+The smoke check uses synthetic audio on CPU and downloads no models. It checks the
+execution pipeline; it is not a voice-cloning score. Python 3.10+ is required.
+For a first real model, install `python -m pip install -e '.[qwen3]'`, then run
+`python scripts/run_qwen3tts_quickstart.py --max-samples 5`. This generates audio
+without downloading evaluation models. Install FFmpeg and SoX for model/audio processing (included in the Qwen Conda template).
+The model checkpoint and selected speaker audio are downloaded on first use;
+GPU requirements depend on the selected model and audio lengths.
+
+To score those outputs, install `python -m pip install -e '.[eval]'` and use the
+[evaluation-only command](docs/run_protocol.md). `--evaluate` on the Qwen quickstart
+runs generation and the full metric stack together, including Whisper medium,
+speaker recognition, and available perceptual/emotion models.
+
 ### Requirements
 
-- Python 3.9+
+- Python 3.10+
 - PyTorch ≥ 2.0 with CUDA
 - `hydra-core`, `omegaconf`, `pandas`, `pyarrow`, `soundfile`, `librosa`
 - Model-specific packages. Many supported VC/TTS models need mutually
@@ -240,8 +270,7 @@ RVCBench reports fidelity metrics for protection/denoising runs and generation-q
 ```bash
 git clone https://github.com/Nanboy-Ronan/RVCBench.git
 cd RVCBench
-pip install hydra-core omegaconf pandas pyarrow soundfile librosa \
-            jiwer openai-whisper pymcd huggingface_hub
+python -m pip install -e .
 ```
 
 For model-specific runs, prefer the checked-in Conda environment files:
@@ -273,7 +302,7 @@ conda activate qwen3
 python scripts/run_qwen3tts_quickstart.py --max-samples 5
 ```
 
-Protection plus voice-cloning run:
+Protection plus voice-cloning run (advanced; install the protection runtime and evaluation dependencies described in [model setup](docs/quickstart_model_setup.md)):
 
 ```bash
 conda activate qwen3
@@ -326,6 +355,19 @@ python scripts/validate_quickstarts.py
 Pass `--help` to either script for the full list of options.
 
 ---
+
+## Run status and reproducibility
+
+Zero-shot runs write `run_manifest.json` with stable sample IDs, input/output
+SHA-256 hashes, resolved config, environment/code provenance, per-sample failures,
+and coverage over **all requested samples**. Missing outputs and missing required
+metrics make a run `partial`; generation-only runs are `generated`.
+
+Use `+vc.retries=1` for one retry per failed sample and `+vc.resume_from=/path/to/run`
+to reuse verified outputs in a **new** run directory. Resume rejects changed inputs,
+generation settings, runtime source, or output hashes. The source run is preserved.
+See [run protocol and report export](docs/run_protocol.md) for details, legacy
+migration, comparison constraints, and known limits.
 
 ## Full Benchmark Path
 

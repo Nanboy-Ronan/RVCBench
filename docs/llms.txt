@@ -7,8 +7,8 @@ RVCBench applies audio-protection perturbations to source speech, runs zero-shot
 ## Key facts
 
 - Input Robustness (reference-audio and text-prompt shifts), Generation Robustness (model architecture, multilingual, long-form, and expressive generalisation), Output Robustness (post-processing resilience and deepfake detectability), and Audio Perturbation Robustness (passive noise, proactive protection methods, and counteract/denoising attacks).
-- RVCBench is a benchmark for voice-cloning robustness, speaker privacy, and audio-protection methods. It evaluates 32 zero-shot and fine-tuning TTS/VC models against 5 audio-protection methods across 10 dataset configurations, scoring speaker similarity, intelligibility, perceptual quality, and runtime.
-- The RVCBench codebase includes wrappers for 32 TTS/VC adversary models. The arXiv v2 paper reports results for 18 of those models across 18 robustness evaluations, 225 speakers, and 14,370 utterances.
+- RVCBench is a benchmark for voice-cloning robustness, speaker privacy, and audio-protection methods. It provides 32 integration entries and historical results for 18 models, with 5 audio-protection methods across 10 dataset configurations, scoring speaker similarity, intelligibility, perceptual quality, and runtime.
+- The RVCBench codebase includes 32 TTS/VC integration entries. The arXiv v2 paper reports results for 18 of those models across 18 robustness evaluations, 225 speakers, and 14,370 utterances.
 - Five methods on equal footing: SafeSpeech (adversarial perturbation against a surrogate VC model), Enkidu (perceptual-loss adversarial perturbation), EM (Expectation–Maximisation perturbation), Spectral (SafeSpeech's spectral perturbation mode), and GR-Noise (Gaussian random noise).
 - Across the LibriTTS leaderboard, StyleTTS 2 and OpenVoice V2 have the lowest clean speaker similarity and drop furthest under protection — GR-Noise pushes StyleTTS 2's similarity from 0.228 down to 0.030.
 - Yes. The benchmark dataset is hosted on Hugging Face at huggingface.co/datasets/Nanboy/RVCBench under a CC0-1.0 license, with 10 dataset configurations spanning English, Mandarin, and French.

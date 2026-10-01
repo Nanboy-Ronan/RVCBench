@@ -62,6 +62,7 @@ def render_body(template: str) -> str:
         .replace("__PROTECT_GRID__", R.render_protect_grid())
         .replace("__DATASETS_ROWS__", R.render_datasets_rows())
         .replace("__FAQ_ITEMS__", R.render_faq())
+        .replace("__VALIDATED_RUNS__", R.render_validated_runs())
     )
 
 
@@ -69,7 +70,7 @@ def build_head(canonical: bool = True) -> str:
     title = "RVCBench — NeurIPS 2026 | Voice Cloning Robustness Benchmark"
     desc = (
         "Accepted to NeurIPS 2026. RVCBench benchmarks voice-cloning robustness, speaker privacy, and audio-protection methods "
-        "across 32 TTS/VC models, 5 protection methods, and 10 dataset conditions, with a public "
+        "with 32 TTS/VC integration entries, 5 protection methods, and 10 dataset conditions, with a public "
         "leaderboard, dataset, and reproducible evaluation pipeline."
     )
     url = D.SITE["url"]

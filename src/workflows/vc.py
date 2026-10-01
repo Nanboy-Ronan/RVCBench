@@ -8,13 +8,14 @@ import torch
 from omegaconf import DictConfig, OmegaConf
 from hydra.utils import to_absolute_path
 
-from src.evaluation import generation
+
 
 _SPEAKER_SLUG_PATTERN = re.compile(r"[^0-9A-Za-z_.-]")
 
 
 _ADVERSARY_REGISTRY: Dict[str, Dict[str, str]] = {
     "ots": {
+        "smoke": "src.adversary.smoke:SmokeAdversary",
         "bertvits2": "src.adversary.bertvit2_ots:BertVits2ZeroShotAdversary",
         "ozspeech": "src.adversary.ozspeech_ots:OzSpeechZeroShotAdversary",
         "higgs_audio": "src.adversary.higgs_audio_ots:HiggsAudioZeroShotAdversary",
@@ -86,7 +87,12 @@ def _locate_clone_path(
     # Match the behavior of _cloned_filename() in base_adversary.py
     # which uses both prompt_path and target_path to create unique filenames
     
-    speaker_hint = target_path.parent.name or metadata.get("speaker_id")
+    if sample is not None:
+        from src.benchmark.artifacts import output_path
+        exact = output_path(generated_audio_dir, sample)
+        if exact.is_file():
+            return exact
+    speaker_hint = metadata.get("speaker_id") or target_path.parent.name
     if not speaker_hint or not generated_audio_dir.exists():
         return None
     
@@ -141,6 +147,7 @@ def _locate_clone_path(
             f"No generated audio files found in {generated_audio_dir}; cannot locate cloned audio."
         )
 
+    from src.evaluation import generation
     return generation._resolve_generated_file(target_path, sample_index, metadata, available_files, logger)
 
 
@@ -301,6 +308,12 @@ def run_vc_workflow(
     logger,
     protected_audio_dir: Optional[Path] = None,
 ) -> Tuple[dict, Optional[Path], Path]:
+    if str(conf.vc.mode).lower() == 'ots' and not conf.vc.get('legacy_evaluation', False):
+        from src.benchmark.runner import run_zero_shot
+        return run_zero_shot(conf, base_dir, device, dataset, exp_dir, logger, protected_audio_dir)
+
+    if conf.vc.get("legacy_evaluation", False) and not conf.vc.get("evaluate_only", False):
+        raise ValueError("legacy_evaluation is only for inspecting historical audio")
     vc_conf = conf.vc
     dataset_conf = conf.dataset
 
@@ -412,6 +425,7 @@ def run_vc_workflow(
         logger,
         original_resolver=original_resolver,
     )
+    from src.evaluation import generation
     generation_metrics = generation.evaluate_pairs(
         evaluation_pairs,
         str(generated_audio_dir),
@@ -423,4 +437,6 @@ def run_vc_workflow(
     )
     logger.info(f"Generation Metrics: {generation_metrics}")
 
+    generation_metrics["legacy_protocol"] = True
+    generation_metrics["eligible_for_comparison"] = False
     return generation_metrics, protected_audio_dir, generated_audio_dir

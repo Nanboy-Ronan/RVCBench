@@ -38,7 +38,7 @@ DIMENSIONS = [
         "name": "Generation Robustness",
         "question": "Does cloning quality hold up across model architectures, languages, and utterance length?",
         "subtests": [
-            "32 adversary models spanning codec-LM, diffusion, and hybrid architectures",
+            "32 integration entries spanning codec-LM, diffusion, and hybrid architectures",
             "Multilingual (EN/ZH/FR), long-form generation, and emotion preservation",
         ],
         "demo_anchor": "leaderboard",
@@ -82,7 +82,7 @@ CROSS_DATASET_GROUPS = [
 # "Why RVCBench" comparison — a real table (not two parallel lists) so each
 # row pairs its two values directly, both visually and when read as plain text.
 WHY_COMPARISON = [
-    {"dim": "Adversary models", "typical": "1–3", "rvcbench": "26, zero-shot + fine-tuning"},
+    {"dim": "Adversary models", "typical": "1–3", "rvcbench": "32 integration entries; 18 models with historical results"},
     {"dim": "Datasets / languages", "typical": "1", "rvcbench": "10, incl. ZH / FR / bilingual / noisy"},
     {"dim": "Protection methods compared", "typical": "usually own only", "rvcbench": "5, equal footing"},
     {"dim": "Denoising-adaptive attacker", "typical": "rarely modeled", "rvcbench": "built into the pipeline"},
@@ -167,40 +167,9 @@ CROSS_DATASET = [
     {"m": "StyleTTS 2",   "v": [.228, .236, .162, None, None, None, .213, .196, .166, .184]},
 ]
 
-MODELS = [
-    {"n": "BertVITS2", "key": "bert", "b": False},
-    {"n": "Qwen3-TTS", "key": "qwen3_tts", "b": True},
-    {"n": "Qwen3-Omni", "key": "qwen3_omni", "b": False},
-    {"n": "FireRedTTS-2", "key": "fireredtts2", "b": False},
-    {"n": "VoxCPM", "key": "voxcpm", "b": False},
-    {"n": "F5-TTS", "key": "f5_tts", "b": True},
-    {"n": "MaskGCT", "key": "maskgct", "b": True},
-    {"n": "OpenVoice V2", "key": "openvoice", "b": True},
-    {"n": "Coqui XTTS-v2", "key": "xtts", "b": True},
-    {"n": "IndexTTS", "key": "index_tts", "b": True},
-    {"n": "ZipVoice", "key": "zipvoice", "b": True},
-    {"n": "FishSpeech", "key": "fishspeech", "b": True},
-    {"n": "Fish Audio S2 (in-proc)", "key": "fishspeech_s2", "b": False},
-    {"n": "Fish Audio S2 (server)", "key": "fish_audio_s2", "b": False},
-    {"n": "CosyVoice / 2", "key": "cosyvoice", "b": True},
-    {"n": "Higgs Audio", "key": "higgs_audio", "b": True},
-    {"n": "Higgs TTS 3", "key": "higgs_tts_3", "b": False},
-    {"n": "SparkTTS", "key": "sparktts", "b": True},
-    {"n": "VALL-E", "key": "vall_e", "b": False},
-    {"n": "StyleTTS 2", "key": "styletts2", "b": True},
-    {"n": "GLM-TTS", "key": "glm_tts", "b": True},
-    {"n": "GlowTTS", "key": "glowtts", "b": False},
-    {"n": "Kimi Audio", "key": "kimi_audio", "b": False},
-    {"n": "MGM-Omni", "key": "mgm_omni", "b": True},
-    {"n": "MOSS TTSD", "key": "moss_ttsd", "b": True},
-    {"n": "MOSS-TTS", "key": "moss_tts", "b": False},
-    {"n": "dots.tts", "key": "dots_tts", "b": False},
-    {"n": "ZONOS2", "key": "zonos2", "b": False},
-    {"n": "PlayDiffusion", "key": "playdiffusion", "b": True},
-    {"n": "Bark Voice Clone", "key": "bark_voice_clone", "b": False},
-    {"n": "OZSpeech", "key": "ozspeech", "b": True},
-    {"n": "VibeVoice", "key": "vibevoice", "b": True},
-]
+import json as _json
+from pathlib import Path as _Path
+MODELS = _json.loads((_Path(__file__).resolve().parents[2] / "src/benchmark/model_catalog.json").read_text())
 
 PROTECTIONS = [
     {"n": "SafeSpeech", "desc": "Adversarial perturbation optimised against a surrogate VC model."},
@@ -234,12 +203,12 @@ FAQ = [
     {
         "q": "What is RVCBench?",
         "a": "RVCBench is a benchmark for voice-cloning robustness, speaker privacy, and audio-protection methods. "
-             "It evaluates 32 zero-shot and fine-tuning TTS/VC models against 5 audio-protection methods across "
+             "It provides 32 integration entries and historical results for 18 models, with 5 audio-protection methods across "
              "10 dataset configurations, scoring speaker similarity, intelligibility, perceptual quality, and runtime.",
     },
     {
         "q": "How many voice-cloning models does RVCBench evaluate?",
-        "a": "The RVCBench codebase includes wrappers for 32 TTS/VC adversary models. The arXiv v2 paper reports "
+        "a": "The RVCBench codebase includes 32 TTS/VC integration entries. The arXiv v2 paper reports "
              "results for 18 of those models across 18 robustness evaluations, 225 speakers, and 14,370 utterances.",
     },
     {

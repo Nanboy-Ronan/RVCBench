@@ -105,6 +105,7 @@ class Qwen3TTSZeroShotAdversary(BaseAdversary):
 
         generator_config = Qwen3TTSGeneratorConfig(
             checkpoint_path=self.checkpoint_path,
+            revision=self.config.get("revision"),
             torch_dtype=self.torch_dtype,
             device_map=self.device_map,
             use_flash_attn2=self.use_flash_attn2,
@@ -261,7 +262,7 @@ class Qwen3TTSZeroShotAdversary(BaseAdversary):
                     ref_text=prompt_text if prompt_text else None,
                     voice_clone_prompt=prompt_features,
                     x_vector_only_mode=use_x_vector_only_mode,
-                    sample_index=idx,
+                    sample_index=sample.index,
                 )
                 synth_elapsed = time.perf_counter() - synth_start
             except Exception as exc:

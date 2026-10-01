@@ -106,7 +106,8 @@ def main(conf: DictConfig):
         seed_value = 42
     configure_seeds(seed_value, logger=logger)
 
-    dataset = datasets.AllSpeakerData(conf, conf.dataset, logger)
+    dataset_cls = datasets.ZeroShotDataset if str(conf.vc.mode) == "ots" else datasets.AllSpeakerData
+    dataset = dataset_cls(conf, conf.dataset, logger)
     missing_count, total = _override_prompt_paths(dataset, protected_audio_dir, logger)
     if missing_count:
         logger.warning(

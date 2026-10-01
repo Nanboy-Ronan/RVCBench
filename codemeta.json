@@ -7,7 +7,7 @@
   "issueTracker": "https://github.com/Nanboy-Ronan/RVCBench/issues",
   "license": "https://spdx.org/licenses/CC0-1.0",
   "programmingLanguage": "Python",
-  "runtimePlatform": "Python 3.9+",
+  "runtimePlatform": "Python 3.10+",
   "applicationCategory": [
     "Speech Processing",
     "Machine Learning",

@@ -335,3 +335,31 @@ def render_llms_txt():
         "```",
     ]
     return "\n".join(lines) + "\n"
+
+
+def render_validated_runs(report_dir=None):
+    """Render only coverage-checked reports; never substitute for historical rows."""
+    import sys
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[2]
+    sys.path.insert(0, str(root))
+    from src.benchmark.artifacts import validate_report, metric_means
+    reports = []
+    directory = Path(report_dir) if report_dir is not None else root / 'docs' / 'validated_runs'
+    for path in sorted(directory.glob('*.json')):
+        payload = json.loads(path.read_text())
+        run = payload['run']
+        validate_report(run, verify_files=False)
+        if run['config']['vc']['model'] == 'smoke':
+            raise ValueError('Smoke fixtures must never appear on the public leaderboard')
+        means = metric_means(run['samples'], run['coverage']['required_metrics'])
+        if means != payload['means']:
+            raise ValueError('Report means disagree with sample metrics: ' + str(path))
+        reports.append('<tr><td>' + esc(str(run['config']['vc']['model'])) + '</td><td>'
+                       + str(run['coverage']['requested']) + '</td><td>'
+                       + esc(', '.join(f'{k}: {v:.4f}' for k, v in means.items()))
+                       + '</td><td><a href="validated_runs/' + esc(path.name)
+                       + '">Manifest and provenance</a></td></tr>')
+    if not reports:
+        return '<p>No reports have been published under the new manifest protocol yet.</p>'
+    return '<table><thead><tr><th>Model</th><th>Samples</th><th>Metrics</th><th>Evidence</th></tr></thead><tbody>' + ''.join(reports) + '</tbody></table>'

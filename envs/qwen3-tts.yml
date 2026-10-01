@@ -1,13 +1,11 @@
 name: qwen3
 channels:
   - conda-forge
-  - defaults
 dependencies:
   - python=3.10
   - pip
   - ffmpeg
+  - sox
   - libsndfile
-  - espeak-ng
   - pip:
-      - --extra-index-url https://download.pytorch.org/whl/cu121
-      - -r ../requirements.txt
+      - -e ..[qwen3]

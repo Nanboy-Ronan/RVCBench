@@ -18,6 +18,7 @@ class Qwen3TTSGeneratorConfig:
     """Configuration options for Qwen3-TTS voice cloning."""
 
     checkpoint_path: str
+    revision: Optional[str] = None
     torch_dtype: Optional[str] = "auto"
     device_map: Optional[str] = "auto"
     use_flash_attn2: bool = False
@@ -56,6 +57,8 @@ class Qwen3TTSGenerator(BaseModel):
             raise ImportError("qwen_tts does not expose Qwen3TTSModel.")
 
         load_kwargs: Dict[str, Any] = {}
+        if self.config.revision:
+            load_kwargs["revision"] = self.config.revision
         dtype = self._parse_torch_dtype(self.config.torch_dtype)
         if dtype is not None:
             load_kwargs["dtype"] = dtype

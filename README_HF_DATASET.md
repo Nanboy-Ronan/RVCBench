@@ -115,6 +115,16 @@ Some subsets include additional task-specific metadata, for example `spam_type` 
 - `robotcall`
 - `vctk_text_robust`
 
+## Getting started
+
+Follow the [public quickstart](https://github.com/Nanboy-Ronan/RVCBench#getting-started).
+The Qwen quickstart downloads the selected speaker audio and generates a small
+sample without loading the full evaluation stack. Use the
+[run protocol](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/run_protocol.md)
+to evaluate, inspect coverage, or resume a run. Keep the dataset revision or input
+hashes with any reported result; do not compare scores computed on different
+successful subsets without reporting coverage.
+
 ## Intended Use
 
 Use this dataset with the RVCBench codebase to run reproducible voice cloning robustness experiments across source audio, protected audio, denoised audio, and generated audio. Typical tasks include:

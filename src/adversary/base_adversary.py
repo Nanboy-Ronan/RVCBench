@@ -116,41 +116,8 @@ class BaseAdversary(ABC):
         logger.info(message)
 
     def _cloned_filename(self, sample, idx: int, suffix: str = "cloned") -> str:
-        # Use BOTH prompt_path (input audio) and target_path (ground truth) for unique identification
-        prompt_path = getattr(sample, "prompt_path", None)
-        target_path = getattr(sample, "target_path", None)
-        
-        prompt_stem = None
-        target_stem = None
-        
-        # Get prompt stem if available
-        if prompt_path is not None:
-            try:
-                prompt_stem = Path(str(prompt_path)).stem
-            except Exception:
-                prompt_stem = str(prompt_path)
-        
-        # Get target stem
-        if target_path is not None:
-            try:
-                target_stem = Path(str(target_path)).stem
-            except Exception:
-                target_stem = str(target_path)
-        
-        # Create combined stem using both prompt and target
-        if prompt_stem and target_stem:
-            stem_source = f"{prompt_stem}_to_{target_stem}"
-        elif prompt_stem:
-            stem_source = prompt_stem
-        elif target_stem:
-            stem_source = target_stem
-        else:
-            stem_source = getattr(sample, "target_stub", None) or f"sample_{idx}"
-        
-        stem = re.sub(r"[^0-9A-Za-z_+\-]", "_", str(stem_source).strip())
-        if not stem:
-            stem = f"sample_{idx}"
-        return f"{stem}_{suffix}.wav"
+        from src.benchmark.artifacts import output_path
+        return output_path(Path('.'), sample, suffix).name
 
     def _init_synthesis_timings(self, output_dir: Path) -> None:
         self._synthesis_timing_records = []

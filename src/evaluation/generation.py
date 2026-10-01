@@ -1,4 +1,5 @@
 import csv
+import math
 import hashlib
 import inspect
 import re
@@ -32,6 +33,13 @@ from .fidelity import (
 _SANITIZE_PATTERN = re.compile(r"[^a-zA-Z0-9_-]")
 _EMOTION_MODEL_ID = "speechbrain/emotion-recognition-wav2vec2-IEMOCAP"
 _EMOTION_SR = 16000
+
+
+def _finite_float(value):
+    result = float(value)
+    if not math.isfinite(result):
+        raise ValueError('Metric returned a non-finite value')
+    return result
 
 
 def _sanitize_component(value: str) -> str:
@@ -654,7 +662,7 @@ def _evaluate_pairs(
         # 1. MCD (robust – do not abort other metrics if it fails)
         mcd_value = None
         try:
-            mcd_value = float(mcd_toolbox.calculate_mcd(str(gt_path), str(gen_file_for_metrics)))
+            mcd_value = _finite_float(mcd_toolbox.calculate_mcd(str(gt_path), str(gen_file_for_metrics)))
         except Exception as exc:
             logger.warning("Failed to compute MCD for %s vs %s: %s", gt_path, gen_file_for_metrics, exc)
         else:
@@ -702,7 +710,7 @@ def _evaluate_pairs(
                     hyp_norm = _normalize_zh_text(hyp_text_proc)
                     ref_tokens = " ".join(jieba.lcut(ref_norm))
                     hyp_tokens = " ".join(jieba.lcut(hyp_norm))
-                    wer = float(jiwer.wer(ref_tokens, hyp_tokens))
+                    wer = _finite_float(jiwer.wer(ref_tokens, hyp_tokens))
                 except Exception as exc:
                     logger.warning("Failed to compute Chinese WER for %s: %s", gen_file, exc)
             else:
@@ -711,7 +719,7 @@ def _evaluate_pairs(
                     import string
                     ref_no_punct = ref_text_proc.translate(str.maketrans('', '', string.punctuation)).lower()
                     hyp_no_punct = hyp_text_proc.translate(str.maketrans('', '', string.punctuation)).lower()
-                    wer = float(jiwer.wer(ref_no_punct, hyp_no_punct))
+                    wer = _finite_float(jiwer.wer(ref_no_punct, hyp_no_punct))
                 except Exception as exc:
                     logger.warning("Failed to compute WER for %s: %s", gen_file, exc)
         if wer is not None:
@@ -724,7 +732,7 @@ def _evaluate_pairs(
         sva_decision = None
         try:
             score, decision = sim_model.verify_files(str(gt_path), str(gen_file_for_metrics))
-            sim_score = float(score)
+            sim_score = _finite_float(score)
             sva_decision = _coerce_sva_decision(decision)
         except Exception as exc:
             logger.warning("Speaker similarity failed for %s vs %s: %s", gt_path, gen_file_for_metrics, exc)
@@ -767,10 +775,15 @@ def _evaluate_pairs(
                         logger,
                     )
                     if speechmos_score is not None:
-                        speechmos_score = float(speechmos_score)
-                        speechmos_scores.append(speechmos_score)
+                        if math.isfinite(float(speechmos_score)):
+                            speechmos_score = float(speechmos_score)
+                            speechmos_scores.append(speechmos_score)
+                        else:
+                            speechmos_score = None
 
         dnsmos_values = _predict_dnsmos_scores(dnsmos_model, gen_file_for_metrics, logger)
+        if dnsmos_values is not None and not all(math.isfinite(float(v)) for v in dnsmos_values.values()):
+            dnsmos_values = None
         if dnsmos_values is not None:
             for key in ("ovrl", "sig", "bak"):
                 dnsmos_scores[key].append(dnsmos_values[key])
@@ -847,6 +860,7 @@ def _evaluate_pairs(
                 "ground_truth_path": str(gt_path),
                 "generated_path": str(gen_file),
                 "speaker_id": speaker_value,
+                "sample_id": metadata.get("sample_id", "") if isinstance(metadata, dict) else "",
                 "ground_truth_text": gt_text,
                 "predicted_text": display_transcription,
                 "mcd": mcd_value,
@@ -947,6 +961,7 @@ def _evaluate_pairs(
         sample_metrics_path = gen_dir.parent / "generation_sample_metrics.csv"
         sample_metrics_path.parent.mkdir(parents=True, exist_ok=True)
         fieldnames = [
+            "sample_id",
             "ground_truth_path",
             "generated_path",
             "speaker_id",

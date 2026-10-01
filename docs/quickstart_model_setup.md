@@ -10,9 +10,9 @@ The commands below make those dependencies explicit.
 
 The quickstarts and full benchmark runs should be launched from a
 model-specific environment. The public release includes the same environment
-specs that were maintained internally at
-`/tealab-data/rjin02/AudioWatermarkBench/envs`; use the checked-in copies under
-[`../envs/`](../envs/) instead of relying on that absolute path.
+base specifications under [`../envs/`](../envs/). The Qwen template installs
+only core and Qwen dependencies. Other templates require the corresponding
+upstream runtime and are not environment locks.
 
 For example:
 
@@ -42,7 +42,7 @@ huggingface-cli login
 Install the runtime package:
 
 ```bash
-python -m pip install -U qwen-tts
+python -m pip install -e '.[qwen3]'
 ```
 
 Optional but recommended: pre-download the gated checkpoint into the repo so
@@ -126,10 +126,13 @@ python scripts/run_fishspeech_s2_quickstart.py \
 > downloaded the checkpoint, and update the `configs/ots_vc/clean/*/fishspeech_s2_ots.yaml`
 > files if upstream exposes a different config name for the S2 codec.
 
-## 5. SafeSpeech / BertVITS2 Setup
+## 5. SafeSpeech / BertVITS2 Setup (advanced)
 
 `grnoise_on_libritts` does not require the SafeSpeech surrogate checkpoints, but
 `safespeech_on_libritts` does.
+
+Install `.[eval]` and the protection runtime dependencies before using the
+protection quickstart. These are separate from the minimal Qwen environment.
 
 The upstream helper in
 [`src/protection/safespeech/original_code/download_models.py`](../src/protection/safespeech/original_code/download_models.py)

@@ -1,7 +1,9 @@
 # Per-Model Environments
 
 Each model family may require a different Python environment. These files are
-the repository's canonical environment specifications.
+base templates. The Qwen template installs core plus Qwen dependencies;
+other templates require the matching upstream model runtime. These are not
+validated lock files for every integration.
 
 Create environments from this directory so relative requirement paths resolve:
 
