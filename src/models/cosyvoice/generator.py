@@ -30,6 +30,7 @@ class CosyVoiceGeneratorConfig:
     load_vllm: bool = False
     fp16: bool = False
     trt_concurrent: int = 1
+    matcha_code_path: Optional[Path] = None
 
 
 class CosyVoiceGenerator(BaseModel):
@@ -319,6 +320,18 @@ class CosyVoiceGenerator(BaseModel):
     # Third-party dependency helpers
     # ------------------------------------------------------------------
     def _ensure_matcha_dependency(self) -> None:
+        if self.config.matcha_code_path is not None:
+            candidate = Path(self.config.matcha_code_path).expanduser().resolve()
+            if not self._is_matcha_root(candidate):
+                raise FileNotFoundError(f'Configured Matcha-TTS source is missing: {candidate}')
+            sys.path.insert(0, str(candidate))
+            module = importlib.import_module('matcha')
+            origin = getattr(module, '__file__', None)
+            if not origin or not Path(origin).resolve().is_relative_to(candidate):
+                raise RuntimeError(f'Matcha-TTS already loaded from a different source: {origin}')
+            if self.logger:
+                self.logger.info('Loaded configured Matcha-TTS dependency from %s', candidate)
+            return
         try:
             importlib.import_module("matcha")
             return

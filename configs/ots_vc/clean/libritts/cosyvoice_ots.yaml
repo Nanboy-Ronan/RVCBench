@@ -13,6 +13,7 @@ output_paths:
 
 adversary:
   code_path: "checkpoints/CosyVoice"
+  matcha_code_path: null # Set explicitly when Matcha-TTS is outside code_path.
   model_dir: "checkpoints/CosyVoice/pretrained_models/CosyVoice2-0.5B"
   variant: cosyvoice2
   stream: false

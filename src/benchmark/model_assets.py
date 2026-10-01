@@ -5,7 +5,7 @@ from omegaconf import OmegaConf
 from .artifacts import digest, file_hash
 
 
-def resolve_model_assets(conf):
+def resolve_model_assets(conf, logger=None):
     resolved = OmegaConf.create(OmegaConf.to_container(conf, resolve=True))
     model = str(conf.vc.model).lower()
     assets, unresolved, cache = {}, {}, {}
@@ -33,6 +33,9 @@ def resolve_model_assets(conf):
         if not files:
             unresolved[key] = value
             continue
+        if logger:
+            logger.info('Hashing %s: %d asset files (%.2f GiB)', key, len(files),
+                        sum(f.stat().st_size for f in files) / 1024**3)
         hashes = {}
         for file in files:
             identity = str(file.resolve())
@@ -40,6 +43,8 @@ def resolve_model_assets(conf):
                 cache[identity] = file_hash(file)
             hashes[str(file.relative_to(path)) if path.is_dir() else file.name] = cache[identity]
         assets[key] = {'configured_path': value, 'files': hashes}
+        if logger:
+            logger.info('Verified %s asset hashes', key)
     if model in ('qwen3_tts', 'qwentts') and 'checkpoint_path' in unresolved:
         from huggingface_hub import HfApi
         repo_id = unresolved.pop('checkpoint_path')

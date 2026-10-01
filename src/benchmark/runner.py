@@ -84,7 +84,7 @@ def run_zero_shot(conf, base_dir, device, dataset, exp_dir, logger, protected_au
         resolved_conf = OmegaConf.create(effective_config)
         if not evaluate_only:
             from .model_assets import resolve_model_assets
-            resolved_conf, reference, asset_fingerprint = resolve_model_assets(conf)
+            resolved_conf, reference, asset_fingerprint = resolve_model_assets(conf, logger=logger)
             manifest['model_reference'] = reference
             generation_config['model_assets_fingerprint'] = asset_fingerprint
         # One effective run seed; adapters using internal RNGs must agree with it.

@@ -168,6 +168,26 @@ def test_generation_fingerprint_tracks_auxiliary_upstream_source(tmp_path):
     assert generation_runtime(tmp_path, conf, {})['source_sha256'] != first['source_sha256']
 
 
+def test_cosyvoice_explicit_matcha_source_rejects_cached_other_checkout(tmp_path):
+    from src.models.cosyvoice.generator import CosyVoiceGenerator
+    root = tmp_path / 'Matcha-TTS'
+    (root / 'matcha').mkdir(parents=True)
+    generator = CosyVoiceGenerator.__new__(CosyVoiceGenerator)
+    generator.config = SimpleNamespace(matcha_code_path=root)
+    generator.logger = logging.getLogger()
+    with patch.object(sys, 'path', list(sys.path)), patch.dict(sys.modules,
+            {'matcha': SimpleNamespace(__file__=str(root / 'matcha/__init__.py'))}):
+        generator._ensure_matcha_dependency()
+        assert sys.path[0] == str(root)
+    with patch.object(sys, 'path', list(sys.path)), patch.dict(sys.modules,
+            {'matcha': SimpleNamespace(__file__=str(tmp_path / 'other/matcha/__init__.py'))}):
+        with pytest.raises(RuntimeError, match='different source'):
+            generator._ensure_matcha_dependency()
+    generator.config.matcha_code_path = tmp_path / 'missing'
+    with pytest.raises(FileNotFoundError, match='Configured Matcha-TTS source'):
+        generator._ensure_matcha_dependency()
+
+
 def test_xtts_managed_lifetime_retains_generator_between_samples(setup_run, tmp_path):
     from src.adversary.xtts_ots import XttsZeroShotAdversary
     from src.benchmark.backends import SampleView

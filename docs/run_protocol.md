@@ -50,6 +50,10 @@ vocabularies and base speaker embeddings also contribute to the generation
 fingerprint. This prevents resuming after those inputs change. Implicit upstream
 downloads remain outside this local-asset coverage and must be captured or pinned
 separately; earlier runs are not retroactively assigned the expanded coverage.
+CosyVoice can pin an external Matcha-TTS checkout with
+`adversary.matcha_code_path=/absolute/path/to/Matcha-TTS`. Its source is included
+in the generation fingerprint, and a conflicting already-imported checkout is
+rejected. Use this when the dependency is outside the CosyVoice source tree.
 Missing/failed samples are retried. Use `+vc.retries=1` with `run_vc.py` for an
 additional attempt within a run. A per-sample seed is set before each adapter call.
 The effective run seed is propagated into adapters; seeds use the preserved source

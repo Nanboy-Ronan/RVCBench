@@ -28,6 +28,8 @@ class CosyVoiceZeroShotAdversary(BaseAdversary):
         self.logger = logger
 
         self.code_path = Path(to_absolute_path(self.config.get("code_path", "checkpoints/CosyVoice"))).resolve()
+        matcha_path = self.config.get('matcha_code_path')
+        self.matcha_code_path = Path(to_absolute_path(str(matcha_path))).resolve() if matcha_path else None
         model_dir_value = self.config.get("model_dir")
         if not model_dir_value:
             raise ValueError("CosyVoice adversary requires 'model_dir' in the config block.")
@@ -64,6 +66,7 @@ class CosyVoiceZeroShotAdversary(BaseAdversary):
             return
         generator_config = CosyVoiceGeneratorConfig(
             code_path=self.code_path,
+            matcha_code_path=self.matcha_code_path,
             model_dir=self.model_dir,
             variant=self.variant,
             stream=self.stream,
