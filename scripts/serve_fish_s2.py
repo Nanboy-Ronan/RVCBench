@@ -15,6 +15,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--code-path', type=Path, required=True)
     parser.add_argument('--startup-seed', type=int, default=42)
+    parser.add_argument('--stable-codec-activations', action='store_true',
+                        help='Use the same Snake expression eagerly on owned codec modules')
     parser.add_argument('--diagnostic-trace', type=Path,
                         help='Record reference and generated token hashes; introduces CUDA synchronization')
     parser.add_argument('server_args', nargs=argparse.REMAINDER,
@@ -48,16 +50,17 @@ def main():
           f'cudnn.deterministic={torch.backends.cudnn.deterministic}; '
           f'cudnn.benchmark={torch.backends.cudnn.benchmark}', flush=True)
     sys.argv = [str(entry), *native_args]
-    if trace_path:
+    if trace_path or args.stable_codec_activations:
         # Optional observations on the owned engine instance only. Copies to CPU
         # synchronize CUDA; these diagnostic runs are not timing measurements.
         from tools.api_server import API
         from tools.server.api_utils import parse_args
         import uvicorn
         native = parse_args()
-        trace_path.parent.mkdir(parents=True, exist_ok=True)
-        if trace_path.exists():
-            raise FileExistsError(f'Refusing to overwrite diagnostic trace: {trace_path}')
+        if trace_path:
+            trace_path.parent.mkdir(parents=True, exist_ok=True)
+            if trace_path.exists():
+                raise FileExistsError(f'Refusing to overwrite diagnostic trace: {trace_path}')
 
         def record(kind, tensor, **fields):
             value = tensor.detach().cpu().contiguous()
@@ -70,6 +73,15 @@ def main():
             async def initialize_app(self, app):
                 await super().initialize_app(app)
                 engine = app.state.model_manager.tts_inference_engine
+                if args.stable_codec_activations:
+                    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+                    from src.models.stable_codec_activations import stabilize_codec_snake
+                    count = stabilize_codec_snake(engine.decoder_model)
+                    if not count:
+                        raise RuntimeError('No DAC Snake activations found; stable variant not applied')
+                    print(f'Owned codec eager Snake activations={count}', flush=True)
+                if not trace_path:
+                    return
                 encode = engine.encode_reference
                 decode = engine.get_audio_segment
 

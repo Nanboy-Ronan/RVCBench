@@ -207,6 +207,24 @@ def test_authored_build_definition_changes_resume_but_generated_outputs_do_not(t
         assert generation_runtime(tmp_path, conf, {})['source_sha256'] != before['source_sha256']
 
 
+def test_declared_service_source_file_invalidates_generation_resume(tmp_path):
+    from src.benchmark.fingerprints import generation_runtime
+    adapter = tmp_path / 'src/adversary/fixture.py'
+    adapter.parent.mkdir(parents=True)
+    adapter.write_text('')
+    launcher = tmp_path / 'serve.py'
+    launcher.write_text('variant = 1\n')
+    conf = OmegaConf.create({'vc': {'mode': 'ots', 'model': 'fixture'},
+                            'adversary': {'service_launcher_code_path': str(launcher)}})
+    with patch.dict('src.benchmark.fingerprints._ADVERSARY_REGISTRY',
+                    {'ots': {'fixture': 'src.adversary.fixture:Adapter'}}), \
+            patch('importlib.metadata.packages_distributions', return_value={}):
+        before = generation_runtime(tmp_path, conf, {})
+        assert 'serve.py' in before['source_files']
+        launcher.write_text('variant = 2\n')
+        assert generation_runtime(tmp_path, conf, {})['source_sha256'] != before['source_sha256']
+
+
 def test_runner_rejects_resume_after_native_source_change(setup_run):
     conf, _, run, tmp_path = setup_run
     upstream = tmp_path / 'native-upstream'

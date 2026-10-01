@@ -1,0 +1,146 @@
+{
+  "server_pid": 2996318,
+  "command": "/tmp/rvcbench-fish-s2-env/bin/python scripts/serve_fish_s2.py --code-path checkpoints/fish-speech-s2-native --startup-seed 42 --stable-codec-activations -- --listen 127.0.0.1:18011 --workers 1 --device cuda:0 --llama-checkpoint-path /tealab-data/rjin02/AudioWatermarkBench/checkpoints/s2-pro --decoder-checkpoint-path /tealab-data/rjin02/AudioWatermarkBench/checkpoints/s2-pro/codec.pth --decoder-config-name modded_dac_vq",
+  "source_revision": "214da3cd841bda85da2496b96cd3c4d7edb1337e",
+  "cuda_visible_devices": "5",
+  "codec_variant": "eager_snake_v1",
+  "owned_snake_modules_replaced": 58,
+  "implementation_files": {
+    "scripts/serve_fish_s2.py": "733b2538aa9fa00dfdd3919e0a0250217267089753b9bc5a30cdf804facab15a",
+    "src/models/stable_codec_activations.py": "020872c335b2c60d529b31c3dd4a60ab3fcd5ee4169e95acd60bb8208e0d9adc"
+  },
+  "independent_codec_audit": "reproduction/comparisons/fish_s2_codec_eager_probe.json",
+  "status": "two_owned_service_instances_complete",
+  "preservation": "Upstream checkpoint tensors and source unchanged; module replacement only in owned model hierarchy; original numerical execution retained as default.",
+  "implementation_source_text": {
+    "scripts/serve_fish_s2.py": "#!/usr/bin/env python3\n\"\"\"Start the official single-worker Fish API with seed setup before warmup.\"\"\"\nfrom __future__ import annotations\n\nimport argparse\nimport hashlib\nimport json\nimport os\nfrom pathlib import Path\nimport runpy\nimport sys\n\n\ndef main():\n    parser = argparse.ArgumentParser(description=__doc__)\n    parser.add_argument('--code-path', type=Path, required=True)\n    parser.add_argument('--startup-seed', type=int, default=42)\n    parser.add_argument('--stable-codec-activations', action='store_true',\n                        help='Use the same Snake expression eagerly on owned codec modules')\n    parser.add_argument('--diagnostic-trace', type=Path,\n                        help='Record reference and generated token hashes; introduces CUDA synchronization')\n    parser.add_argument('server_args', nargs=argparse.REMAINDER,\n                        help='Official API arguments after --')\n    args = parser.parse_args()\n    trace_path = args.diagnostic_trace.resolve() if args.diagnostic_trace else None\n    source = args.code_path.resolve()\n    entry = source / 'tools/api_server.py'\n    if not entry.is_file():\n        parser.error(f'Official API entry is missing: {entry}')\n    if not 0 <= args.startup_seed <= 2**31:\n        parser.error('startup-seed must be between 0 and 2**31')\n    native_args = args.server_args\n    if native_args[:1] == ['--']:\n        native_args = native_args[1:]\n    worker_parser = argparse.ArgumentParser(add_help=False)\n    worker_parser.add_argument('--workers', type=int, default=1)\n    workers, _ = worker_parser.parse_known_args(native_args)\n    if workers.workers != 1:\n        parser.error('This launcher requires workers=1 so startup seed setup stays in the serving process')\n    # This is a dedicated process. Source imports and cwd belong to its lifetime.\n    sys.path.insert(0, str(source))\n    os.chdir(source)\n    from fish_speech.utils import set_seed\n    module_path = Path(sys.modules[set_seed.__module__].__file__).resolve()\n    if not module_path.is_relative_to(source):\n        raise RuntimeError(f'Fish utilities resolved outside requested checkout: {module_path}')\n    set_seed(args.startup_seed)\n    import torch\n    print(f'Fish startup seed={args.startup_seed}; '\n          f'cudnn.deterministic={torch.backends.cudnn.deterministic}; '\n          f'cudnn.benchmark={torch.backends.cudnn.benchmark}', flush=True)\n    sys.argv = [str(entry), *native_args]\n    if trace_path or args.stable_codec_activations:\n        # Optional observations on the owned engine instance only. Copies to CPU\n        # synchronize CUDA; these diagnostic runs are not timing measurements.\n        from tools.api_server import API\n        from tools.server.api_utils import parse_args\n        import uvicorn\n        native = parse_args()\n        if trace_path:\n            trace_path.parent.mkdir(parents=True, exist_ok=True)\n            if trace_path.exists():\n                raise FileExistsError(f'Refusing to overwrite diagnostic trace: {trace_path}')\n\n        def record(kind, tensor, **fields):\n            value = tensor.detach().cpu().contiguous()\n            row = {'kind': kind, 'shape': list(value.shape), 'dtype': str(value.dtype),\n                   'sha256': hashlib.sha256(value.numpy().tobytes()).hexdigest(), **fields}\n            with trace_path.open('a') as stream:\n                stream.write(json.dumps(row) + '\\n')\n\n        class DiagnosticAPI(API):\n            async def initialize_app(self, app):\n                await super().initialize_app(app)\n                engine = app.state.model_manager.tts_inference_engine\n                if args.stable_codec_activations:\n                    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))\n                    from src.models.stable_codec_activations import stabilize_codec_snake\n                    count = stabilize_codec_snake(engine.decoder_model)\n                    if not count:\n                        raise RuntimeError('No DAC Snake activations found; stable variant not applied')\n                    print(f'Owned codec eager Snake activations={count}', flush=True)\n                if not trace_path:\n                    return\n                encode = engine.encode_reference\n                decode = engine.get_audio_segment\n\n                def traced_encode(reference_audio, enable_reference_audio):\n                    tokens = encode(reference_audio, enable_reference_audio)\n                    if tokens is not None:\n                        record('reference_tokens', tokens,\n                               audio_sha256=hashlib.sha256(reference_audio).hexdigest())\n                    return tokens\n\n                def traced_decode(result):\n                    record('generated_tokens', result.codes)\n                    return decode(result)\n\n                engine.encode_reference = traced_encode\n                engine.get_audio_segment = traced_decode\n\n        host, port = native.listen.rsplit(':', 1)\n        uvicorn.run(DiagnosticAPI(args=native).app, host=host.strip('[]'), port=int(port),\n                    workers=1, log_level='info')\n        return\n    runpy.run_path(str(entry), run_name='__main__')\n\n\nif __name__ == '__main__':\n    main()\n",
+    "src/models/stable_codec_activations.py": "\"\"\"Owned codec activation replacement with unchanged trained parameters.\"\"\"\nimport torch\nfrom torch import nn\n\n\nclass EagerSnake1d(nn.Module):\n    \"\"\"DAC's exact Snake expression without profiling-dependent JIT fusion.\"\"\"\n    def __init__(self, alpha):\n        super().__init__()\n        self.alpha = alpha\n\n    def forward(self, x):\n        shape = x.shape\n        x = x.reshape(shape[0], shape[1], -1)\n        x = x + (self.alpha + 1e-9).reciprocal() * torch.sin(self.alpha * x).pow(2)\n        return x.reshape(shape)\n\n\ndef stabilize_codec_snake(model, *, snake_type=None):\n    \"\"\"Replace owned Snake modules, preserving Parameter objects and state keys.\n\n    The module hierarchy belongs to the caller; no shared class or function is\n    patched. Explicit opt-in defines a distinct numerical execution variant.\n    \"\"\"\n    if snake_type is None:\n        from dac.nn.layers import Snake1d\n        snake_type = Snake1d\n    replaced = 0\n    for name, child in list(model.named_children()):\n        if isinstance(child, snake_type):\n            replacement = EagerSnake1d(child.alpha)\n            replacement.train(child.training)\n            setattr(model, name, replacement)\n            replaced += 1\n        else:\n            replaced += stabilize_codec_snake(child, snake_type=snake_type)\n    return replaced\n"
+  },
+  "first_generation": "results/reproduce_v2_fish_s2_http_eager_libritts16/20261001-100707-7203b3c5",
+  "first_score": "results/reproduce_v2_fish_s2_http_eager_libritts16_score/20261001-101205-9a29960f",
+  "first_server_cleanup": "PID2996318_exited_before_second_owned_server_started",
+  "repeat_server": {
+    "pid": 3041305,
+    "command": "/tmp/rvcbench-fish-s2-env/bin/python scripts/serve_fish_s2.py --code-path checkpoints/fish-speech-s2-native --startup-seed 42 --stable-codec-activations -- --listen 127.0.0.1:18011 --workers 1 --device cuda:0 --llama-checkpoint-path /tealab-data/rjin02/AudioWatermarkBench/checkpoints/s2-pro --decoder-checkpoint-path /tealab-data/rjin02/AudioWatermarkBench/checkpoints/s2-pro/codec.pth --decoder-config-name modded_dac_vq",
+    "cuda_visible_devices": "5",
+    "implementation_files": {
+      "scripts/serve_fish_s2.py": "733b2538aa9fa00dfdd3919e0a0250217267089753b9bc5a30cdf804facab15a",
+      "src/models/stable_codec_activations.py": "7c7e0a39c0f399ccabd376a57182bc05b1a87381f065b26bb296110c126169a7"
+    },
+    "implementation_source_text": {
+      "scripts/serve_fish_s2.py": "#!/usr/bin/env python3\n\"\"\"Start the official single-worker Fish API with seed setup before warmup.\"\"\"\nfrom __future__ import annotations\n\nimport argparse\nimport hashlib\nimport json\nimport os\nfrom pathlib import Path\nimport runpy\nimport sys\n\n\ndef main():\n    parser = argparse.ArgumentParser(description=__doc__)\n    parser.add_argument('--code-path', type=Path, required=True)\n    parser.add_argument('--startup-seed', type=int, default=42)\n    parser.add_argument('--stable-codec-activations', action='store_true',\n                        help='Use the same Snake expression eagerly on owned codec modules')\n    parser.add_argument('--diagnostic-trace', type=Path,\n                        help='Record reference and generated token hashes; introduces CUDA synchronization')\n    parser.add_argument('server_args', nargs=argparse.REMAINDER,\n                        help='Official API arguments after --')\n    args = parser.parse_args()\n    trace_path = args.diagnostic_trace.resolve() if args.diagnostic_trace else None\n    source = args.code_path.resolve()\n    entry = source / 'tools/api_server.py'\n    if not entry.is_file():\n        parser.error(f'Official API entry is missing: {entry}')\n    if not 0 <= args.startup_seed <= 2**31:\n        parser.error('startup-seed must be between 0 and 2**31')\n    native_args = args.server_args\n    if native_args[:1] == ['--']:\n        native_args = native_args[1:]\n    worker_parser = argparse.ArgumentParser(add_help=False)\n    worker_parser.add_argument('--workers', type=int, default=1)\n    workers, _ = worker_parser.parse_known_args(native_args)\n    if workers.workers != 1:\n        parser.error('This launcher requires workers=1 so startup seed setup stays in the serving process')\n    # This is a dedicated process. Source imports and cwd belong to its lifetime.\n    sys.path.insert(0, str(source))\n    os.chdir(source)\n    from fish_speech.utils import set_seed\n    module_path = Path(sys.modules[set_seed.__module__].__file__).resolve()\n    if not module_path.is_relative_to(source):\n        raise RuntimeError(f'Fish utilities resolved outside requested checkout: {module_path}')\n    set_seed(args.startup_seed)\n    import torch\n    print(f'Fish startup seed={args.startup_seed}; '\n          f'cudnn.deterministic={torch.backends.cudnn.deterministic}; '\n          f'cudnn.benchmark={torch.backends.cudnn.benchmark}', flush=True)\n    sys.argv = [str(entry), *native_args]\n    if trace_path or args.stable_codec_activations:\n        # Optional observations on the owned engine instance only. Copies to CPU\n        # synchronize CUDA; these diagnostic runs are not timing measurements.\n        from tools.api_server import API\n        from tools.server.api_utils import parse_args\n        import uvicorn\n        native = parse_args()\n        if trace_path:\n            trace_path.parent.mkdir(parents=True, exist_ok=True)\n            if trace_path.exists():\n                raise FileExistsError(f'Refusing to overwrite diagnostic trace: {trace_path}')\n\n        def record(kind, tensor, **fields):\n            value = tensor.detach().cpu().contiguous()\n            row = {'kind': kind, 'shape': list(value.shape), 'dtype': str(value.dtype),\n                   'sha256': hashlib.sha256(value.numpy().tobytes()).hexdigest(), **fields}\n            with trace_path.open('a') as stream:\n                stream.write(json.dumps(row) + '\\n')\n\n        class DiagnosticAPI(API):\n            async def initialize_app(self, app):\n                await super().initialize_app(app)\n                engine = app.state.model_manager.tts_inference_engine\n                if args.stable_codec_activations:\n                    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))\n                    from src.models.stable_codec_activations import stabilize_codec_snake\n                    count = stabilize_codec_snake(engine.decoder_model)\n                    if not count:\n                        raise RuntimeError('No DAC Snake activations found; stable variant not applied')\n                    print(f'Owned codec eager Snake activations={count}', flush=True)\n                if not trace_path:\n                    return\n                encode = engine.encode_reference\n                decode = engine.get_audio_segment\n\n                def traced_encode(reference_audio, enable_reference_audio):\n                    tokens = encode(reference_audio, enable_reference_audio)\n                    if tokens is not None:\n                        record('reference_tokens', tokens,\n                               audio_sha256=hashlib.sha256(reference_audio).hexdigest())\n                    return tokens\n\n                def traced_decode(result):\n                    record('generated_tokens', result.codes)\n                    return decode(result)\n\n                engine.encode_reference = traced_encode\n                engine.get_audio_segment = traced_decode\n\n        host, port = native.listen.rsplit(':', 1)\n        uvicorn.run(DiagnosticAPI(args=native).app, host=host.strip('[]'), port=int(port),\n                    workers=1, log_level='info')\n        return\n    runpy.run_path(str(entry), run_name='__main__')\n\n\nif __name__ == '__main__':\n    main()\n",
+      "src/models/stable_codec_activations.py": "\"\"\"Owned codec activation replacement with unchanged trained parameters.\"\"\"\nimport torch\nfrom torch import nn\n\n\nclass EagerSnake1d(nn.Module):\n    \"\"\"DAC's exact Snake expression without profiling-dependent JIT fusion.\"\"\"\n    def __init__(self, alpha):\n        super().__init__()\n        self.alpha = alpha\n\n    def forward(self, x):\n        shape = x.shape\n        x = x.reshape(shape[0], shape[1], -1)\n        x = x + (self.alpha + 1e-9).reciprocal() * torch.sin(self.alpha * x).pow(2)\n        return x.reshape(shape)\n\n\ndef stabilize_codec_snake(model, *, snake_type=None):\n    \"\"\"Replace owned Snake modules, preserving Parameter objects and state keys.\n\n    The module hierarchy belongs to the caller; no shared class or function is\n    patched. Explicit opt-in defines a distinct numerical execution variant.\n    \"\"\"\n    if snake_type is None:\n        from dac.nn.layers import Snake1d\n        snake_type = Snake1d\n    replaced = 0\n    for name, child in list(model.named_children()):\n        if isinstance(child, snake_type):\n            if (set(child.state_dict()) != {'alpha'} or\n                    not isinstance(child.alpha, nn.Parameter)):\n                raise ValueError('Unsupported Snake module state; refusing to discard codec weights')\n            replacement = EagerSnake1d(child.alpha)\n            replacement.train(child.training)\n            setattr(model, name, replacement)\n            replaced += 1\n        else:\n            replaced += stabilize_codec_snake(child, snake_type=snake_type)\n    return replaced\n"
+    },
+    "source_change": "Only added preflight rejection of unexpected Snake state. Eager expression unchanged. Both loaded variants are captured separately; no identical-source claim."
+  },
+  "repeat_generation": "results/reproduce_v2_fish_s2_http_eager_cold_repeat16/20261001-101408-4296d719",
+  "repeat_generation_manifest_sha256": "27c76af3bf9e9b1758e5eaf18e298cb076c578c471f9fe3ec463d59e84c79169",
+  "first_generation_manifest_sha256": "b5e8cabe0896f5d9cddad236bee2632e3b43c2faacaedeb5b5a78bfe7a4e9cb4",
+  "repeatability": {
+    "pairs": 16,
+    "identical_waveform_hashes": 16,
+    "samples": [
+      {
+        "sample_id": "59c5e63512ec18bacdf941db596a939ba7953749cde66ff2b860d04d8eccc830",
+        "first_sha256": "0937efcec5e4c518f74c28b6cf95960d933575371de39e914bf77b13daa4e173",
+        "second_sha256": "0937efcec5e4c518f74c28b6cf95960d933575371de39e914bf77b13daa4e173",
+        "identical": true
+      },
+      {
+        "sample_id": "bbbafeab3dbc9112c48d524d97c8ffbeebe4129c00afa96c7694033fda99e34f",
+        "first_sha256": "cfa28e6070e6f0a6e167e6b1f65cbac8b7305921a06453ec55daa2c61e6a4806",
+        "second_sha256": "cfa28e6070e6f0a6e167e6b1f65cbac8b7305921a06453ec55daa2c61e6a4806",
+        "identical": true
+      },
+      {
+        "sample_id": "aab57c47ff2f5bfb6c61cd66e8b6010f0216d7a50e7f54657b48d03d549278ad",
+        "first_sha256": "18b16ff7ba5b911729396cbb9cba0abef6c6f68f6ab3e58f7a0fdb0c51ed145d",
+        "second_sha256": "18b16ff7ba5b911729396cbb9cba0abef6c6f68f6ab3e58f7a0fdb0c51ed145d",
+        "identical": true
+      },
+      {
+        "sample_id": "256a7d549878a87a47389cfbe8b30d1a4af57d3742301df83127129f98b629ef",
+        "first_sha256": "07b0c93847722eb8923e891c19cbf69f505bb2e68a7cf3dadfb0449e245f29ef",
+        "second_sha256": "07b0c93847722eb8923e891c19cbf69f505bb2e68a7cf3dadfb0449e245f29ef",
+        "identical": true
+      },
+      {
+        "sample_id": "29b1f775187a47ea70994bf44b6611acaae57c51e27dd083493e5e9107aae915",
+        "first_sha256": "9046e0723b610b9afe30bda1590d0cadcae4868606fe1f4cbdb95400a347f840",
+        "second_sha256": "9046e0723b610b9afe30bda1590d0cadcae4868606fe1f4cbdb95400a347f840",
+        "identical": true
+      },
+      {
+        "sample_id": "119b2b82f7f4c017ab67ea45f1ee994d031ff04ceec6375f25c3e895307c398c",
+        "first_sha256": "9000776d02a8318e99ef8306d1ef869a028e7ebcebc3da8c7e6d362ff1fd1bff",
+        "second_sha256": "9000776d02a8318e99ef8306d1ef869a028e7ebcebc3da8c7e6d362ff1fd1bff",
+        "identical": true
+      },
+      {
+        "sample_id": "287812ddd3899f7174ff55f8c15a5e8272056a4e7b0dd814728e5c4819295b70",
+        "first_sha256": "01c6bb4a3dad6b93e224e74974ee8056ac3df619540b1a2d425b0cfa3f331103",
+        "second_sha256": "01c6bb4a3dad6b93e224e74974ee8056ac3df619540b1a2d425b0cfa3f331103",
+        "identical": true
+      },
+      {
+        "sample_id": "fecd6a254b295c63f62e4b76beea470714c4042578824d8c12ce56c82d2f3267",
+        "first_sha256": "96b9556ae14661a9b906840e7cd63e63a12c609f6f89bf9e537e33cd8a8815f0",
+        "second_sha256": "96b9556ae14661a9b906840e7cd63e63a12c609f6f89bf9e537e33cd8a8815f0",
+        "identical": true
+      },
+      {
+        "sample_id": "52a70d6b2b36735e4c16152898ef40c54641f2fc6d6136ec79f08df70953ef54",
+        "first_sha256": "902de33bec330acd959a71f6760bc2840c426b58fd096d89da846f87c2e970b1",
+        "second_sha256": "902de33bec330acd959a71f6760bc2840c426b58fd096d89da846f87c2e970b1",
+        "identical": true
+      },
+      {
+        "sample_id": "af57d176fed29e48575dfd61eddd7835254516fa2eeb6cebe30dd675148f8eac",
+        "first_sha256": "3543b683c2eab2bddcc10e2a093def04fba979932340a12a7706b956a8e8121a",
+        "second_sha256": "3543b683c2eab2bddcc10e2a093def04fba979932340a12a7706b956a8e8121a",
+        "identical": true
+      },
+      {
+        "sample_id": "e48deb17f83ee2bcdc078274d4bb4027487b5556324b40c77d050cf2b6912cbd",
+        "first_sha256": "2a1492061b361fd38a99c23f6f507330e9c91403d820e19871f1a87f8f47240f",
+        "second_sha256": "2a1492061b361fd38a99c23f6f507330e9c91403d820e19871f1a87f8f47240f",
+        "identical": true
+      },
+      {
+        "sample_id": "f63943cdb6384940de51249a150038ac27cef4386e5896de774703e37a7a2a88",
+        "first_sha256": "69f76b80466d6eef40b8c657816adc3f71e20e60a2ae620885be125cf858c984",
+        "second_sha256": "69f76b80466d6eef40b8c657816adc3f71e20e60a2ae620885be125cf858c984",
+        "identical": true
+      },
+      {
+        "sample_id": "85d81c78a789a9a7a1a2f85e2b90fcf7a2368078a6fdc7507a34ba43f31742a1",
+        "first_sha256": "c1168aaed1ebc5fde49c289f5863772bce87cefeef170631c68518c1e440f981",
+        "second_sha256": "c1168aaed1ebc5fde49c289f5863772bce87cefeef170631c68518c1e440f981",
+        "identical": true
+      },
+      {
+        "sample_id": "4a7f70b24cde8d277eb5084528616e7729c3b1cdee7045a51690c265d7287894",
+        "first_sha256": "6ea9c54a275aad8bd894fbfd39b42b15b95fd41cd40adb5e11138b90a759194b",
+        "second_sha256": "6ea9c54a275aad8bd894fbfd39b42b15b95fd41cd40adb5e11138b90a759194b",
+        "identical": true
+      },
+      {
+        "sample_id": "40290f9edf8d6d7ace3a9bc87646ec7c3eebe406dcb1eb570a63f755bf3dce39",
+        "first_sha256": "6a3da584f57008bb17d6da52a3a8704bf5d2be08c934926b3d85274af385ce21",
+        "second_sha256": "6a3da584f57008bb17d6da52a3a8704bf5d2be08c934926b3d85274af385ce21",
+        "identical": true
+      },
+      {
+        "sample_id": "082cbba9c12a38815b54ab904dfd8c03913772e80527ec05d9aa4474fe8163e4",
+        "first_sha256": "30449a92457375c4f024488d93b491bf71ce0e561ee971b43b3cbc605eae97ba",
+        "second_sha256": "30449a92457375c4f024488d93b491bf71ce0e561ee971b43b3cbc605eae97ba",
+        "identical": true
+      }
+    ],
+    "scope": "same eager numerical variant and trained assets across two independent owned service instances; source preflight guard differs and is recorded separately"
+  },
+  "cleanup_status": "both_owned_servers_exited_port18011_closed_existing8000_8001_preserved",
+  "test_status": "221_tests_passed",
+  "first_score_manifest_sha256": "7558fef11cb12d5a342d75f4058d1c4d1257c61e1e4f1bfb656901972854b856",
+  "repeat_scoring": "Not rerun: every waveform hash matches independently scored first subset; score evidence remains attached to the first scoring run."
+}

@@ -316,7 +316,20 @@
       "repeatability_audit": "comparisons/fish_s2_http_repeatability.json",
       "provenance_limit": "Owned pinned official service and independently checked local weights; historical server weights/runtime/seeds unavailable. Cold-start repeatability remains unresolved.",
       "repeatability_localization": "first_reference_codec_tokens_change_cold_vs_warm_startup_seed_does_not_resolve",
-      "repeatability_localization_audit": "comparisons/fish_s2_http_token_trace_audit.json"
+      "repeatability_localization_audit": "comparisons/fish_s2_http_token_trace_audit.json",
+      "stable_codec_variant": {
+        "name": "eager_snake_v1",
+        "generation_status": "complete_16_of_16",
+        "scoring_status": "complete_16_of_16",
+        "generation_run": "results/reproduce_v2_fish_s2_http_eager_libritts16/20261001-100707-7203b3c5",
+        "scoring_run": "results/reproduce_v2_fish_s2_http_eager_libritts16_score/20261001-101205-9a29960f",
+        "repeat_generation_run": "results/reproduce_v2_fish_s2_http_eager_cold_repeat16/20261001-101408-4296d719",
+        "repeatability": "16_of_16_waveforms_identical_across_independent_service_instances",
+        "runtime_audit": "comparisons/fish_s2_http_eager_runtime_audit.json",
+        "comparison": "comparisons/fish_s2_http_eager_libritts16.json",
+        "historical_comparison_status": "matched_population_numerical_variant_diagnostic",
+        "limits": "Historical server weights/seeds unknown. Eager expression preserves parameters but changes numeric execution. Repeat service adds a preflight guard; both source versions captured."
+      }
     },
     {
       "n": "CosyVoice / 2",

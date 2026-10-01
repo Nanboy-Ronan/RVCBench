@@ -1,0 +1,66 @@
+{
+  "status": "partial_four_observations_then_flash_kernel_unavailable",
+  "observations": [
+    {
+      "label": "first_encode",
+      "shape": [
+        10,
+        293
+      ],
+      "sha256": "079d88b317058f54910151be15e2cafa8ffede5aec74672cd9388768a9c28848",
+      "sdpa": {
+        "flash": true,
+        "math": true,
+        "efficient": true,
+        "cudnn": true
+      }
+    },
+    {
+      "label": "second_encode",
+      "shape": [
+        10,
+        293
+      ],
+      "sha256": "3c4ed13c078e96f39c34798fd28f183a6e394c2658dbb4a33dbc7a1be67dfaa5",
+      "sdpa": {
+        "flash": true,
+        "math": true,
+        "efficient": true,
+        "cudnn": true
+      }
+    },
+    {
+      "label": "encode_after_decode",
+      "shape": [
+        10,
+        293
+      ],
+      "sha256": "3c4ed13c078e96f39c34798fd28f183a6e394c2658dbb4a33dbc7a1be67dfaa5",
+      "sdpa": {
+        "flash": true,
+        "math": true,
+        "efficient": true,
+        "cudnn": true
+      }
+    },
+    {
+      "label": "math_only_encode",
+      "shape": [
+        10,
+        293
+      ],
+      "sha256": "3c4ed13c078e96f39c34798fd28f183a6e394c2658dbb4a33dbc7a1be67dfaa5",
+      "sdpa": {
+        "flash": false,
+        "math": true,
+        "efficient": false,
+        "cudnn": false
+      }
+    }
+  ],
+  "source_sha256": "eacbd7a639fb38d40e36598a9aa29d9a04e33b928d94be163896a6cc3ed9ef09",
+  "source_text": "import sys, json, hashlib\nfrom pathlib import Path\nsys.path.insert(0, '/tealab-data/rjin02/RVCBench/checkpoints/fish-speech-s2-native')\nimport torch\nfrom fish_speech.models.dac.inference import load_model\nfrom fish_speech.inference_engine.reference_loader import ReferenceLoader\nfrom fish_speech.inference_engine.vq_manager import VQManager\nfrom fish_speech.utils import set_seed\nfrom torch.nn.attention import sdpa_kernel, SDPBackend\nset_seed(42)\ntorch.set_num_threads(8)\ncodec=load_model('modded_dac_vq','/tealab-data/rjin02/AudioWatermarkBench/checkpoints/s2-pro/codec.pth','cuda:0')\nclass Engine(ReferenceLoader, VQManager):\n    def __init__(self):\n        ReferenceLoader.__init__(self)\n        self.decoder_model=codec\nengine=Engine()\naudio=Path('/tealab-data/rjin02/RVCBench/data/Libritts/audios/121/121_127105_000043_000007.wav').read_bytes()\nrows=[]\ndef record(label,codes):\n    value=codes.detach().cpu().contiguous()\n    rows.append({'label':label,'shape':list(value.shape),'sha256':hashlib.sha256(value.numpy().tobytes()).hexdigest(),\n                 'sdpa':{'flash':torch.backends.cuda.flash_sdp_enabled(),'math':torch.backends.cuda.math_sdp_enabled(),'efficient':torch.backends.cuda.mem_efficient_sdp_enabled(),'cudnn':torch.backends.cuda.cudnn_sdp_enabled()}})\n    print(json.dumps(rows[-1]),flush=True)\n    return codes\nwith torch.inference_mode():\n    first=record('first_encode',engine.encode_reference(audio,True))\n    record('second_encode',engine.encode_reference(audio,True))\n    with torch.autocast('cuda',torch.bfloat16):\n        codec.from_indices(first[None])\n    record('encode_after_decode',engine.encode_reference(audio,True))\n    with sdpa_kernel(SDPBackend.MATH):\n        record('math_only_encode',engine.encode_reference(audio,True))\n    with sdpa_kernel(SDPBackend.FLASH_ATTENTION):\n        record('flash_only_encode',engine.encode_reference(audio,True))\n    record('restored_encode',engine.encode_reference(audio,True))\nPath('/tealab-data/rjin02/RVCBench/reproduction/comparisons/fish_s2_codec_repeat_probe.json').write_text(json.dumps({'status':'complete','audio_sha256':hashlib.sha256(audio).hexdigest(),'observations':rows},indent=2)+'\\n')\n",
+  "log_sha256": "897d7d16e977e34e8270fcd3738c5d39daa4fc21209b64c01e8f3e5773f696f5",
+  "failure": "RuntimeError: No available kernel. Aborting execution.",
+  "interpretation": "First and second standalone codec encodes differ with unchanged SDPA enable flags; second and after-decode encodes match. Math-only encoding matches the warm result. Flash-only encoding does not support this reference path."
+}

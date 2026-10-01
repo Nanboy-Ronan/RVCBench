@@ -1,0 +1,275 @@
+{
+  "status": "matched_population_eager_codec_variant_diagnostic",
+  "codec_variant": "eager_snake_v1",
+  "matched_pairs": 16,
+  "speakers": 8,
+  "run_manifest": "results/reproduce_v2_fish_s2_http_eager_libritts16_score/20261001-101205-9a29960f/run_manifest.json",
+  "run_manifest_sha256": "7558fef11cb12d5a342d75f4058d1c4d1257c61e1e4f1bfb656901972854b856",
+  "input_audit": "reproduction/comparisons/fish_s2_historical_input_audit.json",
+  "input_audit_sha256": "1b18bd73ef4c9bed1991f5fac3c6eb48c039103af5bebe1c87f65689c0fe2b0b",
+  "metrics": {
+    "mcd": {
+      "current_mean": 5.664465309295709,
+      "historical_mean": 5.88726585313994,
+      "paired_mean_delta": -0.22280054384423156,
+      "speaker_bootstrap_95_ci_delta": [
+        -0.7017288125030371,
+        0.18053123626669906
+      ]
+    },
+    "wer": {
+      "current_mean": 0.0520095310391363,
+      "historical_mean": 0.0519294028340081,
+      "paired_mean_delta": 8.012820512820484e-05,
+      "speaker_bootstrap_95_ci_delta": [
+        -0.00625,
+        0.009615384615384616
+      ]
+    },
+    "sim": {
+      "current_mean": 0.5700203292071819,
+      "historical_mean": 0.5753401219844818,
+      "paired_mean_delta": -0.005319792777299881,
+      "speaker_bootstrap_95_ci_delta": [
+        -0.037176659889519216,
+        0.032760214153677095
+      ]
+    }
+  },
+  "samples": [
+    {
+      "sample_id": "59c5e63512ec18bacdf941db596a939ba7953749cde66ff2b860d04d8eccc830",
+      "speaker_id": "121",
+      "current": {
+        "mcd": 5.110015193555871,
+        "wer": 0.0,
+        "sim": 0.5548740029335022
+      },
+      "historical": {
+        "mcd": 6.205130078463508,
+        "wer": 0.0,
+        "sim": 0.5085010528564453
+      }
+    },
+    {
+      "sample_id": "bbbafeab3dbc9112c48d524d97c8ffbeebe4129c00afa96c7694033fda99e34f",
+      "speaker_id": "121",
+      "current": {
+        "mcd": 6.296260561654735,
+        "wer": 0.125,
+        "sim": 0.42678219079971313
+      },
+      "historical": {
+        "mcd": 6.647058185318518,
+        "wer": 0.125,
+        "sim": 0.41682112216949463
+      }
+    },
+    {
+      "sample_id": "aab57c47ff2f5bfb6c61cd66e8b6010f0216d7a50e7f54657b48d03d549278ad",
+      "speaker_id": "1462",
+      "current": {
+        "mcd": 4.294106034305498,
+        "wer": 0.0,
+        "sim": 0.6322621703147888
+      },
+      "historical": {
+        "mcd": 4.085397270860499,
+        "wer": 0.0,
+        "sim": 0.642890214920044
+      }
+    },
+    {
+      "sample_id": "256a7d549878a87a47389cfbe8b30d1a4af57d3742301df83127129f98b629ef",
+      "speaker_id": "1462",
+      "current": {
+        "mcd": 4.082330655519966,
+        "wer": 0.0,
+        "sim": 0.7006843090057373
+      },
+      "historical": {
+        "mcd": 3.598374886398075,
+        "wer": 0.0,
+        "sim": 0.7238050699234009
+      }
+    },
+    {
+      "sample_id": "29b1f775187a47ea70994bf44b6611acaae57c51e27dd083493e5e9107aae915",
+      "speaker_id": "237",
+      "current": {
+        "mcd": 5.375861707603761,
+        "wer": 0.07692307692307693,
+        "sim": 0.562129557132721
+      },
+      "historical": {
+        "mcd": 5.778262725145475,
+        "wer": 0.07692307692307693,
+        "sim": 0.5937734842300415
+      }
+    },
+    {
+      "sample_id": "119b2b82f7f4c017ab67ea45f1ee994d031ff04ceec6375f25c3e895307c398c",
+      "speaker_id": "237",
+      "current": {
+        "mcd": 8.701509257098374,
+        "wer": 0.0,
+        "sim": 0.40750569105148315
+      },
+      "historical": {
+        "mcd": 7.738979136313187,
+        "wer": 0.0,
+        "sim": 0.45901185274124146
+      }
+    },
+    {
+      "sample_id": "287812ddd3899f7174ff55f8c15a5e8272056a4e7b0dd814728e5c4819295b70",
+      "speaker_id": "2428",
+      "current": {
+        "mcd": 4.831737404691684,
+        "wer": 0.0,
+        "sim": 0.6724529266357422
+      },
+      "historical": {
+        "mcd": 4.879245416510183,
+        "wer": 0.05,
+        "sim": 0.6353893280029297
+      }
+    },
+    {
+      "sample_id": "fecd6a254b295c63f62e4b76beea470714c4042578824d8c12ce56c82d2f3267",
+      "speaker_id": "2428",
+      "current": {
+        "mcd": 6.195163439177979,
+        "wer": 0.0,
+        "sim": 0.5529037714004517
+      },
+      "historical": {
+        "mcd": 4.860070029200858,
+        "wer": 0.0,
+        "sim": 0.6138309240341187
+      }
+    },
+    {
+      "sample_id": "52a70d6b2b36735e4c16152898ef40c54641f2fc6d6136ec79f08df70953ef54",
+      "speaker_id": "251",
+      "current": {
+        "mcd": 6.105219423880685,
+        "wer": 0.5789473684210527,
+        "sim": 0.6994587182998657
+      },
+      "historical": {
+        "mcd": 6.162475575451333,
+        "wer": 0.5789473684210527,
+        "sim": 0.6301758289337158
+      }
+    },
+    {
+      "sample_id": "af57d176fed29e48575dfd61eddd7835254516fa2eeb6cebe30dd675148f8eac",
+      "speaker_id": "251",
+      "current": {
+        "mcd": 7.1677807695244224,
+        "wer": 0.0,
+        "sim": 0.43784278631210327
+      },
+      "historical": {
+        "mcd": 6.8937355990443185,
+        "wer": 0.0,
+        "sim": 0.2805989384651184
+      }
+    },
+    {
+      "sample_id": "e48deb17f83ee2bcdc078274d4bb4027487b5556324b40c77d050cf2b6912cbd",
+      "speaker_id": "4992",
+      "current": {
+        "mcd": 4.889994030711671,
+        "wer": 0.0,
+        "sim": 0.5143324136734009
+      },
+      "historical": {
+        "mcd": 7.142059389262697,
+        "wer": 0.0,
+        "sim": 0.5631746053695679
+      }
+    },
+    {
+      "sample_id": "f63943cdb6384940de51249a150038ac27cef4386e5896de774703e37a7a2a88",
+      "speaker_id": "4992",
+      "current": {
+        "mcd": 4.765912480370555,
+        "wer": 0.0,
+        "sim": 0.5301504135131836
+      },
+      "historical": {
+        "mcd": 5.0638198530711,
+        "wer": 0.0,
+        "sim": 0.5774664878845215
+      }
+    },
+    {
+      "sample_id": "85d81c78a789a9a7a1a2f85e2b90fcf7a2368078a6fdc7507a34ba43f31742a1",
+      "speaker_id": "5694",
+      "current": {
+        "mcd": 5.10914209952236,
+        "wer": 0.0,
+        "sim": 0.6404058337211609
+      },
+      "historical": {
+        "mcd": 5.393620173758483,
+        "wer": 0.0,
+        "sim": 0.6258509755134583
+      }
+    },
+    {
+      "sample_id": "4a7f70b24cde8d277eb5084528616e7729c3b1cdee7045a51690c265d7287894",
+      "speaker_id": "5694",
+      "current": {
+        "mcd": 5.586124329338262,
+        "wer": 0.0,
+        "sim": 0.6214398741722107
+      },
+      "historical": {
+        "mcd": 5.828817948181449,
+        "wer": 0.0,
+        "sim": 0.6449565291404724
+      }
+    },
+    {
+      "sample_id": "40290f9edf8d6d7ace3a9bc87646ec7c3eebe406dcb1eb570a63f755bf3dce39",
+      "speaker_id": "8455",
+      "current": {
+        "mcd": 6.026777559397757,
+        "wer": 0.05128205128205128,
+        "sim": 0.6898890733718872
+      },
+      "historical": {
+        "mcd": 5.972753946252046,
+        "wer": 0.0,
+        "sim": 0.7426708936691284
+      }
+    },
+    {
+      "sample_id": "082cbba9c12a38815b54ab904dfd8c03913772e80527ec05d9aa4474fe8163e4",
+      "speaker_id": "8455",
+      "current": {
+        "mcd": 6.093510002377761,
+        "wer": 0.0,
+        "sim": 0.47721153497695923
+      },
+      "historical": {
+        "mcd": 7.946453437007319,
+        "wer": 0.0,
+        "sim": 0.5465246438980103
+      }
+    }
+  ],
+  "bootstrap": {
+    "resamples": 2000,
+    "seed": 20260930,
+    "unit": "speaker"
+  },
+  "limits": [
+    "Same trained weights and Snake formula, changed numerical execution path.",
+    "Historical server source, weights and seeds unavailable.",
+    "Subset comparison does not establish full-paper table reproduction."
+  ]
+}

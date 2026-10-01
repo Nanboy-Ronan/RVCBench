@@ -65,7 +65,8 @@ tracing, the first reference's codec token hash changes between cold and warm
 requests, followed by generated lengths of 68 versus 62 tokens. The second
 reference and generated token hashes match. This locates the first observed
 divergence in reference encoding; the underlying numerical or state cause
-remains unresolved. See `fish_s2_http_seeded_startup_audit.json` and
+was investigated further in the [codec stability audit](fish_s2_codec_stability.md),
+which provides an opt-in eager activation variant. See `fish_s2_http_seeded_startup_audit.json` and
 `fish_s2_http_token_trace_audit.json` in `reproduction/comparisons/`.
 
 For diagnosis, `scripts/serve_fish_s2.py` invokes the official single-worker

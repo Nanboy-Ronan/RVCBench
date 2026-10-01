@@ -99,8 +99,11 @@ def generation_runtime(root, conf, packages):
         path = Path(str(worker)).resolve()
         files[str(path)] = file_hash(path)
     for key, upstream in conf.adversary.items():
-        if (key in ('code_path', 'repo_root') or key.endswith('_code_path')) and upstream and Path(str(upstream)).is_dir():
-            for path in upstream_runtime_files(Path(str(upstream))):
+        if (key in ('code_path', 'repo_root') or key.endswith('_code_path')) and upstream:
+            root_path = Path(str(upstream))
+            paths = ([root_path] if root_path.is_file() else
+                     upstream_runtime_files(root_path) if root_path.is_dir() else [])
+            for path in paths:
                 files[str(path.resolve())] = file_hash(path)
                 if path.suffix == '.py':
                     for node in walk(ast.parse(_python_source(path))):
