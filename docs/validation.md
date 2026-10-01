@@ -52,7 +52,13 @@ integrations remain in scope even when assets or compatible protocols are missin
 | Native VALL-E | A checkpoint compatible with lifeiteng/vall-e. The validated Amphion variant has a separate configuration. |
 | GlowTTS | Model assets and a validated wrapper implementing the intended speaker-conditioning protocol. |
 
-Other outstanding work includes protection-method production, historical auxiliary
+GR seeded-noise reconstruction, DNS64 and Enkidu cohort production have been
+validated on the fixed LibriTTS subset. Enkidu completed the full 2,000-pair
+training cohort and Qwen3 generation/core scoring for 16 selected outputs. Its
+audio-only protocol differs from historical protection output and does not
+establish historical equivalence.
+
+Other outstanding work includes remaining protection-method production, historical auxiliary
 metric replay, timing comparability, and final website/Hugging Face integration.
 These are retained in [the reproduction plan](../reproduction/plan.json).
 

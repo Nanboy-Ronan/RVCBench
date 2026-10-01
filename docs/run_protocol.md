@@ -30,6 +30,14 @@ Set model checkpoint/source overrides for the selected runtime; see
 [pinned Hub snapshots](hub_revisions.md). A run creates a timestamped directory
 under `results/<run_name>/` containing its manifest and generated audio.
 
+Qwen3-TTS accepts individual samples directly through the request backend.
+Each native seed must match the request's run seed plus original source index.
+Model NaN/Inf output fails that sample, and prompt caches are released when the
+backend closes. Its `qwen3_generate_excluding_prompt_encoding_and_io_v1` timing
+measures the native generation call, excluding prompt encoding and file writing.
+This scope alone does not establish timing comparability with another adapter.
+Other integrations currently use the legacy adapter bridge.
+
 To freeze a new subset before examining model outcomes:
 
 ```bash

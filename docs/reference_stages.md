@@ -28,11 +28,12 @@ and target bytes remain unchanged.
 An adjacent `stage_manifest.json` is hashed and recorded when present. This is
 recorded producer metadata; unknown producer formats do not attest their claims.
 A producer declaring an unfinished or failed status is rejected. For the known
-`gr_archived_noise_replay_v1`, `gr_seeded_batch_rng_v1` and
-`dns64_dataset_rate_v1` formats, the runner additionally requires complete
-verification counts and checks selected sample identities and clean/output/
-historical hashes against the producer rows. Such bindings are labeled
-`verified_selected_output_hashes`. Historical
+`gr_archived_noise_replay_v1`, `gr_seeded_batch_rng_v1`,
+`dns64_dataset_rate_v1` and `enkidu_audio_only_cohort_v1` formats, the runner
+additionally requires complete verification counts and checks selected sample
+identities and clean/output hashes against the producer rows. GR replay also
+requires historical output hashes; Enkidu requires complete cohort training.
+Such bindings are labeled `verified_selected_output_hashes`. Historical
 directories without a producer manifest are labeled
 `legacy_directory_content_only`; binding them does not reproduce the protection
 or denoising algorithm.
@@ -42,7 +43,7 @@ or denoising algorithm.
 Use [Enkidu cohort production](enkidu_stage.md),
 [archived Gaussian-noise replay](gr_noise_replay.md) when the historical
 noise archive is available, or [DNS64 production](dns64_stage.md) to denoise
-an explicit reference directory. Both commands write a stage manifest that
+an explicit reference directory. These commands write a stage manifest that
 the cloning runner verifies against the selected inputs and output bytes.
 
 Legacy protectors store their noise archive at the protection run root and

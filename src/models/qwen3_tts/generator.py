@@ -131,7 +131,8 @@ class Qwen3TTSGenerator(BaseModel):
             raise RuntimeError("Qwen3-TTS returned no audio for the provided prompt.")
 
         wav = np.asarray(wavs[0], dtype=np.float32).reshape(-1)
-        wav = np.nan_to_num(wav, nan=0.0, posinf=0.0, neginf=0.0)
+        if not np.isfinite(wav).all():
+            raise FloatingPointError("Qwen3-TTS returned nonfinite audio")
         wav = np.clip(wav, -1.0, 1.0)
         return wav, int(sample_rate)
 

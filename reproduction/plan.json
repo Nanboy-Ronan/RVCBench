@@ -383,7 +383,7 @@
   "requirements": [
     {
       "item": "Explicit backend requests and results with deterministic resource cleanup",
-      "status": "bridge_implemented_adapter_migration_in_progress"
+      "status": "qwen3_direct_requests_verified_other_adapters_use_legacy_bridge"
     },
     {
       "item": "Original sample seed propagation including subprocess and HTTP adapters",
@@ -407,7 +407,7 @@
     },
     {
       "item": "Protocol and stage plan for protection, denoising, generation and scoring",
-      "status": "gr_seeded_rng_full_cohort_and_dns64_production_verified_other_protection_producers_pending"
+      "status": "gr_rng_dns64_and_enkidu_cohort_verified_other_protection_producers_pending"
     },
     {
       "item": "Separate completion, protocol validity and cross-run comparability",

@@ -33,7 +33,7 @@ def check_audio(path):
 
 def run_zero_shot(conf, base_dir, device, dataset, exp_dir, logger, protected_audio_dir=None):
     from src.utils.seeding import configure_seeds
-    from .backends import LegacyAdversaryBackend, GenerationRequest
+    from .backends import create_backend, GenerationRequest
 
     options = conf.vc
     evaluation = options.get('evaluation') or {}
@@ -171,7 +171,7 @@ def run_zero_shot(conf, base_dir, device, dataset, exp_dir, logger, protected_au
                 row.update(status='input_failed', error='Missing prompt audio, target audio, or target transcript')
             else:
                 if backend is None:
-                    backend = LegacyAdversaryBackend(resolved_conf, dataset, device, logger)
+                    backend = create_backend(resolved_conf, dataset, device, logger)
                     backend.prepare()
                 for attempt in range(retries + 1):
                     row['attempts'] += 1

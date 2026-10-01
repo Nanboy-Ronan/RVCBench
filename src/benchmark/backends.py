@@ -91,3 +91,28 @@ class LegacyAdversaryBackend:
         if self.adapter is not None:
             self.adapter.close()
             self.adapter = None
+
+
+class Qwen3Backend(LegacyAdversaryBackend):
+    """Qwen3 inference consumes samples directly without a dataset facade."""
+
+    def generate_batch(self, requests):
+        from src.utils.seeding import configure_seeds
+        if self.adapter is None:
+            raise RuntimeError('Backend.prepare() must precede generation')
+        results = []
+        for request in requests:
+            native_seed = self.adapter.seed
+            if native_seed is not None and int(native_seed) + request.sample.index != request.seed:
+                raise ValueError('Qwen3 native seed differs from the generation request')
+            configure_seeds(request.seed, logger=None)
+            path, elapsed = self.adapter.generate_sample(request.sample, output_dir=request.output_dir)
+            results.append(GenerationResult(sample_id(request.sample), path, elapsed,
+                'qwen3_generate_excluding_prompt_encoding_and_io_v1',
+                native_seed=request.seed, native_seed_policy='source_index', native_requested_seed=request.seed))
+        return results
+
+
+def create_backend(conf, dataset, device, logger):
+    backend = Qwen3Backend if conf.vc.model == 'qwen3_tts' else LegacyAdversaryBackend
+    return backend(conf, dataset, device, logger)
