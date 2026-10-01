@@ -159,6 +159,8 @@ class VibeVoiceZeroShotAdversary(BaseAdversary):
                 waveform, sr = self._generator.generate(formatted_text, reference_path)
                 synth_elapsed = time.perf_counter() - synth_start
             except Exception as exc:
+                if self._managed_lifetime:
+                    raise
                 self.logger.error(
                     "[VibeVoice] Generation failed for sample %d (speaker %s): %s",
                     idx,

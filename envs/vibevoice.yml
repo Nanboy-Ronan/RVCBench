@@ -1,13 +1,21 @@
+# Key pins for the current checkout, validated in an existing local runtime.
+# Its pyproject's 4.51.3 requirement is stale for its generation cache calls.
+# Clean installation and optional flash-attn compilation remain unverified.
 name: vibevoice
 channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3.10
+  - python=3.11
   - pip
   - ffmpeg
   - libsndfile
   - espeak-ng
   - pip:
-      - --extra-index-url https://download.pytorch.org/whl/cu121
+      - --extra-index-url https://download.pytorch.org/whl/cu126
       - -e ..
+      - torch==2.8.0
+      - torchaudio==2.8.0
+      - transformers==4.57.3
+      - tokenizers==0.22.2
+      - numpy==1.26.4

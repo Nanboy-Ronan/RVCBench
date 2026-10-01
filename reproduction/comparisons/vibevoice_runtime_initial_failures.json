@@ -1,0 +1,58 @@
+{
+  "kind": "runtime_failures",
+  "model": "vibevoice",
+  "attempts": [
+    {
+      "run_manifest": "/tealab-data/rjin02/RVCBench/results/debug_vibevoice_tf451_libritts2/20261001-022132-b829fcf9/run_manifest.json",
+      "run_manifest_sha256": "0196b35682fe08a1a4531053f3d554d3615be3f8d26967ba0d9bc53e9b71c297",
+      "coverage": {
+        "requested": 2,
+        "generated": 0,
+        "generation_failed": 2,
+        "input_failed": 0,
+        "pending": 0,
+        "generating": 0,
+        "metric_valid": {
+          "mcd": 0,
+          "wer": 0,
+          "sim": 0,
+          "sva": 0,
+          "speechmos": 0,
+          "dnsmos": 0,
+          "emotion": 0
+        },
+        "required_metrics": [
+          "mcd",
+          "wer",
+          "sim"
+        ],
+        "status": "partial",
+        "eligible_for_comparison": false
+      },
+      "error": null,
+      "sample_errors": [
+        {
+          "sample_id": "59c5e63512ec18bacdf941db596a939ba7953749cde66ff2b860d04d8eccc830",
+          "error": "RuntimeError: Adapter produced no audio for this sample",
+          "warnings": [
+            "[VibeVoice] Generation failed for sample 0 (speaker 121): GenerationMixin._prepare_cache_for_generation() missing 1 required positional argument: 'device'"
+          ]
+        },
+        {
+          "sample_id": "bbbafeab3dbc9112c48d524d97c8ffbeebe4129c00afa96c7694033fda99e34f",
+          "error": "RuntimeError: Adapter produced no audio for this sample",
+          "warnings": [
+            "[VibeVoice] Generation failed for sample 0 (speaker 121): GenerationMixin._prepare_cache_for_generation() missing 1 required positional argument: 'device'"
+          ]
+        }
+      ],
+      "reason": "Current checkout calls the newer generation cache interface; Transformers 4.51.3 requires a device argument. Legacy adapter swallowed original errors; managed adapter now propagates them."
+    }
+  ],
+  "preparation_guard_validation": {
+    "runtime": "transformers==4.51.3",
+    "result": "rejected before upstream model import/load",
+    "error": "missing a required argument: 'device'"
+  },
+  "interpretation": "Initial failed artifacts retained; no audio generated. Transformers 4.57.3 is validated separately."
+}

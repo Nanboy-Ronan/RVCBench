@@ -1,7 +1,8 @@
 """VibeVoice generator wrapper for off-the-shelf adversary runs."""
 from __future__ import annotations
 
-import os
+import ast
+import inspect
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -11,6 +12,28 @@ import numpy as np
 import torch
 
 from src.models.model import BaseModel
+
+
+def _check_generation_cache_api(code_path):
+    """Check the checkout's cache calls against the installed Transformers API."""
+    from transformers.generation.utils import GenerationMixin
+    source = Path(code_path) / 'vibevoice/modular/modeling_vibevoice_inference.py'
+    if not source.is_file():
+        raise FileNotFoundError(f'VibeVoice inference implementation not found: {source}')
+    signature = inspect.signature(GenerationMixin._prepare_cache_for_generation)
+    for node in ast.walk(ast.parse(source.read_text())):
+        if (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+                and isinstance(node.func.value, ast.Name) and node.func.value.id == 'self'
+                and node.func.attr == '_prepare_cache_for_generation'
+                and not any(isinstance(arg, ast.Starred) for arg in node.args)
+                and all(keyword.arg is not None for keyword in node.keywords)):
+            try:
+                signature.bind(None, *[None for _ in node.args],
+                               **{keyword.arg: None for keyword in node.keywords})
+            except TypeError as exc:
+                raise RuntimeError('VibeVoice checkout cache API is incompatible with installed Transformers: '
+                                   f'{exc}. The current checkout is validated with transformers==4.57.3; '
+                                   'see envs/vibevoice.yml.') from exc
 
 
 @dataclass
@@ -45,6 +68,7 @@ class VibeVoiceGenerator(BaseModel):
             logger=logger,
         )
         self.config = config
+        self.device = torch.device(self.device)
 
         self.config.code_path = Path(self.config.code_path).expanduser().resolve()
         self._ensure_repo_on_path()
@@ -62,6 +86,7 @@ class VibeVoiceGenerator(BaseModel):
     # ------------------------------------------------------------------
     def load_model(self) -> None:
         self._ensure_repo_on_path()
+        _check_generation_cache_api(self.config.code_path)
 
         from vibevoice.modular.modeling_vibevoice_inference import (
             VibeVoiceForConditionalGenerationInference,
@@ -93,7 +118,9 @@ class VibeVoiceGenerator(BaseModel):
                 **load_kwargs,
             )
         except Exception as exc:
-            if not self.config.allow_attn_fallback or self._attn_impl != "flash_attention_2":
+            attention_error = any(marker in str(exc).lower() for marker in
+                                  ('flashattention', 'flash_attn', 'flash attention'))
+            if not self.config.allow_attn_fallback or self._attn_impl != "flash_attention_2" or not attention_error:
                 raise
             self.logger.warning(
                 "[VibeVoice] flash_attention_2 load failed (%s); retrying with sdpa.",
@@ -148,6 +175,10 @@ class VibeVoiceGenerator(BaseModel):
                 self.logger.warning("[VibeVoice] No adapter components were loaded; please verify checkpoint contents.")
 
         self.model.eval()
+
+    def close(self):
+        self.model = self.processor = None
+        self._model_ready = False
 
     def generate(self, text: str, reference_audio: Path) -> Tuple[np.ndarray, int]:
         text = (text or "").strip()
@@ -206,9 +237,6 @@ class VibeVoiceGenerator(BaseModel):
         repo_str = str(repo_path)
         if repo_str not in sys.path:
             sys.path.insert(0, repo_str)
-        current = os.environ.get("PYTHONPATH", "")
-        if repo_str not in [entry for entry in current.split(os.pathsep) if entry]:
-            os.environ["PYTHONPATH"] = f"{repo_str}{os.pathsep}{current}" if current else repo_str
 
     def _device_string(self) -> str:
         if self.device.type == "cuda":

@@ -550,9 +550,20 @@
       "status": "historical_results",
       "config": "configs/ots_vc/clean/libritts/vibevoice_ots.yaml",
       "subset": "subsets/libritts16_v1/selection.json",
-      "generation_status": "pending",
-      "scoring_status": "pending",
-      "historical_comparison_status": "pending"
+      "generation_status": "complete",
+      "scoring_status": "complete",
+      "historical_comparison_status": "matched_subset_measured",
+      "generation_run": "results/reproduce_v2_vibevoice_tf457_libritts16/20261001-022733-eb209c30",
+      "failed_attempts": [
+        {
+          "evidence": "comparisons/vibevoice_runtime_initial_failures.json"
+        }
+      ],
+      "provenance_limit": "Current local checkpoint and source hashed; historical immutable weights/runtime and effective attention backend unproven. Current generation uses SDPA fallback because flash-attn is absent. Validated key runtime pins are not a clean installation lock. Matched historical scoring uses lowercase_v1 WER.",
+      "canary": "comparisons/vibevoice_canary.json",
+      "scoring_run": "results/reproduce_v2_vibevoice_tf457_libritts16_score/20261001-023020-7ac458ae",
+      "comparison": "comparisons/vibevoice_libritts16_v1.json",
+      "historical_metric_replay": "comparisons/vibevoice_metric_replay_v1.json"
     }
   ],
   "requirements": [

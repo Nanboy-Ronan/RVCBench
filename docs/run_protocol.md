@@ -345,3 +345,20 @@ runtime uses Torch 2.8.0, Transformers 4.57.3 and Lightning 2.5.3. Its environme
 recipe records key pins rather than a clean-install lock. G2P/NLTK package resource
 assets and historical immutable weights/runtime are not yet established, so
 matched-input generation and scoring comparisons remain evidence-bounded.
+
+VibeVoice checks the configured checkout's concrete generation cache calls against
+the installed Transformers method signature before model loading. The current
+checkout omits the older required `device` argument, so its declared Transformers
+4.51.3 requirement is stale; the validated runtime uses 4.57.3. The older runtime
+is rejected during preparation. This is a check of the inspected static cache
+calls, not a general certification of all upstream APIs.
+
+VibeVoice runner-managed calls propagate original generation errors to the durable
+sample journal, allowing fatal CUDA failures to terminate the run. Attention
+fallback is restricted to errors mentioning FlashAttention; other checkpoint
+errors are not retried with SDPA. The wrapper releases processor/model references
+and avoids changing the process-wide `PYTHONPATH`. The current runtime uses SDPA
+fallback because flash-attn is absent. Historical effective attention backend,
+weights and environment equivalence remain unproven. Initial canary scoring uses
+the modern WER rule; the matched historical subset uses `lowercase_v1`, confirmed
+against all 2,000 historical rows.

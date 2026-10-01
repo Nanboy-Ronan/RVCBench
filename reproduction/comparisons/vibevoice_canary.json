@@ -1,0 +1,63 @@
+{
+  "kind": "generation_scoring_canary",
+  "model": "vibevoice",
+  "coverage": {
+    "requested": 2,
+    "generated": 2,
+    "generation_failed": 0,
+    "input_failed": 0,
+    "pending": 0,
+    "generating": 0,
+    "metric_valid": {
+      "mcd": 2,
+      "wer": 2,
+      "sim": 2,
+      "sva": 2,
+      "speechmos": 0,
+      "dnsmos": 0,
+      "emotion": 0
+    },
+    "required_metrics": [
+      "mcd",
+      "wer",
+      "sim"
+    ],
+    "status": "complete",
+    "eligible_for_comparison": true
+  },
+  "generation_manifest": "/tealab-data/rjin02/RVCBench/results/debug_vibevoice_tf457_libritts2/20261001-022339-8654ee3b/run_manifest.json",
+  "generation_manifest_sha256": "f8e539a3dacbc7ca673a2fe9845146b99d2f81b1767610f1282a5f8ad1bc3a8f",
+  "scoring_manifest": "/tealab-data/rjin02/RVCBench/results/debug_vibevoice_tf457_libritts2_score/20261001-022538-8481e24c/run_manifest.json",
+  "scoring_manifest_sha256": "b43ce69f27e89ba793a643c6244db1c602373cb6b1177e9cb99fce99770f58d5",
+  "samples": [
+    {
+      "sample_id": "59c5e63512ec18bacdf941db596a939ba7953749cde66ff2b860d04d8eccc830",
+      "generated_sha256": "e7263a37940359f423852ac13cad3a30b7241ea7a4f9f6e9248a8a2ed90d7010",
+      "metrics": {
+        "mcd": 4.59885523871927,
+        "wer": 0.0,
+        "predicted_text": " You'll receive the packet Thursday morning, I inquired.",
+        "sim": 0.5678178668022156,
+        "sva": true
+      }
+    },
+    {
+      "sample_id": "bbbafeab3dbc9112c48d524d97c8ffbeebe4129c00afa96c7694033fda99e34f",
+      "generated_sha256": "26f28131be298e60def97e59a384702dd0041f1fed940edc7977021a125c01ed",
+      "metrics": {
+        "mcd": 8.307065377892798,
+        "wer": 0.125,
+        "predicted_text": " A transferable ticket to the Hall of Fame.",
+        "sim": 0.22267654538154602,
+        "sva": false
+      }
+    }
+  ],
+  "repair_repeat_check": {
+    "full_manifest": "/tealab-data/rjin02/RVCBench/results/reproduce_v2_vibevoice_tf457_libritts16/20261001-022733-eb209c30/run_manifest.json",
+    "full_manifest_sha256": "2ff3aee26bb9bc9de02cc6b8671ac85c02a25dfdf43c8b318adfb13f9ce8abf6",
+    "matched": 2,
+    "identical_waveform_hashes": 2
+  },
+  "interpretation": "Initial 4.57.3 canary predates API guard, error propagation and cleanup repair. Both waveform hashes repeated in full subset. Canary uses ascii_punctuation_removed_v2 WER; matched full scoring uses verified historical lowercase_v1. Historical immutable weights/environment and effective attention backend unproven."
+}
