@@ -504,10 +504,22 @@
       "b": false,
       "status": "experimental_adapter",
       "config": "configs/ots_vc/clean/libritts/zonos2_ots.yaml",
-      "subset": "subsets/libritts16_v1/selection.json",
-      "generation_status": "pending",
-      "scoring_status": "pending",
-      "historical_comparison_status": "historical_reference_not_established"
+      "subset": "subsets/vctk16_v1/selection.json",
+      "generation_status": "complete",
+      "scoring_status": "complete",
+      "historical_comparison_status": "matched_subset_measured",
+      "config_overrides": [
+        "dataset=vctk",
+        "+dataset.manifest_variant=speaker"
+      ],
+      "generation_run": "results/reproduce_v2_zonos2_scoped_vctk16/20261001-032656-ea3a3cef",
+      "scoring_run": "results/reproduce_v2_zonos2_scoped_vctk16_score/20261001-032902-2e861f58",
+      "comparison": "comparisons/zonos2_vctk16_v1.json",
+      "historical_metric_replay": "comparisons/zonos2_metric_replay_v1.json",
+      "historical_reference_scope": "August 2026 VCTK run; experimental integration outside the paper model catalog.",
+      "additional_libritts_validation": "comparisons/zonos2_libritts16_validation.json",
+      "provenance_limit": "Explicit local main/DAC/speaker weights and native Python source hashed. Normalizer cache/data and native kernels not fully frozen; historical weights/seed and timing equivalence unproven. Current run seed plus original index corrects legacy discarded-index seeding.",
+      "reproduction_status": "full_subset_measured_historical_exact_equivalence_unproven"
     },
     {
       "n": "PlayDiffusion",

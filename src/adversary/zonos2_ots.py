@@ -55,6 +55,12 @@ class Zonos2ZeroShotAdversary(BaseAdversary):
             clean_speaker_background=self.clean_speaker_background,
             accurate_mode=self.accurate_mode,
             max_tokens=self.max_tokens,
+            code_path=self.config.get('code_path'),
+            memory_ratio=float(self.config.get('memory_ratio', 0.9)),
+            max_running_req=int(self.config.get('max_running_req', 256)),
+            distributed_port=self.config.get('distributed_port'),
+            vocoder_path=self.config.get('vocoder_path'),
+            speaker_file_path=self.config.get('speaker_file_path'),
         )
         self._generator = Zonos2Generator(generator_config, self.device, self.logger)
 

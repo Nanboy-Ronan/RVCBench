@@ -1,43 +1,23 @@
-# ZONOS2 (Zyphra/ZONOS2) is not pip-installable as a package; it's a
-# `uv`-managed project (git clone + `uv sync`), which creates its own
-# `.venv` with its own resolved deps (torch==2.9.1, sgl_kernel, flashinfer,
-# nvidia-cutlass-dsl, etc — all cu12x-tagged, so they run fine on drivers
-# that only support CUDA 12.x, unlike sglang-omni which needs CUDA 13).
+# ZONOS2 uses an upstream uv environment rather than a conda environment.
+# Locally validated source revision: 194c0a3ab67b90383a67646289f28d4ecb1c1f64.
+# The fixed subset uses Python 3.11, torch/torchaudio 2.9.1, NumPy 2.4.1,
+# Transformers 4.57.3, sgl-kernel 0.3.20 and flashinfer-python 0.5.3.
+# Existing environment validation is not a clean-install or driver compatibility guarantee.
 #
-# `uv sync`'s default python-version resolution can pick Python 3.12, which
-# has no prebuilt `monotonic-align` wheel (the repo's src/models/__init__.py
-# unconditionally imports bertvits2_model, which needs it) and fails to
-# build from source under 3.12's C-API changes. Force 3.11 instead.
+# In a new checkout:
+#   git clone https://github.com/Zyphra/ZONOS2.git checkpoints/ZONOS2-repo
+#   cd checkpoints/ZONOS2-repo
+#   git checkout 194c0a3ab67b90383a67646289f28d4ecb1c1f64
+#   uv sync --python 3.11 --frozen
+#   uv pip install --python .venv/bin/python hydra-core==1.3.2 hydra-colorlog==0.1.4
+#   uv pip install --python .venv/bin/python pandas==3.0.5 soundfile==0.13.1
 #
-# There is no `pip` binary inside a uv-managed venv; use `uv pip install
-# --python <venv>/bin/python ...`.
-#
-# Setup:
-#   1. git clone https://github.com/Zyphra/ZONOS2.git checkpoints/ZONOS2-repo
-#   2. cd checkpoints/ZONOS2-repo && uv sync --python 3.11
-#   3. uv pip install --python .venv/bin/python "setuptools<81"
-#   4. uv pip install --python .venv/bin/python --no-build-isolation-package openai_whisper \
-#        hydra-core==1.3.2 hydra-colorlog==0.1.4 omegaconf==2.3.0 jiwer==3.0.3 \
-#        librosa matplotlib openai_whisper==20231117 pymcd==0.2.1 pysndfx==0.3.6 \
-#        speechbrain==1.0.2 torch_stoi==0.2.1 tqdm==4.64.1 pandas GPUtil psutil \
-#        onnxruntime
-#      (openai-whisper's sdist needs pkg_resources at build time, which uv's
-#      isolated build env doesn't have by default; --no-build-isolation-package
-#      builds it against the target venv instead, which does.)
-#   5. uv pip install --python .venv/bin/python monotonic-align
-#   6. uv pip install --python .venv/bin/python torch==2.9.1 torchaudio==2.9.1
-#      (LAST: step 4 drags torch back to an older, mismatched pair; ZONOS2
-#      hard-pins torchaudio==2.9.1 in its own pyproject.toml.)
-#   7. uv pip install --python .venv/bin/python "speechbrain>=1.0.3"
-#      (speechbrain 1.0.2 calls torchaudio.list_audio_backends(), which was
-#      removed in torchaudio 2.9; 1.1.0 does not call it.)
-#
-# GPU placement: TTSLLM's scheduler communicates over ZMQ IPC and has no
-# `device`/`gpu_id` argument, so `device: cuda:N` in the benchmark config is
-# NOT honoured by this model — set CUDA_VISIBLE_DEVICES on the process
-# instead. It also pre-allocates a large KV cache (~55GB on an 80GB A100),
-# so run it alone on its GPU.
-#
-# Run with: checkpoints/ZONOS2-repo/.venv/bin/python run_vc.py --config-name ...
+# Generate using this interpreter from the RVCBench root. Set CUDA_VISIBLE_DEVICES
+# before starting the process and request logical cuda:0; other devices are rejected.
+# Keep inference in a dedicated process, without an existing process group or DAC cache.
+# Configure code_path, checkpoint, vocoder_path and speaker_file_path as explicit
+# local paths to capture source and weight hashes. memory_ratio and max_running_req
+# control resource allocation. distributed_port chooses a loopback rendezvous port.
+# Use a separate evaluation environment for MCD/WER/SIM; generation needs none of those.
 name: zonos2
-note: "not a conda env — see the setup steps above; uv manages checkpoints/ZONOS2-repo/.venv"
+note: "upstream uv environment; see setup comments above"

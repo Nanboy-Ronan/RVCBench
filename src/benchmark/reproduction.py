@@ -1,4 +1,4 @@
-"""Explicit matched-pair checks against historical LibriTTS result artifacts."""
+"""Explicit matched-pair checks against audited speaker-manifest result artifacts."""
 import csv
 import json
 import re
@@ -52,8 +52,11 @@ def infer_english_wer_protocol(historical_csv):
 def match_historical(run, historical_csv):
     historical_csv = Path(historical_csv).resolve()
     historical = json.loads((historical_csv.parent / 'metrics.json').read_text())
-    if str(historical['config']['dataset']['name']).lower() != 'libritts':
-        raise ValueError('This matcher requires the audited LibriTTS pair naming protocol')
+    dataset_name = str(historical['config']['dataset']['name']).lower()
+    if dataset_name not in ('libritts', 'vctk'):
+        raise ValueError('This matcher requires the audited LibriTTS or VCTK pair naming protocol')
+    if str(run['config']['dataset']['name']).lower() != dataset_name:
+        raise ValueError('Historical dataset identity differs from the current run')
     aliases = {'qwentts': 'qwen3_tts', 'xtts_v2': 'xtts', 'glmtts': 'glm_tts', 'cozyvoice': 'cosyvoice'}
     left, right = str(run['config']['vc']['model']), str(historical['config']['vc']['model'])
     if aliases.get(left, left) != aliases.get(right, right):

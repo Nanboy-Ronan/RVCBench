@@ -36,3 +36,36 @@ def test_wer_protocol_inferred_from_all_transcripts(tmp_path):
         handle.write('different,words,0\n')
     with pytest.raises(ValueError, match='unsupported or ambiguous'):
         infer_english_wer_protocol(path)
+
+
+@pytest.mark.parametrize('dataset', ['LibriTTS', 'VCTK'])
+def test_pair_match_requires_dataset_identity_and_immutable_reference_audio(tmp_path, dataset):
+    import csv
+    import json
+    from src.benchmark.artifacts import file_hash
+    from src.benchmark.reproduction import match_historical
+    audio = tmp_path / 'audios' / 'one'
+    audio.mkdir(parents=True)
+    prompt, target = audio / 'prompt.wav', audio / 'target.wav'
+    prompt.write_bytes(b'prompt')
+    target.write_bytes(b'target')
+    config = {'vc': {'model': 'smoke'}, 'dataset': {'name': dataset, 'root_path': str(tmp_path)}}
+    (tmp_path / 'metrics.json').write_text(json.dumps({'config': config}))
+    csv_path = tmp_path / 'generation_sample_metrics.csv'
+    old = {'speaker_id': 'one', 'ground_truth_text': 'Target.', 'ground_truth_path': str(target),
+           'generated_path': 'prompt_to_target_cloned.wav'}
+    with csv_path.open('w') as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(old))
+        writer.writeheader()
+        writer.writerow(old)
+    row = dict(sample_id='fixture', speaker_id='one', prompt_path=str(prompt), target_path=str(target),
+               target_text='Target.', prompt_sha256=file_hash(prompt), target_sha256=file_hash(target))
+    run = {'config': config, 'samples': [row]}
+    assert len(match_historical(run, csv_path)[1]) == 1
+    run['config'] = {**config, 'dataset': {**config['dataset'], 'name': 'other'}}
+    with pytest.raises(ValueError, match='dataset identity'):
+        match_historical(run, csv_path)
+    run['config'] = config
+    prompt.write_bytes(b'changed reference')
+    with pytest.raises(ValueError, match='input/content mismatch'):
+        match_historical(run, csv_path)

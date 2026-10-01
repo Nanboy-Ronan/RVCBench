@@ -13,6 +13,12 @@ output_paths:
 
 adversary:
   checkpoint: "Zyphra/ZONOS2"
+  code_path: null
+  memory_ratio: 0.9
+  max_running_req: 256
+  distributed_port: null
+  vocoder_path: null
+  speaker_file_path: null
   seed: 42
   clean_speaker_background: false
   accurate_mode: true

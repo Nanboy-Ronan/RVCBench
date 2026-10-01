@@ -8,6 +8,29 @@ the matching upstream runtime; they are not tested dependency lock files.
 
 ## Generate, evaluate, recover
 
+ZONOS2 uses its upstream uv interpreter in a dedicated process and requires
+logical `cuda:0`; select the physical GPU through `CUDA_VISIBLE_DEVICES` before
+startup. Existing distributed process groups and DAC caches are rejected rather
+than adopted. Each native sampling request now receives run seed plus the
+original source index. Device/stream scopes restore the caller's CUDA state,
+and `close()` calls the scheduler shutdown, releases the owned DAC cache and
+cleans up a process group created during a failed initialization.
+Set `adversary.code_path`, `checkpoint`, `vocoder_path` and `speaker_file_path`
+to explicit local runtime, main-weight, DAC and speaker-encoder paths for hashing.
+`memory_ratio`, `max_running_req` and `distributed_port` expose engine resource
+allocation and a loopback rendezvous address. The local canary uses memory_ratio
+0.65, one running request and the source revision recorded in `envs/zonos2.yml`.
+This is a quality check with separate scorers; timing comparability, normalizer
+cache/data provenance and a clean uv installation remain unverified.
+The historical ZONOS2 run is on VCTK, so its historical comparison uses the
+separately frozen `reproduction/subsets/vctk16_v1` population with `dataset=vctk`.
+All 16 reference/target hashes and transcripts match the historical population.
+Historical audio replay reproduces MCD and WER exactly; SIM differs by at most
+0.000394. New-generation MCD averages 5.5421 versus historical 4.6485, a regression
+that remains unresolved. Corrected source-index seeding, upstream/runtime drift
+and unavailable historical weight revisions prevent an exact-equivalence claim.
+LibriTTS validation is retained separately, including two repeated audio hashes.
+
 Generation dependency scope v3 records `flash-attn` even when absent if a
 FlashAttention option is selected, an upstream source imports it, or Transformers
 is in the dependency closure. Installing or changing this optional dependency
