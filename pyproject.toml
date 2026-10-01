@@ -20,7 +20,7 @@ eval = [
   "pymcd==0.2.1", "speechbrain>=1.0,<2", "torch-stoi>=0.2", "scipy",
   "matplotlib", "jieba", "onnxruntime", "requests"
 ]
-test = ["pytest>=8"]
+test = ["pytest>=8", "jiwer==3.0.3"]
 
 [project.scripts]
 rvcbench = "src.benchmark.cli:main"
