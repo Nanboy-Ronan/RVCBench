@@ -26,6 +26,10 @@ def check_comparability(left_dir, right_dir, metrics):
     policies = [(r.get('generation_config') or {}).get('sample_seed_policy') for r in runs]
     if policies[0] is None or policies[0] != policies[1]:
         reasons.append('sample seed policies differ or are missing')
+    native_policies = [(r.get('generation_config') or {}).get('adversary', {}).get(
+        'native_seed_policy', 'source_index') for r in runs]
+    if native_policies[0] != native_policies[1]:
+        reasons.append('native seed policies differ')
     scorers = []
     for directory in directories:
         path = directory / 'scoring_manifest.json'

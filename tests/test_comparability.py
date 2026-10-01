@@ -19,6 +19,14 @@ def test_complete_runs_require_matched_scorer_protocol(setup_run):
             (directory / 'scoring_manifest.json').write_text(json.dumps({'sim': {'fingerprint': digest(spec), **spec}}))
             directories.append(directory)
     assert check_comparability(*directories, ['sim'])['status'] == 'comparable'
+    policy_path = directories[1] / 'run_manifest.json'
+    policy_manifest = json.loads(policy_path.read_text())
+    policy_manifest['generation_config']['adversary']['native_seed_policy'] = 'legacy_fixed'
+    policy_path.write_text(json.dumps(policy_manifest))
+    result = check_comparability(*directories, ['sim'])
+    assert result['status'] == 'incompatible' and 'native seed policies differ' in result['reasons']
+    del policy_manifest['generation_config']['adversary']['native_seed_policy']
+    policy_path.write_text(json.dumps(policy_manifest))
     (directories[1] / 'scoring_manifest.json').write_text(json.dumps({'sim': {'fingerprint': 'new-weights'}}))
     result = check_comparability(*directories, ['sim'])
     assert result['status'] == 'incompatible' and any('sim scorer' in r for r in result['reasons'])

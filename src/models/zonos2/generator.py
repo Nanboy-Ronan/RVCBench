@@ -20,6 +20,7 @@ class Zonos2GeneratorConfig:
 
     checkpoint: str = "Zyphra/ZONOS2"
     seed: Optional[int] = 42
+    native_seed_policy: str = 'source_index'
     clean_speaker_background: bool = False
     accurate_mode: bool = True
     max_tokens: Optional[int] = None
@@ -55,6 +56,7 @@ class Zonos2Generator(BaseModel):
         self._vocoder_module = None
         self._owned_dac = None
         self._owns_group = False
+        self.last_native_seed = None
 
     # ------------------------------------------------------------------
     # BaseModel API
@@ -70,6 +72,8 @@ class Zonos2Generator(BaseModel):
             raise RuntimeError('ZONOS2 requires its own process group; use a dedicated process')
         if not 0 < self.config.memory_ratio <= 1 or self.config.max_running_req < 1:
             raise ValueError('ZONOS2 memory_ratio must be in (0, 1] and max_running_req must be positive')
+        if self.config.native_seed_policy not in ('source_index', 'legacy_fixed'):
+            raise ValueError('ZONOS2 native_seed_policy must be source_index or legacy_fixed')
         if self.config.code_path:
             root = Path(self.config.code_path).expanduser().resolve()
             import_root = root / 'python' if (root / 'python').is_dir() else root
@@ -115,8 +119,8 @@ class Zonos2Generator(BaseModel):
             raise
         self.model = getattr(self._tts, "model", None)
         self.logger.info("[ZONOS2] Loaded model from %s", self.config.checkpoint)
-        self.logger.info('[ZONOS2] Engine device=%s; seed policy=base_seed_plus_source_index',
-                         getattr(getattr(self._tts, 'engine', None), 'device', None))
+        self.logger.info('[ZONOS2] Engine device=%s; native seed policy=%s',
+                         getattr(getattr(self._tts, 'engine', None), 'device', None), self.config.native_seed_policy)
 
     # ------------------------------------------------------------------
     # Public API
@@ -137,7 +141,9 @@ class Zonos2Generator(BaseModel):
         assert self._tts is not None
         assert self._sampling_params_cls is not None
 
-        seed = None if self.config.seed is None else int(self.config.seed) + int(sample_index)
+        offset = int(sample_index) if self.config.native_seed_policy == 'source_index' else 0
+        seed = None if self.config.seed is None else int(self.config.seed) + offset
+        self.last_native_seed = seed
         sampling_params = self._sampling_params_cls(seed=seed)
         with self._runtime_context():
             speaker_embedding = self._tts.embed_speaker_file(str(prompt_audio))
@@ -204,5 +210,6 @@ class Zonos2Generator(BaseModel):
             if self._owns_group and torch.distributed.is_initialized():
                 torch.distributed.destroy_process_group()
             self._owns_group = False
+            self.last_native_seed = None
             self.logger.info('[ZONOS2] Closed; process_group_initialized=%s; owned DAC cache released',
                              torch.distributed.is_initialized())

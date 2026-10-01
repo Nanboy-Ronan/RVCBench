@@ -518,8 +518,18 @@
       "historical_metric_replay": "comparisons/zonos2_metric_replay_v1.json",
       "historical_reference_scope": "August 2026 VCTK run; experimental integration outside the paper model catalog.",
       "additional_libritts_validation": "comparisons/zonos2_libritts16_validation.json",
-      "provenance_limit": "Explicit local main/DAC/speaker weights and native Python source hashed. Normalizer cache/data and native kernels not fully frozen; historical weights/seed and timing equivalence unproven. Current run seed plus original index corrects legacy discarded-index seeding.",
-      "reproduction_status": "full_subset_measured_historical_exact_equivalence_unproven"
+      "provenance_limit": "Explicit local main/DAC/speaker weights and native Python source hashed. Normalizer cache/data and native kernels not fully frozen; historical immutable weights/runtime and timing equivalence unproven. Source-index and legacy-fixed native seed variants retained. Fixed native seed almost entirely accounts for the MCD mean gap; no historical bitwise equivalence claim.",
+      "reproduction_status": "full_subset_measured_historical_exact_equivalence_unproven",
+      "native_seed_control": "comparisons/zonos2_native_seed_control_v1.json",
+      "legacy_fixed_variant": {
+        "native_seed_policy": "legacy_fixed",
+        "generation_run": "results/reproduce_v2_zonos2_legacy_fixed_vctk16/20261001-035641-8334d96e",
+        "scoring_run": "results/reproduce_v2_zonos2_legacy_fixed_vctk16_score/20261001-035850-ca41c2a6",
+        "comparison": "comparisons/zonos2_legacy_fixed_vctk16_v1.json",
+        "generation_status": "complete",
+        "scoring_status": "complete",
+        "historical_comparison_status": "matched_subset_measured"
+      }
     },
     {
       "n": "PlayDiffusion",

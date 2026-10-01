@@ -142,6 +142,9 @@ def run_zero_shot(conf, base_dir, device, dataset, exp_dir, logger, protected_au
                 row.update(status='generated', generated_sha256=prior['generated_sha256'],
                            synthesis_time_sec=prior.get('synthesis_time_sec'),
                            timing_scope=prior.get('timing_scope'), reused=True)
+                for key in ('native_seed', 'native_seed_policy'):
+                    if key in prior:
+                        row[key] = prior[key]
             elif evaluate_only:
                 row.update(status='generation_failed', error=prior.get('error') or 'Missing generated artifact in source run')
             elif not row['prompt_sha256'] or not row['target_sha256'] or not str(row['target_text']).strip():
@@ -166,6 +169,8 @@ def run_zero_shot(conf, base_dir, device, dataset, exp_dir, logger, protected_au
                         check_audio(dest)
                         row.update(status='generated', generated_sha256=file_hash(dest),
                                    synthesis_time_sec=result.elapsed_sec, timing_scope=result.timing_scope)
+                        if result.native_seed_policy is not None:
+                            row.update(native_seed=result.native_seed, native_seed_policy=result.native_seed_policy)
                         if handler.messages:
                             row['warnings'] = list(handler.messages)
                         break

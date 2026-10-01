@@ -11,8 +11,14 @@ the matching upstream runtime; they are not tested dependency lock files.
 ZONOS2 uses its upstream uv interpreter in a dedicated process and requires
 logical `cuda:0`; select the physical GPU through `CUDA_VISIBLE_DEVICES` before
 startup. Existing distributed process groups and DAC caches are rejected rather
-than adopted. Each native sampling request now receives run seed plus the
-original source index. Device/stream scopes restore the caller's CUDA state,
+than adopted. `adversary.native_seed_policy=source_index` sends run seed plus
+the original source index to native sampling. `legacy_fixed` sends the same run
+seed to every native request, retaining the historical-compatible variant.
+Both keep the runner's global RNG seed at run seed plus source index. Rows record
+`seed`, `native_seed` and `native_seed_policy` separately, including after resume
+and evaluation-only runs. Cross-policy quality comparisons are rejected by the
+comparability gate; explicit intervention diagnostics remain descriptive.
+Device/stream scopes restore the caller's CUDA state,
 and `close()` calls the scheduler shutdown, releases the owned DAC cache and
 cleans up a process group created during a failed initialization.
 Set `adversary.code_path`, `checkpoint`, `vocoder_path` and `speaker_file_path`
@@ -26,9 +32,13 @@ The historical ZONOS2 run is on VCTK, so its historical comparison uses the
 separately frozen `reproduction/subsets/vctk16_v1` population with `dataset=vctk`.
 All 16 reference/target hashes and transcripts match the historical population.
 Historical audio replay reproduces MCD and WER exactly; SIM differs by at most
-0.000394. New-generation MCD averages 5.5421 versus historical 4.6485, a regression
-that remains unresolved. Corrected source-index seeding, upstream/runtime drift
-and unavailable historical weight revisions prevent an exact-equivalence claim.
+0.000394. Source-index generation MCD averages 5.5421 versus historical 4.6485.
+A fixed-native-seed control, keeping global RNG seeds and inputs unchanged,
+returns MCD to 4.64825 and WER to the historical mean 0.0208333. This intervention
+accounts for almost all of the observed MCD mean gap. The formal `legacy_fixed`
+runner produces the same 16 audio hashes as the diagnostic control. Those hashes
+still differ from historical audio; unavailable historical weight/runtime
+revisions prevent an exact-equivalence claim. Both protocol variants are retained.
 LibriTTS validation is retained separately, including two repeated audio hashes.
 
 Generation dependency scope v3 records `flash-attn` even when absent if a

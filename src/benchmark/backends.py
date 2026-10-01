@@ -27,6 +27,8 @@ class GenerationResult:
     path: Path
     elapsed_sec: float
     timing_scope: str
+    native_seed: int | None = None
+    native_seed_policy: str | None = None
 
 
 class Backend(Protocol):
@@ -77,7 +79,10 @@ class LegacyAdversaryBackend:
                 if Path(timing['generated_path']).resolve() == dest.resolve():
                     elapsed = timing['synthesis_time_sec']
                     scope = 'adapter_reported_synthesis'
-            results.append(GenerationResult(sample_id(request.sample), dest, elapsed, scope))
+            generator = getattr(self.adapter, '_generator', None)
+            results.append(GenerationResult(sample_id(request.sample), dest, elapsed, scope,
+                native_seed=getattr(generator, 'last_native_seed', None),
+                native_seed_policy=getattr(getattr(generator, 'config', None), 'native_seed_policy', None)))
         return results
 
     def close(self):

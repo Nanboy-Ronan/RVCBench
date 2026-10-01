@@ -105,6 +105,33 @@ def test_resume_rejects_changed_config_and_audio(setup_run):
     assert json.loads((root / 'bad-audio/run_manifest.json').read_text())['status'] == 'failed'
 
 
+def test_native_seed_provenance_survives_resume_and_evaluation(setup_run):
+    conf, _, run, _ = setup_run
+    class NativeSeedAdapter(SmokeAdversary):
+        def attack(self, **kwargs):
+            self._generator = SimpleNamespace(last_native_seed=42,
+                config=SimpleNamespace(native_seed_policy='legacy_fixed'))
+            return super().attack(**kwargs)
+    adapter = NativeSeedAdapter(conf, conf.dataset, 'cpu', logging.getLogger())
+    with patch('src.benchmark.backends.select_adversary', return_value=adapter):
+        first, old, _ = run('native-seed')
+    assert [r['seed'] for r in old['samples']] == [42, 43]
+    assert all(r['native_seed'] == 42 and r['native_seed_policy'] == 'legacy_fixed' for r in old['samples'])
+    conf.vc.resume_from = str(first)
+    with patch('src.benchmark.backends.select_adversary', side_effect=AssertionError('must not generate')):
+        _, resumed, _ = run('native-resumed')
+        conf.vc.generate_only = False
+        with mocked_evaluator(fake_evaluate):
+            _, scored, _ = run('native-scored')
+        del conf.vc.resume_from
+        conf.vc.evaluate_only = True
+        conf.vc.evaluation = {'generated_audio_dir': str(first / 'generated_audio')}
+        with mocked_evaluator(fake_evaluate):
+            _, evaluated, _ = run('native-evaluated')
+    for manifest in (resumed, scored, evaluated):
+        assert all(r['native_seed'] == 42 and r['native_seed_policy'] == 'legacy_fixed' for r in manifest['samples'])
+
+
 def test_retry_and_missing_samples(setup_run):
     conf, dataset, run, _ = setup_run
     class Flaky(SmokeAdversary):

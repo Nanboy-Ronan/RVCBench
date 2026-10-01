@@ -20,6 +20,7 @@ adversary:
   vocoder_path: null
   speaker_file_path: null
   seed: 42
+  native_seed_policy: source_index # legacy_fixed selects the historical-compatible fixed native seed variant.
   clean_speaker_background: false
   accurate_mode: true
   max_tokens: null

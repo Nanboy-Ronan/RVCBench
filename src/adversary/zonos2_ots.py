@@ -52,6 +52,7 @@ class Zonos2ZeroShotAdversary(BaseAdversary):
         generator_config = Zonos2GeneratorConfig(
             checkpoint=self.checkpoint,
             seed=self.seed,
+            native_seed_policy=str(self.config.get('native_seed_policy', 'source_index')),
             clean_speaker_background=self.clean_speaker_background,
             accurate_mode=self.accurate_mode,
             max_tokens=self.max_tokens,

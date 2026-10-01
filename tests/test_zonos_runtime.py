@@ -11,8 +11,9 @@ from src.models.zonos2.generator import Zonos2Generator, Zonos2GeneratorConfig
 
 
 @pytest.mark.parametrize('fail', [False, True])
-def test_sample_seed_and_stream_restore_on_success_and_failure(fail):
-    generator = Zonos2Generator(Zonos2GeneratorConfig(seed=42), 'cuda:0', logging.getLogger())
+@pytest.mark.parametrize('policy,expected_seed', [('source_index', 115), ('legacy_fixed', 42)])
+def test_sample_seed_and_stream_restore_on_success_and_failure(fail, policy, expected_seed):
+    generator = Zonos2Generator(Zonos2GeneratorConfig(seed=42, native_seed_policy=policy), 'cuda:0', logging.getLogger())
     state = {'stream': 'caller'}
     @contextmanager
     def scoped_stream(stream):
@@ -44,9 +45,11 @@ def test_sample_seed_and_stream_restore_on_success_and_failure(fail):
         else:
             assert generator.generate('text', 'ref.wav', 'reference', 73)[1] == 44100
         assert state['stream'] == 'caller'
+        assert generator.last_native_seed == expected_seed
         generator.close()
         generator.close()
-    assert seeds == [115] and shutdown.call_count == 1
+    assert seeds == [expected_seed] and shutdown.call_count == 1
+    assert generator.last_native_seed is None
     assert state['stream'] == 'caller' and generator._tts is None
 
 
@@ -84,3 +87,9 @@ def test_scoped_scheduler_port_restores_upstream_class(fail):
     except RuntimeError:
         assert fail
     assert module.SchedulerConfig is Scheduler
+
+
+def test_invalid_seed_policy_is_rejected_before_engine_import():
+    generator = Zonos2Generator(Zonos2GeneratorConfig(native_seed_policy='unknown'), 'cuda:0', logging.getLogger())
+    with pytest.raises(ValueError, match='native_seed_policy'):
+        generator.load_model()
