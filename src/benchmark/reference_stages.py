@@ -63,7 +63,7 @@ def bind_reference_stage(samples, dataset_root, reference_root, kind='external_r
         if 'status' in producer and producer['status'] != 'complete':
             raise ValueError('Reference stage producer is not complete')
         producer_status = 'manifest_recorded'
-        if producer.get('variant') in ('gr_archived_noise_replay_v1', 'gr_seeded_batch_rng_v1', 'dns64_dataset_rate_v1'):
+        if producer.get('variant') in ('gr_archived_noise_replay_v1', 'gr_seeded_batch_rng_v1', 'dns64_dataset_rate_v1', 'enkidu_audio_only_cohort_v1'):
             records = producer.get('rows', [])
             if (producer.get('schema_version') != 1 or producer.get('status') != 'complete' or
                     not records or producer.get('verified') != len(records) or
@@ -73,6 +73,10 @@ def bind_reference_stage(samples, dataset_root, reference_root, kind='external_r
                 rng = producer.get('rng_verification') or {}
                 if not rng.get('requested_batches') or rng.get('verified_batches') != rng['requested_batches']:
                     raise ValueError('Incomplete regenerated RNG verification')
+            if producer['variant'] == 'enkidu_audio_only_cohort_v1':
+                if (not producer.get('training_requested_steps') or
+                        producer.get('training_verified_steps') != producer['training_requested_steps']):
+                    raise ValueError('Incomplete Enkidu cohort training')
             by_id = {r['sample_id']: r for r in records}
             if len(by_id) != len(records):
                 raise ValueError('Duplicate producer sample identities')

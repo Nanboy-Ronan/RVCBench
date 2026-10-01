@@ -6,14 +6,17 @@ import soundfile as sf
 
 class BaseProtector(ABC):
     """Abstract Base Class for all protection algorithms."""
-    def __init__(self, output_dir, config, dataset_config, logger, device):
+    def __init__(self, output_dir, config, dataset_config, logger, device, speaker_data=None):
         self.output_dir= Path(output_dir)
         self.config = config
         self.logger = logger
         self.dataset_config = dataset_config
         self.protect_method= config.mode.lower()
         self.device = device
-        self.get_data()
+        if speaker_data is None:
+            self.get_data()
+        else:
+            self.speaker_data = speaker_data
 
 
     def get_data(self):

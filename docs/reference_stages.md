@@ -39,7 +39,8 @@ or denoising algorithm.
 
 ## Produce reference audio
 
-Use [archived Gaussian-noise replay](gr_noise_replay.md) when the historical
+Use [Enkidu cohort production](enkidu_stage.md),
+[archived Gaussian-noise replay](gr_noise_replay.md) when the historical
 noise archive is available, or [DNS64 production](dns64_stage.md) to denoise
 an explicit reference directory. Both commands write a stage manifest that
 the cloning runner verifies against the selected inputs and output bytes.

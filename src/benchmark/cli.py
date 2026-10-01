@@ -40,12 +40,25 @@ def main():
     denoise.add_argument('--dataset-rate', type=int, default=16000)
     denoise.add_argument('--runtime-python', type=Path, help='Run inference in an isolated model interpreter')
     denoise.add_argument('--timeout-seconds', type=float, default=600)
+    enkidu = commands.add_parser('protect-enkidu', help='Train Enkidu on the full cohort and emit selected references')
+    for name in ('dataset-root', 'subset-manifest', 'model-directory', 'output'):
+        enkidu.add_argument('--' + name, type=Path, required=True)
+    enkidu.add_argument('--device', default='cpu')
+    enkidu.add_argument('--seed', type=int, default=42)
+    enkidu.add_argument('--epochs', type=int, default=10)
     compare = commands.add_parser('compare-check', help='Verify whether two complete runs share a comparison protocol')
     compare.add_argument('left', type=Path)
     compare.add_argument('right', type=Path)
     compare.add_argument('--metrics', nargs='+', default=['mcd', 'wer', 'sim'])
     compare.add_argument('--output', type=Path)
     args = parser.parse_args()
+    if args.command == 'protect-enkidu':
+        from .enkidu_stage import protect_enkidu
+        result = protect_enkidu(args.dataset_root, args.subset_manifest, args.model_directory,
+                                args.output, args.device, args.seed, args.epochs)
+        print(json.dumps({'status': result['status'], 'verified': result['verified'],
+                          'manifest': str(args.output / 'stage_manifest.json')}, indent=2))
+        return
     if args.command == 'denoise-dns64':
         from .denoise_stage import denoise_dns64
         result = denoise_dns64(args.dataset_root, args.subset_manifest, args.reference_directory,

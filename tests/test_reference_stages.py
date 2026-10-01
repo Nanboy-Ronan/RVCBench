@@ -95,7 +95,7 @@ def test_producer_manifest_changes_lineage_without_changing_audio(setup_run):
 
 
 @pytest.mark.parametrize('failure', ['failed', 'stale_output', 'wrong_count', None])
-@pytest.mark.parametrize('variant', ['gr_archived_noise_replay_v1', 'gr_seeded_batch_rng_v1', 'dns64_dataset_rate_v1'])
+@pytest.mark.parametrize('variant', ['gr_archived_noise_replay_v1', 'gr_seeded_batch_rng_v1', 'dns64_dataset_rate_v1', 'enkidu_audio_only_cohort_v1'])
 def test_archived_producer_must_be_complete_and_match_selected_outputs(setup_run, failure, variant):
     conf, dataset, run, tmp_path = setup_run
     root, _, _ = stage_directory(dataset, tmp_path)
@@ -105,6 +105,8 @@ def test_archived_producer_must_be_complete_and_match_selected_outputs(setup_run
                 'status': 'complete', 'requested': len(rows), 'verified': len(rows), 'rows': rows}
     if variant == 'gr_seeded_batch_rng_v1':
         producer['rng_verification'] = {'requested_batches': 1, 'verified_batches': 1}
+    if variant == 'enkidu_audio_only_cohort_v1':
+        producer.update(training_requested_steps=2, training_verified_steps=2)
     if failure == 'failed':
         producer['status'] = 'failed'
     elif failure == 'stale_output':

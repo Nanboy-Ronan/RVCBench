@@ -15,6 +15,8 @@ class EnkiduProtector(BaseProtector):
     def __init__(
             self,
             model_config,
+            model_cache=None,
+            progress_callback=None,
             **kwargs
     ):
         """
@@ -25,6 +27,7 @@ class EnkiduProtector(BaseProtector):
 
 
         """
+        self.progress_callback = progress_callback
         config = kwargs['config']
         if config.batch_size != 1:
             raise ValueError('Enkidu requires batch_size=1; flattening a batch would merge references')
@@ -59,7 +62,9 @@ class EnkiduProtector(BaseProtector):
         else:
             source= model_config.source
         from speechbrain.inference import SpeakerRecognition
-        self.model = SpeakerRecognition.from_hparams(source=source, run_opts={"device": self.device},savedir=model_config.checkpoint_path)
+        options = {'overrides': {'pretrained_path': str(source)}} if model_cache else {}
+        self.model = SpeakerRecognition.from_hparams(source=source, run_opts={"device": self.device},
+            savedir=str(model_cache or model_config.checkpoint_path), **options)
         self.model.to(self.device)
 
 
@@ -197,7 +202,11 @@ class EnkiduProtector(BaseProtector):
                     batch_data = batch_data.to(self.device)
                     perturbed_audio = self.perturb(batch_data, universal_noise_real, universal_noise_imag)
                     loss_total, loss_items = self._protect_losses(batch_data, perturbed_audio)
+                    if not torch.isfinite(loss_total).all():
+                        raise FloatingPointError(f'Nonfinite Enkidu loss for {sid}, epoch {epoch}, batch {batch_idx}')
                     loss_total.backward()
+                    if getattr(self, 'progress_callback', None):
+                        self.progress_callback(sid, epoch, batch_idx, loss_items)
                     # print(f"Batch {batch_idx}: Loss {loss_items}")
                 self.optimizer.step()
 
@@ -235,6 +244,8 @@ class EnkiduProtector(BaseProtector):
             wav_clean_batch= batch.wav
             perturbed_batch= self.perturb(wav_clean_batch, noise_real, noise_imag)
             perturbed_batch= perturbed_batch.detach().cpu()
+            if not torch.isfinite(perturbed_batch).all():
+                raise FloatingPointError('Nonfinite Enkidu protected waveform')
 
 
             for i, p_wav_i in enumerate(perturbed_batch):

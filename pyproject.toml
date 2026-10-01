@@ -15,6 +15,7 @@ dependencies = [
 
 [project.optional-dependencies]
 http = ["requests>=2.31,<3", "ormsgpack>=1.7,<2"]
+enkidu = ["numpy==1.26.4", "torch==2.6.0", "torchaudio==2.6.0", "speechbrain==1.0.3"]
 qwen3 = ["numpy==1.26.4", "qwen-tts==0.1.1", "torch==2.6.0", "torchaudio==2.6.0"]
 eval = [
   "numpy==1.26.4", "numba>=0.59,<0.62", "torch==2.6.0", "torchaudio==2.6.0", "jiwer==3.0.3", "librosa>=0.10,<0.12", "openai-whisper",
