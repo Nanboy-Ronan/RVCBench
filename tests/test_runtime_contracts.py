@@ -167,8 +167,11 @@ def test_generation_fingerprint_tracks_auxiliary_upstream_source(tmp_path):
     module.write_text('TEMPERATURE = 2\n')
     assert generation_runtime(tmp_path, conf, {})['source_sha256'] != first['source_sha256']
     module.write_text('import transformers\n')
-    first = generation_runtime(tmp_path, conf, {'transformers': '4.51.3'})
-    second = generation_runtime(tmp_path, conf, {'transformers': '4.57.3'})
+    with patch('importlib.metadata.packages_distributions',
+               return_value={'transformers': ['transformers']}), \
+            patch('importlib.metadata.requires', return_value=[]):
+        first = generation_runtime(tmp_path, conf, {'transformers': '4.51.3'})
+        second = generation_runtime(tmp_path, conf, {'transformers': '4.57.3'})
     assert first['packages']['transformers'] == '4.51.3'
     assert second['packages'] != first['packages']
     requirements = source / 'requirements.txt'
