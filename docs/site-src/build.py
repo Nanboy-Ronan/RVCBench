@@ -66,9 +66,9 @@ def render_body(template: str) -> str:
 
 
 def build_head(canonical: bool = True) -> str:
-    title = "RVCBench — Voice Cloning Robustness Benchmark"
+    title = "RVCBench — NeurIPS 2026 | Voice Cloning Robustness Benchmark"
     desc = (
-        "RVCBench benchmarks voice-cloning robustness, speaker privacy, and audio-protection methods "
+        "Accepted to NeurIPS 2026. RVCBench benchmarks voice-cloning robustness, speaker privacy, and audio-protection methods "
         "across 32 TTS/VC models, 5 protection methods, and 10 dataset conditions, with a public "
         "leaderboard, dataset, and reproducible evaluation pipeline."
     )
@@ -105,6 +105,7 @@ def build_head(canonical: bool = True) -> str:
 <meta name="citation_title" content="{D.CITATION['title']}">
 {citation_authors}
 <meta name="citation_publication_date" content="{D.CITATION['year']}">
+<meta name="citation_conference_title" content="{D.CITATION['venue']}">
 <meta name="citation_arxiv_id" content="{D.CITATION['arxiv_id']}">
 <meta name="citation_online_date" content="{D.CITATION['year']}">
 

@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>RVCBench — Voice Cloning Robustness Benchmark</title>
-<meta name="description" content="RVCBench benchmarks voice-cloning robustness, speaker privacy, and audio-protection methods across 32 TTS/VC models, 5 protection methods, and 10 dataset conditions, with a public leaderboard, dataset, and reproducible evaluation pipeline.">
+<title>RVCBench — NeurIPS 2026 | Voice Cloning Robustness Benchmark</title>
+<meta name="description" content="Accepted to NeurIPS 2026. RVCBench benchmarks voice-cloning robustness, speaker privacy, and audio-protection methods across 32 TTS/VC models, 5 protection methods, and 10 dataset conditions, with a public leaderboard, dataset, and reproducible evaluation pipeline.">
 <meta name="robots" content="index, follow">
 <meta name="keywords" content="voice cloning benchmark, TTS robustness, speaker privacy, audio deepfake, adversarial audio, speaker verification, voice cloning protection, RVCBench">
 <link rel="canonical" href="https://nanboy-ronan.github.io/RVCBench/">
@@ -13,15 +13,15 @@
 
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="RVCBench">
-<meta property="og:title" content="RVCBench — Voice Cloning Robustness Benchmark">
-<meta property="og:description" content="RVCBench benchmarks voice-cloning robustness, speaker privacy, and audio-protection methods across 32 TTS/VC models, 5 protection methods, and 10 dataset conditions, with a public leaderboard, dataset, and reproducible evaluation pipeline.">
+<meta property="og:title" content="RVCBench — NeurIPS 2026 | Voice Cloning Robustness Benchmark">
+<meta property="og:description" content="Accepted to NeurIPS 2026. RVCBench benchmarks voice-cloning robustness, speaker privacy, and audio-protection methods across 32 TTS/VC models, 5 protection methods, and 10 dataset conditions, with a public leaderboard, dataset, and reproducible evaluation pipeline.">
 <meta property="og:url" content="https://nanboy-ronan.github.io/RVCBench/">
 <meta property="og:image" content="https://nanboy-ronan.github.io/RVCBench/assets/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="RVCBench — Voice Cloning Robustness Benchmark">
-<meta name="twitter:description" content="RVCBench benchmarks voice-cloning robustness, speaker privacy, and audio-protection methods across 32 TTS/VC models, 5 protection methods, and 10 dataset conditions, with a public leaderboard, dataset, and reproducible evaluation pipeline.">
+<meta name="twitter:title" content="RVCBench — NeurIPS 2026 | Voice Cloning Robustness Benchmark">
+<meta name="twitter:description" content="Accepted to NeurIPS 2026. RVCBench benchmarks voice-cloning robustness, speaker privacy, and audio-protection methods across 32 TTS/VC models, 5 protection methods, and 10 dataset conditions, with a public leaderboard, dataset, and reproducible evaluation pipeline.">
 <meta name="twitter:image" content="https://nanboy-ronan.github.io/RVCBench/assets/og-image.png">
 
 <meta name="citation_title" content="RVCBench: Benchmarking the Robustness of Voice Cloning Across Modern Audio Generation Models">
@@ -31,6 +31,7 @@
     <meta name="citation_author" content="Deval Pandya">
     <meta name="citation_author" content="Xiaoxiao Li">
 <meta name="citation_publication_date" content="2026">
+<meta name="citation_conference_title" content="Advances in Neural Information Processing Systems">
 <meta name="citation_arxiv_id" content="2602.00443">
 <meta name="citation_online_date" content="2026">
 
@@ -118,6 +119,11 @@
       "datePublished": "2026",
       "url": "https://arxiv.org/abs/2602.00443",
       "identifier": "arXiv:2602.00443",
+      "isPartOf": {
+        "@type": "PublicationVolume",
+        "name": "Advances in Neural Information Processing Systems"
+      },
+      "description": "Accepted to NeurIPS 2026.",
       "about": {
         "@id": "https://nanboy-ronan.github.io/RVCBench/#dataset"
       }
@@ -187,7 +193,7 @@
           "name": "How do I cite RVCBench?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Cite the arXiv preprint: Jin, Ruinan; Liao, Xinting; Yu, Hanlin; Pandya, Deval; Li, Xiaoxiao. “RVCBench: Benchmarking the Robustness of Voice Cloning Across Modern Audio Generation Models.” arXiv:2602.00443, 2026."
+            "text": "Cite the NeurIPS 2026 paper: Jin, Ruinan; Liao, Xinting; Yu, Hanlin; Pandya, Deval; Li, Xiaoxiao. “RVCBench: Benchmarking the Robustness of Voice Cloning Across Modern Audio Generation Models.” Advances in Neural Information Processing Systems (NeurIPS), 2026. arXiv:2602.00443."
           }
         }
       ]
@@ -713,7 +719,7 @@
             <a class="btn" href="https://huggingface.co/datasets/Nanboy/RVCBench" target="_blank" rel="noopener">Get the dataset ↗</a>
             <a class="btn" href="https://huggingface.co/spaces/Nanboy/RVCBench" target="_blank" rel="noopener">Try the demo ↗</a>
           </div>
-          <p class="hero-meta">arXiv:2602.00443 · CC0-1.0 · Jin, Liao, Yu, Pandya, Li</p>
+          <p class="hero-meta"><strong>Accepted to NeurIPS 2026</strong> · arXiv:2602.00443 · CC0-1.0 · Jin, Liao, Yu, Pandya, Li</p>
         </div>
 
         <div class="scope-panel">
@@ -949,7 +955,7 @@
           <span class="eyebrow">FAQ</span>
           <h2>Questions people ask about RVCBench.</h2>
         </div>
-        <div class="faq-grid" itemscope itemtype="https://schema.org/FAQPage"><div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><h3 itemprop="name">What four dimensions of robustness does RVCBench test?</h3><div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Input Robustness (reference-audio and text-prompt shifts), Generation Robustness (model architecture, multilingual, long-form, and expressive generalisation), Output Robustness (post-processing resilience and deepfake detectability), and Audio Perturbation Robustness (passive noise, proactive protection methods, and counteract/denoising attacks).</p></div></div><div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><h3 itemprop="name">What is RVCBench?</h3><div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">RVCBench is a benchmark for voice-cloning robustness, speaker privacy, and audio-protection methods. It evaluates 32 zero-shot and fine-tuning TTS/VC models against 5 audio-protection methods across 10 dataset configurations, scoring speaker similarity, intelligibility, perceptual quality, and runtime.</p></div></div><div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><h3 itemprop="name">How many voice-cloning models does RVCBench evaluate?</h3><div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">The RVCBench codebase includes wrappers for 32 TTS/VC adversary models. The arXiv v2 paper reports results for 18 of those models across 18 robustness evaluations, 225 speakers, and 14,370 utterances.</p></div></div><div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><h3 itemprop="name">What audio-protection methods does RVCBench compare?</h3><div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Five methods on equal footing: SafeSpeech (adversarial perturbation against a surrogate VC model), Enkidu (perceptual-loss adversarial perturbation), EM (Expectation–Maximisation perturbation), Spectral (SafeSpeech&#x27;s spectral perturbation mode), and GR-Noise (Gaussian random noise).</p></div></div><div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><h3 itemprop="name">Which model is hardest to clone under protection, according to RVCBench?</h3><div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Across the LibriTTS leaderboard, StyleTTS 2 and OpenVoice V2 have the lowest clean speaker similarity and drop furthest under protection — GR-Noise pushes StyleTTS 2&#x27;s similarity from 0.228 down to 0.030.</p></div></div><div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><h3 itemprop="name">Is the RVCBench dataset public?</h3><div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Yes. The benchmark dataset is hosted on Hugging Face at huggingface.co/datasets/Nanboy/RVCBench under a CC0-1.0 license, with 10 dataset configurations spanning English, Mandarin, and French.</p></div></div><div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><h3 itemprop="name">How do I cite RVCBench?</h3><div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Cite the arXiv preprint: Jin, Ruinan; Liao, Xinting; Yu, Hanlin; Pandya, Deval; Li, Xiaoxiao. “RVCBench: Benchmarking the Robustness of Voice Cloning Across Modern Audio Generation Models.” arXiv:2602.00443, 2026.</p></div></div></div>
+        <div class="faq-grid" itemscope itemtype="https://schema.org/FAQPage"><div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><h3 itemprop="name">What four dimensions of robustness does RVCBench test?</h3><div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Input Robustness (reference-audio and text-prompt shifts), Generation Robustness (model architecture, multilingual, long-form, and expressive generalisation), Output Robustness (post-processing resilience and deepfake detectability), and Audio Perturbation Robustness (passive noise, proactive protection methods, and counteract/denoising attacks).</p></div></div><div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><h3 itemprop="name">What is RVCBench?</h3><div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">RVCBench is a benchmark for voice-cloning robustness, speaker privacy, and audio-protection methods. It evaluates 32 zero-shot and fine-tuning TTS/VC models against 5 audio-protection methods across 10 dataset configurations, scoring speaker similarity, intelligibility, perceptual quality, and runtime.</p></div></div><div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><h3 itemprop="name">How many voice-cloning models does RVCBench evaluate?</h3><div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">The RVCBench codebase includes wrappers for 32 TTS/VC adversary models. The arXiv v2 paper reports results for 18 of those models across 18 robustness evaluations, 225 speakers, and 14,370 utterances.</p></div></div><div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><h3 itemprop="name">What audio-protection methods does RVCBench compare?</h3><div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Five methods on equal footing: SafeSpeech (adversarial perturbation against a surrogate VC model), Enkidu (perceptual-loss adversarial perturbation), EM (Expectation–Maximisation perturbation), Spectral (SafeSpeech&#x27;s spectral perturbation mode), and GR-Noise (Gaussian random noise).</p></div></div><div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><h3 itemprop="name">Which model is hardest to clone under protection, according to RVCBench?</h3><div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Across the LibriTTS leaderboard, StyleTTS 2 and OpenVoice V2 have the lowest clean speaker similarity and drop furthest under protection — GR-Noise pushes StyleTTS 2&#x27;s similarity from 0.228 down to 0.030.</p></div></div><div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><h3 itemprop="name">Is the RVCBench dataset public?</h3><div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Yes. The benchmark dataset is hosted on Hugging Face at huggingface.co/datasets/Nanboy/RVCBench under a CC0-1.0 license, with 10 dataset configurations spanning English, Mandarin, and French.</p></div></div><div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><h3 itemprop="name">How do I cite RVCBench?</h3><div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Cite the NeurIPS 2026 paper: Jin, Ruinan; Liao, Xinting; Yu, Hanlin; Pandya, Deval; Li, Xiaoxiao. “RVCBench: Benchmarking the Robustness of Voice Cloning Across Modern Audio Generation Models.” Advances in Neural Information Processing Systems (NeurIPS), 2026. arXiv:2602.00443.</p></div></div></div>
       </div>
     </section>
 
@@ -1002,13 +1008,14 @@ python scripts/run_protect_qwen3tts_quickstart.py --max-samples 5</pre>
         </div>
         <div class="code-block">
           <button class="copy-btn" id="citeCopy">Copy</button>
-          <pre id="citeText" class="mono">@article{jin2026rvcbench,
+          <pre id="citeText" class="mono">@inproceedings{jin2026rvcbench,
   title   = {RVCBench: Benchmarking the Robustness of
              Voice Cloning Across Modern Audio
              Generation Models},
   author  = {Jin, Ruinan and Liao, Xinting and Yu, Hanlin
              and Pandya, Deval and Li, Xiaoxiao},
-  journal = {arXiv preprint arXiv:2602.00443},
+  booktitle = {Advances in Neural Information Processing Systems},
+  url     = {https://arxiv.org/abs/2602.00443},
   year    = {2026}
 }</pre>
         </div>

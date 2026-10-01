@@ -28,7 +28,7 @@ keywords:
   - speaker verification
 license: CC0-1.0
 preferred-citation:
-  type: article
+  type: conference-paper
   title: "RVCBench: Benchmarking the Robustness of Voice Cloning Across Modern Audio Generation Models"
   authors:
     - family-names: Jin
@@ -41,7 +41,7 @@ preferred-citation:
       given-names: Deval
     - family-names: Li
       given-names: Xiaoxiao
-  journal: "arXiv preprint arXiv:2602.00443"
+  collection-title: "Advances in Neural Information Processing Systems"
   year: 2026
   identifiers:
     - type: url

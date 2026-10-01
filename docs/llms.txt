@@ -12,7 +12,7 @@ RVCBench applies audio-protection perturbations to source speech, runs zero-shot
 - Five methods on equal footing: SafeSpeech (adversarial perturbation against a surrogate VC model), Enkidu (perceptual-loss adversarial perturbation), EM (Expectation–Maximisation perturbation), Spectral (SafeSpeech's spectral perturbation mode), and GR-Noise (Gaussian random noise).
 - Across the LibriTTS leaderboard, StyleTTS 2 and OpenVoice V2 have the lowest clean speaker similarity and drop furthest under protection — GR-Noise pushes StyleTTS 2's similarity from 0.228 down to 0.030.
 - Yes. The benchmark dataset is hosted on Hugging Face at huggingface.co/datasets/Nanboy/RVCBench under a CC0-1.0 license, with 10 dataset configurations spanning English, Mandarin, and French.
-- Cite the arXiv preprint: Jin, Ruinan; Liao, Xinting; Yu, Hanlin; Pandya, Deval; Li, Xiaoxiao. “RVCBench: Benchmarking the Robustness of Voice Cloning Across Modern Audio Generation Models.” arXiv:2602.00443, 2026.
+- Cite the NeurIPS 2026 paper: Jin, Ruinan; Liao, Xinting; Yu, Hanlin; Pandya, Deval; Li, Xiaoxiao. “RVCBench: Benchmarking the Robustness of Voice Cloning Across Modern Audio Generation Models.” Advances in Neural Information Processing Systems (NeurIPS), 2026. arXiv:2602.00443.
 
 ## Links
 
@@ -24,10 +24,11 @@ RVCBench applies audio-protection perturbations to source speech, runs zero-shot
 ## Citation
 
 ```
-@article{jin2026rvcbench,
+@inproceedings{jin2026rvcbench,
   title   = {RVCBench: Benchmarking the Robustness of Voice Cloning Across Modern Audio Generation Models},
   author  = {Ruinan Jin and Xinting Liao and Hanlin Yu and Deval Pandya and Xiaoxiao Li},
-  journal = {arXiv preprint arXiv:2602.00443},
+  booktitle = {Advances in Neural Information Processing Systems},
+  url     = {https://arxiv.org/abs/2602.00443},
   year    = {2026}
 }
 ```

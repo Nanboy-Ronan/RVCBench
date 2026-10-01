@@ -59,7 +59,13 @@
     "@type": "ScholarlyArticle",
     "name": "RVCBench: Benchmarking the Robustness of Voice Cloning Across Modern Audio Generation Models",
     "identifier": "arXiv:2602.00443",
-    "url": "https://arxiv.org/abs/2602.00443"
+    "url": "https://arxiv.org/abs/2602.00443",
+    "isPartOf": {
+      "@type": "PublicationVolume",
+      "name": "Advances in Neural Information Processing Systems"
+    },
+    "description": "Accepted to NeurIPS 2026.",
+    "datePublished": "2026"
   },
   "isBasedOn": "https://huggingface.co/datasets/Nanboy/RVCBench"
 }

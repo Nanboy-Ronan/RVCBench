@@ -1,6 +1,7 @@
 # RVCBench — Voice Cloning Benchmark
 <img src="figs/logo.png" alt="RVCBench logo" width="40" style="vertical-align: middle; margin-right: 8px;">
 
+[![NeurIPS 2026](https://img.shields.io/badge/NeurIPS-2026%20Accepted-6842c2.svg)](https://arxiv.org/abs/2602.00443)
 [![Website](https://img.shields.io/badge/Website-RVCBench-0d6ea8.svg)](https://nanboy-ronan.github.io/RVCBench/)
 [![Paper](https://img.shields.io/badge/arXiv-2602.00443-b31b1b.svg)](https://arxiv.org/abs/2602.00443)
 [![Dataset](https://img.shields.io/badge/Hugging%20Face-Dataset-ffcc00.svg)](https://huggingface.co/datasets/Nanboy/RVCBench)
@@ -8,6 +9,8 @@
 [![License: CC0-1.0](https://img.shields.io/badge/License-CC0--1.0-lightgrey.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](#requirements)
 [![GitHub stars](https://img.shields.io/github/stars/Nanboy-Ronan/RVCBench?style=social)](https://github.com/Nanboy-Ronan/RVCBench/stargazers)
+
+**News:** RVCBench has been accepted to **NeurIPS 2026**!
 
 **RVCBench** is the first large-scale benchmark for **voice cloning robustness**, **voice clone evaluation**, **speaker privacy**, and **audio deepfake protection** — covering **27 TTS/VC models**, **10 datasets**, and **5 audio protection methods**.
 
@@ -674,10 +677,11 @@ Please open an issue or pull request on GitHub. For questions, contact:
 If you use RVCBench in your research, please cite:
 
 ```bibtex
-@article{jin2026rvcbench,
+@inproceedings{jin2026rvcbench,
   title   = {RVCBench: Benchmarking the Robustness of Voice Cloning Across Modern Audio Generation Models},
   author  = {Jin, Ruinan and Liao, Xinting and Yu, Hanlin and Pandya, Deval and Li, Xiaoxiao},
-  journal = {arXiv preprint arXiv:2602.00443},
+  booktitle = {Advances in Neural Information Processing Systems},
+  url     = {https://arxiv.org/abs/2602.00443},
   year    = {2026}
 }
 ```

@@ -260,9 +260,9 @@ FAQ = [
     },
     {
         "q": "How do I cite RVCBench?",
-        "a": "Cite the arXiv preprint: Jin, Ruinan; Liao, Xinting; Yu, Hanlin; Pandya, Deval; Li, Xiaoxiao. "
+        "a": "Cite the NeurIPS 2026 paper: Jin, Ruinan; Liao, Xinting; Yu, Hanlin; Pandya, Deval; Li, Xiaoxiao. "
              "“RVCBench: Benchmarking the Robustness of Voice Cloning Across Modern Audio Generation Models.” "
-             "arXiv:2602.00443, 2026.",
+             "Advances in Neural Information Processing Systems (NeurIPS), 2026. arXiv:2602.00443.",
     },
 ]
 
@@ -270,5 +270,7 @@ CITATION = {
     "title": "RVCBench: Benchmarking the Robustness of Voice Cloning Across Modern Audio Generation Models",
     "authors": ["Ruinan Jin", "Xinting Liao", "Hanlin Yu", "Deval Pandya", "Xiaoxiao Li"],
     "year": "2026",
+    "venue": "Advances in Neural Information Processing Systems",
+    "conference": "NeurIPS 2026",
     "arxiv_id": "2602.00443",
 }
