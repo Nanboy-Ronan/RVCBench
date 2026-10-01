@@ -504,9 +504,15 @@
       "status": "historical_results",
       "config": "configs/ots_vc/clean/libritts/playdiffusion_ots.yaml",
       "subset": "subsets/libritts16_v1/selection.json",
-      "generation_status": "pending",
-      "scoring_status": "pending",
-      "historical_comparison_status": "pending"
+      "generation_status": "complete",
+      "scoring_status": "complete",
+      "historical_comparison_status": "matched_subset_measured",
+      "generation_run": "results/reproduce_v2_playdiffusion_local_libritts16/20261001-020533-a6d78370",
+      "canary": "comparisons/playdiffusion_canary.json",
+      "provenance_limit": "Six configured local preset files and upstream code hashed; historical immutable Hub revision/runtime absent. NLTK tagger resource unrecorded; key runtime pins are not a clean installation lock.",
+      "scoring_run": "results/reproduce_v2_playdiffusion_local_libritts16_score/20261001-020815-1135bf06",
+      "comparison": "comparisons/playdiffusion_libritts16_v1.json",
+      "historical_metric_replay": "comparisons/playdiffusion_metric_replay_v1.json"
     },
     {
       "n": "Bark Voice Clone",

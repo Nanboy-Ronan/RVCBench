@@ -21,6 +21,22 @@ def resolve_model_assets(conf, logger=None):
                   if isinstance(value, str) and value and (key in fields or key.endswith(('_checkpoint_path', '_config_path')))}
     if model == 'moss_ttsd' and resolved.adversary.get('use_prompt_transcript', False):
         references.pop('reference_asr_model', None)
+    if model == 'playdiffusion':
+        from src.models.playdiffusion.generator import PRESET_FILES, PlayDiffusionGeneratorConfig
+        filenames = {key: resolved.adversary.get(key, getattr(PlayDiffusionGeneratorConfig, key))
+                     for key in PRESET_FILES}
+        preset = resolved.adversary.get('preset_dir')
+        if not preset:
+            from huggingface_hub import HfApi, snapshot_download
+            repo_id = resolved.adversary.get('hf_repo_id', 'PlayHT/inpainter')
+            revision = HfApi().model_info(repo_id, revision=resolved.adversary.get('hf_revision')).sha
+            preset = snapshot_download(repo_id=repo_id, revision=revision,
+                cache_dir=resolved.adversary.get('cache_dir'), allow_patterns=list(filenames.values()))
+            OmegaConf.update(resolved, 'adversary.preset_dir', preset, force_add=True)
+            OmegaConf.update(resolved, 'adversary.hf_revision', revision, force_add=True)
+            assets['playdiffusion.hub'] = {'repo_id': repo_id, 'revision': revision}
+        for key, filename in filenames.items():
+            references['playdiffusion.' + key] = str(Path(preset).expanduser() / filename)
     if model in ('glm_tts', 'glmtts') and resolved.adversary.get('code_path'):
         upstream = Path(resolved.adversary.code_path).expanduser()
         references['glmtts.configs'] = str(upstream / 'configs')

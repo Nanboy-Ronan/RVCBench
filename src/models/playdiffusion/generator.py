@@ -1,7 +1,7 @@
 """PlayDiffusion generator wrapper for off-the-shelf voice cloning."""
 from __future__ import annotations
 
-import os
+from copy import deepcopy
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -19,6 +19,7 @@ class PlayDiffusionGeneratorConfig:
     preset_dir: Optional[Path] = None
     cache_dir: Optional[Path] = None
     hf_repo_id: str = "PlayHT/inpainter"
+    hf_revision: Optional[str] = None
     num_steps: int = 30
     init_temp: float = 1.0
     init_diversity: float = 1.0
@@ -111,13 +112,6 @@ class PlayDiffusionGenerator(BaseModel):
         if code_path_str not in sys.path:
             sys.path.insert(0, code_path_str)
 
-    def _apply_cache_dir(self) -> None:
-        if self.config.cache_dir is None:
-            return
-        cache_root = str(self.config.cache_dir)
-        os.environ.setdefault("HF_HOME", cache_root)
-        os.environ.setdefault("HUGGINGFACE_HUB_CACHE", cache_root)
-
     def _build_local_preset(self) -> dict:
         assert self.config.preset_dir is not None
 
@@ -152,17 +146,30 @@ class PlayDiffusionGenerator(BaseModel):
 
     def load_model(self) -> None:
         self._ensure_imports()
-        self._apply_cache_dir()
+        if self.config.preset_dir is None:
+            from huggingface_hub import snapshot_download
+            self.config.preset_dir = Path(snapshot_download(
+                repo_id=self.config.hf_repo_id, revision=self.config.hf_revision,
+                cache_dir=str(self.config.cache_dir) if self.config.cache_dir else None,
+                allow_patterns=[getattr(self.config, field) for field in PRESET_FILES]))
+        preset = self._build_local_preset()
 
         from playdiffusion.inference import PlayDiffusion
         from playdiffusion.pydantic_models.models import TTSInput
 
-        self._engine = PlayDiffusion(device=str(self.device))
+        class ConfiguredPlayDiffusion(PlayDiffusion):
+            def load_preset(self, *args, **kwargs):
+                # The manager mutates the preset. Give its one initialization
+                # a private copy and avoid constructing a default manager first.
+                return deepcopy(preset)
+
+        self._engine = ConfiguredPlayDiffusion(device=str(self.device))
         self._tts_input_cls = TTSInput
 
-        if self.config.preset_dir is not None:
-            from playdiffusion.models.model_manager import PlayDiffusionModelManager
+    def close(self):
+        self._engine = self._tts_input_cls = None
+        self._model_ready = False
 
-            preset = self._build_local_preset()
-            self._engine.preset = preset
-            self._engine.mm = PlayDiffusionModelManager(preset, self._engine.device)
+
+PRESET_FILES = ('vocoder_checkpoint', 'tokenizer_file', 'speech_tokenizer_checkpoint',
+                'kmeans_layer_checkpoint', 'voice_encoder_checkpoint', 'inpainter_checkpoint')

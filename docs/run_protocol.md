@@ -312,3 +312,20 @@ key pins rather than a fully resolved clean-install lock. Historical runs select
 a Hub model name without an immutable revision, so current snapshot hashes alone
 do not establish equality to historical weights. Content failures remain in the
 fixed subset and are included in aggregate metrics.
+
+PlayDiffusion resolves its preset before initializing the upstream engine. A
+configured local preset bypasses default Hub checkpoint selection and initializes
+one model manager. The wrapper overrides the engine's preset method on its own
+subclass, leaving the upstream class unchanged, and releases engine references
+before scoring. Hub presets launched through the benchmark runner resolve an
+immutable revision before download; `cache_dir` is passed directly to Hub APIs
+without changing process-wide cache environment variables.
+
+All six named preset assets contribute individual hashes, including the extensionless
+vocoder, `.npy` k-means centers and `.pkl` inpainter. Filename overrides participate
+in both loading and fingerprinting. The validated runtime uses Torch 2.6.0,
+Transformers 4.57.3 and fairseq2 0.4.4; its key-pin recipe has not been tested as
+a clean installation. The upstream constructor still checks/downloads its NLTK
+tagger resource, which is not yet included in configured asset hashes. Historical
+Hub revision and environment equivalence are also unproven; these limits prevent
+a claim of fully frozen generation provenance.

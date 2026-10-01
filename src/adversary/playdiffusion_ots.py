@@ -56,6 +56,8 @@ class PlayDiffusionZeroShotAdversary(BaseAdversary):
             code_path=self.code_path,
             preset_dir=self.preset_dir,
             cache_dir=self.cache_dir,
+            hf_repo_id=str(self.config.get('hf_repo_id', 'PlayHT/inpainter')),
+            hf_revision=self.config.get('hf_revision'),
             num_steps=int(self.config.get("num_steps", 30)),
             init_temp=float(self.config.get("init_temp", 1.0)),
             init_diversity=float(self.config.get("init_diversity", 1.0)),
