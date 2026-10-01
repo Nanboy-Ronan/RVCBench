@@ -4,9 +4,7 @@ from pathlib import Path
 import time
 from typing import Any, Dict, List, Optional, Sequence
 
-import numpy as np
 import soundfile as sf
-import torch
 from hydra.utils import to_absolute_path
 
 from .base_adversary import BaseAdversary
@@ -68,6 +66,8 @@ class KimiAudioZeroShotAdversary(BaseAdversary):
             text_repetition_window_size=self.text_repetition_window_size,
             max_new_tokens=self.max_new_tokens,
             sample_rate=self.sample_rate,
+            seed=self.seed,
+            audio_tokenizer_path=self.config.get('audio_tokenizer_path'),
         )
         self._generator = KimiAudioGenerator(generator_config, self.device, self.logger)
 
@@ -123,16 +123,6 @@ class KimiAudioZeroShotAdversary(BaseAdversary):
             )
         return messages
 
-    def _set_seed(self, index: int) -> None:
-        if self.seed is None:
-            return
-        adjusted_seed = int(self.seed) + int(index)
-        random.seed(adjusted_seed)
-        np.random.seed(adjusted_seed % (2**32 - 1))
-        torch.manual_seed(adjusted_seed)
-        if torch.cuda.is_available():
-            torch.cuda.manual_seed_all(adjusted_seed)
-
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
@@ -180,8 +170,6 @@ class KimiAudioZeroShotAdversary(BaseAdversary):
                         idx,
                     )
                 continue
-            self._set_seed(sample.index)
-
             lookup_key = str(reference_path)
             prompt_transcript = sample_prompt_transcripts.get(lookup_key, "")
             target_override = sample_prompt_targets.get(lookup_key, "")

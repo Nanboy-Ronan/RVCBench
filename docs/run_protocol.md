@@ -8,6 +8,28 @@ the matching upstream runtime; they are not tested dependency lock files.
 
 ## Generate, evaluate, recover
 
+KimiAudio's wrapper loads the official inference runtime from an explicit
+`adversary.code_path`, including its recursive GLM-4-Voice submodule. It scopes
+CUDA device selection and restores the caller after loading or generating.
+`model_path` can select a local snapshot containing the main model, Whisper
+encoder and audio detokenizer. `audio_tokenizer_path` selects a local GLM voice
+tokenizer through a temporary constructor override that is restored after load.
+The adapter preserves the original reference/transcript/instruction messages;
+these settings are experimental and do not establish voice-cloning quality.
+The inspected official `detokenize_audio` call consumes generated tokens without
+reference-waveform prefill; reference conditioning is present in ALM history.
+The two-sample canary has WER 0.75 and SIM 0.2251. A correct generated-text response
+therefore does not establish correct spoken content or preserved speaker identity.
+The full frozen LibriTTS16 subset completes generation and MCD/WER/SIM scoring,
+with means 9.2481, 1.2877 and 0.0464 respectively. The first two audio hashes match
+the canary exactly. These poor metrics are retained as experimental evidence;
+no historical KimiAudio CSV was located, and no paper-table equivalence is claimed.
+Generation uses seed plus original source index, and rejects missing, empty,
+nonfinite or multiple waveforms. Native output is 24 kHz. The inspected official
+audio API overrides `max_new_tokens`, so only its default `-1` is supported;
+requesting a token limit that the runtime ignores raises an explicit error.
+No global Transformers loader or checkpoint-metadata patch is installed.
+
 ZONOS2 uses its upstream uv interpreter in a dedicated process and requires
 logical `cuda:0`; select the physical GPU through `CUDA_VISIBLE_DEVICES` before
 startup. Existing distributed process groups and DAC caches are rejected rather

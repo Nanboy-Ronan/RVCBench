@@ -14,6 +14,7 @@ output_paths:
 adversary:
   code_path: "checkpoints/Kimi-Audio"
   model_path: "moonshotai/Kimi-Audio-7B-Instruct"
+  audio_tokenizer_path: null # Set a local GLM-4-Voice tokenizer snapshot for auxiliary weight hashing.
   load_detokenizer: true
   audio_temperature: 0.9
   audio_top_k: 10
@@ -23,7 +24,7 @@ adversary:
   audio_repetition_window_size: 64
   text_repetition_penalty: 1.0
   text_repetition_window_size: 16
-  max_new_tokens: -1
+  max_new_tokens: -1 # Official audio generation controls this budget internally.
   reference_assignment: "round_robin"
   # instruction_template: "Please perform voice clone with the following text sentence using the same voice as the provided audio sample. Text: {text}"
   instruction_template: "Read the following text using the voice in above example. Text: {text}"

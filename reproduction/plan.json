@@ -404,9 +404,15 @@
       "status": "experimental_adapter",
       "config": "configs/ots_vc/clean/libritts/kimi_audio_ots.yaml",
       "subset": "subsets/libritts16_v1/selection.json",
-      "generation_status": "pending",
-      "scoring_status": "pending",
-      "historical_comparison_status": "historical_reference_not_established"
+      "generation_status": "complete",
+      "scoring_status": "complete",
+      "historical_comparison_status": "historical_reference_not_established",
+      "generation_run": "results/reproduce_v2_kimi_audio_libritts16/20261001-041146-8e0fb3df",
+      "scoring_run": "results/reproduce_v2_kimi_audio_libritts16_score/20261001-041601-7b3b7fac",
+      "subset_validation": "comparisons/kimi_audio_libritts16_validation.json",
+      "runtime_audit": "comparisons/kimi_audio_runtime_audit.json",
+      "reproduction_status": "full_subset_measured_historical_reference_not_established",
+      "provenance_limit": "Local main/Whisper/detokenizer/vocoder/GLM-tokenizer weights and upstream Python hashed. Supplemental native kernel source audit; clean install and historical reference unverified. Reference-history conditioning does not establish effective voice cloning."
     },
     {
       "n": "MGM-Omni",

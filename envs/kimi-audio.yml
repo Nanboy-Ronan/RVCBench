@@ -1,3 +1,17 @@
+# Official runtime source inspected at 349251e1d8f4f98d58fda59246381faecd7392e0.
+# git clone https://github.com/MoonshotAI/Kimi-Audio.git checkpoints/Kimi-Audio
+# git -C checkpoints/Kimi-Audio checkout 349251e1d8f4f98d58fda59246381faecd7392e0
+# git -C checkpoints/Kimi-Audio submodule update --init --recursive
+# Requires: git submodule update --init --recursive in checkpoints/Kimi-Audio.
+# GLM-4-Voice submodule: eb00ce9142e8d98b0ed7c57cd47e0d6d5dce9a1a.
+# Local import validation used Python 3.10, torch/torchaudio 2.6.0+cu124,
+# transformers 4.52.3, flash-attn 2.7.4.post1, NumPy 1.26.4,
+# librosa 0.11.0, diffusers 0.29.0 and torchdyn 1.0.6.
+# This base recipe is not a clean-install lock or proof of completed inference.
+# Install the upstream requirements in a dedicated environment. Its FlashAttention
+# binary must match the installed PyTorch, Python and CUDA ABI.
+# Configure local model_path and audio_tokenizer_path snapshots so the main model,
+# detokenizer, Whisper encoder and GLM audio tokenizer weights are hashed.
 name: kimi-audio
 channels:
   - conda-forge
