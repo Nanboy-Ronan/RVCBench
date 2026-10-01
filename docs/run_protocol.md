@@ -104,6 +104,24 @@ Explicit implementation names and narrowly recognized legacy source directories
 provide configuration evidence; unknown or different implementations are rejected.
 This check does not establish immutable historical source or weight identity.
 
+SpeechMOS and DNSMOS can be selected with
+`+evaluation.required_metrics=[speechmos,dnsmos]` for an evaluation-only run.
+The full LibriTTS16 Amphion audio scores successfully with mean SpeechMOS 2.3686
+and DNSMOS OVRL 2.9097; see
+`reproduction/comparisons/amphion_valle_libritts16_aux_validation.json`.
+SpeechMOS requires the cached `tarepan_SpeechMOS_main` source directory and
+`checkpoints/utmos22_strong_step7459_v1.pt` under `torch.hub.get_dir()`.
+For initial setup, download the native model explicitly with
+`torch.hub.load('tarepan/SpeechMOS', 'utmos22_strong', trust_repo=True)` in the
+evaluation environment. The benchmark uses the local source and strict state
+loading afterward, records only that source and its weight file, and rejects
+missing assets or native runtime errors without interface retries.
+DNSMOS requires `checkpoints/dnsmos/sig_bak_ovr.onnx` and `model_v8.onnx` from
+Microsoft DNS-Challenge; scoring uses the non-personalized native predictor.
+Both files are hashed. Scoring does not silently download replacements.
+Upstream revisions of existing caches remain unverified. Emotion scoring and
+historical auxiliary-metric reproduction remain pending.
+
 FireRedTTS2 decodes output at 24 kHz; its native `sample_rate=16000` field is
 the reference input rate. The wrapper now saves codec output at 24 kHz and
 rejects invalid waveforms instead of replacing NaNs or clipping values.

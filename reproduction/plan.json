@@ -426,7 +426,8 @@
           "historical_replay_status": "complete_20_pairs",
           "physical_speakers": 10,
           "speaker_condition_groups": 20
-        }
+        },
+        "auxiliary_validation": "comparisons/amphion_valle_libritts16_aux_validation.json"
       }
     },
     {
@@ -711,7 +712,7 @@
     },
     {
       "item": "Independently loaded versioned scorers with sample-level metric recovery",
-      "status": "core_real_run_verified_auxiliary_validation_pending"
+      "status": "core_and_SpeechMOS_DNSMOS_real_runs_verified_emotion_pending"
     },
     {
       "item": "Dependency-scoped code, weights, worker environments and hardware provenance",

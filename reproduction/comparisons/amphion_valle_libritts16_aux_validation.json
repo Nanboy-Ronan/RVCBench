@@ -1,0 +1,110 @@
+{
+  "status": "complete_16_pairs_speechmos_dnsmos",
+  "source_generation_run": "/tealab-data/rjin02/RVCBench/results/reproduce_v2_amphion_valle_libritts16/20261001-054053-dbdb5993",
+  "run_manifest": "results/reproduce_v2_amphion_valle_libritts16_aux/20261001-061147-69bb8687/run_manifest.json",
+  "run_manifest_sha256": "401164477ced125705424e78b79c4522758d6d157d82cfe1eba4e127993eadae",
+  "scoring_manifest_sha256": "27b133d47fd65796e49de366426069e6f234447fad58eb079ce84dd031b97c46",
+  "input_fingerprint": "edf4e4429b799ae03a000532f71e92914b4fd18bce7df3782302b334e77250cf",
+  "coverage": {
+    "requested": 16,
+    "generated": 16,
+    "generation_failed": 0,
+    "input_failed": 0,
+    "pending": 0,
+    "generating": 0,
+    "metric_valid": {
+      "mcd": 0,
+      "wer": 0,
+      "sim": 0,
+      "sva": 0,
+      "speechmos": 16,
+      "dnsmos": 16,
+      "emotion": 0
+    },
+    "required_metrics": [
+      "speechmos",
+      "dnsmos"
+    ],
+    "status": "complete",
+    "eligible_for_comparison": true
+  },
+  "means": {
+    "speechmos_mos": 2.368580773472786,
+    "dnsmos_ovrl": 2.9096791886780498,
+    "dnsmos_sig": 3.1791249709358476,
+    "dnsmos_bak": 3.935441217449339
+  },
+  "scorers": {
+    "speechmos": {
+      "fingerprint": "2b8804faabd6c802e2d9f340ae8834f591e1f2b34a9588de909cc27d7cccf7b7",
+      "version": "auxiliary_scoped_assets_v2",
+      "source": {
+        "auxiliary.py": "907d0742440762ab304be1bdf4df3434450ef0017810c278d55e39dcd7982d2b",
+        "pipeline.py": "b6989e1f62c74245a7a2ca80cd7a7f23dd42580588ca4797b17c5c2666fb502b",
+        "text.py": "779e8bf3865c24edba4bd56dd7c7c7bb1ae4ed21f7f85a8956d7d63b3c03854f",
+        "runtime_errors.py": "657874fa2a4ddb90ef7df5afbccca2f9fe844f5bf7964f83134ddf79c703d2c1",
+        "generation.py": "1facb98861bf84616b4a0384ccceb3f0a9d50ea6e0529f2c092eb04f924f15d6",
+        "fidelity.py": "44fd5cc95f44f0a20730166de97f8fe5b3c72fa94914a24a0fffe0b390daee93"
+      },
+      "packages": {
+        "torch": "2.6.0+cu124",
+        "torchaudio": "2.6.0+cu124",
+        "numpy": "1.26.4",
+        "soundfile": "0.13.1"
+      },
+      "model": {
+        "metric": "speechmos",
+        "cached_files": {
+          "hubconf.py": "6720a77483b46844b8652ce47271339536edc45055feed76749278bd96cc5c14",
+          "hubconf_test.py": "8b37e61a54e4a41741f93fce56f2ea198166b2cab791b55448b6e4d2b7ea3331",
+          "speechmos/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "speechmos/utmos22/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "speechmos/utmos22/fairseq_alt.py": "a554d47bebef0eb764a048d58dbb7e1e1fca316d627c571add54faa42fe5f45b",
+          "speechmos/utmos22/strong/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "speechmos/utmos22/strong/model.py": "bffb8eba14e74e4f228684280cbd295ecffbfcd0414a5a460ca55c94f2f0a0e4",
+          "speechmos/utmos22/strong/model_test.py": "0bfe63b9ff9875a90c9ec2475837f9b44890566a68c685b9c7230f4411518041"
+        },
+        "upstream_revision_pinned": false,
+        "weights": {
+          "utmos22_strong_step7459_v1.pt": "38aa51ab79e2a4e09a1449758a4b37e9cbb2e8235a49662a732d33a9ba1e9bff"
+        }
+      },
+      "seed": 42,
+      "sample_seed_policy": "metric_seed_plus_sample_hash_v1",
+      "generated_audio_max_seconds": null
+    },
+    "dnsmos": {
+      "fingerprint": "1fe608786ff64b660441e83ae40b71f64b4ffe57d5ee787f20c84eb2d9292984",
+      "version": "auxiliary_scoped_assets_v2",
+      "source": {
+        "auxiliary.py": "907d0742440762ab304be1bdf4df3434450ef0017810c278d55e39dcd7982d2b",
+        "pipeline.py": "b6989e1f62c74245a7a2ca80cd7a7f23dd42580588ca4797b17c5c2666fb502b",
+        "text.py": "779e8bf3865c24edba4bd56dd7c7c7bb1ae4ed21f7f85a8956d7d63b3c03854f",
+        "runtime_errors.py": "657874fa2a4ddb90ef7df5afbccca2f9fe844f5bf7964f83134ddf79c703d2c1",
+        "generation.py": "1facb98861bf84616b4a0384ccceb3f0a9d50ea6e0529f2c092eb04f924f15d6",
+        "fidelity.py": "44fd5cc95f44f0a20730166de97f8fe5b3c72fa94914a24a0fffe0b390daee93"
+      },
+      "packages": {
+        "onnxruntime": "1.23.2",
+        "numpy": "1.26.4",
+        "librosa": "0.11.0",
+        "soundfile": "0.13.1",
+        "scipy": "1.16.3",
+        "soxr": "1.0.0",
+        "numba": "0.61.2"
+      },
+      "model": {
+        "metric": "dnsmos",
+        "cached_files": {
+          "sig_bak_ovr.onnx": "269fbebdb513aa23cddfbb593542ecc540284a91849ac50516870e1ac78f6edd",
+          "model_v8.onnx": "9246480c58567bc6affd4200938e77eef49468c8bc7ed3776d109c07456f6e91"
+        },
+        "upstream_revision_pinned": false
+      },
+      "seed": 42,
+      "sample_seed_policy": "metric_seed_plus_sample_hash_v1",
+      "generated_audio_max_seconds": null
+    }
+  },
+  "interpretation": "Native full frozen LibriTTS16 auxiliary scoring. Source code and local weights hashed; upstream cache revisions are not immutable release provenance. Emotion and historical auxiliary-score reproduction remain pending."
+}
