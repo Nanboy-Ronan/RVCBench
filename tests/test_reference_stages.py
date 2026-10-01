@@ -92,3 +92,28 @@ def test_producer_manifest_changes_lineage_without_changing_audio(setup_run):
     (root / 'stage_manifest.json').write_text('{}')
     with pytest.raises(ValueError, match='Ambiguous reference stage producer'):
         bind_reference_stage(samples, dataset._dataset_root, root)
+
+
+@pytest.mark.parametrize('failure', ['failed', 'stale_output', 'wrong_count', None])
+def test_archived_producer_must_be_complete_and_match_selected_outputs(setup_run, failure):
+    conf, dataset, run, tmp_path = setup_run
+    root, _, _ = stage_directory(dataset, tmp_path)
+    _, baseline = bind_reference_stage(dataset.get_zero_shot_samples(), dataset._dataset_root, root)
+    rows = [{**b, 'historical_sha256': b['reference_sha256']} for b in baseline['bindings']]
+    producer = {'schema_version': 1, 'variant': 'gr_archived_noise_replay_v1',
+                'status': 'complete', 'requested': len(rows), 'verified': len(rows), 'rows': rows}
+    if failure == 'failed':
+        producer['status'] = 'failed'
+    elif failure == 'stale_output':
+        rows[0]['reference_sha256'] = 'stale'
+    elif failure == 'wrong_count':
+        producer['verified'] = 0
+    (root / 'stage_manifest.json').write_text(json.dumps(producer))
+    conf.vc.reference_audio_dir = str(root)
+    if failure:
+        with patch('src.benchmark.backends.select_adversary', side_effect=AssertionError('must not load')):
+            with pytest.raises(ValueError):
+                run('bad-producer')
+    else:
+        _, manifest, _ = run('verified-producer')
+        assert manifest['reference_stage']['producer_status'] == 'verified_selected_output_hashes'

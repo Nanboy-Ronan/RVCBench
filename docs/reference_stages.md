@@ -26,7 +26,12 @@ changed lineage, including changes to the clean reference when the replacement
 and target bytes remain unchanged.
 
 An adjacent `stage_manifest.json` is hashed and recorded when present. This is
-recorded producer metadata, not a validation of its claims. Historical
+recorded producer metadata; unknown producer formats do not attest their claims.
+A producer declaring an unfinished or failed status is rejected. For the known
+`gr_archived_noise_replay_v1` format, the runner additionally requires complete
+verification counts and checks selected sample identities and clean/output/
+historical hashes against the producer rows. Such bindings are labeled
+`verified_selected_output_hashes`. Historical
 directories without a producer manifest are labeled
 `legacy_directory_content_only`; binding them does not reproduce the protection
 or denoising algorithm.
@@ -47,6 +52,10 @@ by basename. Binding audits are retained in
 `reproduction/comparisons/denoised_grnoise_dns64_libritts16_bindings.json`.
 These audits prove selected-file coverage and hashes, not end-to-end stage
 reproduction or metric equivalence.
+
+The GR-Noise archive can now be used to produce verified reference outputs;
+see [historical noise replay](gr_noise_replay.md). This records a producer
+manifest while preserving the original experimental noise.
 
 Both historical directories have now been used in real Qwen3-TTS runs on the
 same 16 pairs, with all 16 outputs valid for each core metric:

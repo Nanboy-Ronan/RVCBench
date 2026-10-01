@@ -22,12 +22,25 @@ def main():
     report = commands.add_parser('report', help='Validate a complete run and export a provenance-bearing JSON report')
     report.add_argument('run_dir', type=Path)
     report.add_argument('--output', type=Path, required=True)
+    replay = commands.add_parser('replay-gr', help='Replay frozen GR batch noise and verify historical WAV hashes')
+    for name in ('dataset-root', 'subset-manifest', 'noise-archive', 'historical-directory', 'output'):
+        replay.add_argument('--' + name, type=Path, required=True)
+    replay.add_argument('--batch-size', type=int, default=8)
+    replay.add_argument('--sample-rate', type=int, default=24000)
+    replay.add_argument('--hop-length', type=int, default=512)
     compare = commands.add_parser('compare-check', help='Verify whether two complete runs share a comparison protocol')
     compare.add_argument('left', type=Path)
     compare.add_argument('right', type=Path)
     compare.add_argument('--metrics', nargs='+', default=['mcd', 'wer', 'sim'])
     compare.add_argument('--output', type=Path)
     args = parser.parse_args()
+    if args.command == 'replay-gr':
+        from .noise_replay import replay_gr_noise
+        result = replay_gr_noise(args.dataset_root, args.subset_manifest, args.noise_archive,
+            args.historical_directory, args.output, args.batch_size, args.sample_rate, args.hop_length)
+        print(json.dumps({'status': result['status'], 'verified': result['verified'],
+                          'manifest': str(args.output / 'stage_manifest.json')}, indent=2))
+        return
     if args.command == 'compare-check':
         from .comparability import check_comparability
         from .artifacts import atomic_json

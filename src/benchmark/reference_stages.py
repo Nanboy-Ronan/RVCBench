@@ -1,5 +1,6 @@
 """Explicit reference-stage binding without clean-audio fallback."""
 from dataclasses import replace
+import json
 from pathlib import Path
 
 from .artifacts import digest, file_hash, sample_id
@@ -54,10 +55,35 @@ def bind_reference_stage(samples, dataset_root, reference_root, kind='external_r
     if len(parents) > 1:
         raise ValueError('Ambiguous reference stage producer manifests')
     parent = next(iter(parents), None)
+    producer_status = 'legacy_directory_content_only'
+    if parent:
+        producer = json.loads(parent.read_text())
+        if not isinstance(producer, dict):
+            raise ValueError('Invalid reference stage producer manifest')
+        if 'status' in producer and producer['status'] != 'complete':
+            raise ValueError('Reference stage producer is not complete')
+        producer_status = 'manifest_recorded'
+        if producer.get('variant') == 'gr_archived_noise_replay_v1':
+            records = producer.get('rows', [])
+            if (producer.get('schema_version') != 1 or producer.get('status') != 'complete' or
+                    not records or producer.get('verified') != len(records) or
+                    producer.get('requested') != len(records)):
+                raise ValueError('Incomplete archived-noise producer verification')
+            by_id = {r['sample_id']: r for r in records}
+            if len(by_id) != len(records):
+                raise ValueError('Duplicate producer sample identities')
+            for binding in bindings:
+                record = by_id.get(binding['sample_id'])
+                if not record or any(record.get(k) != binding[k] for k in
+                        ('speaker_id', 'clean_prompt_sha256', 'reference_sha256')):
+                    raise ValueError('Reference stage output differs from its producer manifest')
+                if record.get('historical_sha256') != binding['reference_sha256']:
+                    raise ValueError('Reference stage output is not historically verified')
+            producer_status = 'verified_selected_output_hashes'
     lineage = {'kind': str(kind), 'directory': str(root), 'bindings': bindings,
                'producer_manifest': str(parent) if parent else None,
                'producer_manifest_sha256': file_hash(parent) if parent else None,
-               'producer_status': 'manifest_recorded' if parent else 'legacy_directory_content_only'}
+               'producer_status': producer_status}
     lineage['fingerprint'] = digest({'kind': lineage['kind'],
         'producer_manifest_sha256': lineage['producer_manifest_sha256'],
         'bindings': [{k: r[k] for k in ('sample_id', 'speaker_id', 'clean_prompt_sha256', 'reference_sha256')}

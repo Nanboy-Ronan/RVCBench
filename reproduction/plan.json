@@ -767,7 +767,13 @@
     {
       "item": "Protocol and stage plan for protection, denoising, generation and scoring",
       "status": "strict_reference_binding_real_qwen3_protected_and_denoised_16_pair_generation_and_core_scoring_verified_producers_pending",
-      "evidence": "comparisons/reference_stage_qwen3_libritts16.json"
+      "evidence": "comparisons/reference_stage_qwen3_libritts16.json",
+      "gr_archive_replay": {
+        "status": "16_pairs_historical_wav_hashes_verified_twice_consumer_guarded",
+        "evidence": "comparisons/gr_archived_noise_libritts16.json",
+        "original_noise_rng_regeneration": "pending",
+        "denoising_and_other_producers": "pending"
+      }
     },
     {
       "item": "Separate completion, protocol validity and cross-run comparability",
