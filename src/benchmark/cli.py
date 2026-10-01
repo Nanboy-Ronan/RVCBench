@@ -28,12 +28,25 @@ def main():
     replay.add_argument('--batch-size', type=int, default=8)
     replay.add_argument('--sample-rate', type=int, default=24000)
     replay.add_argument('--hop-length', type=int, default=512)
+    denoise = commands.add_parser('denoise-dns64', help='Enhance selected references with explicit local DNS64 weights')
+    for name in ('dataset-root', 'subset-manifest', 'reference-directory', 'weights', 'output'):
+        denoise.add_argument('--' + name, type=Path, required=True)
+    denoise.add_argument('--device', default='cpu')
+    denoise.add_argument('--dry', type=float, default=0.0)
+    denoise.add_argument('--dataset-rate', type=int, default=16000)
     compare = commands.add_parser('compare-check', help='Verify whether two complete runs share a comparison protocol')
     compare.add_argument('left', type=Path)
     compare.add_argument('right', type=Path)
     compare.add_argument('--metrics', nargs='+', default=['mcd', 'wer', 'sim'])
     compare.add_argument('--output', type=Path)
     args = parser.parse_args()
+    if args.command == 'denoise-dns64':
+        from .denoise_stage import denoise_dns64
+        result = denoise_dns64(args.dataset_root, args.subset_manifest, args.reference_directory,
+            args.weights, args.output, args.device, args.dry, args.dataset_rate)
+        print(json.dumps({'status': result['status'], 'verified': result['verified'],
+                          'manifest': str(args.output / 'stage_manifest.json')}, indent=2))
+        return
     if args.command == 'replay-gr':
         from .noise_replay import replay_gr_noise
         result = replay_gr_noise(args.dataset_root, args.subset_manifest, args.noise_archive,

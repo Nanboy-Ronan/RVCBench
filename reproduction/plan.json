@@ -773,6 +773,12 @@
         "evidence": "comparisons/gr_archived_noise_libritts16.json",
         "original_noise_rng_regeneration": "pending",
         "denoising_and_other_producers": "pending"
+      },
+      "dns64_producer": {
+        "status": "produced_16_repeated_16_exact_clone_and_core_scored_16",
+        "evidence": "comparisons/dns64_gr_archived_noise_libritts16.json",
+        "historical_bitwise_equivalence": "not_established",
+        "dependency_clean_worker": "pending"
       }
     },
     {

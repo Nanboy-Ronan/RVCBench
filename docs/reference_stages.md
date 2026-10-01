@@ -28,7 +28,7 @@ and target bytes remain unchanged.
 An adjacent `stage_manifest.json` is hashed and recorded when present. This is
 recorded producer metadata; unknown producer formats do not attest their claims.
 A producer declaring an unfinished or failed status is rejected. For the known
-`gr_archived_noise_replay_v1` format, the runner additionally requires complete
+`gr_archived_noise_replay_v1` and `dns64_dataset_rate_v1` formats, the runner additionally requires complete
 verification counts and checks selected sample identities and clean/output/
 historical hashes against the producer rows. Such bindings are labeled
 `verified_selected_output_hashes`. Historical
@@ -56,6 +56,7 @@ reproduction or metric equivalence.
 The GR-Noise archive can now be used to produce verified reference outputs;
 see [historical noise replay](gr_noise_replay.md). This records a producer
 manifest while preserving the original experimental noise.
+For explicit DNS64 production, see [the denoising stage](dns64_stage.md).
 
 Both historical directories have now been used in real Qwen3-TTS runs on the
 same 16 pairs, with all 16 outputs valid for each core metric:

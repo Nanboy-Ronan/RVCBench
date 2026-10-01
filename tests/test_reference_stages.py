@@ -95,12 +95,13 @@ def test_producer_manifest_changes_lineage_without_changing_audio(setup_run):
 
 
 @pytest.mark.parametrize('failure', ['failed', 'stale_output', 'wrong_count', None])
-def test_archived_producer_must_be_complete_and_match_selected_outputs(setup_run, failure):
+@pytest.mark.parametrize('variant', ['gr_archived_noise_replay_v1', 'dns64_dataset_rate_v1'])
+def test_archived_producer_must_be_complete_and_match_selected_outputs(setup_run, failure, variant):
     conf, dataset, run, tmp_path = setup_run
     root, _, _ = stage_directory(dataset, tmp_path)
     _, baseline = bind_reference_stage(dataset.get_zero_shot_samples(), dataset._dataset_root, root)
     rows = [{**b, 'historical_sha256': b['reference_sha256']} for b in baseline['bindings']]
-    producer = {'schema_version': 1, 'variant': 'gr_archived_noise_replay_v1',
+    producer = {'schema_version': 1, 'variant': variant,
                 'status': 'complete', 'requested': len(rows), 'verified': len(rows), 'rows': rows}
     if failure == 'failed':
         producer['status'] = 'failed'
