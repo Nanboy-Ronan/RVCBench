@@ -23,6 +23,7 @@ def test_emotion_rejects_changed_pinned_assets_before_native_loading(tmp_path, m
 
 
 def test_emotion_returns_reference_and_generated_labels_and_rejects_unknown_label(tmp_path):
+    pytest.importorskip('torchaudio', reason='native emotion scoring requires optional evaluation dependencies')
     wav = tmp_path / 'audio.wav'
     sf.write(wav, np.ones(1600) * .01, 16000)
     labels = iter(['neu', 'ang', 'unrecognized'])

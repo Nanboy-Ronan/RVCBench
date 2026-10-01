@@ -47,6 +47,8 @@ def test_speechmos_asset_scope_and_loaded_weights(tmp_path, monkeypatch):
 
 @pytest.mark.parametrize('metric', ['speechmos', 'dnsmos'])
 def test_auxiliary_native_error_is_not_swallowed_or_retried(tmp_path, metric):
+    if metric == 'speechmos':
+        pytest.importorskip('torchaudio', reason='native audio scoring requires optional evaluation dependencies')
     wav = tmp_path / 'audio.wav'
     sf.write(wav, np.ones(1600) * .01, 24000)
     calls = []
