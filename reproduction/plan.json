@@ -305,9 +305,16 @@
       "status": "experimental_adapter",
       "config": "configs/ots_vc/clean/libritts/fish_audio_s2_ots.yaml",
       "subset": "subsets/libritts16_v1/selection.json",
-      "generation_status": "pending",
-      "scoring_status": "pending",
-      "historical_comparison_status": "historical_reference_not_established"
+      "generation_status": "complete",
+      "scoring_status": "complete",
+      "historical_comparison_status": "matched_population_http_diagnostic",
+      "generation_run": "results/reproduce_v2_fish_s2_http_libritts16/20261001-092004-34c5786a",
+      "scoring_run": "results/reproduce_v2_fish_s2_http_libritts16_score_device_verified/20261001-093809-09432e2e",
+      "comparison": "comparisons/fish_s2_http_libritts16.json",
+      "runtime_audit": "comparisons/fish_s2_http_service_audit.json",
+      "repeatability_status": "cold_and_warm_http_outputs_differ",
+      "repeatability_audit": "comparisons/fish_s2_http_repeatability.json",
+      "provenance_limit": "Owned pinned official service and independently checked local weights; historical server weights/runtime/seeds unavailable. Cold-start repeatability remains unresolved."
     },
     {
       "n": "CosyVoice / 2",

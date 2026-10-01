@@ -14,7 +14,7 @@ from .scorers import ScoreInput, create_scorer
 from src.utils.runtime_errors import invalid_cuda_context
 
 
-def _scorer_provenance(scorer, seed, cap):
+def _scorer_provenance(scorer, seed, cap, device=None):
     from .scorers import text
     implementation = Path(inspect.getfile(type(scorer)))
     paths = [implementation, Path(__file__), Path(text.__file__),
@@ -27,9 +27,21 @@ def _scorer_provenance(scorer, seed, cap):
             packages[package] = importlib.metadata.version(package)
         except importlib.metadata.PackageNotFoundError:
             packages[package] = None
+    execution = None
+    if device is not None:
+        import torch
+        resolved = torch.device(device)
+        execution = {'device': str(resolved), 'torch': torch.__version__,
+                     'cuda': torch.version.cuda, 'cpu_threads': torch.get_num_threads()}
+        if resolved.type == 'cuda':
+            properties = torch.cuda.get_device_properties(resolved)
+            execution.update(gpu=properties.name,
+                             compute_capability=[properties.major, properties.minor],
+                             cudnn=torch.backends.cudnn.version())
     return {'version': scorer.version, 'source': {p.name: file_hash(p) for p in paths},
             'packages': packages, 'model': scorer.model_provenance, 'seed': seed,
-            'sample_seed_policy': 'metric_seed_plus_sample_hash_v1', 'generated_audio_max_seconds': cap}
+            'sample_seed_policy': 'metric_seed_plus_sample_hash_v1', 'generated_audio_max_seconds': cap,
+            'execution': execution}
 
 
 def _request(row, output, cap):
@@ -90,7 +102,7 @@ def evaluate_run(rows, required, output, device, logger, *, seed=42, cap=None,
             if group == 'wer' and wer_normalization != 'ascii_punctuation_removed_v2':
                 scorer.set_normalization(wer_normalization)
             scorer.prepare()
-            spec = _scorer_provenance(scorer, seed, cap)
+            spec = _scorer_provenance(scorer, seed, cap, device)
             fingerprint = digest(spec)
             provenance[group] = {'fingerprint': fingerprint, **spec}
             atomic_json(output / 'scoring_manifest.json', provenance)

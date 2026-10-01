@@ -26,6 +26,22 @@ def test_mcd_cache_fingerprint_tracks_native_feature_and_alignment_libraries():
             versions[name] = 'fixture-1'
 
 
+def test_scorer_cache_separates_cpu_and_gpu_execution():
+    from types import SimpleNamespace
+    from src.evaluation.pipeline import _scorer_provenance
+    from src.benchmark.artifacts import digest
+    from src.evaluation.scorers.mcd import MCDScorer
+    scorer = MCDScorer('cpu', logging.getLogger())
+    scorer.model_provenance = {'implementation': 'pymcd', 'MCD_mode': 'dtw'}
+    cpu = _scorer_provenance(scorer, 42, None, 'cpu')
+    with patch('torch.cuda.get_device_properties', return_value=SimpleNamespace(
+            name='fixture GPU', major=8, minor=0)):
+        gpu = _scorer_provenance(scorer, 42, None, 'cuda:0')
+    assert cpu['execution']['device'] == 'cpu'
+    assert gpu['execution']['gpu'] == 'fixture GPU'
+    assert digest(cpu) != digest(gpu)
+
+
 class FakeScorer:
     version = 'fixture-v1'
     dependencies = ()

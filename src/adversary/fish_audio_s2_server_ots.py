@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import time
 from pathlib import Path
+from urllib.parse import urljoin, urlsplit
 
 import ormsgpack
 import requests
@@ -49,8 +50,24 @@ class FishAudioS2ServerZeroShotAdversary(BaseAdversary):
             raise ValueError("Fish Audio S2 requires chunk_length between 100 and 300.")
         if self.use_memory_cache not in {"on", "off"}:
             raise ValueError("use_memory_cache must be 'on' or 'off'.")
+        if self.request_attempts < 1 or self.timeout <= 0 or self.retry_delay_sec < 0:
+            raise ValueError('Fish S2 requires positive timeout/attempts and nonnegative retry delay')
+        if urlsplit(self.endpoint_url).scheme not in {'http', 'https'}:
+            raise ValueError('Fish S2 endpoint must use HTTP or HTTPS')
+
+    def prepare(self):
+        health_url = urljoin(self.endpoint_url, 'health')
+        try:
+            response = requests.get(health_url, timeout=min(self.timeout, 10))
+            if response.status_code != 200 or response.json().get('status') != 'ok':
+                raise ValueError(f'Unexpected readiness response: HTTP {response.status_code}')
+        except (requests.RequestException, ValueError, AttributeError) as exc:
+            raise RuntimeError(f'Fish S2 readiness check failed at {health_url}: {exc}') from exc
+        super().prepare()
 
     def _build_payload(self, text: str, reference_path: Path, reference_text: str, sample_index: int = 0) -> bytes:
+        if not str(text or '').strip() or not str(reference_text or '').strip():
+            raise ValueError('Fish S2 requires actual target and reference transcripts')
         payload = {
             "text": text,
             "references": [
@@ -84,8 +101,12 @@ class FishAudioS2ServerZeroShotAdversary(BaseAdversary):
                     headers={"content-type": "application/msgpack"},
                     timeout=self.timeout,
                 )
-                if response.status_code < 400:
+                if 200 <= response.status_code < 300:
+                    if not (response.content[:4] == b'RIFF' and response.content[8:12] == b'WAVE'):
+                        raise RuntimeError('Fish S2 returned a non-WAV response; check endpoint and response_format')
                     return response.content
+                if 400 <= response.status_code < 500 and response.status_code not in {408, 429}:
+                    raise RuntimeError(f'Fish S2 request rejected: HTTP {response.status_code}: {response.text[:500]}')
                 last_error = RuntimeError(
                     f"HTTP {response.status_code}: {response.text[:500]}"
                 )
@@ -138,12 +159,8 @@ class FishAudioS2ServerZeroShotAdversary(BaseAdversary):
                 )
                 continue
 
-            text = (sample.target_text or sample.prompt_text or "").strip()
-            if not text:
-                text = self.default_reference_text
-            reference_text = (
-                (sample.prompt_text or "").strip() or self.default_reference_text
-            )
+            text = (sample.target_text or "").strip()
+            reference_text = (sample.prompt_text or "").strip()
 
             self._log_clone_request(
                 "FishAudioS2",

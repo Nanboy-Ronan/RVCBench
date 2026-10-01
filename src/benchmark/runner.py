@@ -204,7 +204,10 @@ def run_zero_shot(conf, base_dir, device, dataset, exp_dir, logger, protected_au
             writer.writerows({k: r.get(k) for k in writer.fieldnames} for r in rows if r.get('generated_sha256'))
         if not generate_only and any(row.get('generated_sha256') for row in rows):
             from src.evaluation.pipeline import evaluate_run
-            metrics = evaluate_run(rows, required, Path(exp_dir), device, logger, seed=seed,
+            scorer_device = (evaluation.get('device') or
+                             OmegaConf.select(conf, 'evaluation.device') or str(device))
+            manifest['evaluation_device'] = str(scorer_device)
+            metrics = evaluate_run(rows, required, Path(exp_dir), scorer_device, logger, seed=seed,
                 cap=evaluation.get('generated_audio_max_seconds',
                     OmegaConf.select(conf, 'evaluation.generated_audio_max_seconds')),
                 bootstrap_config=OmegaConf.select(conf, 'evaluation.bootstrap'),

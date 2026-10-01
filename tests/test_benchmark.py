@@ -39,6 +39,24 @@ def mocked_evaluator(function):
         yield
 
 
+@pytest.mark.parametrize('settings,expected', [
+    ({'evaluation': {'device': 'cuda:3'}}, 'cuda:3'),
+    ({'evaluation': {'device': 'cuda:3'}, 'vc': {'evaluation': {'device': 'cuda:2'}}}, 'cuda:2'),
+])
+def test_scoring_device_is_independent_of_generation_device(setup_run, settings, expected):
+    conf, dataset, run, _ = setup_run
+    conf = OmegaConf.merge(conf, settings)
+    conf.vc.generate_only = False
+    observed = []
+    def evaluate(*args):
+        observed.append(str(args[2]))
+        return fake_evaluate(*args)
+    with mocked_evaluator(evaluate):
+        _, manifest, _ = run('scoring-device', config=conf)
+    assert observed == [expected]
+    assert manifest['evaluation_device'] == expected
+
+
 @pytest.fixture
 def setup_run(tmp_path):
     root = tmp_path / 'dataset'

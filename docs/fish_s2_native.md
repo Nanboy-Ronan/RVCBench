@@ -44,4 +44,5 @@ engine also accepts `normalize` without applying a normalization transform.
 Actual reference and target transcripts are required. Empty target text is an
 error, rather than a request to synthesize the reference sentence. Scoring runs
 separately in the evaluation environment, after generation resources close.
-The HTTP S2 integration remains a separate entry requiring a verified S2 server.
+The HTTP S2 integration remains a separate entry requiring a verified S2 server;
+see its [measured HTTP protocol and repeatability limits](fish_s2_http.md).

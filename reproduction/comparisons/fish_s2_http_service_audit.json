@@ -1,0 +1,17 @@
+{
+  "pid": 2715703,
+  "command": "/tmp/rvcbench-fish-s2-env/bin/python -m tools.api_server --listen 127.0.0.1:18011 --workers 1 --device cuda:0 --llama-checkpoint-path /tealab-data/rjin02/AudioWatermarkBench/checkpoints/s2-pro --decoder-checkpoint-path /tealab-data/rjin02/AudioWatermarkBench/checkpoints/s2-pro/codec.pth --decoder-config-name modded_dac_vq",
+  "cwd": "/tealab-data/rjin02/RVCBench/checkpoints/fish-speech-s2-native",
+  "python": "/data/rjin02/miniconda3/envs/fish-speech-s2/bin/python3.12",
+  "cuda_visible_devices": "5",
+  "source_revision": "214da3cd841bda85da2496b96cd3c4d7edb1337e",
+  "listen": "127.0.0.1:18011",
+  "runtime": "Python3.12.13 Torch/Torchaudio2.8.0+cu126 Transformers4.57.3 NumPy2.3.5 Hydra1.3.4 OmegaConf2.3.1",
+  "source_log": "/tmp/rvcbench-fish-s2-official-server.log",
+  "ownership": "Dedicated official native service started for this validation; existing port8000/8001 services not changed.",
+  "weight_validation": "Same local main and codec assets as strict native S2 validation, including exact six nonpersistent codec buffer controls. Official ModelManager uses native permissive loader; missing trained weights were independently ruled out by strict control.",
+  "identity_limit": "Locally verified process command/cwd/interpreter/assets; readiness is not an API model-identity attestation.",
+  "cleanup_status": "owned_process_exited_port_18011_closed_existing_8000_8001_listeners_preserved",
+  "generation_run": "results/reproduce_v2_fish_s2_http_libritts16/20261001-092004-34c5786a",
+  "repeatability_audit": "reproduction/comparisons/fish_s2_http_repeatability.json"
+}
