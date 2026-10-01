@@ -34,6 +34,8 @@ def main():
     denoise.add_argument('--device', default='cpu')
     denoise.add_argument('--dry', type=float, default=0.0)
     denoise.add_argument('--dataset-rate', type=int, default=16000)
+    denoise.add_argument('--runtime-python', type=Path, help='Run inference in an isolated model interpreter')
+    denoise.add_argument('--timeout-seconds', type=float, default=600)
     compare = commands.add_parser('compare-check', help='Verify whether two complete runs share a comparison protocol')
     compare.add_argument('left', type=Path)
     compare.add_argument('right', type=Path)
@@ -43,7 +45,8 @@ def main():
     if args.command == 'denoise-dns64':
         from .denoise_stage import denoise_dns64
         result = denoise_dns64(args.dataset_root, args.subset_manifest, args.reference_directory,
-            args.weights, args.output, args.device, args.dry, args.dataset_rate)
+            args.weights, args.output, args.device, args.dry, args.dataset_rate,
+            args.runtime_python, args.timeout_seconds)
         print(json.dumps({'status': result['status'], 'verified': result['verified'],
                           'manifest': str(args.output / 'stage_manifest.json')}, indent=2))
         return

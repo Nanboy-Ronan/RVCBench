@@ -766,19 +766,20 @@
     },
     {
       "item": "Protocol and stage plan for protection, denoising, generation and scoring",
-      "status": "strict_reference_binding_real_qwen3_protected_and_denoised_16_pair_generation_and_core_scoring_verified_producers_pending",
+      "status": "strict_reference_binding_protected_and_denoised_16_pair_generation_and_core_scoring_verified_gr_replay_and_dns64_producers_verified_other_producers_pending",
       "evidence": "comparisons/reference_stage_qwen3_libritts16.json",
       "gr_archive_replay": {
         "status": "16_pairs_historical_wav_hashes_verified_twice_consumer_guarded",
         "evidence": "comparisons/gr_archived_noise_libritts16.json",
         "original_noise_rng_regeneration": "pending",
-        "denoising_and_other_producers": "pending"
+        "denoising_and_other_producers": "dns64_verified_other_protection_producers_pending"
       },
       "dns64_producer": {
         "status": "produced_16_repeated_16_exact_clone_and_core_scored_16",
         "evidence": "comparisons/dns64_gr_archived_noise_libritts16.json",
         "historical_bitwise_equivalence": "not_established",
-        "dependency_clean_worker": "pending"
+        "dependency_clean_worker": "integrated_16_pairs_repeated_and_output_equivalence_verified",
+        "worker_evidence": "comparisons/dns64_clean_worker_libritts16.json"
       }
     },
     {

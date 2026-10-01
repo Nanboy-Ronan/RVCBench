@@ -12,6 +12,7 @@ rvcbench denoise-dns64 \
   --reference-directory /absolute/path/to/protection-run/protected_audio \
   --weights /absolute/path/to/dns64-a7761ff99a7d5bb6.th \
   --device cuda:0 \
+  --runtime-python /absolute/path/to/dns64-worker/bin/python \
   --output /absolute/path/to/new/denoising-run
 ```
 
@@ -34,6 +35,15 @@ hashes. Missing or ambiguous references fail before loading the model.
 Invalid inference produces a failed stage manifest. The clone runner checks
 the known producer format's completion counts and selected output hashes
 before accepting `denoised_audio` as its reference directory.
+With `--runtime-python`, inference runs in a finite subprocess using a JSON
+request/result protocol. The core process validates request, weight, worker and
+kernel hashes, sample identities, output content, rates and frame counts.
+Interpreter identity retains the virtual environment entry path even when
+several environments share the same underlying Python binary.
+`--timeout-seconds` defaults to 600; timeout terminates the worker and marks the
+stage failed. `worker_result.json` records incremental worker progress, and
+`worker.log` retains its diagnostics. Both direct and worker execution use the
+same model-only inference kernel.
 
 ## Validation and remaining environment work
 
@@ -52,8 +62,16 @@ The overlay does not establish a dependency-clean installation. A separate
 Python 3.10 environment with no system-site packages has passed `pip check`
 and strict DNS64 weight loading. Its exact package set is retained in
 `envs/dns64-worker-py310-cu124.txt`; this is a model-worker environment, not
-the benchmark's core environment. Worker inference and integration remain pending. The
-original `run_denoiser.py` and shared environments have not been modified.
+the benchmark's core environment. This worker now runs through the public
+CLI. Two independent worker executions produced 16/16 identical WAVs, all
+matching the earlier direct-run WAVs. The core runtime records Hydra 1.3.2
+while the worker records Hydra 0.11.3. A real 2-pair cloning canary verifies
+consumption of the worker producer manifest; the matching direct-run reference
+bytes were already used in the retained full 16-pair generation/scoring.
+Worker evidence is retained in
+`reproduction/comparisons/dns64_clean_worker_libritts16.json`.
+This increment leaves the existing `run_denoiser.py` edits and shared
+environments untouched.
 
 The isolated model environment can be reconstructed with Python 3.10:
 
