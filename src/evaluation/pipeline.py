@@ -184,7 +184,7 @@ def _export(rows, required, output, provenance, bootstrap_config):
     bootstrapper = create_bootstrapper(bootstrap_config)
     csv_path = output / 'generation_sample_metrics.csv'
     fields = ['sample_id', 'speaker_id', 'ground_truth_path', 'generated_path', 'ground_truth_text',
-              'predicted_text'] + list(METRIC_COLUMNS.values()) + ['dnsmos_sig', 'dnsmos_bak',
+              'predicted_text', 'reference_emotion', 'generated_emotion'] + list(METRIC_COLUMNS.values()) + ['dnsmos_sig', 'dnsmos_bak',
               'generated_duration_sec', 'synthesis_time_sec', 'timing_scope']
     timings = {}
     with csv_path.open('w', newline='') as f:

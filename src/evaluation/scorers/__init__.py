@@ -12,6 +12,9 @@ class ScoreInput:
 
 
 def create_scorer(name, device, logger):
+    if name == 'emotion':
+        from .emotion import EmotionScorer
+        return EmotionScorer(device, logger)
     if name == 'mcd':
         from .mcd import MCDScorer
         return MCDScorer(device, logger)

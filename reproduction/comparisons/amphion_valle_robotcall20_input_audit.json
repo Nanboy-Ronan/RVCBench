@@ -1,5 +1,5 @@
 {
-  "status": "inputs_matched_historical_audio_replayed_native_generation_running",
+  "status": "inputs_matched_historical_audio_replayed_native_subset_scored",
   "historical_csv": "/tealab-data/rjin02/AudioWatermarkBench/results/vall_e_ots_on_robotcall/20260327-092720/generation_sample_metrics.csv",
   "historical_csv_sha256": "4020c897c1b112ede9855e76c2bc99dabea1e79c8a3c8969e94c17817f5db98c",
   "historical_rows": 300,
@@ -109,5 +109,33 @@
       "replayed_predicted_text": "アクティ pests lop пошлicy lop"
     }
   ],
-  "wer_replay_interpretation": "The historical WER formula matches all 300 saved transcripts; rescoring the same WAV changes ASR predictions for the listed rows. Historical ASR runtime and immutable weights are not recorded, so the cause of prediction drift is not established."
+  "wer_replay_interpretation": "The historical WER formula matches all 300 saved transcripts; rescoring the same WAV changes ASR predictions for the listed rows. Historical ASR runtime and immutable weights are not recorded, so the cause of prediction drift is not established.",
+  "scoring_run": "results/reproduce_v2_amphion_valle_robotcall20_score/20261001-061819-752a1999",
+  "scoring_manifest_sha256": "36655b361d90396f1ae7b0227b5f5fb87846502a08eb9c69fb8ff0092dd74f41",
+  "coverage": {
+    "requested": 20,
+    "generated": 20,
+    "generation_failed": 0,
+    "input_failed": 0,
+    "pending": 0,
+    "generating": 0,
+    "metric_valid": {
+      "mcd": 20,
+      "wer": 20,
+      "sim": 20,
+      "sva": 20,
+      "speechmos": 0,
+      "dnsmos": 0,
+      "emotion": 0
+    },
+    "required_metrics": [
+      "mcd",
+      "wer",
+      "sim"
+    ],
+    "status": "complete",
+    "eligible_for_comparison": true
+  },
+  "comparison": "reproduction/comparisons/amphion_valle_robotcall20_v1.json",
+  "comparison_sha256": "93634f7607b754f8fcccb0bbeaa3e80762a38ff15c2c2aa36eba27c7b5dc81db"
 }

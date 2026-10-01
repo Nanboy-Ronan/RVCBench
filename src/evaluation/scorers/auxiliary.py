@@ -18,11 +18,7 @@ class AuxiliaryScorer:
         }.get(name, self.dependencies)
 
     def prepare(self):
-        if self.name == 'emotion':
-            from src.evaluation.generation import _load_emotion_recognizer
-            self.model = _load_emotion_recognizer(self.device, self.logger)
-            root = Path('checkpoints/emotion-recognition-wav2vec2-IEMOCAP')
-        elif self.name == 'dnsmos':
+        if self.name == 'dnsmos':
             from src.evaluation.fidelity import _DNSMOSPredictor
             root = Path(to_absolute_path('checkpoints/dnsmos'))
             files = [root / 'sig_bak_ovr.onnx', root / 'model_v8.onnx']
@@ -60,12 +56,6 @@ class AuxiliaryScorer:
             self.model_provenance['weights'] = {weights.name: file_hash(weights)}
 
     def score(self, request):
-        if self.name == 'emotion':
-            from src.evaluation.generation import _predict_emotion_label
-            ref = _predict_emotion_label(self.model, request.reference, self.logger)
-            gen = _predict_emotion_label(self.model, request.generated, self.logger)
-            return {'reference_emotion': ref, 'generated_emotion': gen,
-                    'emotion_match': ref == gen if ref is not None and gen is not None else None}
         if self.name == 'dnsmos':
             values = self.model(request.generated)
             return {f'dnsmos_{k}': v for k, v in (values or {}).items()}

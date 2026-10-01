@@ -409,7 +409,7 @@
         "generation_run": "results/reproduce_v2_amphion_valle_libritts16/20261001-054053-dbdb5993",
         "scoring_status": "complete",
         "native_canary_status": "complete_2_pairs_MCD_WER_SIM",
-        "historical_comparison_status": "Robotcall20_inputs_matched_metric_replay_complete_new_generation_running",
+        "historical_comparison_status": "Robotcall20_matched_subset_measured_generation_differs",
         "scoring_run": "results/reproduce_v2_amphion_valle_libritts16_score/20261001-055240-377db43f",
         "means": {
           "mcd": 6.997914793326701,
@@ -420,14 +420,17 @@
           "config": "configs/ots_vc/clean/robotcall/vall_e_amphion_ots.yaml",
           "subset": "subsets/robotcall20_v1/selection.json",
           "runtime_audit": "comparisons/amphion_valle_robotcall20_input_audit.json",
-          "generation_status": "running",
+          "generation_status": "complete",
           "generation_run": "results/reproduce_v2_amphion_valle_robotcall20/20261001-055730-7ce1f2eb",
-          "scoring_status": "pending",
+          "scoring_status": "complete",
           "historical_replay_status": "complete_20_pairs",
           "physical_speakers": 10,
-          "speaker_condition_groups": 20
+          "speaker_condition_groups": 20,
+          "scoring_run": "results/reproduce_v2_amphion_valle_robotcall20_score/20261001-061819-752a1999",
+          "comparison": "comparisons/amphion_valle_robotcall20_v1.json"
         },
-        "auxiliary_validation": "comparisons/amphion_valle_libritts16_aux_validation.json"
+        "auxiliary_validation": "comparisons/amphion_valle_libritts16_aux_validation.json",
+        "emotion_validation": "comparisons/amphion_valle_libritts16_emotion_validation.json"
       }
     },
     {
@@ -712,7 +715,7 @@
     },
     {
       "item": "Independently loaded versioned scorers with sample-level metric recovery",
-      "status": "core_and_SpeechMOS_DNSMOS_real_runs_verified_emotion_pending"
+      "status": "core_and_SpeechMOS_DNSMOS_native_emotion_real_runs_verified_historical_auxiliary_replay_pending"
     },
     {
       "item": "Dependency-scoped code, weights, worker environments and hardware provenance",

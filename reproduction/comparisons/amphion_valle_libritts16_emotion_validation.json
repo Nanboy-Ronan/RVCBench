@@ -1,0 +1,186 @@
+{
+  "status": "native_emotion_full_subset_scored",
+  "run_manifest": "results/reproduce_v2_amphion_valle_libritts16_emotion_native_csv/20261001-062538-a3407ba7/run_manifest.json",
+  "run_manifest_sha256": "ce82d1ecf17987c1968551ed86508992e8614a97c455e18b229eff1cd2fd0682",
+  "scoring_manifest_sha256": "686c5827d5913369b7737f5d1d0d952df88e49d6d98665801fa0b926729a6000",
+  "csv_sha256": "bb49d6f9aaff462913998a16a08f3bd14173fcc37c65e81368f624fd99f4c547",
+  "coverage": {
+    "requested": 16,
+    "generated": 16,
+    "generation_failed": 0,
+    "input_failed": 0,
+    "pending": 0,
+    "generating": 0,
+    "metric_valid": {
+      "mcd": 0,
+      "wer": 0,
+      "sim": 0,
+      "sva": 0,
+      "speechmos": 0,
+      "dnsmos": 0,
+      "emotion": 16
+    },
+    "required_metrics": [
+      "emotion"
+    ],
+    "status": "complete",
+    "eligible_for_comparison": true
+  },
+  "agreement_count": 7,
+  "requested": 16,
+  "agreement_rate": 0.4375,
+  "all_labels_repeat_in_independent_score_run": true,
+  "prior_score_run": "results/reproduce_v2_amphion_valle_libritts16_emotion_native/20261001-062144-0b52bbcb",
+  "failed_initial_attempt": {
+    "run": "results/reproduce_v2_amphion_valle_libritts16_emotion/20261001-062103-c94bee6d",
+    "error": "Foreign class is not registered in sys.modules; class inspection failed. Method source inspection corrected this without replacing the native interface."
+  },
+  "scorer": {
+    "fingerprint": "1b727ec94f04bdfa3d9051097973be8ee140948d606f1d38ec6aced337cecad2",
+    "version": "speechbrain_native_iemocap_117a9c3_v2",
+    "source": {
+      "emotion.py": "63ff6b9944c1a129c28c1750ff9d8be99a15c767cbe2a119f007025505d24ddd",
+      "pipeline.py": "b0b6c4ecdb8d1e7ddd454f8ed8c76812c78417515242e56f44d428ff394c392f",
+      "text.py": "779e8bf3865c24edba4bd56dd7c7c7bb1ae4ed21f7f85a8956d7d63b3c03854f",
+      "runtime_errors.py": "657874fa2a4ddb90ef7df5afbccca2f9fe844f5bf7964f83134ddf79c703d2c1"
+    },
+    "packages": {
+      "torch": "2.6.0+cu124",
+      "torchaudio": "2.6.0+cu124",
+      "speechbrain": "1.0.3",
+      "transformers": "4.57.3",
+      "hyperpyyaml": "1.2.2",
+      "huggingface-hub": "0.36.2",
+      "numpy": "1.26.4",
+      "soundfile": "0.13.1"
+    },
+    "model": {
+      "repo_id": "speechbrain/emotion-recognition-wav2vec2-IEMOCAP",
+      "revision": "117a9c3dff08be81a3628eecf6a66b547ec1659b",
+      "verified_assets": {
+        "custom_interface.py": "b3b2060058f220e40c582f91da38cee416b3ce80a365f7dee46063a04ed180d7",
+        "hyperparams.yaml": "4519de8fee8fef69ae5aeb8d2d307fa45a5d1795f0597b06e42aebbd96597237",
+        "label_encoder.txt": "30afecda60619b67b50375bac880df4edc3862c14fb724c86701200b13e080ca",
+        "wav2vec2.ckpt": "b6db170a487b2912cfe10359fad40dbb7563120656f26f47c521b1c7e578bdd0",
+        "model.ckpt": "e351bafc8c0a2699f174e2f43f13e732836731621a8e595b53ddaf5334abcefb"
+      },
+      "base_initializer_cached_revision": "0b5b8e868dd84f03fd87d01f9c4ff0f080fecfe8",
+      "base_initializer_assets": {
+        "config.json": "4937977e24d12d1bba70cdce8709c3c04807a8e4ae8ddac4229c48c436ae99ae",
+        "preprocessor_config.json": "b225d617c025463b9e157e06afea8b90dc7078fc70b013c533328423e0486b4a",
+        "pytorch_model.bin": "3249fe98bfc62fcbc26067f724716a6ec49d12c4728a2af1df659013905dff21"
+      },
+      "interface": "CustomEncoderWav2vec2Classifier",
+      "sample_rate": 16000,
+      "labels": [
+        "neu",
+        "ang",
+        "hap",
+        "sad"
+      ],
+      "note": "Base cache content hashed; cache directory revision is not independent upstream hash verification."
+    },
+    "seed": 42,
+    "sample_seed_policy": "metric_seed_plus_sample_hash_v1",
+    "generated_audio_max_seconds": null
+  },
+  "labels": [
+    {
+      "sample_id": "59c5e63512ec18bacdf941db596a939ba7953749cde66ff2b860d04d8eccc830",
+      "reference_emotion": "neu",
+      "generated_emotion": "ang",
+      "emotion_match": false
+    },
+    {
+      "sample_id": "bbbafeab3dbc9112c48d524d97c8ffbeebe4129c00afa96c7694033fda99e34f",
+      "reference_emotion": "neu",
+      "generated_emotion": "neu",
+      "emotion_match": true
+    },
+    {
+      "sample_id": "aab57c47ff2f5bfb6c61cd66e8b6010f0216d7a50e7f54657b48d03d549278ad",
+      "reference_emotion": "neu",
+      "generated_emotion": "ang",
+      "emotion_match": false
+    },
+    {
+      "sample_id": "256a7d549878a87a47389cfbe8b30d1a4af57d3742301df83127129f98b629ef",
+      "reference_emotion": "neu",
+      "generated_emotion": "ang",
+      "emotion_match": false
+    },
+    {
+      "sample_id": "29b1f775187a47ea70994bf44b6611acaae57c51e27dd083493e5e9107aae915",
+      "reference_emotion": "ang",
+      "generated_emotion": "ang",
+      "emotion_match": true
+    },
+    {
+      "sample_id": "119b2b82f7f4c017ab67ea45f1ee994d031ff04ceec6375f25c3e895307c398c",
+      "reference_emotion": "neu",
+      "generated_emotion": "neu",
+      "emotion_match": true
+    },
+    {
+      "sample_id": "287812ddd3899f7174ff55f8c15a5e8272056a4e7b0dd814728e5c4819295b70",
+      "reference_emotion": "ang",
+      "generated_emotion": "ang",
+      "emotion_match": true
+    },
+    {
+      "sample_id": "fecd6a254b295c63f62e4b76beea470714c4042578824d8c12ce56c82d2f3267",
+      "reference_emotion": "ang",
+      "generated_emotion": "ang",
+      "emotion_match": true
+    },
+    {
+      "sample_id": "52a70d6b2b36735e4c16152898ef40c54641f2fc6d6136ec79f08df70953ef54",
+      "reference_emotion": "neu",
+      "generated_emotion": "ang",
+      "emotion_match": false
+    },
+    {
+      "sample_id": "af57d176fed29e48575dfd61eddd7835254516fa2eeb6cebe30dd675148f8eac",
+      "reference_emotion": "neu",
+      "generated_emotion": "hap",
+      "emotion_match": false
+    },
+    {
+      "sample_id": "e48deb17f83ee2bcdc078274d4bb4027487b5556324b40c77d050cf2b6912cbd",
+      "reference_emotion": "neu",
+      "generated_emotion": "ang",
+      "emotion_match": false
+    },
+    {
+      "sample_id": "f63943cdb6384940de51249a150038ac27cef4386e5896de774703e37a7a2a88",
+      "reference_emotion": "neu",
+      "generated_emotion": "ang",
+      "emotion_match": false
+    },
+    {
+      "sample_id": "85d81c78a789a9a7a1a2f85e2b90fcf7a2368078a6fdc7507a34ba43f31742a1",
+      "reference_emotion": "neu",
+      "generated_emotion": "neu",
+      "emotion_match": true
+    },
+    {
+      "sample_id": "4a7f70b24cde8d277eb5084528616e7729c3b1cdee7045a51690c265d7287894",
+      "reference_emotion": "ang",
+      "generated_emotion": "hap",
+      "emotion_match": false
+    },
+    {
+      "sample_id": "40290f9edf8d6d7ace3a9bc87646ec7c3eebe406dcb1eb570a63f755bf3dce39",
+      "reference_emotion": "neu",
+      "generated_emotion": "neu",
+      "emotion_match": true
+    },
+    {
+      "sample_id": "082cbba9c12a38815b54ab904dfd8c03913772e80527ec05d9aa4474fe8163e4",
+      "reference_emotion": "neu",
+      "generated_emotion": "hap",
+      "emotion_match": false
+    }
+  ],
+  "interpretation": "Native IEMOCAP audio-to-audio label agreement; not text/audio emotion-alignment judging. No historical equivalence claim."
+}

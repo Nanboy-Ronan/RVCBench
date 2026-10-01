@@ -89,8 +89,12 @@ The separate `robotcall20_v1` subset selects one pair from each of 20 speaker
 condition groups by the same fixed hash ranking. These are normal and scam
 conditions for 10 physical VCTK speakers. All 300 historical Amphion Robocall
 rows match the current pair names, target transcripts and input audio hashes;
-the selected 20 also pass the strict historical matcher. Native generation is
-running with `ots_vc/clean/robotcall/vall_e_amphion_ots` and that frozen manifest.
+the selected 20 also pass the strict historical matcher. Native generation and
+MCD/WER/SIM scoring complete with `ots_vc/clean/robotcall/vall_e_amphion_ots`
+and that frozen manifest. Current means are 8.1171, 0.5841 and 0.2726, versus
+historical 7.6966, 0.5281 and 0.2900. Generation differs; immutable historical
+weights/source and generation seed are unknown. See the condition-specific
+comparison in `reproduction/comparisons/amphion_valle_robotcall20_v1.json`.
 The comparator reports condition-specific means and bootstraps by the physical
 speaker shared by both conditions. Scam target WAVs are VCTK carrier audio,
 not recordings of the scam text: scam MCD remains a historical acoustic proxy.
@@ -119,8 +123,21 @@ missing assets or native runtime errors without interface retries.
 DNSMOS requires `checkpoints/dnsmos/sig_bak_ovr.onnx` and `model_v8.onnx` from
 Microsoft DNS-Challenge; scoring uses the non-personalized native predictor.
 Both files are hashed. Scoring does not silently download replacements.
-Upstream revisions of existing caches remain unverified. Emotion scoring and
-historical auxiliary-metric reproduction remain pending.
+Upstream revisions of existing caches remain unverified. Historical
+auxiliary-metric reproduction remains pending.
+
+Emotion scoring uses the official SpeechBrain
+`CustomEncoderWav2vec2Classifier`, not the legacy generic-classifier adapters.
+Run `python scripts/setup_emotion_scorer.py` to fetch its pinned interface,
+configuration, labels and weights, plus the local wav2vec2 base initializer.
+Existing assets are checked and preserved; `--check-only` performs no downloads
+or writes. Emotion release `117a9c3dff08be81a3628eecf6a66b547ec1659b`
+is checked against five expected content hashes before native loading.
+Inference uses mono 16kHz audio and the native four-class classifier. Both
+labels and their equality are retained in row artifacts and exported CSVs.
+This is audio-to-audio classifier agreement; it does not replace the paper's
+text-to-audio emotion-alignment judge. Historical classifier agreement requires
+its own matched scorer replay before any equivalence claim.
 
 FireRedTTS2 decodes output at 24 kHz; its native `sample_rate=16000` field is
 the reference input rate. The wrapper now saves codec output at 24 kHz and
