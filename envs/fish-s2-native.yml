@@ -1,0 +1,21 @@
+# Starting recipe for the measured runtime, not a clean-install lock.
+# Actual validation uses an isolated overlay on an existing Python 3.12 env.
+name: fish-s2-native
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip
+  - ffmpeg
+  - libsndfile
+  - pip:
+      - -e ..
+      - torch==2.8.0
+      - torchaudio==2.8.0
+      - transformers==4.57.3
+      - numpy==2.3.5
+      - descript-audio-codec==1.0.0
+      - safetensors==0.8.0
+      - einops==0.8.2
+      - lightning==2.6.5
+      - -e ../checkpoints/fish-speech-s2-native

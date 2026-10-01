@@ -289,9 +289,14 @@
       "status": "experimental_adapter",
       "config": "configs/ots_vc/clean/libritts/fishspeech_s2_ots.yaml",
       "subset": "subsets/libritts16_v1/selection.json",
-      "generation_status": "pending",
-      "scoring_status": "pending",
-      "historical_comparison_status": "historical_reference_not_established"
+      "generation_status": "complete",
+      "scoring_status": "complete",
+      "historical_comparison_status": "matched_population_cross_implementation_diagnostic",
+      "generation_run": "results/reproduce_v2_fish_s2_native_libritts16/20261001-090605-07a7f79b",
+      "scoring_run": "results/reproduce_v2_fish_s2_native_libritts16_score/20261001-091122-2eed1e50",
+      "runtime_audit": "comparisons/fish_s2_runtime_audit.json",
+      "comparison": "comparisons/fish_s2_cross_implementation_libritts16.json",
+      "provenance_limit": "Historical HTTP result has matched input/audio hashes, but lacks immutable server weights/runtime and server-side seeds. Native serial is a separate implementation."
     },
     {
       "n": "Fish Audio S2 (server)",

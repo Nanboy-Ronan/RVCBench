@@ -692,3 +692,20 @@ See [the protocol audit](../reproduction/comparisons/bertvits2_protocol_audit.js
 Provenance parses upstream Python source using Python BOM/coding-cookie rules
 while hashing raw bytes. Generator checkpoint paths are included in asset
 fingerprints, preventing resumed runs from silently changing those weights.
+
+## Native Fish S2 subset validation
+
+The separate native S2 integration completes all 16 frozen LibriTTS pairs with
+independent scoring: MCD 5.810259, WER 0.055686, SIM 0.575742. The first two generated
+audio hashes exactly repeat the canary. Both model and codec weights load
+strictly; six legacy codec buffers are accepted only after exact reconstruction
+checks. See [the runtime audit](../reproduction/comparisons/fish_s2_runtime_audit.json)
+and [setup instructions](fish_s2_native.md).
+
+The historical HTTP S2 run has 2,000 CSV-aligned request-log entries. All 16
+selected pairs match reference/target audio hashes and target transcripts; its
+WER formula matches the current normalization across all 2,000 rows.
+The [paired diagnostic](../reproduction/comparisons/fish_s2_cross_implementation_libritts16.json)
+compares separate implementations and retains every row and speaker bootstrap
+interval. Missing historical service weights/runtime/seeds prevent a same-model
+generation-equivalence claim. The HTTP integration remains independently pending.

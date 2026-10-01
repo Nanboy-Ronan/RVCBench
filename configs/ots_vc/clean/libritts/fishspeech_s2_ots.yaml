@@ -13,10 +13,10 @@ output_paths:
 
 adversary:
   name: "fishspeech_s2_ots"
-  code_path: "checkpoints/fish_speech"
-  llama_checkpoint_path: "checkpoints/fish_speech/s2-pro"
-  decoder_checkpoint_path: "checkpoints/fish_speech/s2-pro/codec.pth"
-  decoder_config_name: "modded_dac_vq"  # TODO: verify against s2-pro codec config once checkpoints are downloaded
+  code_path: "checkpoints/fish-speech-s2-native"
+  llama_checkpoint_path: "checkpoints/s2-pro"
+  decoder_checkpoint_path: "checkpoints/s2-pro/codec.pth"
+  decoder_config_name: "modded_dac_vq"
   mode: "tts"
   half: false
   compile: false
