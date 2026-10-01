@@ -1,0 +1,27 @@
+# Locally validated native runtime recipe; not a clean-install dependency lock.
+# git clone https://github.com/FireRedTeam/FireRedTTS2.git checkpoints/FireRedTTS2
+# git -C checkpoints/FireRedTTS2 checkout 404f3f61d25bb4804859b588a6a734bf8468090c
+# Main/codec/tokenizer: FireRedTeam/FireRedTTS2 revision
+# 4af3f5cc4963373b86b52d750220d4de85261f05. Monologue requires llm_pretrain.pt;
+# llm_posttrain.pt is for dialogue and was not downloaded or validated here.
+# Local CUDA inference uses torch/torchaudio 2.8.0+cu126. Torchao 0.17.0 warns
+# about optional C++ extensions requiring a newer Torch; this inference path
+# passes native canary without those extensions. Quantization is not validated.
+name: fireredtts2
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+  - ffmpeg
+  - libsndfile
+  - pip:
+      - -e ..
+      - torch==2.8.0
+      - torchaudio==2.8.0
+      - torchtune==0.6.1
+      - torchao==0.17.0
+      - transformers==4.57.3
+      - numpy==1.26.4
+      - librosa==0.10.0
+      - einops

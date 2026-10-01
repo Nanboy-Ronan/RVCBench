@@ -45,8 +45,37 @@ rejects invalid waveforms instead of replacing NaNs or clipping values.
 Its legacy prompted generation uses at most three attempts to exceed 18 token
 frames and trims two leading token frames. Exhausting those attempts is an
 explicit failure. `pretrained_dir` weights and nested tokenizer/config files
-are included in generation asset fingerprints. Native subset validation remains
-pending; see `reproduction/comparisons/fireredtts2_runtime_audit.json`.
+are included in generation asset fingerprints. Native short10 validation uses
+the separate `fireredtts2_short10_retry20_ots` configuration; see
+`reproduction/comparisons/fireredtts2_runtime_audit.json`.
+Reference-conditioned generation requires the actual reference transcript and
+nonempty target text. Missing text is rejected before loading or synthesizing;
+the adapter does not substitute a default sentence. Closing resets readiness
+so a subsequent use reloads the model.
+
+The historical sample-rate control preserves the source WAV files and verifies
+that the copied PCM bytes are identical. Under the same current scorer
+fingerprints, interpreting those ten outputs at 24 kHz instead of 16 kHz changes
+MCD from 5.2440 to 4.2234, WER from 0.0333 to 0, and SIM from 0.04125 to 0.35026.
+Replaying the original files reproduces every historical MCD and WER exactly;
+SIM's maximum absolute historical difference is 0.000043. This isolates a sample
+rate interpretation error, not model generation drift. All four located legacy
+runs (40 outputs) use 16 kHz headers. These controls are separate from newly
+generated model results: see
+`reproduction/comparisons/fireredtts2_sample_rate_control_v1.json`.
+
+The three-attempt native run generates and scores 8/10 requests; two short
+targets exhaust its attempts. Those failed rows remain in the partial report.
+A separate twenty-attempt run preserves the official >18-token criterion and
+generates/scores all ten requests at 24 kHz. All eight previously successful
+waveform hashes repeat exactly. Full means are MCD 3.9999, WER 0 and SIM 0.2780.
+The corrected historical ten-pair means are 4.2234, 0 and 0.3503, so the new
+generation still differs after correcting the header interpretation.
+Historical seed and immutable source/weight revisions are unknown, and the
+historical device was CPU. This is a measured fixed-cohort regression check,
+not exact generation reproduction. See
+`reproduction/comparisons/fireredtts2_short10_retry20_v1.json` and the preserved
+`fireredtts2_short10_retry3_partial_v1.json` for coverage and provenance.
 
 VoxCPM2 now passes seed plus original source index to the native API explicitly.
 Native badcase retries may increment that seed; sample rows distinguish

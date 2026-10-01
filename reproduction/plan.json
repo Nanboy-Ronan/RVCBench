@@ -48,12 +48,37 @@
       "b": false,
       "status": "experimental_adapter",
       "config": "configs/ots_vc/clean/libritts/fireredtts2_ots.yaml",
-      "subset": "subsets/libritts16_v1/selection.json",
-      "generation_status": "pending_native_runtime_validation",
-      "scoring_status": "pending",
-      "historical_comparison_status": "historical_reference_not_established",
+      "subset": "subsets/libritts_short10_legacy_v1/selection.json",
+      "generation_status": "complete",
+      "scoring_status": "complete",
+      "historical_comparison_status": "matched_10_pairs_header_control_measured",
       "runtime_audit": "comparisons/fireredtts2_runtime_audit.json",
-      "runtime_corrections": "24kHz output, pretrained asset hashing, invalid waveform rejection, bounded prompt failures and generator cleanup"
+      "runtime_corrections": "24kHz output, pretrained asset hashing, invalid waveform rejection, bounded prompt failures and generator cleanup",
+      "historical_sample_rate_control": "comparisons/fireredtts2_sample_rate_control_v1.json",
+      "generation_run": "results/reproduce_v2_fireredtts2_short10_retry20/20261001-051212-75e6a3c6",
+      "native_canary": {
+        "run": "results/debug_fireredtts2_short10_2/20261001-050601-636f1926",
+        "scoring_run": "results/debug_fireredtts2_short10_2_score/20261001-050935-82290891",
+        "pairs": 2,
+        "status": "generated_and_scored",
+        "means": {
+          "mcd": 3.994769240010826,
+          "wer": 0.0,
+          "sim": 0.3737233132123947
+        }
+      },
+      "retry20_variant_status": "complete",
+      "scoring_run": "results/reproduce_v2_fireredtts2_short10_retry20_score/20261001-051442-b3a52d17",
+      "subset_validation": "comparisons/fireredtts2_short10_retry20_v1.json",
+      "model_variant": "FireRedTTS2-monologue-retry20",
+      "comparison": "comparisons/fireredtts2_short10_retry20_v1.json",
+      "reproduction_config": "configs/ots_vc/clean/libritts/fireredtts2_short10_retry20_ots.yaml",
+      "retry3_variant": {
+        "generation_status": "partial_8_of_10",
+        "scoring_status": "partial_8_of_10",
+        "validation": "comparisons/fireredtts2_short10_retry3_partial_v1.json"
+      },
+      "reproduction_status": "full_fixed_short10_measured_not_exact_generation_reproduction"
     },
     {
       "n": "VoxCPM",

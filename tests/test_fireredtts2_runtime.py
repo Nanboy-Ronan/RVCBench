@@ -26,6 +26,16 @@ def test_codec_output_rate_is_independent_of_prompt_input_rate():
     assert audio.max() > 1  # Do not silently clip the native result.
     wrapper.close()
     assert wrapper._generator is wrapper.model is wrapper._spliter_module is None
+    assert not wrapper.is_model_ready()
+
+
+@pytest.mark.parametrize('kwargs', [dict(text=''), dict(text='Target.', prompt_wav='ref.wav'),
+    dict(text='Target.', prompt_text='Reference.')])
+def test_missing_content_or_unpaired_reference_fails_before_loading(kwargs):
+    wrapper = generator(np.ones(10))
+    wrapper.ensure_model = lambda: pytest.fail('Invalid request must not load model')
+    with pytest.raises(ValueError):
+        wrapper.generate(**kwargs)
 
 
 @pytest.mark.parametrize('audio', [np.array([]), np.array([np.nan]),

@@ -41,6 +41,11 @@ class FireRedTTS2Generator(BaseModel):
             logger=logger,
         )
         self.config = materialised_config
+        self.device = torch.device(device)
+        if self.config.gen_type != 'monologue':
+            raise ValueError('FireRedTTS2 zero-shot generator requires monologue mode')
+        if self.config.max_prompt_retries <= 0 or self.config.min_token_frames < 2:
+            raise ValueError('FireRedTTS2 requires positive retries and at least two token frames')
         self._generator = None
         self._spliter_module = None
 
@@ -82,6 +87,10 @@ class FireRedTTS2Generator(BaseModel):
         prompt_wav: Optional[str] = None,
         prompt_text: Optional[str] = None,
     ) -> Tuple[np.ndarray, int]:
+        if not str(text).strip():
+            raise ValueError('FireRedTTS2 requires nonempty target text')
+        if bool(prompt_wav) != bool(prompt_text and str(prompt_text).strip()):
+            raise ValueError('FireRedTTS2 reference audio requires its actual transcript')
         self.ensure_model()
         assert self._generator is not None
 
@@ -123,6 +132,7 @@ class FireRedTTS2Generator(BaseModel):
         self._generator = None
         self.model = None
         self._spliter_module = None
+        self._model_ready = False
 
     def _device_scope(self):
         return torch.cuda.device(self.device) if self.device.type == 'cuda' else nullcontext()
@@ -187,8 +197,6 @@ class FireRedTTS2Generator(BaseModel):
 
     def _cleanup_after_generation(self) -> None:
         gc.collect()
-        if torch.cuda.is_available() and str(self.device).startswith("cuda"):
-            torch.cuda.empty_cache()
 
     @contextmanager
     def _cpu_safe_torch_load(self):

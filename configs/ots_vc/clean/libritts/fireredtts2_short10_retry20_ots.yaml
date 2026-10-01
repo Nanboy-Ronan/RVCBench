@@ -1,0 +1,11 @@
+# @package _global_
+# Bounded official >18-token criterion; distinct from the legacy three-attempt wrapper.
+defaults:
+  - fireredtts2_ots
+  - _self_
+run_name: fireredtts2_short10_retry20
+adversary:
+  max_prompt_retries: 20
+dataset:
+  use_hf_dataset: false
+  manifest_filename: ${hydra:runtime.cwd}/reproduction/subsets/libritts_short10_legacy_v1/metadata.json

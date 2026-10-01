@@ -112,18 +112,10 @@ class FireRedTTS2ZeroShotAdversary(BaseAdversary):
             target_text = (sample.target_text or "").strip()
             prompt_text = (sample.prompt_text or "").strip()
             if not target_text:
-                target_text = prompt_text or self.default_prompt_text
+                raise ValueError('FireRedTTS2 requires target text; reference text is not a substitute')
 
             if not prompt_text:
-                if self.require_prompt_text:
-                    if self.logger:
-                        self.logger.warning(
-                            "[%s] Sample %d missing prompt transcript; skipping.",
-                            self.MODEL_NAME,
-                            idx,
-                        )
-                    continue
-                prompt_text = self.default_prompt_text
+                raise ValueError('FireRedTTS2 requires the actual reference transcript')
 
             speaker_id = str(sample.speaker_id)
             speaker_dir = self._speaker_output_dir(output_dir, speaker_id)
