@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib
 import sys
+from contextlib import nullcontext
 from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Optional, Tuple
@@ -34,6 +35,8 @@ class VoxCPMGeneratorConfig:
     retry_badcase: bool = True
     retry_badcase_max_times: int = 3
     retry_badcase_ratio_threshold: float = 6.0
+    seed: Optional[int] = None
+    native_seed_policy: str = 'source_index'
 
 
 class VoxCPMGenerator(BaseModel):
@@ -47,16 +50,23 @@ class VoxCPMGenerator(BaseModel):
             logger=logger,
         )
         self.config = materialised_config
+        self.device = torch.device(device)
         self._voxcpm_cls = None
         self._pipeline = None
         self._supports_reference_audio: Optional[bool] = None
-        self._warned_reference_audio_ignored = False
+        self.last_native_seed = None
+        self.last_native_requested_seed = None
+
+    def _device_scope(self):
+        return torch.cuda.device(self.device) if self.device.type == 'cuda' else nullcontext()
 
     def load_model(self) -> None:
         if self._pipeline is not None:
             return
 
         self._ensure_pythonpath()
+        if self.config.native_seed_policy != 'source_index':
+            raise ValueError('VoxCPM native_seed_policy must be source_index')
 
         try:
             module = importlib.import_module("voxcpm")
@@ -67,6 +77,8 @@ class VoxCPMGenerator(BaseModel):
             ) from exc
 
         self._voxcpm_cls = getattr(module, "VoxCPM", None)
+        if self.config.code_path and not Path(module.__file__).resolve().is_relative_to(Path(self.config.code_path).expanduser().resolve()):
+            raise RuntimeError('VoxCPM runtime was imported from outside configured code_path')
         if self._voxcpm_cls is None:
             raise ImportError("voxcpm does not expose VoxCPM.")
 
@@ -80,10 +92,12 @@ class VoxCPMGenerator(BaseModel):
         if self.config.cache_dir not in (None, ""):
             load_kwargs["cache_dir"] = str(self.config.cache_dir)
 
-        self._pipeline = self._voxcpm_cls.from_pretrained(
-            str(self.config.model_path),
-            **load_kwargs,
-        )
+        try:
+            with self._device_scope():
+                self._pipeline = self._voxcpm_cls.from_pretrained(str(self.config.model_path), **load_kwargs)
+        except BaseException:
+            self.close()
+            raise
         self.model = getattr(self._pipeline, "tts_model", self._pipeline)
         tts_model = getattr(self._pipeline, "tts_model", None)
         self._supports_reference_audio = bool(
@@ -97,6 +111,7 @@ class VoxCPMGenerator(BaseModel):
         reference_wav_path: Optional[str] = None,
         prompt_wav_path: Optional[str] = None,
         prompt_text: Optional[str] = None,
+        sample_index: int = 0,
     ) -> Tuple[np.ndarray, int]:
         self.ensure_model()
         assert self._pipeline is not None
@@ -115,22 +130,36 @@ class VoxCPMGenerator(BaseModel):
         }
         if reference_wav_path and self._supports_reference_audio:
             kwargs["reference_wav_path"] = str(reference_wav_path)
-        elif reference_wav_path and not self._supports_reference_audio and not self._warned_reference_audio_ignored:
-            self.logger.info(
-                "Ignoring reference_wav_path because the loaded checkpoint does not support VoxCPM2 reference-audio cloning."
-            )
-            self._warned_reference_audio_ignored = True
+        elif reference_wav_path and not self._supports_reference_audio:
+            raise ValueError('Loaded VoxCPM model does not support reference_wav_path; select VoxCPM2 or explicitly use transcript-prompt conditioning only')
+        if bool(prompt_wav_path) != bool(prompt_text):
+            raise ValueError('VoxCPM prompt_wav_path and prompt_text must be supplied together')
         if prompt_wav_path and prompt_text:
             kwargs["prompt_wav_path"] = str(prompt_wav_path)
             kwargs["prompt_text"] = str(prompt_text)
 
-        wav = self._pipeline.generate(**kwargs)
-        audio = np.asarray(wav, dtype=np.float32).reshape(-1)
-        audio = np.nan_to_num(audio, nan=0.0, posinf=0.0, neginf=0.0)
-        audio = np.clip(audio, -1.0, 1.0)
+        self.last_native_requested_seed = None if self.config.seed is None else int(self.config.seed) + int(sample_index)
+        kwargs['seed'] = self.last_native_requested_seed
+        with self._device_scope(), torch.inference_mode():
+            wav = self._pipeline.generate(**kwargs)
+        effective_seed = getattr(getattr(self._pipeline, 'tts_model', None), 'last_successful_seed', None)
+        self.last_native_seed = int(effective_seed) if effective_seed is not None else self.last_native_requested_seed
+        audio = wav.detach().cpu().float().numpy() if isinstance(wav, torch.Tensor) else np.asarray(wav)
+        if audio.ndim > 2 or (audio.ndim == 2 and 1 not in audio.shape):
+            raise RuntimeError('VoxCPM must return one mono waveform')
+        audio = np.asarray(audio, dtype=np.float32).reshape(-1)
+        if not audio.size or not np.isfinite(audio).all():
+            raise RuntimeError('VoxCPM returned empty or nonfinite waveform')
 
         sample_rate = int(getattr(getattr(self._pipeline, "tts_model", None), "sample_rate", 48000))
         return audio, sample_rate
+
+    def close(self):
+        self._pipeline = self.model = self._voxcpm_cls = None
+        self._supports_reference_audio = None
+        self._model_ready = False
+        self.last_native_seed = None
+        self.last_native_requested_seed = None
 
     def _ensure_pythonpath(self) -> None:
         raw = self.config.code_path

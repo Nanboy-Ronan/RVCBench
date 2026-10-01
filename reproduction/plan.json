@@ -60,9 +60,15 @@
       "status": "experimental_adapter",
       "config": "configs/ots_vc/clean/libritts/voxcpm_ots.yaml",
       "subset": "subsets/libritts16_v1/selection.json",
-      "generation_status": "pending",
-      "scoring_status": "pending",
-      "historical_comparison_status": "historical_reference_not_established"
+      "generation_status": "complete",
+      "scoring_status": "complete",
+      "historical_comparison_status": "different_version_0_5B_short10_reference",
+      "generation_run": "results/reproduce_v2_voxcpm2_libritts16/20261001-043343-7a1a178d",
+      "scoring_run": "results/reproduce_v2_voxcpm2_libritts16_score/20261001-043622-953de74b",
+      "subset_validation": "comparisons/voxcpm2_libritts16_validation.json",
+      "model_variant": "VoxCPM2",
+      "reproduction_status": "full_subset_measured_same_version_historical_reference_not_established",
+      "provenance_limit": "Local main/AudioVAE/tokenizer weights and upstream source hashed. Requested and effective native retry seeds recorded. Existing historical 0.5B short10 CPU run requires a separate protocol/subset; no cross-version substitution."
     },
     {
       "n": "F5-TTS",

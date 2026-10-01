@@ -142,7 +142,7 @@ def run_zero_shot(conf, base_dir, device, dataset, exp_dir, logger, protected_au
                 row.update(status='generated', generated_sha256=prior['generated_sha256'],
                            synthesis_time_sec=prior.get('synthesis_time_sec'),
                            timing_scope=prior.get('timing_scope'), reused=True)
-                for key in ('native_seed', 'native_seed_policy'):
+                for key in ('native_seed', 'native_seed_policy', 'native_requested_seed'):
                     if key in prior:
                         row[key] = prior[key]
             elif evaluate_only:
@@ -171,6 +171,8 @@ def run_zero_shot(conf, base_dir, device, dataset, exp_dir, logger, protected_au
                                    synthesis_time_sec=result.elapsed_sec, timing_scope=result.timing_scope)
                         if result.native_seed_policy is not None:
                             row.update(native_seed=result.native_seed, native_seed_policy=result.native_seed_policy)
+                            if result.native_requested_seed is not None:
+                                row['native_requested_seed'] = result.native_requested_seed
                         if handler.messages:
                             row['warnings'] = list(handler.messages)
                         break

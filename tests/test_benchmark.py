@@ -110,7 +110,7 @@ def test_native_seed_provenance_survives_resume_and_evaluation(setup_run):
     class NativeSeedAdapter(SmokeAdversary):
         def attack(self, **kwargs):
             self._generator = SimpleNamespace(last_native_seed=42,
-                config=SimpleNamespace(native_seed_policy='legacy_fixed'))
+                last_native_requested_seed=41, config=SimpleNamespace(native_seed_policy='legacy_fixed'))
             return super().attack(**kwargs)
     adapter = NativeSeedAdapter(conf, conf.dataset, 'cpu', logging.getLogger())
     with patch('src.benchmark.backends.select_adversary', return_value=adapter):
@@ -130,6 +130,7 @@ def test_native_seed_provenance_survives_resume_and_evaluation(setup_run):
             _, evaluated, _ = run('native-evaluated')
     for manifest in (resumed, scored, evaluated):
         assert all(r['native_seed'] == 42 and r['native_seed_policy'] == 'legacy_fixed' for r in manifest['samples'])
+        assert all(r['native_requested_seed'] == 41 for r in manifest['samples'])
 
 
 def test_retry_and_missing_samples(setup_run):

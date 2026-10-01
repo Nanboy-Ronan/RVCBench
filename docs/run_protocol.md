@@ -8,6 +8,22 @@ the matching upstream runtime; they are not tested dependency lock files.
 
 ## Generate, evaluate, recover
 
+VoxCPM2 now passes seed plus original source index to the native API explicitly.
+Native badcase retries may increment that seed; sample rows distinguish
+`native_requested_seed` from the final `native_seed`, including after resume and
+evaluation-only scoring. Reference-only conditioning is rejected on models that
+do not support it; transcript prompts require both an audio path and its text.
+The wrapper rejects empty, nonfinite and multiple waveforms instead of rewriting
+invalid samples, restores the CUDA device scope, and releases owned model
+references before scoring. Adapter errors propagate to the runner, including
+fatal CUDA errors that must stop the run. See `envs/voxcpm.yml` for the pinned
+source/model revisions and locally validated dependency versions.
+The frozen LibriTTS16 VoxCPM2 subset completes with MCD 5.2746, WER 0.0551
+and SIM 0.6333. Both canary audio hashes repeat exactly, and all 16 effective
+native seeds equal their requested seeds. The existing historical VoxCPM run uses
+a 0.5B checkpoint, a short10 population and transcript-only conditioning on CPU;
+it is retained as a separate version/protocol, not a matched VoxCPM2 baseline.
+
 KimiAudio's wrapper loads the official inference runtime from an explicit
 `adversary.code_path`, including its recursive GLM-4-Voice submodule. It scopes
 CUDA device selection and restores the caller after loading or generating.

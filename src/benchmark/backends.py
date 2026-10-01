@@ -29,6 +29,7 @@ class GenerationResult:
     timing_scope: str
     native_seed: int | None = None
     native_seed_policy: str | None = None
+    native_requested_seed: int | None = None
 
 
 class Backend(Protocol):
@@ -82,7 +83,8 @@ class LegacyAdversaryBackend:
             generator = getattr(self.adapter, '_generator', None)
             results.append(GenerationResult(sample_id(request.sample), dest, elapsed, scope,
                 native_seed=getattr(generator, 'last_native_seed', None),
-                native_seed_policy=getattr(getattr(generator, 'config', None), 'native_seed_policy', None)))
+                native_seed_policy=getattr(getattr(generator, 'config', None), 'native_seed_policy', None),
+                native_requested_seed=getattr(generator, 'last_native_requested_seed', None)))
         return results
 
     def close(self):

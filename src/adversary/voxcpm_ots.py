@@ -83,6 +83,8 @@ class VoxCPMZeroShotAdversary(BaseAdversary):
             retry_badcase=bool(self.config.get("retry_badcase", True)),
             retry_badcase_max_times=int(self.config.get("retry_badcase_max_times", 3)),
             retry_badcase_ratio_threshold=float(self.config.get("retry_badcase_ratio_threshold", 6.0)),
+            seed=self.config.get('seed'),
+            native_seed_policy=str(self.config.get('native_seed_policy', 'source_index')),
         )
         self._generator = VoxCPMGenerator(generator_config, self.device, self.logger)
 
@@ -155,7 +157,7 @@ class VoxCPMZeroShotAdversary(BaseAdversary):
 
             try:
                 synth_start = time.perf_counter()
-                wav, sample_rate = self._generator.generate(**generation_kwargs)
+                wav, sample_rate = self._generator.generate(**generation_kwargs, sample_index=sample.index)
                 synth_elapsed = time.perf_counter() - synth_start
             except Exception as exc:
                 if self.logger:
@@ -166,12 +168,9 @@ class VoxCPMZeroShotAdversary(BaseAdversary):
                         speaker_id,
                         exc,
                     )
-                continue
+                raise
 
             wav = np.asarray(wav, dtype=np.float32)
-            if not np.isfinite(wav).all():
-                wav = np.nan_to_num(wav)
-            wav = np.clip(wav, -1.0, 1.0)
 
             output_filename = self._cloned_filename(sample, idx)
             output_wav_path = speaker_dir / output_filename

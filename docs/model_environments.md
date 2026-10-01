@@ -42,6 +42,7 @@ cd ..
 | Model family | Environment file | Conda environment name |
 |---|---|---|
 | General benchmark / fallback | `envs/audiobench.yml` | `audiobench` |
+| VoxCPM2 | `envs/voxcpm.yml` (base recipe; requires the pinned upstream checkout) | `voxcpm` |
 | BertVITS2 / SafeSpeech surrogate | `envs/bertvits2.yml` | `bertvits2` |
 | CosyVoice | `envs/cosyvoice.yml` | `cosyvoice` |
 | dots.tts | `envs/dots-tts.yml` | `dots-tts` |
