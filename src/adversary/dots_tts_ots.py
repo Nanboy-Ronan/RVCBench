@@ -45,6 +45,7 @@ class DotsTTSZeroShotAdversary(BaseAdversary):
             optimize=self.optimize,
             num_steps=self.num_steps,
             guidance_scale=self.guidance_scale,
+            code_path=Path(self.config.code_path).expanduser().resolve() if self.config.get('code_path') else None,
         )
         self._generator = DotsTTSGenerator(generator_config, self.device, self.logger)
 

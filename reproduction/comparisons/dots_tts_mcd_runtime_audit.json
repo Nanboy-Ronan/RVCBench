@@ -1,0 +1,112 @@
+{
+  "kind": "mcd_runtime_diagnostic",
+  "conditions": {
+    "dots_runtime": {
+      "numpy": "2.4.6",
+      "scipy": "1.17.1",
+      "numba": "0.66.0",
+      "pymcd": "0.2.1"
+    }
+  },
+  "samples": [
+    {
+      "sample_id": "59c5e63512ec18bacdf941db596a939ba7953749cde66ff2b860d04d8eccc830",
+      "historical": 3.589458653685355,
+      "eval_numpy126": 3.5789426595902247,
+      "dots_numpy246": 3.5789426595902247
+    },
+    {
+      "sample_id": "bbbafeab3dbc9112c48d524d97c8ffbeebe4129c00afa96c7694033fda99e34f",
+      "historical": 6.147079513121174,
+      "eval_numpy126": 6.146368550652973,
+      "dots_numpy246": 6.146368550652973
+    },
+    {
+      "sample_id": "aab57c47ff2f5bfb6c61cd66e8b6010f0216d7a50e7f54657b48d03d549278ad",
+      "historical": 4.424231100680824,
+      "eval_numpy126": 4.392328607182673,
+      "dots_numpy246": 4.392328607182673
+    },
+    {
+      "sample_id": "256a7d549878a87a47389cfbe8b30d1a4af57d3742301df83127129f98b629ef",
+      "historical": 3.312356796920553,
+      "eval_numpy126": 3.312356796920553,
+      "dots_numpy246": 3.312356796920553
+    },
+    {
+      "sample_id": "29b1f775187a47ea70994bf44b6611acaae57c51e27dd083493e5e9107aae915",
+      "historical": 7.588714982071492,
+      "eval_numpy126": 7.531110263977006,
+      "dots_numpy246": 7.531110263977006
+    },
+    {
+      "sample_id": "119b2b82f7f4c017ab67ea45f1ee994d031ff04ceec6375f25c3e895307c398c",
+      "historical": 8.995956840068303,
+      "eval_numpy126": 8.995956840068303,
+      "dots_numpy246": 8.995956840068303
+    },
+    {
+      "sample_id": "287812ddd3899f7174ff55f8c15a5e8272056a4e7b0dd814728e5c4819295b70",
+      "historical": 4.39660259379963,
+      "eval_numpy126": 4.396572722392865,
+      "dots_numpy246": 4.396572722392865
+    },
+    {
+      "sample_id": "fecd6a254b295c63f62e4b76beea470714c4042578824d8c12ce56c82d2f3267",
+      "historical": 4.572455761871939,
+      "eval_numpy126": 3.505318245666763,
+      "dots_numpy246": 3.505318245666763
+    },
+    {
+      "sample_id": "52a70d6b2b36735e4c16152898ef40c54641f2fc6d6136ec79f08df70953ef54",
+      "historical": 6.682957618543288,
+      "eval_numpy126": 6.65211386326488,
+      "dots_numpy246": 6.65211386326488
+    },
+    {
+      "sample_id": "af57d176fed29e48575dfd61eddd7835254516fa2eeb6cebe30dd675148f8eac",
+      "historical": 5.480322169933864,
+      "eval_numpy126": 5.484073968716481,
+      "dots_numpy246": 5.484073968716481
+    },
+    {
+      "sample_id": "e48deb17f83ee2bcdc078274d4bb4027487b5556324b40c77d050cf2b6912cbd",
+      "historical": 4.30828009162861,
+      "eval_numpy126": 4.301140940542629,
+      "dots_numpy246": 4.301140940542629
+    },
+    {
+      "sample_id": "f63943cdb6384940de51249a150038ac27cef4386e5896de774703e37a7a2a88",
+      "historical": 5.053765117453646,
+      "eval_numpy126": 5.049598690403145,
+      "dots_numpy246": 5.049598690403145
+    },
+    {
+      "sample_id": "85d81c78a789a9a7a1a2f85e2b90fcf7a2368078a6fdc7507a34ba43f31742a1",
+      "historical": 4.759649711494738,
+      "eval_numpy126": 4.755531484596172,
+      "dots_numpy246": 4.755531484596172
+    },
+    {
+      "sample_id": "4a7f70b24cde8d277eb5084528616e7729c3b1cdee7045a51690c265d7287894",
+      "historical": 5.08003282791894,
+      "eval_numpy126": 5.069595333184037,
+      "dots_numpy246": 5.069595333184037
+    },
+    {
+      "sample_id": "40290f9edf8d6d7ace3a9bc87646ec7c3eebe406dcb1eb570a63f755bf3dce39",
+      "historical": 5.780593392075691,
+      "eval_numpy126": 5.781367052419508,
+      "dots_numpy246": 5.781367052419508
+    },
+    {
+      "sample_id": "082cbba9c12a38815b54ab904dfd8c03913772e80527ec05d9aa4474fe8163e4",
+      "historical": 7.702229356018756,
+      "eval_numpy126": 7.702581317800678,
+      "dots_numpy246": 7.702581317800678
+    }
+  ],
+  "historical_csv": "../AudioWatermarkBench/results/dots_tts_ots_on_libritts/20260831-053638/generation_sample_metrics.csv",
+  "interpretation": "Identical current MCD in both tested environments; differences from historical CSV remain unexplained. Historical scorer environment and evaluation-time audio hashes are unavailable, so package drift and artifact drift cannot be distinguished.",
+  "all_current_environments_equal": true
+}

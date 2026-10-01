@@ -482,9 +482,18 @@
       "status": "experimental_adapter",
       "config": "configs/ots_vc/clean/libritts/dots_tts_ots.yaml",
       "subset": "subsets/libritts16_v1/selection.json",
-      "generation_status": "pending",
-      "scoring_status": "pending",
-      "historical_comparison_status": "historical_reference_not_established"
+      "generation_status": "complete_16_of_16",
+      "scoring_status": "complete_16_of_16",
+      "historical_comparison_status": "matched_subset_measured",
+      "generation_run": "results/reproduce_v2_dots_tts_scoped_libritts16/20261001-024256-efd03a9d",
+      "scoring_run": "results/reproduce_v2_dots_tts_scoped_libritts16_score/20261001-025420-2f049144",
+      "comparison": "comparisons/dots_tts_libritts16_v1.json",
+      "historical_metric_replay": "comparisons/dots_tts_metric_replay_v1.json",
+      "historical_metric_replay_status": "WER_exact_SIM_numerical_difference_MCD_unresolved",
+      "historical_reference_scope": "August 2026 local run; experimental adapter, outside the paper model catalog.",
+      "reproduction_status": "full_subset_measured_historical_exact_equivalence_unproven",
+      "canary": "comparisons/dots_tts_canary.json",
+      "tokenizer_audit": "comparisons/dots_tts_tokenizer_audit.json"
     },
     {
       "n": "ZONOS2",

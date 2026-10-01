@@ -1,6 +1,7 @@
 class MCDScorer:
     version = 'pymcd_dtw_v1'
-    dependencies = ('pymcd', 'librosa', 'numpy', 'scipy', 'numba')
+    dependencies = ('pymcd', 'librosa', 'numpy', 'scipy', 'numba',
+                    'pyworld', 'pysptk', 'fastdtw', 'soundfile', 'soxr')
 
     def __init__(self, device, logger):
         self.model = None

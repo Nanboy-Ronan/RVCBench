@@ -12,6 +12,7 @@ output_paths:
   metrics_file: "results/dots_tts_ots_on_libritts/metrics.json"
 
 adversary:
+  code_path: null # Optional checkout/package directory, included in source provenance.
   checkpoint: "checkpoints/dots.tts-soar"
   precision: "bfloat16"
   optimize: true

@@ -1,0 +1,20 @@
+{
+  "kind": "dots_tts_canary_repeat",
+  "canary_run": "results/debug_dots_tts_libritts2/20261001-023516-ea04e744",
+  "full_generation_run": "results/reproduce_v2_dots_tts_scoped_libritts16/20261001-024256-efd03a9d",
+  "samples": [
+    {
+      "sample_id": "59c5e63512ec18bacdf941db596a939ba7953749cde66ff2b860d04d8eccc830",
+      "canary_sha256": "c17d8a7dc8eefc51ed58d7b268aac5eb2729fdec30efeb789b84fd8eaf8d28fe",
+      "full_sha256": "c17d8a7dc8eefc51ed58d7b268aac5eb2729fdec30efeb789b84fd8eaf8d28fe",
+      "identical": true
+    },
+    {
+      "sample_id": "bbbafeab3dbc9112c48d524d97c8ffbeebe4129c00afa96c7694033fda99e34f",
+      "canary_sha256": "cb3cd3250d8d295369986f319a5d107e775f59dc8c0fa3df1bdfbf428309fcdf",
+      "full_sha256": "cb3cd3250d8d295369986f319a5d107e775f59dc8c0fa3df1bdfbf428309fcdf",
+      "identical": true
+    }
+  ],
+  "interpretation": "Two repeated waveform hashes under fixed sample seeds; limited repeatability evidence, not historical or full-population equivalence."
+}

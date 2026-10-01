@@ -11,6 +11,21 @@ from src.benchmark.artifacts import input_fingerprint, input_records, sample_id
 from src.datasets.manifest_utils import select_manifest_variant
 
 
+def test_mcd_cache_fingerprint_tracks_native_feature_and_alignment_libraries():
+    from src.evaluation.pipeline import _scorer_provenance
+    from src.evaluation.scorers.mcd import MCDScorer
+    from src.benchmark.artifacts import digest
+    scorer = MCDScorer('cpu', logging.getLogger())
+    scorer.model_provenance = {'implementation': 'pymcd', 'MCD_mode': 'dtw'}
+    versions = {name: 'fixture-1' for name in scorer.dependencies}
+    with patch('importlib.metadata.version', side_effect=versions.__getitem__):
+        baseline = digest(_scorer_provenance(scorer, 42, None))
+        for name in ('pyworld', 'pysptk', 'fastdtw', 'soundfile', 'soxr'):
+            versions[name] = 'fixture-2'
+            assert digest(_scorer_provenance(scorer, 42, None)) != baseline
+            versions[name] = 'fixture-1'
+
+
 class FakeScorer:
     version = 'fixture-v1'
     dependencies = ()

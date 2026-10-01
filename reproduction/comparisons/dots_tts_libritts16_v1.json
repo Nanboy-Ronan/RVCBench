@@ -1,0 +1,406 @@
+{
+  "status": "matched_subset_comparison",
+  "model": "dots_tts",
+  "matched_pairs": 16,
+  "speakers": 8,
+  "run_manifest": "/tealab-data/rjin02/RVCBench/results/reproduce_v2_dots_tts_scoped_libritts16_score/20261001-025420-2f049144/run_manifest.json",
+  "run_manifest_sha256": "6e87084189a663e3d31f0d1e9ccdb5d343855b430ff21b25ebe3dfa7ffac9ab1",
+  "historical_csv": "/tealab-data/rjin02/AudioWatermarkBench/results/dots_tts_ots_on_libritts/20260831-053638/generation_sample_metrics.csv",
+  "historical_csv_sha256": "d969746a66e6888abfc1c4fc821f47d2216755b53196c125edb7d0ff260bbb2d",
+  "historical_config": {
+    "device": "cuda:0",
+    "base_dir": ".",
+    "vc": {
+      "mode": "ots",
+      "model": "dots_tts"
+    },
+    "adversary": {
+      "checkpoint": "checkpoints/dots.tts-soar",
+      "precision": "bfloat16",
+      "optimize": true,
+      "num_steps": 10,
+      "guidance_scale": 1.2,
+      "language": null,
+      "max_samples": null
+    },
+    "batch_size": 16,
+    "evaluation": {
+      "resume": true,
+      "bootstrap": {
+        "enabled": true,
+        "num_samples": 1000,
+        "confidence_level": 0.95,
+        "seed": null
+      }
+    },
+    "dataset": {
+      "name": "LibriTTS",
+      "root_path": "./data/Libritts",
+      "speaker_id": null,
+      "max_wav_value": 32768.0,
+      "sampling_rate": 24000,
+      "filter_length": 2048,
+      "hop_length": 512,
+      "win_length": 2048,
+      "n_mel_channels": 128,
+      "mel_fmin": 0.0,
+      "mel_fmax": null,
+      "add_blank": true,
+      "n_speakers": 850,
+      "cleaned_text": true,
+      "return_path": true
+    },
+    "run_name": "dots_tts_ots_on_libritts",
+    "output_paths": {
+      "metrics_file": "results/dots_tts_ots_on_libritts/metrics.json"
+    }
+  },
+  "metrics": {
+    "mcd": {
+      "current_mean": 5.51652102262588,
+      "historical_mean": 5.492167907955425,
+      "paired_mean_delta": 0.024353114670454562,
+      "mean_absolute_delta": 0.5154800798588509,
+      "speaker_bootstrap_95_ci_delta": [
+        -0.2992165338323208,
+        0.358533082127048
+      ]
+    },
+    "wer": {
+      "current_mean": 0.06093810246770773,
+      "historical_mean": 0.0550544028340081,
+      "paired_mean_delta": 0.005883699633699633,
+      "mean_absolute_delta": 0.018383699633699634,
+      "speaker_bootstrap_95_ci_delta": [
+        -0.0125,
+        0.02999084249084249
+      ]
+    },
+    "sim": {
+      "current_mean": 0.6695557534694672,
+      "historical_mean": 0.6509101614356041,
+      "paired_mean_delta": 0.018645592033863068,
+      "mean_absolute_delta": 0.03494790196418762,
+      "speaker_bootstrap_95_ci_delta": [
+        0.0015432665590196849,
+        0.03606354747898877
+      ]
+    }
+  },
+  "samples": [
+    {
+      "sample_id": "59c5e63512ec18bacdf941db596a939ba7953749cde66ff2b860d04d8eccc830",
+      "speaker_id": "121",
+      "historical_generated_path": "/tealab-data/rjin02/AudioWatermarkBench/results/dots_tts_ots_on_libritts/20260831-053638/generated_audio/121/121_127105_000043_000007_to_121_127105_000025_000000_cloned.wav",
+      "historical_generated_sha256": "a1e340be018b994f42d3f53560679801ab745afd99c1aeb3dd0ca633df7e943c",
+      "historical_prompt_evidence": {
+        "source": "pair_encoded_filename"
+      },
+      "current": {
+        "mcd": 4.775058712687877,
+        "wer": 0.0,
+        "sim": 0.575452446937561
+      },
+      "historical": {
+        "mcd": 3.589458653685355,
+        "wer": 0.0,
+        "sim": 0.4509803056716919
+      }
+    },
+    {
+      "sample_id": "bbbafeab3dbc9112c48d524d97c8ffbeebe4129c00afa96c7694033fda99e34f",
+      "speaker_id": "121",
+      "historical_generated_path": "/tealab-data/rjin02/AudioWatermarkBench/results/dots_tts_ots_on_libritts/20260831-053638/generated_audio/121/121_127105_000028_000002_to_121_121726_000025_000000_cloned.wav",
+      "historical_generated_sha256": "e0539b62a87764e2e5d8eb4ff467cd00e496e1c1a4a651853094b3954a8663e3",
+      "historical_prompt_evidence": {
+        "source": "pair_encoded_filename"
+      },
+      "current": {
+        "mcd": 5.712168293496743,
+        "wer": 0.125,
+        "sim": 0.35204246640205383
+      },
+      "historical": {
+        "mcd": 6.147079513121174,
+        "wer": 0.125,
+        "sim": 0.37254828214645386
+      }
+    },
+    {
+      "sample_id": "aab57c47ff2f5bfb6c61cd66e8b6010f0216d7a50e7f54657b48d03d549278ad",
+      "speaker_id": "1462",
+      "historical_generated_path": "/tealab-data/rjin02/AudioWatermarkBench/results/dots_tts_ots_on_libritts/20260831-053638/generated_audio/1462/1462_170142_000031_000001_to_1462_170145_000006_000002_cloned.wav",
+      "historical_generated_sha256": "d424f0e1d3c9215abb268f0b4fd2a2b43a3b3337f0887f29d0ef74ceee268156",
+      "historical_prompt_evidence": {
+        "source": "pair_encoded_filename"
+      },
+      "current": {
+        "mcd": 4.048366074505691,
+        "wer": 0.0,
+        "sim": 0.6332510709762573
+      },
+      "historical": {
+        "mcd": 4.424231100680824,
+        "wer": 0.0,
+        "sim": 0.6359221339225769
+      }
+    },
+    {
+      "sample_id": "256a7d549878a87a47389cfbe8b30d1a4af57d3742301df83127129f98b629ef",
+      "speaker_id": "1462",
+      "historical_generated_path": "/tealab-data/rjin02/AudioWatermarkBench/results/dots_tts_ots_on_libritts/20260831-053638/generated_audio/1462/1462_170142_000025_000001_to_1462_170142_000026_000000_cloned.wav",
+      "historical_generated_sha256": "f1123c45adcc041c0d0cb35dff0c0660ec48df9d6ab83e9b5b8f1cd1f7423621",
+      "historical_prompt_evidence": {
+        "source": "pair_encoded_filename"
+      },
+      "current": {
+        "mcd": 3.514054352802634,
+        "wer": 0.0,
+        "sim": 0.8026719093322754
+      },
+      "historical": {
+        "mcd": 3.312356796920553,
+        "wer": 0.0,
+        "sim": 0.7846184968948364
+      }
+    },
+    {
+      "sample_id": "29b1f775187a47ea70994bf44b6611acaae57c51e27dd083493e5e9107aae915",
+      "speaker_id": "237",
+      "historical_generated_path": "/tealab-data/rjin02/AudioWatermarkBench/results/dots_tts_ots_on_libritts/20260831-053638/generated_audio/237/237_134500_000036_000002_to_237_126133_000035_000000_cloned.wav",
+      "historical_generated_sha256": "3369bed5331d84ebcceb27db8db4d9519c1b8f284ca2d69dd7a321c962863f7d",
+      "historical_prompt_evidence": {
+        "source": "pair_encoded_filename"
+      },
+      "current": {
+        "mcd": 8.74876361628113,
+        "wer": 0.07692307692307693,
+        "sim": 0.49446699023246765
+      },
+      "historical": {
+        "mcd": 7.588714982071492,
+        "wer": 0.07692307692307693,
+        "sim": 0.5340954065322876
+      }
+    },
+    {
+      "sample_id": "119b2b82f7f4c017ab67ea45f1ee994d031ff04ceec6375f25c3e895307c398c",
+      "speaker_id": "237",
+      "historical_generated_path": "/tealab-data/rjin02/AudioWatermarkBench/results/dots_tts_ots_on_libritts/20260831-053638/generated_audio/237/237_126133_000032_000001_to_237_134493_000017_000002_cloned.wav",
+      "historical_generated_sha256": "33536a209d9078103531a2d295dfc42c91019b53960b6ebb91cf703f659ac751",
+      "historical_prompt_evidence": {
+        "source": "pair_encoded_filename"
+      },
+      "current": {
+        "mcd": 9.040722807309661,
+        "wer": 0.14285714285714285,
+        "sim": 0.5848691463470459
+      },
+      "historical": {
+        "mcd": 8.995956840068303,
+        "wer": 0.0,
+        "sim": 0.5349112153053284
+      }
+    },
+    {
+      "sample_id": "287812ddd3899f7174ff55f8c15a5e8272056a4e7b0dd814728e5c4819295b70",
+      "speaker_id": "2428",
+      "historical_generated_path": "/tealab-data/rjin02/AudioWatermarkBench/results/dots_tts_ots_on_libritts/20260831-053638/generated_audio/2428/2428_83705_000027_000001_to_2428_83699_000039_000004_cloned.wav",
+      "historical_generated_sha256": "ee3bdc9d3d6f84ee39d4663e25a5917f55b21e8dc0ed00e4fc43fba48eed9ff2",
+      "historical_prompt_evidence": {
+        "source": "pair_encoded_filename"
+      },
+      "current": {
+        "mcd": 4.110396356970902,
+        "wer": 0.0,
+        "sim": 0.7222335934638977
+      },
+      "historical": {
+        "mcd": 4.39660259379963,
+        "wer": 0.1,
+        "sim": 0.7182483077049255
+      }
+    },
+    {
+      "sample_id": "fecd6a254b295c63f62e4b76beea470714c4042578824d8c12ce56c82d2f3267",
+      "speaker_id": "2428",
+      "historical_generated_path": "/tealab-data/rjin02/AudioWatermarkBench/results/dots_tts_ots_on_libritts/20260831-053638/generated_audio/2428/2428_83705_000039_000007_to_2428_83705_000018_000001_cloned.wav",
+      "historical_generated_sha256": "5fd5edbccfc25ae265c837a5f38e4f74bb3c2defe722de418336058e7b8374cb",
+      "historical_prompt_evidence": {
+        "source": "pair_encoded_filename"
+      },
+      "current": {
+        "mcd": 3.7054107266789083,
+        "wer": 0.0,
+        "sim": 0.6657940745353699
+      },
+      "historical": {
+        "mcd": 4.572455761871939,
+        "wer": 0.0,
+        "sim": 0.5743247270584106
+      }
+    },
+    {
+      "sample_id": "52a70d6b2b36735e4c16152898ef40c54641f2fc6d6136ec79f08df70953ef54",
+      "speaker_id": "251",
+      "historical_generated_path": "/tealab-data/rjin02/AudioWatermarkBench/results/dots_tts_ots_on_libritts/20260831-053638/generated_audio/251/251_136532_000009_000001_to_251_137823_000003_000000_cloned.wav",
+      "historical_generated_sha256": "f81ced9a3fb56b2c7af9ec0e41cfba02dc792a7f1c4b6ed9607b9b13052b51ec",
+      "historical_prompt_evidence": {
+        "source": "pair_encoded_filename"
+      },
+      "current": {
+        "mcd": 6.84782306157187,
+        "wer": 0.5789473684210527,
+        "sim": 0.8439134359359741
+      },
+      "historical": {
+        "mcd": 6.682957618543288,
+        "wer": 0.5789473684210527,
+        "sim": 0.8139395117759705
+      }
+    },
+    {
+      "sample_id": "af57d176fed29e48575dfd61eddd7835254516fa2eeb6cebe30dd675148f8eac",
+      "speaker_id": "251",
+      "historical_generated_path": "/tealab-data/rjin02/AudioWatermarkBench/results/dots_tts_ots_on_libritts/20260831-053638/generated_audio/251/251_137823_000030_000000_to_251_137823_000033_000000_cloned.wav",
+      "historical_generated_sha256": "51b460d2e73fe54eb413887398037aa1e4de6b5085ec142da6dc2aac13f02795",
+      "historical_prompt_evidence": {
+        "source": "pair_encoded_filename"
+      },
+      "current": {
+        "mcd": 4.8852567845953105,
+        "wer": 0.0,
+        "sim": 0.6759150624275208
+      },
+      "historical": {
+        "mcd": 5.480322169933864,
+        "wer": 0.0,
+        "sim": 0.6955273151397705
+      }
+    },
+    {
+      "sample_id": "e48deb17f83ee2bcdc078274d4bb4027487b5556324b40c77d050cf2b6912cbd",
+      "speaker_id": "4992",
+      "historical_generated_path": "/tealab-data/rjin02/AudioWatermarkBench/results/dots_tts_ots_on_libritts/20260831-053638/generated_audio/4992/4992_41806_000024_000001_to_4992_41806_000029_000000_cloned.wav",
+      "historical_generated_sha256": "f7356a94b7a78c5683039335d7cda4e17014c325cb6e9dd6a90655284fec4b71",
+      "historical_prompt_evidence": {
+        "source": "pair_encoded_filename"
+      },
+      "current": {
+        "mcd": 4.921347242435702,
+        "wer": 0.0,
+        "sim": 0.670981228351593
+      },
+      "historical": {
+        "mcd": 4.30828009162861,
+        "wer": 0.0,
+        "sim": 0.612722635269165
+      }
+    },
+    {
+      "sample_id": "f63943cdb6384940de51249a150038ac27cef4386e5896de774703e37a7a2a88",
+      "speaker_id": "4992",
+      "historical_generated_path": "/tealab-data/rjin02/AudioWatermarkBench/results/dots_tts_ots_on_libritts/20260831-053638/generated_audio/4992/4992_23283_000034_000000_to_4992_23283_000043_000000_cloned.wav",
+      "historical_generated_sha256": "c198fc96f34d5f8e1d7103be3710ba11e8477c6a4db7a491185af1e9054750a9",
+      "historical_prompt_evidence": {
+        "source": "pair_encoded_filename"
+      },
+      "current": {
+        "mcd": 5.831620836847176,
+        "wer": 0.0,
+        "sim": 0.7397040724754333
+      },
+      "historical": {
+        "mcd": 5.053765117453646,
+        "wer": 0.0,
+        "sim": 0.7124980092048645
+      }
+    },
+    {
+      "sample_id": "85d81c78a789a9a7a1a2f85e2b90fcf7a2368078a6fdc7507a34ba43f31742a1",
+      "speaker_id": "5694",
+      "historical_generated_path": "/tealab-data/rjin02/AudioWatermarkBench/results/dots_tts_ots_on_libritts/20260831-053638/generated_audio/5694/5694_64038_000021_000000_to_5694_64029_000006_000001_cloned.wav",
+      "historical_generated_sha256": "1646a68081d742d7e5a7dc1895b42959549a4cf2900a199a3cd7512a2c264312",
+      "historical_prompt_evidence": {
+        "source": "pair_encoded_filename"
+      },
+      "current": {
+        "mcd": 4.669713128011682,
+        "wer": 0.0,
+        "sim": 0.7447667121887207
+      },
+      "historical": {
+        "mcd": 4.759649711494738,
+        "wer": 0.0,
+        "sim": 0.753150224685669
+      }
+    },
+    {
+      "sample_id": "4a7f70b24cde8d277eb5084528616e7729c3b1cdee7045a51690c265d7287894",
+      "speaker_id": "5694",
+      "historical_generated_path": "/tealab-data/rjin02/AudioWatermarkBench/results/dots_tts_ots_on_libritts/20260831-053638/generated_audio/5694/5694_64029_000028_000001_to_5694_64029_000013_000013_cloned.wav",
+      "historical_generated_sha256": "1962c41c6368883246958cce040f051c2526335d8c67c6df31cdd76382a6a317",
+      "historical_prompt_evidence": {
+        "source": "pair_encoded_filename"
+      },
+      "current": {
+        "mcd": 5.196485817857213,
+        "wer": 0.0,
+        "sim": 0.8445032835006714
+      },
+      "historical": {
+        "mcd": 5.08003282791894,
+        "wer": 0.0,
+        "sim": 0.8191320300102234
+      }
+    },
+    {
+      "sample_id": "40290f9edf8d6d7ace3a9bc87646ec7c3eebe406dcb1eb570a63f755bf3dce39",
+      "speaker_id": "8455",
+      "historical_generated_path": "/tealab-data/rjin02/AudioWatermarkBench/results/dots_tts_ots_on_libritts/20260831-053638/generated_audio/8455/8455_210777_000050_000005_to_8455_210777_000004_000006_cloned.wav",
+      "historical_generated_sha256": "bdf3669d59d58592309dcb1681a41f6adf3c016093fc838fe9919c2544440e93",
+      "historical_prompt_evidence": {
+        "source": "pair_encoded_filename"
+      },
+      "current": {
+        "mcd": 5.834905428807058,
+        "wer": 0.05128205128205128,
+        "sim": 0.8078180551528931
+      },
+      "historical": {
+        "mcd": 5.780593392075691,
+        "wer": 0.0,
+        "sim": 0.8294800519943237
+      }
+    },
+    {
+      "sample_id": "082cbba9c12a38815b54ab904dfd8c03913772e80527ec05d9aa4474fe8163e4",
+      "speaker_id": "8455",
+      "historical_generated_path": "/tealab-data/rjin02/AudioWatermarkBench/results/dots_tts_ots_on_libritts/20260831-053638/generated_audio/8455/8455_210777_000048_000000_to_8455_210777_000012_000001_cloned.wav",
+      "historical_generated_sha256": "05b4a1ce34f241935938f221b19ddbdd46fafc32aa129a13ab2e2aa9253a12f2",
+      "historical_prompt_evidence": {
+        "source": "pair_encoded_filename"
+      },
+      "current": {
+        "mcd": 6.422243121154517,
+        "wer": 0.0,
+        "sim": 0.5545085072517395
+      },
+      "historical": {
+        "mcd": 7.702229356018756,
+        "wer": 0.0,
+        "sim": 0.5724639296531677
+      }
+    }
+  ],
+  "historical_wer_protocol": {
+    "normalization": "ascii_punctuation_removed_v2",
+    "rows": 2000,
+    "formula_matches": {
+      "lowercase_v1": 816,
+      "ascii_punctuation_removed_v2": 2000
+    }
+  },
+  "interpretation": "Descriptive paired regression check, not an equivalence test or full-table reproduction claim.",
+  "historical_provenance_limit": "Legacy result does not provide modern per-sample generation, weight and scorer fingerprints."
+}

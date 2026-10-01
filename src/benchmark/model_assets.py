@@ -10,7 +10,7 @@ def resolve_model_assets(conf, logger=None):
     model = str(conf.vc.model).lower()
     assets, unresolved, cache = {}, {}, {}
     suffixes = {'.safetensors', '.bin', '.pt', '.pth', '.ckpt', '.onnx', '.json', '.yaml', '.yml',
-                '.txt', '.tiktoken', '.model', '.vocab', '.py', '.t7', '.jsonl', '.fst'}
+                '.txt', '.tiktoken', '.model', '.vocab', '.py', '.t7', '.jsonl', '.fst', '.jinja'}
     fields = {'checkpoint', 'checkpoint_path', 'model_path', 'model_dir', 'models_dir', 'checkpoint_dir',
               'config_path', 'hubert_checkpoint', 'hubert_tokenizer', 'vocoder_path',
               'ckpt_file', 'vocab_file', 'vocab_path', 'speaker_file_path', 'base_speaker_dir',

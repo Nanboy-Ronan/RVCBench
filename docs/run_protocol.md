@@ -8,6 +8,26 @@ the matching upstream runtime; they are not tested dependency lock files.
 
 ## Generate, evaluate, recover
 
+The dots.tts subset check uses dots.tts 0.2.1, Torch 2.8.0, Transformers
+5.14.1 and NumPy 2.4.6 for generation, with evaluation in a separate environment.
+`envs/dots-tts.yml` records those key pins; a clean installation is not yet
+validated. Set `adversary.code_path` to the dots_tts package directory or checkout
+to hash its Python source. Local checkpoint provenance includes
+`chat_template.jinja`. CUDA selection, thread count and matmul precision are scoped
+around loading and inference, restored on failure, and released by `close()`.
+Compilation warmup occurs during preparation before sample seeding and timing.
+The tokenizer audit in `reproduction/comparisons/dots_tts_tokenizer_audit.json`
+finds identical default token IDs under Transformers 5.14.1 and 4.57.3 on 35
+strings; enabling `fix_mistral_regex` changes one subset target. This limited
+check does not establish general tokenizer equivalence.
+
+Historical dots.tts audio replay reproduces WER exactly and SIM within 0.00006,
+but MCD differs by up to 1.067. Both tested current environments return identical
+MCD values on those 16 historical files; the historical scorer environment and
+evaluation-time audio hashes are unavailable. The discrepancy remains unresolved.
+MCD cache provenance now also tracks pyworld, pysptk, fastdtw, soundfile and soxr;
+earlier scoring artifacts retain their original narrower fingerprints.
+
 ```bash
 python scripts/run_qwen3tts_quickstart.py --max-samples 5
 ```
