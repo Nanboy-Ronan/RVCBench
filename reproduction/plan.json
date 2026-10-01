@@ -399,7 +399,24 @@
       "historical_comparison_status": "historical_reference_not_established",
       "runtime_audit": "comparisons/valle_runtime_audit.json",
       "implementation": "lifeiteng/vall-e",
-      "alternate_variant_status": "Amphion_released_checkpoint_located_requires_explicit_runtime"
+      "alternate_variant_status": "Amphion_native_LibriTTS16_generated_and_scored",
+      "amphion_variant": {
+        "implementation": "amphion",
+        "config": "configs/ots_vc/clean/libritts/vall_e_amphion_ots.yaml",
+        "subset": "subsets/libritts16_v1/selection.json",
+        "runtime_audit": "comparisons/amphion_valle_runtime_audit.json",
+        "generation_status": "complete",
+        "generation_run": "results/reproduce_v2_amphion_valle_libritts16/20261001-054053-dbdb5993",
+        "scoring_status": "complete",
+        "native_canary_status": "complete_2_pairs_MCD_WER_SIM",
+        "historical_comparison_status": "robocall_reference_has_different_population",
+        "scoring_run": "results/reproduce_v2_amphion_valle_libritts16_score/20261001-055240-377db43f",
+        "means": {
+          "mcd": 6.997914793326701,
+          "wer": 0.3109975085571986,
+          "sim": 0.3685356401838362
+        }
+      }
     },
     {
       "n": "StyleTTS 2",

@@ -59,6 +59,11 @@ def resolve_model_assets(conf, logger=None):
     if model in ('glm_tts', 'glmtts') and resolved.adversary.get('code_path'):
         upstream = Path(resolved.adversary.code_path).expanduser()
         references['glmtts.configs'] = str(upstream / 'configs')
+    if model == 'vall_e' and resolved.adversary.get('implementation') == 'amphion':
+        references['valle.base_configs'] = str(Path(resolved.adversary.code_path).expanduser() / 'config')
+        import torch
+        references['valle.encodec_cache'] = str(Path(torch.hub.get_dir()) / 'checkpoints' /
+                                               'encodec_24khz-d7cc33bc.th')
     if model == 'styletts2' and resolved.adversary.get('config_path'):
         configuration = OmegaConf.load(resolved.adversary.config_path)
         for name in ('ASR_config', 'ASR_path', 'F0_path', 'PLBERT_dir'):

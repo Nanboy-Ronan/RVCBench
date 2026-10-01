@@ -1,0 +1,26 @@
+# Native canary validated against Amphion 26f6883110181f1dbfe95c70a7c7dbaf4de5f42a.
+# This is a base recipe, not a clean-install lock. Use a dedicated benchmark process:
+# Amphion imports top-level models/utils/text packages; source checks reject clashes.
+# Released checkpoint: amphion/valle_libritts; select pytorch_model.bin, args.json
+# and symbols.dict explicitly. Local CUDA uses torch/torchaudio 2.8.0+cu126.
+name: amphion-valle
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+  - ffmpeg
+  - libsndfile
+  - espeak-ng
+  - pip:
+      - -e ..
+      - torch==2.8.0
+      - torchaudio==2.8.0
+      - torchmetrics==1.8.1
+      - numpy==1.26.4
+      - librosa==0.10.0
+      - encodec==0.1.1
+      - phonemizer==3.3.0
+      - g2p-en==2.1.0
+      - json5==0.13.0
+      - ruamel.yaml

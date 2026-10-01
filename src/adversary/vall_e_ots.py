@@ -43,7 +43,16 @@ class VallEZeroShotAdversary(BaseAdversary):
         if self._generator is not None:
             return
 
-        generator_config = VallEGeneratorConfig(
+        generator_cls, config_cls = VallEGenerator, VallEGeneratorConfig
+        extras = {}
+        implementation = self.config.get('implementation', 'lifeiteng')
+        if implementation == 'amphion':
+            from src.models.valle.amphion import AmphionVallEGenerator, AmphionVallEGeneratorConfig
+            generator_cls, config_cls = AmphionVallEGenerator, AmphionVallEGeneratorConfig
+            extras['config_path'] = self.config.get('config_path')
+        elif implementation != 'lifeiteng':
+            raise ValueError(f'Unsupported VALL-E implementation: {implementation}')
+        generator_config = config_cls(
             code_path=self.code_path,
             checkpoint_path=self.checkpoint_path,
             text_extractor=self.text_extractor,
@@ -51,8 +60,9 @@ class VallEZeroShotAdversary(BaseAdversary):
             temperature=self.temperature,
             output_sample_rate=self.output_sample_rate,
             text_tokens_path=self.config.get('text_tokens_path'),
+            **extras,
         )
-        self._generator = VallEGenerator(generator_config, self.device, self.logger)
+        self._generator = generator_cls(generator_config, self.device, self.logger)
 
     # ------------------------------------------------------------------
     # Public API

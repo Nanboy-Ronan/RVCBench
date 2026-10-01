@@ -51,6 +51,40 @@ checkpoint exists locally, but requires a separate runtime/configuration and
 cannot be used as a lifeiteng checkpoint. See
 `reproduction/comparisons/valle_runtime_audit.json`.
 
+`vall_e_amphion_ots` explicitly selects the released Amphion implementation,
+using a tensor-only state dict, released config and symbols file. Native strict
+loading, text tokenization, reference encoding and 24kHz decoding are retained.
+Base config paths resolve within the selected source root without changing
+`WORK_DIR` or the process working directory. Model weights, symbols, base configs
+and the EnCodec Torch Hub cache enter the asset fingerprint. Use a dedicated
+benchmark process with the pinned runtime recipe in `envs/amphion-valle.yml`.
+The two-pair native canary scores MCD 10.0042, WER 0.5625, SIM 0.1615; poor quality
+is preserved. The first two hashes repeat in the completed 16-pair LibriTTS generation run.
+All 16 pairs score successfully: MCD 6.9979, WER 0.3110, SIM 0.3685.
+These results establish native execution and preserve poor output quality. A located historical 300-pair robocall run names Amphion,
+but has a different population and is not a matched LibriTTS baseline. See
+`reproduction/comparisons/amphion_valle_runtime_audit.json`.
+
+To use the same upstream revision, clone Amphion into `checkpoints/Amphion-valle`
+and check out `26f6883110181f1dbfe95c70a7c7dbaf4de5f42a`. Obtain the released
+`amphion/valle_libritts` files and pass their actual locations explicitly:
+
+```bash
+python run_vc.py --config-name ots_vc/clean/libritts/vall_e_amphion_ots \
+  dataset.use_hf_dataset=false \
+  +dataset.manifest_filename=/absolute/path/to/reproduction/subsets/libritts16_v1/metadata.json \
+  adversary.checkpoint_path=/absolute/path/to/pytorch_model.bin \
+  adversary.config_path=/absolute/path/to/args.json \
+  adversary.text_tokens_path=/absolute/path/to/symbols.dict \
+  +vc.generate_only=true +seed=42
+```
+
+The native tokenizer also requires the EnCodec 24kHz Torch Hub checkpoint. Make
+it available before generation so its hash enters the asset fingerprint. Score
+the resulting audio in the evaluation environment with `+vc.evaluate_only=true`
+and `+vc.evaluation.generated_audio_dir=/absolute/path/to/generated_audio`,
+keeping the same dataset and frozen manifest selection.
+
 FireRedTTS2 decodes output at 24 kHz; its native `sample_rate=16000` field is
 the reference input rate. The wrapper now saves codec output at 24 kHz and
 rejects invalid waveforms instead of replacing NaNs or clipping values.
