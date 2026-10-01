@@ -675,3 +675,20 @@ scoring. The first two waveforms exactly repeat the canary hashes. Mean MCD is
 no matched historical Bark reference has been established. See
 [`bark_runtime_audit.json`](../reproduction/comparisons/bark_runtime_audit.json)
 and the [asset and environment setup](bark_native.md).
+
+## BertVITS2 reference-conditioning audit
+
+The current native 2.3 configuration uses 850 trained speaker embeddings. Its
+reference-audio processing is commented out, and the base checkpoint contains
+neither speaker embeddings nor reference-encoder weights. The native loader
+would retain initialized tensors for missing weights. The zero-shot adapter
+now rejects this closed-set configuration before imports or GPU allocation,
+selects target text, and refuses unknown-speaker identity fallbacks. Setting
+`n_speakers=0` alone cannot establish a trained reference-conditioned model.
+The fixed LibriTTS16 probe is retained as failed with zero generated outputs;
+real generation remains pending a compatible checkpoint and inference path.
+See [the protocol audit](../reproduction/comparisons/bertvits2_protocol_audit.json).
+
+Provenance parses upstream Python source using Python BOM/coding-cookie rules
+while hashing raw bytes. Generator checkpoint paths are included in asset
+fingerprints, preventing resumed runs from silently changing those weights.

@@ -9,9 +9,12 @@
       "status": "experimental_adapter",
       "config": "configs/ots_vc/clean/libritts/bert_ots.yaml",
       "subset": "subsets/libritts16_v1/selection.json",
-      "generation_status": "pending",
+      "generation_status": "pending_compatible_reference_conditioned_checkpoint_and_runtime",
       "scoring_status": "pending",
-      "historical_comparison_status": "historical_reference_not_established"
+      "historical_comparison_status": "historical_reference_not_established",
+      "runtime_audit": "comparisons/bertvits2_protocol_audit.json",
+      "runtime_probe": "results/debug_bert_closedset_libritts16_guard/20261001-083434-235fa487",
+      "provenance_limit": "Need an actual reference-conditioned checkpoint, strict complete weight loading and native reference inference before canary/full16 generation. Configuring n_speakers=0 does not create missing trained weights or supply reference spectrograms."
     },
     {
       "n": "Qwen3-TTS",

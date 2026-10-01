@@ -156,6 +156,31 @@ def test_upstream_native_source_changes_generation_fingerprint(tmp_path, suffix)
     assert before['source_sha256'] != after['source_sha256']
 
 
+@pytest.mark.parametrize('source', [
+    b'\xef\xbb\xbfimport numpy\n',
+    b'# coding: latin-1\n# caf\xe9\nimport numpy\n',
+])
+def test_python_encoding_rules_preserve_upstream_hash_and_imports(tmp_path, source):
+    from src.benchmark.fingerprints import generation_runtime
+    from src.benchmark.artifacts import file_hash
+    adapter = tmp_path / 'src/adversary/fixture.py'
+    adapter.parent.mkdir(parents=True)
+    adapter.write_text('')
+    upstream = tmp_path / 'upstream'
+    upstream.mkdir()
+    path = upstream / 'native.py'
+    path.write_bytes(source)
+    conf = OmegaConf.create({'vc': {'mode': 'ots', 'model': 'fixture'},
+                            'adversary': {'code_path': str(upstream)}})
+    with patch.dict('src.benchmark.fingerprints._ADVERSARY_REGISTRY',
+                    {'ots': {'fixture': 'src.adversary.fixture:Adapter'}}), \
+            patch('importlib.metadata.packages_distributions', return_value={'numpy': ['numpy']}), \
+            patch('importlib.metadata.requires', return_value=[]):
+        result = generation_runtime(tmp_path, conf, {'numpy': '1.26.4'})
+    assert result['source_files']['upstream/native.py'] == file_hash(path)
+    assert result['packages']['numpy'] == '1.26.4'
+
+
 def test_authored_build_definition_changes_resume_but_generated_outputs_do_not(tmp_path):
     from src.benchmark.fingerprints import generation_runtime
     adapter = tmp_path / 'src/adversary/fixture.py'

@@ -1,4 +1,5 @@
 import importlib
+import json
 import os
 import sys
 from pathlib import Path
@@ -9,7 +10,6 @@ import numpy as np
 import soundfile as sf
 from hydra.utils import to_absolute_path
 from omegaconf import OmegaConf
-from scipy.signal import resample_poly
 
 from .base_adversary import BaseAdversary
 
@@ -54,7 +54,24 @@ class BertVits2ZeroShotAdversary(BaseAdversary):
         if self._imports_loaded:
             return
 
+        # Trained speaker embeddings do not condition on an unseen reference
+        # waveform. Validate before upstream imports can allocate models or
+        # mutate global CLI arguments and working directories.
+        with self.config_path.open(encoding='utf-8') as handle:
+            configuration = json.load(handle)
+        n_speakers = configuration.get('data', {}).get('n_speakers')
+        if not isinstance(n_speakers, int) or isinstance(n_speakers, bool) or n_speakers < 0:
+            raise ValueError('BertVITS2 requires an explicit nonnegative integer data.n_speakers')
+        if n_speakers > 0:
+            raise ValueError(
+                f'BertVITS2 configuration uses {n_speakers} trained speaker embeddings; '
+                'this is closed-set TTS, not reference-conditioned zero-shot voice cloning. '
+                'Dataset speaker IDs cannot be used as trained speaker indices. '
+                'Provide a compatible reference-conditioned checkpoint and native inference path.'
+            )
+
         prev_cwd = Path.cwd()
+        previous_argv = sys.argv[:]
         try:
             if str(self.code_path) not in sys.path:
                 sys.path.insert(0, str(self.code_path))
@@ -70,6 +87,7 @@ class BertVits2ZeroShotAdversary(BaseAdversary):
             infer_mod = importlib.import_module("infer")
         finally:
             os.chdir(prev_cwd)
+            sys.argv[:] = previous_argv
 
         self._infer_fn = infer_mod.infer
         latest_version = getattr(infer_mod, "latest_version", "2.3")
@@ -77,21 +95,9 @@ class BertVits2ZeroShotAdversary(BaseAdversary):
 
         self._hps = utils_mod.get_hparams_from_file(str(self.config_path))
 
-        class _SpeakerLookup(dict):
-            def __getitem__(self, key):
-                key_str = str(key)
-                if key_str not in self:
-                    try:
-                        value = int(key)
-                    except (TypeError, ValueError):
-                        value = int(key_str)
-                    self[key_str] = value
-                return dict.__getitem__(self, key_str)
-
         speaker_map = getattr(self._hps.data, "spk2id", None)
         if speaker_map is None:
-            self.logger.warning("hps.data.spk2id missing; defaulting to identity mapping for speaker ids")
-            self._hps.data.spk2id = _SpeakerLookup()
+            raise ValueError('BertVITS2 native inference requires its explicit spk2id mapping')
         else:
             base_map = {}
             if isinstance(speaker_map, dict):
@@ -109,8 +115,8 @@ class BertVits2ZeroShotAdversary(BaseAdversary):
                 try:
                     cleaned_map[str(key)] = int(value)
                 except (TypeError, ValueError):
-                    continue
-            self._hps.data.spk2id = _SpeakerLookup(cleaned_map)
+                    raise ValueError(f'Invalid BertVITS2 trained speaker mapping for {key!r}')
+            self._hps.data.spk2id = cleaned_map
 
         version = getattr(self._hps, "version", latest_version)
 
@@ -130,6 +136,7 @@ class BertVits2ZeroShotAdversary(BaseAdversary):
         if audio.ndim > 1:
             audio = audio.mean(axis=1)
         if sr != self.reference_sr:
+            from scipy.signal import resample_poly
             audio = resample_poly(audio, self.reference_sr, sr)
         return np.asarray(audio, dtype=np.float32)
 
@@ -178,11 +185,9 @@ class BertVits2ZeroShotAdversary(BaseAdversary):
             speaker_identifier = str(speaker_identifier)
             speaker_dir = self._speaker_output_dir(output_dir, speaker_identifier)
 
-            text = (sample.prompt_text or "").strip()
+            text = (sample.target_text or "").strip()
             if not text:
-                text = (sample.target_text or "").strip()
-            if not text:
-                text = self.default_target_text
+                raise ValueError('BertVITS2 requires nonempty target text')
 
             self._log_clone_request(
                 "BertVITS2",

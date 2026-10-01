@@ -1,5 +1,6 @@
 """Generation provenance scoped to reachable runtime code and dependencies."""
 import ast
+import tokenize
 import importlib.metadata
 import json
 import os
@@ -42,6 +43,13 @@ print(json.dumps({'python': platform.python_version(), 'executable': sys.executa
     return json.loads(result.stdout)
 
 
+def _python_source(path):
+    # Follow Python's own BOM/coding-cookie rules while hashing the raw file
+    # separately. Upstream source need not be UTF-8 without a BOM.
+    with tokenize.open(path) as handle:
+        return handle.read()
+
+
 def generation_runtime(root, conf, packages):
     root = Path(root)
     target = _ADVERSARY_REGISTRY[str(conf.vc.mode)][str(conf.vc.model)].split(':')[0]
@@ -67,7 +75,7 @@ def generation_runtime(root, conf, packages):
             continue
         files[str(path)] = file_hash(path)
         package = module.split('.') if path.name == '__init__.py' else module.split('.')[:-1]
-        for node in walk(ast.parse(path.read_text())):
+        for node in walk(ast.parse(_python_source(path))):
             imports = []
             if isinstance(node, ast.Import):
                 imports = [alias.name for alias in node.names]
@@ -95,7 +103,7 @@ def generation_runtime(root, conf, packages):
             for path in upstream_runtime_files(Path(str(upstream))):
                 files[str(path.resolve())] = file_hash(path)
                 if path.suffix == '.py':
-                    for node in walk(ast.parse(path.read_text())):
+                    for node in walk(ast.parse(_python_source(path))):
                         if isinstance(node, ast.Import):
                             external.update(alias.name.split('.')[0] for alias in node.names)
                         elif isinstance(node, ast.ImportFrom) and not node.level and node.module:
