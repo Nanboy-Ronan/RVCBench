@@ -255,6 +255,9 @@ To score those outputs, install `python -m pip install -e '.[eval]'` and use the
 runs generation and the full metric stack together, including Whisper medium,
 speaker recognition, and available perceptual/emotion models.
 
+See [validation coverage](docs/validation.md) for completed subset checks and
+remaining model requirements. Subset validation does not establish full-paper reproduction.
+
 ### Requirements
 
 - Python 3.10+

@@ -23,7 +23,6 @@
     "6829.json": "1db1d14879f8f183c6470dbee8d189977656656fddb5a6e7e43a1df9a4495e6a",
     "7127.json": "6033584d0ee3c902b062e5a1f657df8c6947cda0eff24001d2161103bd8496aa"
   },
-  "historical_csv": "/tealab-data/rjin02/AudioWatermarkBench/results/voxcpm_ots_on_libratts/20260503-220621/generation_sample_metrics.csv",
   "historical_csv_sha256": "ef51aca68c8be39b9198b991b19f2c197f93e343d952030d65e85dc45869fb4d",
   "metadata_sha256": "da0950668e201b80db2bd3eb6ae973ef9fb22e2d39cbe6a1a38b0149cb7dd48b",
   "input_fingerprint": "d3053293df1ce2339583b3872c10732d4d351cb71ddbcfaf413116431638df3e",

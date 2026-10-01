@@ -51,10 +51,6 @@ python run_vc.py --config-name ots_vc/clean/libritts/bark_voice_clone_ots \
   +vc.generate_only=true +seed=42
 ```
 
-Score the generated directory from the separate evaluation environment using
-`+vc.evaluate_only=true +vc.evaluation.generated_audio_dir=<generated_audio>`
-instead of `+vc.generate_only=true`. Generation closes its model before scoring.
-See [the runtime audit](../reproduction/comparisons/bark_runtime_audit.json)
-for complete paths, hashes, scoring provenance, repeated canary hashes, and
-retained failures. These 16 pairs validate the experimental integration;
-historical paper equivalence remains unestablished.
+Score saved outputs using the [evaluation-only command](run_protocol.md#score-saved-audio)
+in a separate evaluation environment. Subset validation does not establish
+historical paper equivalence.

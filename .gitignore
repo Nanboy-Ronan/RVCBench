@@ -237,3 +237,7 @@ data/
 
 # HuggingFace Spaces (deployed separately via huggingface_hub)
 spaces/
+
+# Local reproduction diagnostics and audit snapshots
+/reproduction/comparisons/
+/docs/audits/

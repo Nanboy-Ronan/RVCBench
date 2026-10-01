@@ -38,25 +38,3 @@ files:
 These declarations record code and configuration. They do not attest the
 implementation of an arbitrary remote server. The controlled run verifies
 the locally owned process and exact source hashes separately.
-
-Evidence is retained in `reproduction/comparisons/fish_s2_codec_*_probe.json`:
-the initial probe's unsupported Flash-only kernel failure, deterministic
-controls, full layer hashes, JIT-disabled controls, and eager controls. Probe
-source text is embedded in the artifacts. The full layer probe synchronizes
-CUDA heavily; it is diagnostic evidence and provides no timing measurement.
-HTTP validation generated and scored all 16 fixed LibriTTS pairs. The cold
-two-sample canary matches the corresponding full-run outputs. A second
-independent service instance generated all 16 again with identical WAV hashes.
-Its only source change was an added preflight guard against unexpected Snake
-state; both loaded source versions are captured. Scoring was not repeated for
-byte-identical waveforms: evidence remains attached to the first scored run.
-Mean MCD/WER/SIM are 5.664465/0.052010/0.570020. All three speaker-bootstrap
-intervals for differences from the matched historical population include zero.
-
-The eager runtime audit and comparison are
-`reproduction/comparisons/fish_s2_http_eager_runtime_audit.json` and
-`fish_s2_http_eager_libritts16.json`. This validates the measured subset and
-environment, not universal determinism or full-paper table reproduction.
-Both owned services were stopped after finite validation; existing services
-were preserved. The original HTTP numerical path and all historical results
-remain available.

@@ -38,12 +38,3 @@ HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python run_vc.py \
 
 This is an example revision used in the retained reproduction artifacts, not
 a claim that every upstream revision supports the same cloning interface.
-
-The offline snapshot run generated all 16 fixed pairs and produced valid MCD,
-WER and SIM scores for all 16: 5.028930, 0.048804 and 0.686518 respectively.
-Fifteen WAVs match the previous repo-ID run byte for byte; one differs and its
-cause remains unverified. The previous artifacts remain preserved. The audit
-`reproduction/comparisons/qwen3_offline_snapshot_runtime_audit.json` records
-asset hashes, input/seed checks, the two resolved offline failures and runtime
-limits. The matched historical comparison is
-`reproduction/comparisons/qwen3_offline_snapshot_libritts16.json`.

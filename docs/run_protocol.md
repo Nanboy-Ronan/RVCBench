@@ -1,719 +1,106 @@
-# Run protocol (zero-shot v2)
+# Running and reproducing RVCBench
 
-Use `pip install -e .` from the repository root. Model runtimes and evaluation
-models are separate dependencies. The initial supported onboarding path is
-`pip install -e '.[qwen3]'` followed by the Qwen quickstart. Model checkpoints
-are not part of the package. Other environment files are base templates requiring
-the matching upstream runtime; they are not tested dependency lock files.
+Install the benchmark with `python -m pip install -e .`. Use a separate model
+runtime for generation and `python -m pip install -e '.[eval]'` for scoring.
+Model checkpoints are downloaded or supplied separately. See
+[model environments](model_environments.md) and the
+[validation coverage](validation.md) before selecting an integration.
 
-## VoxCPM 0.5B historical short10 check
+## Generate a fixed subset
 
-VoxCPM2 and the historical VoxCPM-0.5B result use separate configurations and
-populations. The legacy configuration selects all ten pairs from the original
-short10 manifests, preserving their order and source indices 0–9. Its frozen
-selection verifies both audio hashes, target transcripts and pair-encoded
-historical filenames; no rows are selected using metric outcomes.
+The released selections under `reproduction/subsets/` contain pair identities,
+transcripts and input hashes. `libritts16_v1` selects 16 pairs across eight
+speakers. Use the same selection for generation, scoring and comparisons.
 
 ```bash
-python run_vc.py --config-name ots_vc/clean/libritts/voxcpm_05_legacy_ots \
-  adversary.model_path=/absolute/path/to/VoxCPM-0.5B/snapshot \
-  adversary.code_path=/absolute/path/to/VoxCPM/src \
-  adversary.local_files_only=true +vc.generate_only=true +seed=42
-```
-
-The local snapshot is revision `b2e656f7524303fdaf84591c75bbb87203d7c98d`;
-the runtime checkout is `f0c787f0937dc1c9a8f4f64d9a332d9c5da2e629`.
-The measured ten-pair means are MCD 4.6329, WER 0.0333 and SIM 0.4234, compared
-with historical 4.2660, 0 and 0.4441. Rescoring the historical audio reproduces
-all ten MCD and WER values exactly; SIM's maximum absolute difference is 0.000207.
-Generation differs. The historical seed and immutable weight/source revisions
-are unknown, and its device was CPU rather than the current CUDA runtime.
-This is a matched population check, not exact generation or full-paper reproduction.
-See `reproduction/comparisons/voxcpm05_libritts_short10_v1.json`.
-
-`scripts/freeze_historical_population.py` regenerates this frozen selection from
-the original short10 speaker manifests and CSV in a new output directory. It
-rejects pair, order, transcript and historical audio content mismatches.
-The historical matcher also supports manifests that reference audio outside
-their cohort directory, requiring a unique source record and target hash match.
-
-## Generate, evaluate, recover
-
-The VALL-E integration selects `lifeiteng/vall-e`, with strict checkpoint
-loading and native text/EnCodec APIs. Reference audio requires its actual
-transcript; missing target text is rejected. Empty codec output is not padded
-into artificial success, and mismatched weights are not filtered into a partial
-model. Native dependencies must be installed; no dependency stubs are injected.
-`+adversary.text_tokens_path=/absolute/path/to/vocabulary` selects and fingerprints
-the checkpoint's vocabulary explicitly. The configured checkpoint is absent
-locally, so native subset reproduction remains pending. A released Amphion VALLE
-checkpoint exists locally, but requires a separate runtime/configuration and
-cannot be used as a lifeiteng checkpoint. See
-`reproduction/comparisons/valle_runtime_audit.json`.
-
-`vall_e_amphion_ots` explicitly selects the released Amphion implementation,
-using a tensor-only state dict, released config and symbols file. Native strict
-loading, text tokenization, reference encoding and 24kHz decoding are retained.
-Base config paths resolve within the selected source root without changing
-`WORK_DIR` or the process working directory. Model weights, symbols, base configs
-and the EnCodec Torch Hub cache enter the asset fingerprint. Use a dedicated
-benchmark process with the pinned runtime recipe in `envs/amphion-valle.yml`.
-The two-pair native canary scores MCD 10.0042, WER 0.5625, SIM 0.1615; poor quality
-is preserved. The first two hashes repeat in the completed 16-pair LibriTTS generation run.
-All 16 pairs score successfully: MCD 6.9979, WER 0.3110, SIM 0.3685.
-These results establish native execution and preserve poor output quality. A located historical 300-pair robocall run names Amphion,
-but has a different population and is not a matched LibriTTS baseline. See
-`reproduction/comparisons/amphion_valle_runtime_audit.json`.
-
-To use the same upstream revision, clone Amphion into `checkpoints/Amphion-valle`
-and check out `26f6883110181f1dbfe95c70a7c7dbaf4de5f42a`. Obtain the released
-`amphion/valle_libritts` files and pass their actual locations explicitly:
-
-```bash
-python run_vc.py --config-name ots_vc/clean/libritts/vall_e_amphion_ots \
+python run_vc.py --config-name ots_vc/clean/libritts/qwen3_tts_ots \
+  run_name=qwen3_libritts16 \
   dataset.use_hf_dataset=false \
-  +dataset.manifest_filename=/absolute/path/to/reproduction/subsets/libritts16_v1/metadata.json \
-  adversary.checkpoint_path=/absolute/path/to/pytorch_model.bin \
-  adversary.config_path=/absolute/path/to/args.json \
-  adversary.text_tokens_path=/absolute/path/to/symbols.dict \
+  +dataset.manifest_filename=reproduction/subsets/libritts16_v1/metadata.json \
   +vc.generate_only=true +seed=42
 ```
 
-The native tokenizer also requires the EnCodec 24kHz Torch Hub checkpoint. Make
-it available before generation so its hash enters the asset fingerprint. Score
-the resulting audio in the evaluation environment with `+vc.evaluate_only=true`
-and `+vc.evaluation.generated_audio_dir=/absolute/path/to/generated_audio`,
-keeping the same dataset and frozen manifest selection.
+Supply the dataset locally under `data/Libritts`, or enable
+`dataset.use_hf_dataset=true` to use the configured Hugging Face dataset.
+Set model checkpoint/source overrides for the selected runtime; see
+[Qwen setup](quickstart_model_setup.md) and
+[pinned Hub snapshots](hub_revisions.md). A run creates a timestamped directory
+under `results/<run_name>/` containing its manifest and generated audio.
 
-The separate `robotcall20_v1` subset selects one pair from each of 20 speaker
-condition groups by the same fixed hash ranking. These are normal and scam
-conditions for 10 physical VCTK speakers. All 300 historical Amphion Robocall
-rows match the current pair names, target transcripts and input audio hashes;
-the selected 20 also pass the strict historical matcher. Native generation and
-MCD/WER/SIM scoring complete with `ots_vc/clean/robotcall/vall_e_amphion_ots`
-and that frozen manifest. Current means are 8.1171, 0.5841 and 0.2726, versus
-historical 7.6966, 0.5281 and 0.2900. Generation differs; immutable historical
-weights/source and generation seed are unknown. See the condition-specific
-comparison in `reproduction/comparisons/amphion_valle_robotcall20_v1.json`.
-The comparator reports condition-specific means and bootstraps by the physical
-speaker shared by both conditions. Scam target WAVs are VCTK carrier audio,
-not recordings of the scam text: scam MCD remains a historical acoustic proxy.
-Historical-audio replay reproduces all 20 MCD values exactly and SIM within
-0.000081; WER differs by up to 0.1429 because ASR predictions change. The saved
-historical transcripts all match the selected WER formula, but the historical
-ASR runtime and immutable weights are unknown. See
-`reproduction/comparisons/amphion_valle_robotcall20_input_audit.json`.
-Historical VALL-E matching also requires the same recognized implementation.
-Explicit implementation names and narrowly recognized legacy source directories
-provide configuration evidence; unknown or different implementations are rejected.
-This check does not establish immutable historical source or weight identity.
-
-SpeechMOS and DNSMOS can be selected with
-`+evaluation.required_metrics=[speechmos,dnsmos]` for an evaluation-only run.
-The full LibriTTS16 Amphion audio scores successfully with mean SpeechMOS 2.3686
-and DNSMOS OVRL 2.9097; see
-`reproduction/comparisons/amphion_valle_libritts16_aux_validation.json`.
-SpeechMOS requires the cached `tarepan_SpeechMOS_main` source directory and
-`checkpoints/utmos22_strong_step7459_v1.pt` under `torch.hub.get_dir()`.
-For initial setup, download the native model explicitly with
-`torch.hub.load('tarepan/SpeechMOS', 'utmos22_strong', trust_repo=True)` in the
-evaluation environment. The benchmark uses the local source and strict state
-loading afterward, records only that source and its weight file, and rejects
-missing assets or native runtime errors without interface retries.
-DNSMOS requires `checkpoints/dnsmos/sig_bak_ovr.onnx` and `model_v8.onnx` from
-Microsoft DNS-Challenge; scoring uses the non-personalized native predictor.
-Both files are hashed. Scoring does not silently download replacements.
-Upstream revisions of existing caches remain unverified. Historical
-auxiliary-metric reproduction remains pending.
-
-Emotion scoring uses the official SpeechBrain
-`CustomEncoderWav2vec2Classifier`, not the legacy generic-classifier adapters.
-Run `python scripts/setup_emotion_scorer.py` to fetch its pinned interface,
-configuration, labels and weights, plus the local wav2vec2 base initializer.
-Existing assets are checked and preserved; `--check-only` performs no downloads
-or writes. Emotion release `117a9c3dff08be81a3628eecf6a66b547ec1659b`
-is checked against five expected content hashes before native loading.
-Inference uses mono 16kHz audio and the native four-class classifier. Both
-labels and their equality are retained in row artifacts and exported CSVs.
-This is audio-to-audio classifier agreement; it does not replace the paper's
-text-to-audio emotion-alignment judge. Historical classifier agreement requires
-its own matched scorer replay before any equivalence claim.
-
-FireRedTTS2 decodes output at 24 kHz; its native `sample_rate=16000` field is
-the reference input rate. The wrapper now saves codec output at 24 kHz and
-rejects invalid waveforms instead of replacing NaNs or clipping values.
-Its legacy prompted generation uses at most three attempts to exceed 18 token
-frames and trims two leading token frames. Exhausting those attempts is an
-explicit failure. `pretrained_dir` weights and nested tokenizer/config files
-are included in generation asset fingerprints. Native short10 validation uses
-the separate `fireredtts2_short10_retry20_ots` configuration; see
-`reproduction/comparisons/fireredtts2_runtime_audit.json`.
-Reference-conditioned generation requires the actual reference transcript and
-nonempty target text. Missing text is rejected before loading or synthesizing;
-the adapter does not substitute a default sentence. Closing resets readiness
-so a subsequent use reloads the model.
-CPU loading binds a private codec factory with CPU checkpoint mapping; it does
-not reassign shared `torch.load`, upstream class methods or module globals.
-Failed initialization clears owned references and readiness before propagating
-the exception, allowing a later load attempt. Native CPU loading verifies all
-LLM and codec parameters are on CPU and close resets readiness; CPU inference
-has not been exercised. See
-`reproduction/comparisons/fireredtts2_cpu_loader_validation.json`.
-
-The historical sample-rate control preserves the source WAV files and verifies
-that the copied PCM bytes are identical. Under the same current scorer
-fingerprints, interpreting those ten outputs at 24 kHz instead of 16 kHz changes
-MCD from 5.2440 to 4.2234, WER from 0.0333 to 0, and SIM from 0.04125 to 0.35026.
-Replaying the original files reproduces every historical MCD and WER exactly;
-SIM's maximum absolute historical difference is 0.000043. This isolates a sample
-rate interpretation error, not model generation drift. All four located legacy
-runs (40 outputs) use 16 kHz headers. These controls are separate from newly
-generated model results: see
-`reproduction/comparisons/fireredtts2_sample_rate_control_v1.json`.
-
-The three-attempt native run generates and scores 8/10 requests; two short
-targets exhaust its attempts. Those failed rows remain in the partial report.
-A separate twenty-attempt run preserves the official >18-token criterion and
-generates/scores all ten requests at 24 kHz. All eight previously successful
-waveform hashes repeat exactly. Full means are MCD 3.9999, WER 0 and SIM 0.2780.
-The corrected historical ten-pair means are 4.2234, 0 and 0.3503, so the new
-generation still differs after correcting the header interpretation.
-Historical seed and immutable source/weight revisions are unknown, and the
-historical device was CPU. This is a measured fixed-cohort regression check,
-not exact generation reproduction. See
-`reproduction/comparisons/fireredtts2_short10_retry20_v1.json` and the preserved
-`fireredtts2_short10_retry3_partial_v1.json` for coverage and provenance.
-
-VoxCPM2 now passes seed plus original source index to the native API explicitly.
-Native badcase retries may increment that seed; sample rows distinguish
-`native_requested_seed` from the final `native_seed`, including after resume and
-evaluation-only scoring. Reference-only conditioning is rejected on models that
-do not support it; transcript prompts require both an audio path and its text.
-The wrapper rejects empty, nonfinite and multiple waveforms instead of rewriting
-invalid samples, restores the CUDA device scope, and releases owned model
-references before scoring. Adapter errors propagate to the runner, including
-fatal CUDA errors that must stop the run. See `envs/voxcpm.yml` for the pinned
-source/model revisions and locally validated dependency versions.
-The frozen LibriTTS16 VoxCPM2 subset completes with MCD 5.2746, WER 0.0551
-and SIM 0.6333. Both canary audio hashes repeat exactly, and all 16 effective
-native seeds equal their requested seeds. The existing historical VoxCPM run uses
-a 0.5B checkpoint, a short10 population and transcript-only conditioning on CPU;
-it is retained as a separate version/protocol, not a matched VoxCPM2 baseline.
-
-KimiAudio's wrapper loads the official inference runtime from an explicit
-`adversary.code_path`, including its recursive GLM-4-Voice submodule. It scopes
-CUDA device selection and restores the caller after loading or generating.
-`model_path` can select a local snapshot containing the main model, Whisper
-encoder and audio detokenizer. `audio_tokenizer_path` selects a local GLM voice
-tokenizer through a temporary constructor override that is restored after load.
-The adapter preserves the original reference/transcript/instruction messages;
-these settings are experimental and do not establish voice-cloning quality.
-The inspected official `detokenize_audio` call consumes generated tokens without
-reference-waveform prefill; reference conditioning is present in ALM history.
-The two-sample canary has WER 0.75 and SIM 0.2251. A correct generated-text response
-therefore does not establish correct spoken content or preserved speaker identity.
-The full frozen LibriTTS16 subset completes generation and MCD/WER/SIM scoring,
-with means 9.2481, 1.2877 and 0.0464 respectively. The first two audio hashes match
-the canary exactly. These poor metrics are retained as experimental evidence;
-no historical KimiAudio CSV was located, and no paper-table equivalence is claimed.
-Generation uses seed plus original source index, and rejects missing, empty,
-nonfinite or multiple waveforms. Native output is 24 kHz. The inspected official
-audio API overrides `max_new_tokens`, so only its default `-1` is supported;
-requesting a token limit that the runtime ignores raises an explicit error.
-No global Transformers loader or checkpoint-metadata patch is installed.
-
-ZONOS2 uses its upstream uv interpreter in a dedicated process and requires
-logical `cuda:0`; select the physical GPU through `CUDA_VISIBLE_DEVICES` before
-startup. Existing distributed process groups and DAC caches are rejected rather
-than adopted. `adversary.native_seed_policy=source_index` sends run seed plus
-the original source index to native sampling. `legacy_fixed` sends the same run
-seed to every native request, retaining the historical-compatible variant.
-Both keep the runner's global RNG seed at run seed plus source index. Rows record
-`seed`, `native_seed` and `native_seed_policy` separately, including after resume
-and evaluation-only runs. Cross-policy quality comparisons are rejected by the
-comparability gate; explicit intervention diagnostics remain descriptive.
-Device/stream scopes restore the caller's CUDA state,
-and `close()` calls the scheduler shutdown, releases the owned DAC cache and
-cleans up a process group created during a failed initialization.
-Set `adversary.code_path`, `checkpoint`, `vocoder_path` and `speaker_file_path`
-to explicit local runtime, main-weight, DAC and speaker-encoder paths for hashing.
-`memory_ratio`, `max_running_req` and `distributed_port` expose engine resource
-allocation and a loopback rendezvous address. The local canary uses memory_ratio
-0.65, one running request and the source revision recorded in `envs/zonos2.yml`.
-This is a quality check with separate scorers; timing comparability, normalizer
-cache/data provenance and a clean uv installation remain unverified.
-The historical ZONOS2 run is on VCTK, so its historical comparison uses the
-separately frozen `reproduction/subsets/vctk16_v1` population with `dataset=vctk`.
-All 16 reference/target hashes and transcripts match the historical population.
-Historical audio replay reproduces MCD and WER exactly; SIM differs by at most
-0.000394. Source-index generation MCD averages 5.5421 versus historical 4.6485.
-A fixed-native-seed control, keeping global RNG seeds and inputs unchanged,
-returns MCD to 4.64825 and WER to the historical mean 0.0208333. This intervention
-accounts for almost all of the observed MCD mean gap. The formal `legacy_fixed`
-runner produces the same 16 audio hashes as the diagnostic control. Those hashes
-still differ from historical audio; unavailable historical weight/runtime
-revisions prevent an exact-equivalence claim. Both protocol variants are retained.
-LibriTTS validation is retained separately, including two repeated audio hashes.
-
-Generation dependency scope v4 also hashes authored upstream C/C++/CUDA headers
-and sources, Cython sources and native build definitions under configured runtime
-roots. Generated `build`/`dist` trees and virtual environments are excluded, so
-first-time compilation alone does not invalidate recovery. Changing a kernel
-source or authored build definition does invalidate resume. Native sources outside
-the Python runtime root can be included through a separate
-`+adversary.native_code_path=/path/to/native/source` override.
-Compiled binaries, compiler flags and effective kernel selection remain outside
-this source fingerprint. Older generation manifests retain their original scope;
-their quality-scoring evidence is preserved, and they are not retroactively upgraded.
-
-This scope records `flash-attn` even when absent if a
-FlashAttention option is selected, an upstream source imports it, or Transformers
-is in the dependency closure. Installing or changing this optional dependency
-therefore changes the generation fingerprint and prevents silent resume across
-an attention-backend change. This records package availability, not proof that
-a particular CUDA kernel actually ran.
-
-Qwen3-Omni's missing model wrapper has been restored with independent loading,
-cleanup on initialization failure, sample-index seeding, and validation of each
-output waveform. Output defaults to 24 kHz, independently of the processor's
-input feature-extractor rate. Its configured system prompt and requested voice
-remain explicit experiment settings; reference conditioning alone does not prove
-speaker cloning. The local checkpoint is incomplete (1/15 weight shards), so
-this integration remains experimental and its fixed-subset generation is pending.
-See `reproduction/comparisons/qwen3_omni_runtime_audit.json` and the
-[official Transformers API](https://huggingface.co/docs/transformers/v4.57.3/en/model_doc/qwen3_omni_moe).
-`rvcbench doctor --model qwen3_omni --imports` checks dependencies and the exact
-model/processor exports without loading weights. The environment recipe records
-the local API-import combination rather than an unpinned Transformers Git branch;
-it is not yet a validated clean installation or an inference recipe.
-
-The dots.tts subset check uses dots.tts 0.2.1, Torch 2.8.0, Transformers
-5.14.1 and NumPy 2.4.6 for generation, with evaluation in a separate environment.
-`envs/dots-tts.yml` records those key pins; a clean installation is not yet
-validated. Set `adversary.code_path` to the dots_tts package directory or checkout
-to hash its Python source. Local checkpoint provenance includes
-`chat_template.jinja`. CUDA selection, thread count and matmul precision are scoped
-around loading and inference, restored on failure, and released by `close()`.
-Compilation warmup occurs during preparation before sample seeding and timing.
-The tokenizer audit in `reproduction/comparisons/dots_tts_tokenizer_audit.json`
-finds identical default token IDs under Transformers 5.14.1 and 4.57.3 on 35
-strings; enabling `fix_mistral_regex` changes one subset target. This limited
-check does not establish general tokenizer equivalence.
-
-Historical dots.tts audio replay reproduces WER exactly and SIM within 0.00006,
-but MCD differs by up to 1.067. Both tested current environments return identical
-MCD values on those 16 historical files; the historical scorer environment and
-evaluation-time audio hashes are unavailable. The discrepancy remains unresolved.
-MCD cache provenance now also tracks pyworld, pysptk, fastdtw, soundfile and soxr;
-earlier scoring artifacts retain their original narrower fingerprints.
+To freeze a new subset before examining model outcomes:
 
 ```bash
-python scripts/run_qwen3tts_quickstart.py --max-samples 5
+python scripts/freeze_reproduction_subset.py \
+  --dataset-config configs/dataset/libritts.yaml \
+  --speakers 8 --pairs-per-speaker 2 \
+  --output results/my_subset
 ```
 
-The default quickstart only generates audio. It prints the generated audio and
-metrics paths; `run_manifest.json` is in that timestamped run directory. No
-Whisper, speaker-recognition, or perceptual evaluation model is loaded.
+The output directory must be new. The dataset configuration must point to a
+locally available dataset; this command does not download it.
 
-Install evaluation dependencies and score an existing run:
+## Score saved audio
+
+Run the same model configuration and frozen manifest in the evaluation
+environment, supplying the generation run's actual `generated_audio` directory:
 
 ```bash
-python -m pip install -e '.[eval]'
 python run_vc.py --config-name ots_vc/clean/libritts/qwen3_tts_ots \
-  dataset.use_hf_dataset=false dataset.speaker_id=1089 adversary.max_samples=5 \
+  run_name=qwen3_libritts16_score \
+  dataset.use_hf_dataset=false \
+  +dataset.manifest_filename=reproduction/subsets/libritts16_v1/metadata.json \
   +vc.evaluate_only=true \
-  +vc.evaluation.generated_audio_dir=/absolute/path/to/run/generated_audio
+  +vc.evaluation.generated_audio_dir=/absolute/path/to/generated_audio
 ```
 
-Use exactly the same dataset selection, transcripts, and audio as the source run.
-This command creates a new run; it does not overwrite the generation run. Generation and scoring can also be requested with `--evaluate` on the Qwen quickstart.
-
-XTTS-v2 with Coqui TTS 0.22.0 requires the Transformers 4.40.2 / tokenizers
-0.19.1 combination recorded in `envs/xtts-v2.yml`. The local subset check uses
-Python 3.11 and NumPy 1.26.4 in an isolated overlay; this validates that runtime
-combination, not a fully locked environment installation. The runner retains
-the XTTS model across samples and releases it before scoring.
+Evaluation-only mode scores existing audio without loading the generation model.
+The scoring configuration must match the original input population and generation
+protocol. Scorer definitions, devices and assets are recorded in the run.
+Missing metrics and failed samples remain visible in coverage.
 
 ```bash
-python scripts/run_qwen3tts_quickstart.py --max-samples 5 \
-  --resume-from /absolute/path/to/previous/run
+rvcbench status /absolute/path/to/scoring-run
+rvcbench report /absolute/path/to/scoring-run --output results/report.json
+rvcbench compare-check /absolute/path/to/run-a /absolute/path/to/run-b
 ```
 
-Resume checks the input fingerprint, generation settings, runtime source digest,
-Python environment, and generated audio hashes. Verified successful audio is copied into a new run.
-For subprocess adapters, the worker interpreter and its installed package versions
-are recorded independently and checked on resume. Evaluation-only runs preserve
-source generation provenance and do not probe or start the model interpreter.
-Configured auxiliary source trees such as `melo_code_path`, converter configs,
-vocabularies and base speaker embeddings also contribute to the generation
-fingerprint. This prevents resuming after those inputs change. Implicit upstream
-downloads remain outside this local-asset coverage and must be captured or pinned
-separately; earlier runs are not retroactively assigned the expanded coverage.
-CosyVoice can pin an external Matcha-TTS checkout with
-`adversary.matcha_code_path=/absolute/path/to/Matcha-TTS`. Its source is included
-in the generation fingerprint, and a conflicting already-imported checkout is
-rejected. Use this when the dependency is outside the CosyVoice source tree.
-CosyVoice also checks the exact Transformers pin in its upstream
-`requirements.txt` before model loading. The validated local compatibility
-combination is Transformers 4.51.3 / tokenizers 0.21.4 on Python 3.11. A 4.57.3 /
-0.22.2 runtime completed inference but produced a severe quality regression;
-see `reproduction/comparisons/cosyvoice_transformers451_canary.json` for the
-matched diagnostic samples. The environment recipe remains a template; the
-local check used an isolated overlay, not a clean dependency lock installation.
-Upstream requirement files and statically imported distributions now contribute
-to the generation fingerprint, including auxiliary source trees. This is
-conservative and can include optional training dependencies.
-Missing/failed samples are retried. Use `+vc.retries=1` with `run_vc.py` for an
-additional attempt within a run. A per-sample seed is set before each adapter call.
-The effective run seed is propagated into adapters; seeds use the preserved source
-index rather than the index within a retry batch. Subprocess workers receive explicit
-per-sample seeds. GPU kernels and external services may still be nondeterministic.
+`report` requires a complete, valid run; synthetic smoke runs cannot be exported
+as benchmark results. `compare-check` verifies protocol compatibility for the
+requested metrics. It does not by itself establish equality of results or
+comparability of synthesis timing.
 
-The v2 runner dispatches one sample per adapter call, prioritizing explicit
-failure accounting and resumability. It does not promise high-throughput batching
-or multi-node scheduling. Model setup runs before generation so missing runtime dependencies fail the run
-early. Owned subprocess workers are explicitly closed before evaluation.
+## Reference protection and denoising
 
-Inspect a running or interrupted job with `rvcbench status /path/to/run`.
+Use an explicit reference directory and stage name to clone protected or
+denoised voices. The original targets and sample identities are preserved.
+See [reference binding](reference_stages.md),
+[archived Gaussian-noise replay](gr_noise_replay.md) and
+[DNS64 production](dns64_stage.md). Replay requires the original noise archive
+and historical audio; these experimental assets are not included in the code.
 
-## Artifacts and status
+## LibriTTS manifest variants
 
-- `run_manifest.json`: atomic initial/final snapshots containing schema and
-  protocol versions, selected sample IDs, transcripts, input hashes, output hashes,
-  status, attempts, errors/warnings, code digest, Git commit, package versions,
-  effective settings and coverage. Qwen Hub checkpoints are resolved to an immutable
-  commit; local `checkpoint_path` directories record model/config hashes. Other
-  adapters retain their configured references and need explicitly pinned upstream
-  assets for strict reproducibility.
-- `sample_events.jsonl`: durable per-sample updates, replayed on resume after
-  interruption. A truncated final journal line is ignored; earlier corruption is
-  rejected. This avoids rewriting the entire manifest for each sample.
-- `scoring_manifest.json`: metric-specific implementation, package and model asset
-  provenance. Core MCD, Whisper WER and ECAPA scorers load separately.
-- `metric_cache/`: atomic sample-by-scorer results. Successful records can be reused
-  from the source run when inputs, scorer code, weights and settings match. Failed
-  records are retried; each completed metric is also journaled.
-- `generation_sample_metrics.csv`: sample IDs and individual scores, with missing
-  metrics retained as missing rather than assigned successful scores.
-- `generated_audio/synthesis_timings.csv`: adapter synthesis timing when provided;
-  otherwise the full single-sample adapter call time. RTF must be compared under
-  matched hardware/runtime conditions.
-- Existing `metrics.json`, logs and audio remain available for compatibility.
+The subset contains 40 speakers and 4,000 distinct waveforms: 100 waveforms per
+speaker form 50 reference–target pairs, giving 2,000 pairs overall. The metadata
+also retains two annotation variants for those pairs: `speaker.json` and
+`speaker_text.json`. They share audio paths but can differ in punctuation and
+phonetic annotations. The default `manifest_variant: speaker` matches the
+historical evaluation; selecting another variant changes the protocol.
+Both variants are preserved and contribute to sample identity.
 
-`generated` means all requested audio exists but has not been scored. `complete`
-requires all requested audio and every required metric for every requested sample.
-`partial` includes failures or missing metrics; `failed` and `interrupted` record
-exceptions or interrupt signals handled by the process. A forcibly killed process
-may leave `running`/`generating`; these statuses must not be interpreted as success.
+The paper's Table 9 counts waveforms. Its B.1 wording of 100 paired entries per
+speaker differs from the available manifests, which contain 50 pairs. Do not
+infer the evaluation denominator from the exported metadata row count.
 
-The default required metrics are MCD, WER and SIM. Configure a stricter gate with
-`+evaluation.required_metrics=[mcd,wer,sim,sva,speechmos,dnsmos,emotion]`.
-Only requested metrics are loaded and evaluated. SIM and SVA share one ECAPA
-scorer. Optional SpeechMOS, DNSMOS and emotion metrics have separate lifetimes;
-their current wrappers retain historical implementations and record cached asset hashes. `metric_valid` always uses the
-requested population as its denominator. Diagnostic averages remain available
-for partial runs, but the report exporter rejects them. The existing bootstrap
-uses utterance resampling, not speaker-cluster resampling; choose a statistical
-protocol appropriate to the claim before publishing.
+## Interpreting reproduction
 
-Completeness alone does not make two runs comparable: match the input fingerprint,
-model version, protection settings, metric protocol, required metrics, and relevant
-runtime/hardware settings. Historical and current per-sample execution timings must not
-be merged without accounting for the protocol change.
+A successful subset run verifies that an integration generates and scores the
+selected inputs. Matching historical rows additionally requires matching
+reference/target audio, transcripts and metric protocols. Historical runs can
+lack immutable checkpoint revisions, seeds or runtime details; their scores do
+not establish bitwise generation reproducibility. Full paper-table reproduction
+requires the complete population, rather than the onboarding subsets.
 
-Run `rvcbench compare-check /path/to/run-a /path/to/run-b --metrics mcd wer sim`
-before comparing current model quality. This checks both runs' audio hashes,
-population, seed policy and metric-specific scorer fingerprints, and returns a
-nonzero exit code when they differ. The old coverage field
-`eligible_for_comparison` means only that coverage is complete; it does not prove
-pairwise comparability. New runs record `comparison_status` separately. Timing
-comparisons and intervention comparisons require their additional protocols.
-
-## Export and website
-
-```bash
-rvcbench report /absolute/path/to/run --output docs/validated_runs/my-run.json
-python docs/site-src/build.py
-```
-
-Export verifies coverage and the audio hashes and recomputes means from sample
-records. Website builds recompute report means and reject incomplete or synthetic
-runs. Published reports contain paths, transcripts, environment and provenance;
-use this route for the public benchmark data, not private recordings. Historical
-tables remain historical snapshots and are not automatically relabeled as v1 runs.
-
-The output is a self-contained JSON report linked from the website's validated-run
-section. No report is published until its JSON is committed and the site deployed.
-
-## Historical audio and fine-tuning
-
-To inspect pre-v1 audio without a manifest, explicitly use:
-
-```bash
-python run_vc.py --config-name ots_vc/clean/libritts/qwen3_tts_ots \
-  +vc.evaluate_only=true +vc.legacy_evaluation=true \
-  +vc.evaluation.generated_audio_dir=/path/to/historical/audio
-```
-
-This uses the compatibility filename matcher and marks the result as legacy and
-ineligible for the new report export. Never infer v1 provenance for these files.
-The fine-tuning, protection-training, and denoising entry points retain their
-existing protocols; v1 sample-level retry/resume applies to the zero-shot cloning
-stage. They need their own model-specific training/protection dependencies.
-
-For models requiring a different Torch version, generate with `+vc.generate_only=true`
-in that model's environment and evaluate in a separate environment containing
-`.[eval]`. The Qwen and evaluation extras pin a matched Torch/Torchaudio 2.6 pair;
-other model base templates do not install the evaluation stack automatically.
-
-Use `rvcbench doctor --model qwen3 --eval --imports` to detect import-time
-compatibility errors before launching. Qwen/evaluation extras constrain NumPy to
-1.26.4; the evaluator also constrains Numba. Install these in an isolated environment
-rather than upgrading a shared environment used by other experiments.
-
-## Manifest variants and subset reproduction
-
-For protected or denoised reference inputs, see
-[reference-stage binding](reference_stages.md). Explicit directories are bound
-before model loading, with clean and replacement hashes retained for resume.
-
-For cached model execution without Hub access, see
-[fixed Hub revisions](hub_revisions.md). Qwen3-TTS model and processor inputs
-are bound to the same pinned local snapshot, with actual asset hashes recorded.
-
-LibriTTS contains 4,000 distinct waveforms forming 2,000 reference–target pairs.
-Older exports also contain a second transcript representation in `speaker_text`
-rows. Both representations are preserved and receive distinct sample identities.
-`configs/dataset/libritts.yaml` explicitly selects `manifest_variant: speaker`,
-matching the original `<speaker>.json` evaluation loader. Use
-`dataset.manifest_variant=speaker_text` to select the alternate representation,
-or `dataset.manifest_variant=null` to retain all variants. A custom manifest can
-store `manifest_variant` explicitly. No source audio or manifest is rewritten by
-selection. See `docs/audits/libritts_manifest_20260930.json` for the source audit.
-
-The frozen `reproduction/subsets/libritts16_v1` selection contains eight speakers
-and two pairs per speaker, selected by a fixed hash ranking before model outcomes
-were examined. It records content hashes, original indices and transcript versions.
-Load it using the original dataset audio root:
-
-```bash
-python run_vc.py --config-name ots_vc/clean/libritts/qwen3_tts_ots \
-  dataset.use_hf_dataset=false \
-  +dataset.manifest_filename=/absolute/path/to/reproduction/subsets/libritts16_v1/metadata.json \
-  +vc.generate_only=true +seed=42
-```
-
-`scripts/compare_reproduction_subset.py` validates exact historical pair filenames,
-speaker identities, target transcripts and both input audio hashes before comparing
-scores. It reports paired deltas and a speaker-cluster bootstrap interval.
-`scripts/replay_historical_metrics.py` separately checks whether current scorers
-reproduce scores on the original generated audio. These are different checks:
-stochastic new generation can differ even when historical metric replay agrees.
-Neither a 16-pair check nor a confidence interval alone establishes full-table
-reproduction or statistical equivalence. Per-model progress and remaining
-architecture requirements are recorded in `reproduction/plan.json`.
-
-Historical English WER used more than one normalization formula. Set
-`+evaluation.wer_normalization=lowercase_v1` to preserve punctuation, or
-`+evaluation.wer_normalization=ascii_punctuation_removed_v2` for the current
-default. The choice is recorded in the scorer version and cache fingerprint.
-The historical replay script verifies the formula against every saved transcript
-before selecting it. The paired comparator rejects different formulas.
-Target-only legacy output names also require a complete, ordered generation log
-that verifies reference audio identity; target audio alone is insufficient.
-Even with matching formulas, Whisper predictions can differ across runtime
-versions. Replay reports retain those differences and do not claim equivalence.
-
-ZipVoice defaults to retained native inference: weights and vocoder are loaded
-once in preparation and released before scoring. Setting `adversary.runtime_python`
-selects CLI inference in that interpreter; `adversary.execution_backend` can
-explicitly select `native` or `cli`. Native inference requires the current Python
-interpreter. Interpreter paths preserve virtual-environment symlinks so that the
-requested environment is actually used, including for MaskGCT and IndexTTS workers.
-CLI inference starts a process and loads weights per sample; its reported synthesis
-time includes that overhead, while native preparation is outside per-sample timing.
-Do not compare their RTF as equivalent timing protocols.
-
-The published ZipVoice checkpoint uses the `emilia` tokenizer even when evaluated
-on LibriTTS. Tokenizer selection follows the trained checkpoint, not the dataset
-name. The historical March 2026 clean run also used `emilia`; the former `libritts`
-default produced a severe content regression. Explicit tokenizer overrides remain
-available for custom checkpoints. Invalid names fail before weight loading.
-
-MOSS-TTS v1.5 uses Transformers 5.x processor APIs and an auxiliary audio
-tokenizer. Set `adversary.codec_path` to a local tokenizer snapshot to avoid an
-implicit Hub download. Configured checkpoint directories now hash their Python
-implementations alongside weights, vocabulary and configuration files; changing
-checkpoint code or codec weights changes the model fingerprint. Unconfigured
-downloads remain outside this asset coverage.
-
-Higgs Audio loads `examples/generation.py` from the configured checkout by file
-path, so another installed `examples` package cannot shadow that entrypoint.
-Before loading it, the wrapper checks Transformers against that checkout's declared
-requirement. The validated overlay uses Transformers 4.46.3 and tokenizers 0.20.3.
-Model assets also hash configured `audio_tokenizer_path` and `scene_prompt_path`.
-The historical November 2025 log omitted `reference_role`; reproduction explicitly
-uses `assistant`, the default in the nearest preceding source revision. This is
-source-derived historical alignment, not an immutable record of the executed code.
-The current clean YAML's explicit `user` reference role remains a distinct setting.
-
-StyleTTS2's model fingerprint follows `ASR_config`, `ASR_path`, `F0_path` and
-`PLBERT_dir` in its YAML, resolving relative paths against the configured upstream
-checkout. This includes `.t7` checkpoints and PL-BERT implementation/configuration.
-Legacy pickle loading is scoped to serial upstream model preparation, and the
-original `torch.load` is restored on success or failure. The primary checkpoint
-uses an explicit `weights_only=False` argument. Other implicit Hub assets remain
-outside the configured local asset coverage.
-
-GLM-TTS preparation and generation both run inside the configured upstream working
-directory and CUDA device context, restoring the previous directory/device afterward.
-This keeps relative frontend rules and upstream `.cuda()` calls consistent with the
-requested runtime. Model fingerprints include `ckpt_dir`, `frontend_dir` and upstream
-`configs/`, including JSONL text rules and FST files where present. Normalizer caches
-inside installed third-party packages remain outside this configured asset coverage.
-The historical January 2026 checkpoint directory is no longer present locally;
-matching its current replacement to those historical weights is unproven.
-
-MOSS-TTSD inspects the local checkpoint's `auto_map` and uses its declared
-`AutoModel` class when present. The legacy Asteroid loader remains available for
-older checkpoints without that declaration. Missing or mismatched model parameters
-are rejected; explicitly declared tied weights must refer to the loaded source
-parameter. The validated native checkpoint runtime uses Transformers 5.0.0:
-4.53.2 lacks its `tie_weights` interface, and 5.14.1 removed a cache helper used
-by its custom generation code. `envs/moss-ttsd.yml` records the key runtime pins;
-the isolated overlay has been tested, but a clean installation is unverified.
-The wrapper supplies the tokenizer's actual padding ID to the native config and
-requests a full generated sequence, because the upstream batch helper already
-slices off the reference prefix.
-
-MOSS-TTSD preserves historical reference-ASR behavior by default
-(`use_prompt_transcript=false`). Set `reference_asr_model` to an explicit local
-Whisper checkpoint for asset hashing, or select `use_prompt_transcript=true` to
-use the manifest's reference text. These are distinct generation protocols.
-ASR loads during preparation and is released with the generator; an unused ASR
-asset is excluded when manifest text is selected. The current native checkpoint
-differs from the legacy loader's architecture, and immutable historical weights
-are absent, so a matched-input comparison does not establish historical weight
-equivalence.
-
-Fatal CUDA device assertions and illegal memory accesses terminate a run after
-journaling the failed sample. Subsequent samples stay pending, and scorers are
-not launched in the invalid context. The same stop rule applies to scorer
-initialization and per-sample scoring: completed metric caches are preserved,
-the fatal sample and scorer are recorded, and later samples/metrics are not
-assigned dependent failures. Cleanup errors do not mask the fatal error, and
-the evaluator skips CUDA cache operations after context failure.
-Ordinary per-sample errors continue to use
-the configured retry policy. An empty dataset now reports the dataset root and
-asks the caller to check `manifest_filename`, before accessing variant metadata.
-
-MGM-Omni's legacy loader chooses its architecture from the checkpoint directory
-name. For local checkpoints declaring `model_type=MGMTTS`, RVCBench selects the
-TTS branch from that metadata, so a Hub snapshot directory named by revision hash
-loads correctly. The upstream name hook, Torch initialization overrides and
-Transformers generation initializer are restored after preparation, including
-on errors. Generation re-enters the upstream initializer within a scoped CUDA
-device context. Main model, tokenizer and fallback Whisper references are released
-before scoring. This remains a serial compatibility bridge.
-
-Configured `repo_root` checkouts now contribute Python source and dependency
-files to generation provenance, and `cosyvoice_path` contributes local auxiliary
-weights/configuration to the model fingerprint. The validated MGM runtime uses
-Torch 2.6.0, Transformers 4.52.3 and flash-attn 2.7.4.post1; its recipe records
-key pins rather than a fully resolved clean-install lock. Historical runs selected
-a Hub model name without an immutable revision, so current snapshot hashes alone
-do not establish equality to historical weights. Content failures remain in the
-fixed subset and are included in aggregate metrics.
-
-PlayDiffusion resolves its preset before initializing the upstream engine. A
-configured local preset bypasses default Hub checkpoint selection and initializes
-one model manager. The wrapper overrides the engine's preset method on its own
-subclass, leaving the upstream class unchanged, and releases engine references
-before scoring. Hub presets launched through the benchmark runner resolve an
-immutable revision before download; `cache_dir` is passed directly to Hub APIs
-without changing process-wide cache environment variables.
-
-All six named preset assets contribute individual hashes, including the extensionless
-vocoder, `.npy` k-means centers and `.pkl` inpainter. Filename overrides participate
-in both loading and fingerprinting. The validated runtime uses Torch 2.6.0,
-Transformers 4.57.3 and fairseq2 0.4.4; its key-pin recipe has not been tested as
-a clean installation. The upstream constructor still checks/downloads its NLTK
-tagger resource, which is not yet included in configured asset hashes. Historical
-Hub revision and environment equivalence are also unproven; these limits prevent
-a claim of fully frozen generation provenance.
-
-OZSpeech places ZACT and both FACodec modules explicitly on the requested device
-and logs their actual parameter devices after loading. Loading tensors with a
-CUDA `map_location` alone does not move a newly constructed model's parameters.
-Main/codec references are released before scoring. Its OmegaConf checkpoint
-allowlist exists only during the upstream `weights_only=True` load; existing
-caller-owned allowlist entries are preserved on success and failure.
-
-Both codec path spellings (`codec_*_path`, `facodec_*_path`) are accepted, including
-an alias when the primary YAML field is null. Local codec weights and the upstream
-`zact/lexicon/librispeech-lexicon.txt` are hashed. Missing codec paths resolve the
-two default Hub files at one immutable revision before loading. The validated
-runtime uses Torch 2.8.0, Transformers 4.57.3 and Lightning 2.5.3. Its environment
-recipe records key pins rather than a clean-install lock. G2P/NLTK package resource
-assets and historical immutable weights/runtime are not yet established, so
-matched-input generation and scoring comparisons remain evidence-bounded.
-
-VibeVoice checks the configured checkout's concrete generation cache calls against
-the installed Transformers method signature before model loading. The current
-checkout omits the older required `device` argument, so its declared Transformers
-4.51.3 requirement is stale; the validated runtime uses 4.57.3. The older runtime
-is rejected during preparation. This is a check of the inspected static cache
-calls, not a general certification of all upstream APIs.
-
-VibeVoice runner-managed calls propagate original generation errors to the durable
-sample journal, allowing fatal CUDA failures to terminate the run. Attention
-fallback is restricted to errors mentioning FlashAttention; other checkpoint
-errors are not retried with SDPA. The wrapper releases processor/model references
-and avoids changing the process-wide `PYTHONPATH`. The current runtime uses SDPA
-fallback because flash-attn is absent. Historical effective attention backend,
-weights and environment equivalence remain unproven. Initial canary scoring uses
-the modern WER rule; the matched historical subset uses `lowercase_v1`, confirmed
-against all 2,000 historical rows.
-
-## Native Bark subset validation
-
-Bark completes all 16 frozen LibriTTS pairs with independent MCD/WER/SIM
-scoring. The first two waveforms exactly repeat the canary hashes. Mean MCD is
-5.915845, WER 0.101474, and SIM 0.404699. This establishes native runtime validation;
-no matched historical Bark reference has been established. See
-[`bark_runtime_audit.json`](../reproduction/comparisons/bark_runtime_audit.json)
-and the [asset and environment setup](bark_native.md).
-
-## BertVITS2 reference-conditioning audit
-
-The current native 2.3 configuration uses 850 trained speaker embeddings. Its
-reference-audio processing is commented out, and the base checkpoint contains
-neither speaker embeddings nor reference-encoder weights. The native loader
-would retain initialized tensors for missing weights. The zero-shot adapter
-now rejects this closed-set configuration before imports or GPU allocation,
-selects target text, and refuses unknown-speaker identity fallbacks. Setting
-`n_speakers=0` alone cannot establish a trained reference-conditioned model.
-The fixed LibriTTS16 probe is retained as failed with zero generated outputs;
-real generation remains pending a compatible checkpoint and inference path.
-See [the protocol audit](../reproduction/comparisons/bertvits2_protocol_audit.json).
-
-Provenance parses upstream Python source using Python BOM/coding-cookie rules
-while hashing raw bytes. Generator checkpoint paths are included in asset
-fingerprints, preventing resumed runs from silently changing those weights.
-
-## Native Fish S2 subset validation
-
-The separate native S2 integration completes all 16 frozen LibriTTS pairs with
-independent scoring: MCD 5.810259, WER 0.055686, SIM 0.575742. The first two generated
-audio hashes exactly repeat the canary. Both model and codec weights load
-strictly; six legacy codec buffers are accepted only after exact reconstruction
-checks. See [the runtime audit](../reproduction/comparisons/fish_s2_runtime_audit.json)
-and [setup instructions](fish_s2_native.md).
-
-The historical HTTP S2 run has 2,000 CSV-aligned request-log entries. All 16
-selected pairs match reference/target audio hashes and target transcripts; its
-WER formula matches the current normalization across all 2,000 rows.
-The [paired diagnostic](../reproduction/comparisons/fish_s2_cross_implementation_libritts16.json)
-compares separate implementations and retains every row and speaker bootstrap
-interval. Missing historical service weights/runtime/seeds prevent a same-model
-generation-equivalence claim. The HTTP integration remains independently pending.
+Generated audio, diagnostics and local audit snapshots belong under `results/`
+and are excluded from source control. Public source retains reusable configs,
+frozen selections, concise setup documentation and regression tests.

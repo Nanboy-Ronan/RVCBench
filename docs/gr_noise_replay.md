@@ -40,11 +40,6 @@ the clone runner records the adjacent producer manifest hash, requires complete
 verification and checks the selected input/output hashes against its rows
 before model loading. Failed or stale producer outputs cannot be consumed.
 
-Two independent executions on `libritts16_v1` each reconstructed 16/16
-historical GR-Noise WAVs byte for byte. The second execution additionally
-records runtime and dependency source provenance. Its retained audit is
-`reproduction/comparisons/gr_archived_noise_libritts16.json`.
-
 This is reproduction from frozen experimental noise, not regeneration of the
 original random-number stream. Historical batch construction, worker RNGs,
 text-feature fallbacks and runtime versions can affect newly drawn noise.

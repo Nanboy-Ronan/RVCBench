@@ -1,6 +1,7 @@
 {
   "objective": "Refactor the benchmark and validate every integrated model on a fixed subset, tracing paper reproduction to matched historical samples.",
   "paper_reference": "https://arxiv.org/abs/2602.00443v2",
+  "scope_note": "Subset validation covers integration and matched populations; it does not establish full-paper table or bitwise generation reproduction. Detailed local execution records are excluded from source control.",
   "models": [
     {
       "n": "BertVITS2",
@@ -12,8 +13,6 @@
       "generation_status": "pending_compatible_reference_conditioned_checkpoint_and_runtime",
       "scoring_status": "pending",
       "historical_comparison_status": "historical_reference_not_established",
-      "runtime_audit": "comparisons/bertvits2_protocol_audit.json",
-      "runtime_probe": "results/debug_bert_closedset_libritts16_guard/20261001-083434-235fa487",
       "provenance_limit": "Need an actual reference-conditioned checkpoint, strict complete weight loading and native reference inference before canary/full16 generation. Configuring n_speakers=0 does not create missing trained weights or supply reference spectrograms."
     },
     {
@@ -25,20 +24,7 @@
       "subset": "subsets/libritts16_v1/selection.json",
       "generation_status": "complete",
       "scoring_status": "complete",
-      "historical_comparison_status": "matched_subset_measured",
-      "generation_run": "results/reproduce_v2_qwen3_tts_libritts16/20260930-223300-9e739660",
-      "scoring_run": "results/reproduce_v2_qwen3_tts_libritts16_score/20260930-223755-4501bf0b",
-      "comparison": "comparisons/qwen3_tts_libritts16_v1.json",
-      "historical_metric_replay": "comparisons/qwen3_tts_metric_replay_v1.json",
-      "pinned_snapshot_variant": {
-        "status": "offline_generated_and_core_scored_16_pairs",
-        "generation_run": "results/reproduce_v2_qwen3_offline_snapshot_libritts16/20261001-104928-4fb9aacf",
-        "scoring_run": "results/reproduce_v2_qwen3_offline_snapshot_libritts16_score/20261001-105336-0769f68b",
-        "comparison": "comparisons/qwen3_offline_snapshot_libritts16.json",
-        "runtime_audit": "comparisons/qwen3_offline_snapshot_runtime_audit.json",
-        "identical_previous_wavs": 15,
-        "limits": "One WAV differs; no bitwise equivalence or full-paper reproduction claim."
-      }
+      "historical_comparison_status": "matched_subset_measured"
     },
     {
       "n": "Qwen3-Omni",
@@ -50,8 +36,6 @@
       "generation_status": "pending_incomplete_local_checkpoint",
       "scoring_status": "pending",
       "historical_comparison_status": "historical_reference_not_established",
-      "runtime_audit": "comparisons/qwen3_omni_runtime_audit.json",
-      "adapter_status": "wrapper_restored_API_import_verified_inference_pending",
       "provenance_limit": "Local HF cache has 1 of 15 required shards; no model inference. Interface tests and live API imports do not establish reference speaker cloning or subset reproduction."
     },
     {
@@ -64,36 +48,8 @@
       "generation_status": "complete",
       "scoring_status": "complete",
       "historical_comparison_status": "matched_10_pairs_header_control_measured",
-      "runtime_audit": "comparisons/fireredtts2_runtime_audit.json",
-      "runtime_corrections": "24kHz output, pretrained asset hashing, invalid waveform rejection, bounded prompt failures and generator cleanup",
-      "historical_sample_rate_control": "comparisons/fireredtts2_sample_rate_control_v1.json",
-      "generation_run": "results/reproduce_v2_fireredtts2_short10_retry20/20261001-051212-75e6a3c6",
-      "native_canary": {
-        "run": "results/debug_fireredtts2_short10_2/20261001-050601-636f1926",
-        "scoring_run": "results/debug_fireredtts2_short10_2_score/20261001-050935-82290891",
-        "pairs": 2,
-        "status": "generated_and_scored",
-        "means": {
-          "mcd": 3.994769240010826,
-          "wer": 0.0,
-          "sim": 0.3737233132123947
-        }
-      },
-      "retry20_variant_status": "complete",
-      "scoring_run": "results/reproduce_v2_fireredtts2_short10_retry20_score/20261001-051442-b3a52d17",
-      "subset_validation": "comparisons/fireredtts2_short10_retry20_v1.json",
-      "model_variant": "FireRedTTS2-monologue-retry20",
-      "comparison": "comparisons/fireredtts2_short10_retry20_v1.json",
       "reproduction_config": "configs/ots_vc/clean/libritts/fireredtts2_short10_retry20_ots.yaml",
-      "retry3_variant": {
-        "generation_status": "partial_8_of_10",
-        "scoring_status": "partial_8_of_10",
-        "validation": "comparisons/fireredtts2_short10_retry3_partial_v1.json"
-      },
-      "reproduction_status": "full_fixed_short10_measured_not_exact_generation_reproduction",
-      "cpu_loader_validation": "comparisons/fireredtts2_cpu_loader_validation.json",
-      "cpu_load_status": "native_llm_and_codec_loaded_global_loader_unchanged",
-      "cpu_inference_status": "not_validated"
+      "model_variant": "FireRedTTS2-monologue-retry20"
     },
     {
       "n": "VoxCPM",
@@ -105,26 +61,8 @@
       "generation_status": "complete",
       "scoring_status": "complete",
       "historical_comparison_status": "different_version_0_5B_short10_reference",
-      "generation_run": "results/reproduce_v2_voxcpm2_libritts16/20261001-043343-7a1a178d",
-      "scoring_run": "results/reproduce_v2_voxcpm2_libritts16_score/20261001-043622-953de74b",
-      "subset_validation": "comparisons/voxcpm2_libritts16_validation.json",
-      "model_variant": "VoxCPM2",
-      "reproduction_status": "full_subset_measured_same_version_historical_reference_not_established",
       "provenance_limit": "Local main/AudioVAE/tokenizer weights and upstream source hashed. Requested and effective native retry seeds recorded. Existing historical 0.5B short10 CPU run requires a separate protocol/subset; no cross-version substitution.",
-      "legacy_05_variant": {
-        "model_variant": "VoxCPM-0.5B",
-        "config": "configs/ots_vc/clean/libritts/voxcpm_05_legacy_ots.yaml",
-        "subset": "subsets/libritts_short10_legacy_v1/selection.json",
-        "generation_run": "results/reproduce_v2_voxcpm05_libritts_short10/20261001-044933-813dfab2",
-        "scoring_run": "results/reproduce_v2_voxcpm05_libritts_short10_score/20261001-045102-44f98cef",
-        "comparison": "comparisons/voxcpm05_libritts_short10_v1.json",
-        "generation_status": "complete",
-        "scoring_status": "complete",
-        "historical_comparison_status": "matched_10_pairs_generation_difference",
-        "historical_metric_replay_status": "MCD_WER_exact_SIM_max_abs_0_000207",
-        "reproduction_status": "matched_population_measured_not_exact_generation_reproduction",
-        "provenance_limit": "Old seed and immutable weights/source revision absent; historical CPU vs current CUDA. Both versions retained separately."
-      }
+      "model_variant": "VoxCPM2"
     },
     {
       "n": "F5-TTS",
@@ -135,12 +73,7 @@
       "subset": "subsets/libritts16_v1/selection.json",
       "generation_status": "complete",
       "scoring_status": "complete",
-      "historical_comparison_status": "matched_subset_measured",
-      "generation_run": "results/reproduce_v2_f5_tts_libritts16/20260930-230725-5da60e6e",
-      "scoring_run": "results/reproduce_v2_f5_tts_libritts16_score/20260930-230926-125a36f4",
-      "comparison": "comparisons/f5_tts_libritts16_v1.json",
-      "historical_metric_replay_status": "partial_WER_ASR_difference",
-      "historical_metric_replay": "comparisons/f5_tts_metric_replay_v1.json"
+      "historical_comparison_status": "matched_subset_measured"
     },
     {
       "n": "MaskGCT",
@@ -151,20 +84,7 @@
       "subset": "subsets/libritts16_v1/selection.json",
       "generation_status": "complete",
       "scoring_status": "complete",
-      "historical_comparison_status": "matched_subset_measured",
-      "runtime_python": "/data/rjin02/miniconda3/envs/maskgct/bin/python",
-      "failed_attempts": [
-        {
-          "run": "results/reproduce_v2_maskgct_libritts16/20260930-231432-99118d8f",
-          "reason": "RuntimeError: MaskGCT worker failed to start: cannot import name 'MaskGCTInference' from 'models.tts.maskgct.maskgct_inference' (/tealab-data/rjin02/AudioWatermarkBench/checkpoints/Amphion-maskgct/models/tts/maskgct/maskgct_inference.py)"
-        }
-      ],
-      "active_run_root": "results/reproduce_v2_maskgct_libritts16_api_fixed",
-      "generation_run": "results/reproduce_v2_maskgct_libritts16_api_fixed/20260930-231604-0a310655",
-      "scoring_run": "results/reproduce_v2_maskgct_libritts16_score/20260930-231928-b6ed62d2",
-      "comparison": "comparisons/maskgct_libritts16_v1.json",
-      "historical_metric_replay_status": "MCD_WER_exact_SIM_numerical_difference",
-      "historical_metric_replay": "comparisons/maskgct_metric_replay_v1.json"
+      "historical_comparison_status": "matched_subset_measured"
     },
     {
       "n": "OpenVoice V2",
@@ -176,11 +96,7 @@
       "generation_status": "complete",
       "scoring_status": "complete",
       "historical_comparison_status": "matched_subset_measured",
-      "generation_run": "results/reproduce_v2_openvoice_libritts16/20260930-234521-33f5c07d",
-      "scoring_run": "results/reproduce_v2_openvoice_libritts16_score/20260930-234613-fb75b3b5",
-      "comparison": "comparisons/openvoice_libritts16_v1.json",
-      "provenance_limit": "Initial subset run predates auxiliary source/config/embedding fingerprint repair; implicit Melo/BERT downloads still require runtime asset capture.",
-      "historical_metric_replay": "comparisons/openvoice_metric_replay_v1.json"
+      "provenance_limit": "Initial subset run predates auxiliary source/config/embedding fingerprint repair; implicit Melo/BERT downloads still require runtime asset capture."
     },
     {
       "n": "Coqui XTTS-v2",
@@ -191,33 +107,7 @@
       "subset": "subsets/libritts16_v1/selection.json",
       "generation_status": "complete",
       "scoring_status": "complete",
-      "historical_comparison_status": "matched_subset_measured",
-      "failed_attempts": [
-        {
-          "run": "results/reproduce_v2_xtts_libritts16/20260930-232701-32ee3dcb",
-          "reason": "ImportError: Unable to import Coqui XTTS runtime. Ensure the 'TTS' package is installed and compatible with the current transformers version."
-        },
-        {
-          "run": "results/reproduce_v2_xtts_libritts16_pinned/20260930-233118-98a94d39",
-          "status": "partial",
-          "generated": 15,
-          "requested": 16,
-          "reason": "Legacy adapter released the generator after each serial request, triggering repeated checkpoint initialization; one request failed strict checkpoint loading."
-        }
-      ],
-      "generation_run": "results/reproduce_v2_xtts_libritts16_managed/20260930-233959-95d5ad60",
-      "runtime_validation": {
-        "python": "3.11",
-        "TTS": "0.22.0",
-        "transformers": "4.40.2",
-        "tokenizers": "0.19.1",
-        "numpy": "1.26.4",
-        "environment": "isolated system-site-packages overlay; clean lockfile validation pending",
-        "model_initializations": 1
-      },
-      "scoring_run": "results/reproduce_v2_xtts_libritts16_score/20260930-234149-7a6263ac",
-      "comparison": "comparisons/xtts_libritts16_v1.json",
-      "historical_metric_replay": "comparisons/xtts_metric_replay_v1.json"
+      "historical_comparison_status": "matched_subset_measured"
     },
     {
       "n": "IndexTTS",
@@ -228,12 +118,7 @@
       "subset": "subsets/libritts16_v1/selection.json",
       "generation_status": "complete",
       "scoring_status": "complete",
-      "historical_comparison_status": "matched_subset_measured",
-      "generation_run": "results/reproduce_v2_index_tts_libritts16/20260930-230123-df8787be",
-      "scoring_run": "results/reproduce_v2_index_tts_libritts16/20260930-230123-df8787be",
-      "comparison": "comparisons/index_tts_libritts16_v1.json",
-      "historical_metric_replay": "comparisons/index_tts_metric_replay_v1.json",
-      "historical_metric_replay_status": "partial_WER_ASR_difference"
+      "historical_comparison_status": "matched_subset_measured"
     },
     {
       "n": "ZipVoice",
@@ -245,22 +130,7 @@
       "generation_status": "complete",
       "scoring_status": "complete",
       "historical_comparison_status": "matched_subset_measured",
-      "generation_run": "results/reproduce_v2_zipvoice_native_emilia_libritts16/20261001-003543-0cf09252",
-      "scoring_run": "results/reproduce_v2_zipvoice_native_emilia_libritts16_score/20261001-003621-8cf5314f",
-      "comparison": "comparisons/zipvoice_libritts16_v1.json",
-      "historical_metric_replay": "comparisons/zipvoice_metric_replay_v1.json",
-      "historical_metric_replay_status": "partial_WER_ASR_difference",
-      "reproduction_status": "tokenizer_regression_corrected_full_subset_measured_historical_exact_equivalence_unproven",
-      "provenance_limit": "Pinned local model/vocoder snapshots and upstream source fingerprints; historical run lacks immutable weight/runtime records. Corrected generation predates invalid-tokenizer validation guard. Native and CLI are distinct timing protocols.",
-      "failed_quality_attempts": [
-        {
-          "generation_run": "results/reproduce_v2_zipvoice_native_libritts16/20261001-002305-67008eb0",
-          "scoring_run": "results/reproduce_v2_zipvoice_native_libritts16_score/20261001-002433-1495fa0a",
-          "comparison": "comparisons/zipvoice_libritts16_initial_v1.json",
-          "reason": "libritts tokenizer used with published emilia checkpoint; WER 1.0335. Same inputs/weights/seed with emilia reduce WER to 0.0921."
-        }
-      ],
-      "native_cli_canary": "comparisons/zipvoice_emilia_native_cli_canary.json"
+      "provenance_limit": "Pinned local model/vocoder snapshots and upstream source fingerprints; historical run lacks immutable weight/runtime records. Corrected generation predates invalid-tokenizer validation guard. Native and CLI are distinct timing protocols."
     },
     {
       "n": "FishSpeech",
@@ -271,25 +141,7 @@
       "subset": "subsets/libritts16_v1/selection.json",
       "generation_status": "complete",
       "scoring_status": "complete",
-      "historical_comparison_status": "matched_subset_measured",
-      "failed_attempts": [
-        {
-          "run": "results/reproduce_v2_fishspeech_libritts16/20260930-224405-761269e0",
-          "reason": "Evaluation environment lacks audiotools; retried in existing fish-speech-s2 environment."
-        },
-        {
-          "run": "results/reproduce_v2_fishspeech_libritts16/20260930-224737-271468d8",
-          "reason": "S2-era upstream code is incompatible with released S1 tokenizer; resolved with isolated S1 code revision."
-        }
-      ],
-      "generation_run": "results/reproduce_v2_fishspeech_libritts16_s1/20260930-225025-8fb94160",
-      "scoring_run": "results/reproduce_v2_fishspeech_libritts16_legacy_score/20260930-230607-877a11c2",
-      "comparison": "comparisons/fishspeech_libritts16_legacy_v1.json",
-      "upstream_revision": "d3df50503b36314a964f66cac1af1e19e95bcfa3",
-      "historical_selection": "Newest complete 2000-row run; prompt identity verified against all 2000 ordered generation log entries.",
-      "wer_normalization": "lowercase_v1",
-      "historical_metric_replay": "comparisons/fishspeech_metric_replay_v1.json",
-      "historical_metric_replay_status": "partial_WER_ASR_difference"
+      "historical_comparison_status": "matched_subset_measured"
     },
     {
       "n": "Fish Audio S2 (in-proc)",
@@ -301,10 +153,6 @@
       "generation_status": "complete",
       "scoring_status": "complete",
       "historical_comparison_status": "matched_population_cross_implementation_diagnostic",
-      "generation_run": "results/reproduce_v2_fish_s2_native_libritts16/20261001-090605-07a7f79b",
-      "scoring_run": "results/reproduce_v2_fish_s2_native_libritts16_score/20261001-091122-2eed1e50",
-      "runtime_audit": "comparisons/fish_s2_runtime_audit.json",
-      "comparison": "comparisons/fish_s2_cross_implementation_libritts16.json",
       "provenance_limit": "Historical HTTP result has matched input/audio hashes, but lacks immutable server weights/runtime and server-side seeds. Native serial is a separate implementation."
     },
     {
@@ -317,28 +165,7 @@
       "generation_status": "complete",
       "scoring_status": "complete",
       "historical_comparison_status": "matched_population_http_diagnostic",
-      "generation_run": "results/reproduce_v2_fish_s2_http_libritts16/20261001-092004-34c5786a",
-      "scoring_run": "results/reproduce_v2_fish_s2_http_libritts16_score_device_verified/20261001-093809-09432e2e",
-      "comparison": "comparisons/fish_s2_http_libritts16.json",
-      "runtime_audit": "comparisons/fish_s2_http_service_audit.json",
-      "repeatability_status": "cold_and_warm_http_outputs_differ",
-      "repeatability_audit": "comparisons/fish_s2_http_repeatability.json",
-      "provenance_limit": "Owned pinned official service and independently checked local weights; historical server weights/runtime/seeds unavailable. Cold-start repeatability remains unresolved.",
-      "repeatability_localization": "first_reference_codec_tokens_change_cold_vs_warm_startup_seed_does_not_resolve",
-      "repeatability_localization_audit": "comparisons/fish_s2_http_token_trace_audit.json",
-      "stable_codec_variant": {
-        "name": "eager_snake_v1",
-        "generation_status": "complete_16_of_16",
-        "scoring_status": "complete_16_of_16",
-        "generation_run": "results/reproduce_v2_fish_s2_http_eager_libritts16/20261001-100707-7203b3c5",
-        "scoring_run": "results/reproduce_v2_fish_s2_http_eager_libritts16_score/20261001-101205-9a29960f",
-        "repeat_generation_run": "results/reproduce_v2_fish_s2_http_eager_cold_repeat16/20261001-101408-4296d719",
-        "repeatability": "16_of_16_waveforms_identical_across_independent_service_instances",
-        "runtime_audit": "comparisons/fish_s2_http_eager_runtime_audit.json",
-        "comparison": "comparisons/fish_s2_http_eager_libritts16.json",
-        "historical_comparison_status": "matched_population_numerical_variant_diagnostic",
-        "limits": "Historical server weights/seeds unknown. Eager expression preserves parameters but changes numeric execution. Repeat service adds a preflight guard; both source versions captured."
-      }
+      "provenance_limit": "Owned pinned official service and independently checked local weights; historical server weights/runtime/seeds unavailable. Cold-start repeatability remains unresolved."
     },
     {
       "n": "CosyVoice / 2",
@@ -350,29 +177,7 @@
       "generation_status": "complete",
       "scoring_status": "complete",
       "historical_comparison_status": "matched_subset_measured",
-      "generation_run": "results/reproduce_v2_cosyvoice_libritts16_transformers451/20261001-000642-745fb083",
-      "provenance_limit": "Validated isolated overlay, not a clean environment lock. Historical run lacks immutable weight/runtime records. Generation run predates expanded upstream distribution closure capture.",
-      "pinned_dependency_validation": {
-        "generation_run": "results/reproduce_v2_cosyvoice_libritts16_pinned_matcha/20260930-235655-3de3c6f5",
-        "status": "generated",
-        "configured_matcha_source_files": 42,
-        "requested": 16,
-        "identical_generated_audio": 16
-      },
-      "scoring_run": "results/reproduce_v2_cosyvoice_libritts16_transformers451_score/20261001-000929-dee42e8a",
-      "comparison": "comparisons/cosyvoice_libritts16_v1.json",
-      "reproduction_status": "runtime_regression_corrected_full_subset_measured_historical_exact_equivalence_unproven",
-      "historical_metric_replay": "comparisons/cosyvoice_metric_replay_v1.json",
-      "runtime_compatibility_canary": "comparisons/cosyvoice_transformers451_canary.json",
-      "corrected_generation_status": "complete",
-      "failed_quality_attempts": [
-        {
-          "generation_run": "results/reproduce_v2_cosyvoice_libritts16/20260930-234949-7d797094",
-          "scoring_run": "results/reproduce_v2_cosyvoice_libritts16_score/20260930-235628-6e886608",
-          "comparison": "comparisons/cosyvoice_libritts16_initial_v1.json",
-          "reason": "transformers 4.57.3/tokenizers 0.22.2 silently produced unintelligible speech; full sixteen-pair repetition with fixed Matcha source preserved every bad output"
-        }
-      ]
+      "provenance_limit": "Validated isolated overlay, not a clean environment lock. Historical run lacks immutable weight/runtime records. Generation run predates expanded upstream distribution closure capture."
     },
     {
       "n": "Higgs Audio",
@@ -384,20 +189,7 @@
       "generation_status": "complete",
       "scoring_status": "complete",
       "historical_comparison_status": "matched_subset_measured",
-      "runtime_compatibility_canary": "comparisons/higgs_audio_pinned_canary.json",
-      "failed_attempts": [
-        {
-          "evidence": "comparisons/higgs_audio_runtime_initial_failures.json"
-        }
-      ],
-      "provenance_limit": "Validated overlay, not a clean environment lock. Explicit main/tokenizer snapshots. Historical log omits reference_role; assistant inferred from preceding source edc38f4. Current YAML explicitly uses user. Historical weights/runtime immutable records absent.",
-      "generation_run": "results/reproduce_v2_higgs_audio_libritts16/20261001-005635-895f9eb9",
-      "scoring_run": "results/reproduce_v2_higgs_audio_libritts16_score/20261001-005922-743b6010",
-      "comparison": "comparisons/higgs_audio_libritts16_v1.json",
-      "historical_metric_replay": "comparisons/higgs_audio_metric_replay_v1.json",
-      "historical_metric_replay_status": "partial_WER_ASR_difference",
-      "runtime_guard": "comparisons/higgs_audio_runtime_guard.json",
-      "reproduction_status": "full_subset_measured_historical_exact_equivalence_unproven"
+      "provenance_limit": "Validated overlay, not a clean environment lock. Explicit main/tokenizer snapshots. Historical log omits reference_role; assistant inferred from preceding source edc38f4. Current YAML explicitly uses user. Historical weights/runtime immutable records absent."
     },
     {
       "n": "Higgs TTS 3",
@@ -419,12 +211,7 @@
       "subset": "subsets/libritts16_v1/selection.json",
       "generation_status": "complete",
       "scoring_status": "complete",
-      "historical_comparison_status": "matched_subset_measured",
-      "generation_run": "results/reproduce_v2_sparktts_libritts16/20260930-231928-f9defcfe",
-      "scoring_run": "results/reproduce_v2_sparktts_libritts16_legacy_score/20260930-232540-fe8519b1",
-      "comparison": "comparisons/sparktts_libritts16_v1.json",
-      "historical_metric_replay": "comparisons/sparktts_metric_replay_v1.json",
-      "historical_metric_replay_status": "partial_WER_ASR_difference"
+      "historical_comparison_status": "matched_subset_measured"
     },
     {
       "n": "VALL-E",
@@ -435,42 +222,7 @@
       "subset": "subsets/libritts16_v1/selection.json",
       "generation_status": "pending_compatible_checkpoint_and_runtime",
       "scoring_status": "pending",
-      "historical_comparison_status": "historical_reference_not_established",
-      "runtime_audit": "comparisons/valle_runtime_audit.json",
-      "implementation": "lifeiteng/vall-e",
-      "alternate_variant_status": "Amphion_native_LibriTTS16_generated_and_scored",
-      "amphion_variant": {
-        "implementation": "amphion",
-        "config": "configs/ots_vc/clean/libritts/vall_e_amphion_ots.yaml",
-        "subset": "subsets/libritts16_v1/selection.json",
-        "runtime_audit": "comparisons/amphion_valle_runtime_audit.json",
-        "generation_status": "complete",
-        "generation_run": "results/reproduce_v2_amphion_valle_libritts16/20261001-054053-dbdb5993",
-        "scoring_status": "complete",
-        "native_canary_status": "complete_2_pairs_MCD_WER_SIM",
-        "historical_comparison_status": "Robotcall20_matched_subset_measured_generation_differs",
-        "scoring_run": "results/reproduce_v2_amphion_valle_libritts16_score/20261001-055240-377db43f",
-        "means": {
-          "mcd": 6.997914793326701,
-          "wer": 0.3109975085571986,
-          "sim": 0.3685356401838362
-        },
-        "robotcall_validation": {
-          "config": "configs/ots_vc/clean/robotcall/vall_e_amphion_ots.yaml",
-          "subset": "subsets/robotcall20_v1/selection.json",
-          "runtime_audit": "comparisons/amphion_valle_robotcall20_input_audit.json",
-          "generation_status": "complete",
-          "generation_run": "results/reproduce_v2_amphion_valle_robotcall20/20261001-055730-7ce1f2eb",
-          "scoring_status": "complete",
-          "historical_replay_status": "complete_20_pairs",
-          "physical_speakers": 10,
-          "speaker_condition_groups": 20,
-          "scoring_run": "results/reproduce_v2_amphion_valle_robotcall20_score/20261001-061819-752a1999",
-          "comparison": "comparisons/amphion_valle_robotcall20_v1.json"
-        },
-        "auxiliary_validation": "comparisons/amphion_valle_libritts16_aux_validation.json",
-        "emotion_validation": "comparisons/amphion_valle_libritts16_emotion_validation.json"
-      }
+      "historical_comparison_status": "historical_reference_not_established"
     },
     {
       "n": "StyleTTS 2",
@@ -482,14 +234,7 @@
       "generation_status": "complete",
       "scoring_status": "complete",
       "historical_comparison_status": "matched_subset_measured",
-      "generation_run": "results/reproduce_v2_styletts2_libritts16/20261001-010412-ba502ef9",
-      "runtime_compatibility_canary": "comparisons/styletts2_canary.json",
-      "provenance_limit": "Configured primary and YAML-referenced ASR/F0/PL-BERT assets captured. Other implicit Hub assets and historical immutable weight/runtime records remain incomplete. Serial scoped loader compatibility; no thread-safety claim.",
-      "scoring_run": "results/reproduce_v2_styletts2_libritts16_score/20261001-010515-a811e0ab",
-      "comparison": "comparisons/styletts2_libritts16_v1.json",
-      "historical_metric_replay": "comparisons/styletts2_metric_replay_v1.json",
-      "historical_metric_replay_status": "partial_WER_ASR_difference",
-      "reproduction_status": "full_subset_measured_historical_exact_equivalence_unproven"
+      "provenance_limit": "Configured primary and YAML-referenced ASR/F0/PL-BERT assets captured. Other implicit Hub assets and historical immutable weight/runtime records remain incomplete. Serial scoped loader compatibility; no thread-safety claim."
     },
     {
       "n": "GLM-TTS",
@@ -501,14 +246,7 @@
       "generation_status": "complete",
       "scoring_status": "complete",
       "historical_comparison_status": "matched_subset_measured",
-      "generation_run": "results/reproduce_v2_glm_tts_libritts16/20261001-011331-82b3bc4e",
-      "runtime_compatibility_canary": "comparisons/glm_tts_canary.json",
-      "provenance_limit": "Historical checkpoint directory /tealab-data/rjin02/GLM-TTS-ckpt is absent; replacement weight equivalence unproven. Configured checkpoint/frontend/config assets hashed. Installed-package normalizer FST caches are not hashed. Campplus ONNX falls back to CPU because CUDA 11 libraries are absent; generation LLM uses CUDA. Shared tested runtime, not a clean environment lock.",
-      "scoring_run": "results/reproduce_v2_glm_tts_libritts16_score/20261001-011714-f5ad018f",
-      "comparison": "comparisons/glm_tts_libritts16_v1.json",
-      "historical_metric_replay": "comparisons/glm_tts_metric_replay_v1.json",
-      "historical_metric_replay_status": "partial_WER_ASR_difference",
-      "reproduction_status": "full_subset_measured_historical_exact_equivalence_unproven"
+      "provenance_limit": "Historical checkpoint directory the original checkpoint directory is absent; replacement weight equivalence unproven. Configured checkpoint/frontend/config assets hashed. Installed-package normalizer FST caches are not hashed. Campplus ONNX falls back to CPU because CUDA 11 libraries are absent; generation LLM uses CUDA. Shared tested runtime, not a clean environment lock."
     },
     {
       "n": "GlowTTS",
@@ -520,8 +258,6 @@
       "generation_status": "pending_missing_wrapper_and_assets",
       "scoring_status": "pending",
       "historical_comparison_status": "historical_reference_not_established",
-      "protocol_audit": "comparisons/glowtts_protocol_audit.json",
-      "reference_conditioning_status": "not_implemented_by_current_adapter",
       "provenance_limit": "Current adapter prioritizes reference text and uses dataset speaker IDs without reference-audio conditioning. Missing wrapper and configured assets prevent runtime validation; no unrelated model substitution."
     },
     {
@@ -534,13 +270,7 @@
       "generation_status": "complete",
       "scoring_status": "complete",
       "historical_comparison_status": "historical_reference_not_established",
-      "generation_run": "results/reproduce_v2_kimi_audio_libritts16/20261001-041146-8e0fb3df",
-      "scoring_run": "results/reproduce_v2_kimi_audio_libritts16_score/20261001-041601-7b3b7fac",
-      "subset_validation": "comparisons/kimi_audio_libritts16_validation.json",
-      "runtime_audit": "comparisons/kimi_audio_runtime_audit.json",
-      "reproduction_status": "full_subset_measured_historical_reference_not_established",
-      "provenance_limit": "Local main/Whisper/detokenizer/vocoder/GLM-tokenizer weights and upstream Python hashed. Supplemental native kernel source audit; clean install and historical reference unverified. Reference-history conditioning does not establish effective voice cloning.",
-      "current_native_source_scope_audit": "comparisons/kimi_audio_native_source_scope_v4.json"
+      "provenance_limit": "Local main/Whisper/detokenizer/vocoder/GLM-tokenizer weights and upstream Python hashed. Supplemental native kernel source audit; clean install and historical reference unverified. Reference-history conditioning does not establish effective voice cloning."
     },
     {
       "n": "MGM-Omni",
@@ -552,16 +282,6 @@
       "generation_status": "complete",
       "scoring_status": "complete",
       "historical_comparison_status": "matched_subset_measured",
-      "generation_run": "results/reproduce_v2_mgm_omni_scoped_libritts16/20261001-015626-f0c22657",
-      "canary": "comparisons/mgm_omni_canary.json",
-      "failed_attempts": [
-        {
-          "evidence": "comparisons/mgm_omni_runtime_initial_failures.json"
-        }
-      ],
-      "scoring_run": "results/reproduce_v2_mgm_omni_scoped_libritts16_score/20261001-015756-80407160",
-      "comparison": "comparisons/mgm_omni_libritts16_v1.json",
-      "historical_metric_replay": "comparisons/mgm_omni_metric_replay_v1.json",
       "provenance_limit": "Current MGM model/auxiliary checkpoint snapshot and repo_root source hashed; historical immutable Hub revision/runtime absent, so weight equivalence unproven. Key environment pins validated in existing runtime, not a clean lock. Content failure samples are retained."
     },
     {
@@ -574,17 +294,7 @@
       "generation_status": "complete",
       "scoring_status": "complete",
       "historical_comparison_status": "matched_subset_measured",
-      "failed_attempts": [
-        {
-          "evidence": "comparisons/moss_ttsd_runtime_initial_failures.json"
-        }
-      ],
-      "provenance_limit": "Current native MossTTSD checkpoint differs from the legacy Asteroid loader architecture. Historical immutable weights/runtime absent; weight equivalence unproven. Validated Transformers 5.0.0 overlay and key-pin recipe are not a clean environment lock. Reference ASR uses a hashed local base.en checkpoint; historical ASR weight equivalence unproven.",
-      "generation_run": "results/reproduce_v2_moss_ttsd_native_tf500_libritts16/20261001-014556-9961dcc0",
-      "scoring_run": "results/reproduce_v2_moss_ttsd_native_tf500_libritts16_score/20261001-014807-2bb92151",
-      "comparison": "comparisons/moss_ttsd_libritts16_v1.json",
-      "historical_metric_replay": "comparisons/moss_ttsd_metric_replay_v1.json",
-      "canary": "comparisons/moss_ttsd_canary.json"
+      "provenance_limit": "Current native MossTTSD checkpoint differs from the legacy Asteroid loader architecture. Historical immutable weights/runtime absent; weight equivalence unproven. Validated Transformers 5.0.0 overlay and key-pin recipe are not a clean environment lock. Reference ASR uses a hashed local base.en checkpoint; historical ASR weight equivalence unproven."
     },
     {
       "n": "MOSS-TTS",
@@ -596,21 +306,7 @@
       "generation_status": "complete",
       "scoring_status": "complete",
       "historical_comparison_status": "matched_subset_measured",
-      "failed_attempts": [
-        {
-          "evidence": "comparisons/moss_tts_runtime_initial_failure.json",
-          "reason": "Transformers 4.57.3 processing_utils has no MODALITY_TO_BASE_CLASS_MAPPING; checkpoint requires 5.x processor API."
-        }
-      ],
-      "generation_run": "results/reproduce_v2_moss_tts_libritts16/20261001-004619-0fd3edd2",
-      "runtime_compatibility_canary": "comparisons/moss_tts_pinned_canary.json",
-      "provenance_limit": "Validated existing isolated environment, not a clean installation lock. Explicit local main checkpoint and codec include Python implementation hashes. Historical run lacks immutable weights/runtime records.",
-      "scoring_run": "results/reproduce_v2_moss_tts_libritts16_score/20261001-004826-fc075466",
-      "comparison": "comparisons/moss_tts_libritts16_v1.json",
-      "historical_metric_replay": "comparisons/moss_tts_metric_replay_v1.json",
-      "historical_metric_replay_status": "partial_WER_ASR_difference",
-      "historical_reference_scope": "August 2026 local run; remains an experimental adapter in the paper model catalog.",
-      "reproduction_status": "full_subset_measured_historical_exact_equivalence_unproven"
+      "provenance_limit": "Validated existing isolated environment, not a clean installation lock. Explicit local main checkpoint and codec include Python implementation hashes. Historical run lacks immutable weights/runtime records."
     },
     {
       "n": "dots.tts",
@@ -621,16 +317,7 @@
       "subset": "subsets/libritts16_v1/selection.json",
       "generation_status": "complete_16_of_16",
       "scoring_status": "complete_16_of_16",
-      "historical_comparison_status": "matched_subset_measured",
-      "generation_run": "results/reproduce_v2_dots_tts_scoped_libritts16/20261001-024256-efd03a9d",
-      "scoring_run": "results/reproduce_v2_dots_tts_scoped_libritts16_score/20261001-025420-2f049144",
-      "comparison": "comparisons/dots_tts_libritts16_v1.json",
-      "historical_metric_replay": "comparisons/dots_tts_metric_replay_v1.json",
-      "historical_metric_replay_status": "WER_exact_SIM_numerical_difference_MCD_unresolved",
-      "historical_reference_scope": "August 2026 local run; experimental adapter, outside the paper model catalog.",
-      "reproduction_status": "full_subset_measured_historical_exact_equivalence_unproven",
-      "canary": "comparisons/dots_tts_canary.json",
-      "tokenizer_audit": "comparisons/dots_tts_tokenizer_audit.json"
+      "historical_comparison_status": "matched_subset_measured"
     },
     {
       "n": "ZONOS2",
@@ -642,29 +329,7 @@
       "generation_status": "complete",
       "scoring_status": "complete",
       "historical_comparison_status": "matched_subset_measured",
-      "config_overrides": [
-        "dataset=vctk",
-        "+dataset.manifest_variant=speaker"
-      ],
-      "generation_run": "results/reproduce_v2_zonos2_scoped_vctk16/20261001-032656-ea3a3cef",
-      "scoring_run": "results/reproduce_v2_zonos2_scoped_vctk16_score/20261001-032902-2e861f58",
-      "comparison": "comparisons/zonos2_vctk16_v1.json",
-      "historical_metric_replay": "comparisons/zonos2_metric_replay_v1.json",
-      "historical_reference_scope": "August 2026 VCTK run; experimental integration outside the paper model catalog.",
-      "additional_libritts_validation": "comparisons/zonos2_libritts16_validation.json",
-      "provenance_limit": "Explicit local main/DAC/speaker weights and native Python source hashed. Normalizer cache/data and native kernels not fully frozen; historical immutable weights/runtime and timing equivalence unproven. Source-index and legacy-fixed native seed variants retained. Fixed native seed almost entirely accounts for the MCD mean gap; no historical bitwise equivalence claim.",
-      "reproduction_status": "full_subset_measured_historical_exact_equivalence_unproven",
-      "native_seed_control": "comparisons/zonos2_native_seed_control_v1.json",
-      "legacy_fixed_variant": {
-        "native_seed_policy": "legacy_fixed",
-        "generation_run": "results/reproduce_v2_zonos2_legacy_fixed_vctk16/20261001-035641-8334d96e",
-        "scoring_run": "results/reproduce_v2_zonos2_legacy_fixed_vctk16_score/20261001-035850-ca41c2a6",
-        "comparison": "comparisons/zonos2_legacy_fixed_vctk16_v1.json",
-        "generation_status": "complete",
-        "scoring_status": "complete",
-        "historical_comparison_status": "matched_subset_measured"
-      },
-      "current_native_source_scope_audit": "comparisons/zonos2_native_source_scope_v4.json"
+      "provenance_limit": "Explicit local main/DAC/speaker weights and native Python source hashed. Normalizer cache/data and native kernels not fully frozen; historical immutable weights/runtime and timing equivalence unproven. Source-index and legacy-fixed native seed variants retained. Fixed native seed almost entirely accounts for the MCD mean gap; no historical bitwise equivalence claim."
     },
     {
       "n": "PlayDiffusion",
@@ -676,12 +341,7 @@
       "generation_status": "complete",
       "scoring_status": "complete",
       "historical_comparison_status": "matched_subset_measured",
-      "generation_run": "results/reproduce_v2_playdiffusion_local_libritts16/20261001-020533-a6d78370",
-      "canary": "comparisons/playdiffusion_canary.json",
-      "provenance_limit": "Six configured local preset files and upstream code hashed; historical immutable Hub revision/runtime absent. NLTK tagger resource unrecorded; key runtime pins are not a clean installation lock.",
-      "scoring_run": "results/reproduce_v2_playdiffusion_local_libritts16_score/20261001-020815-1135bf06",
-      "comparison": "comparisons/playdiffusion_libritts16_v1.json",
-      "historical_metric_replay": "comparisons/playdiffusion_metric_replay_v1.json"
+      "provenance_limit": "Six configured local preset files and upstream code hashed; historical immutable Hub revision/runtime absent. NLTK tagger resource unrecorded; key runtime pins are not a clean installation lock."
     },
     {
       "n": "Bark Voice Clone",
@@ -693,9 +353,6 @@
       "generation_status": "complete",
       "scoring_status": "complete",
       "historical_comparison_status": "historical_reference_not_established",
-      "generation_run": "results/reproduce_v2_bark_native_libritts16/20261001-065408-6ccc49b1",
-      "scoring_run": "results/reproduce_v2_bark_native_libritts16_score/20261001-070646-0d142414",
-      "runtime_audit": "comparisons/bark_runtime_audit.json",
       "provenance_limit": "Native frozen subset measured; no historical Bark matched reference established. Environment recipe is not a clean install lock."
     },
     {
@@ -708,13 +365,7 @@
       "generation_status": "complete",
       "scoring_status": "complete",
       "historical_comparison_status": "matched_subset_measured",
-      "generation_run": "results/reproduce_v2_ozspeech_device_libritts16/20261001-021703-3f95d57a",
-      "canary": "comparisons/ozspeech_canary.json",
-      "provenance_limit": "Configured main/codec weights and upstream lexicon/source hashed; historical immutable weights/runtime unavailable. G2P/NLTK package resources not frozen; key pins are not a clean installation lock. Runtime explicitly moves main model and both codecs to requested device; historical timing/device equivalence unproven.",
-      "initial_runtime_probe": "comparisons/ozspeech_initial_runtime.json",
-      "scoring_run": "results/reproduce_v2_ozspeech_device_libritts16_score/20261001-021850-0723053d",
-      "comparison": "comparisons/ozspeech_libritts16_v1.json",
-      "historical_metric_replay": "comparisons/ozspeech_metric_replay_v1.json"
+      "provenance_limit": "Configured main/codec weights and upstream lexicon/source hashed; historical immutable weights/runtime unavailable. G2P/NLTK package resources not frozen; key pins are not a clean installation lock. Runtime explicitly moves main model and both codecs to requested device; historical timing/device equivalence unproven."
     },
     {
       "n": "VibeVoice",
@@ -726,17 +377,7 @@
       "generation_status": "complete",
       "scoring_status": "complete",
       "historical_comparison_status": "matched_subset_measured",
-      "generation_run": "results/reproduce_v2_vibevoice_tf457_libritts16/20261001-022733-eb209c30",
-      "failed_attempts": [
-        {
-          "evidence": "comparisons/vibevoice_runtime_initial_failures.json"
-        }
-      ],
-      "provenance_limit": "Current local checkpoint and source hashed; historical immutable weights/runtime and effective attention backend unproven. Current generation uses SDPA fallback because flash-attn is absent. Validated key runtime pins are not a clean installation lock. Matched historical scoring uses lowercase_v1 WER.",
-      "canary": "comparisons/vibevoice_canary.json",
-      "scoring_run": "results/reproduce_v2_vibevoice_tf457_libritts16_score/20261001-023020-7ac458ae",
-      "comparison": "comparisons/vibevoice_libritts16_v1.json",
-      "historical_metric_replay": "comparisons/vibevoice_metric_replay_v1.json"
+      "provenance_limit": "Current local checkpoint and source hashed; historical immutable weights/runtime and effective attention backend unproven. Current generation uses SDPA fallback because flash-attn is absent. Validated key runtime pins are not a clean installation lock. Matched historical scoring uses lowercase_v1 WER."
     }
   ],
   "requirements": [
@@ -766,21 +407,7 @@
     },
     {
       "item": "Protocol and stage plan for protection, denoising, generation and scoring",
-      "status": "strict_reference_binding_protected_and_denoised_16_pair_generation_and_core_scoring_verified_gr_replay_and_dns64_producers_verified_other_producers_pending",
-      "evidence": "comparisons/reference_stage_qwen3_libritts16.json",
-      "gr_archive_replay": {
-        "status": "16_pairs_historical_wav_hashes_verified_twice_consumer_guarded",
-        "evidence": "comparisons/gr_archived_noise_libritts16.json",
-        "original_noise_rng_regeneration": "pending",
-        "denoising_and_other_producers": "dns64_verified_other_protection_producers_pending"
-      },
-      "dns64_producer": {
-        "status": "produced_16_repeated_16_exact_clone_and_core_scored_16",
-        "evidence": "comparisons/dns64_gr_archived_noise_libritts16.json",
-        "historical_bitwise_equivalence": "not_established",
-        "dependency_clean_worker": "integrated_16_pairs_repeated_and_output_equivalence_verified",
-        "worker_evidence": "comparisons/dns64_clean_worker_libritts16.json"
-      }
+      "status": "strict_reference_binding_protected_and_denoised_16_pair_generation_and_core_scoring_verified_gr_replay_and_dns64_producers_verified_other_producers_pending"
     },
     {
       "item": "Separate completion, protocol validity and cross-run comparability",

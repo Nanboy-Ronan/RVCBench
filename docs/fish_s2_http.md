@@ -53,22 +53,6 @@ are matched by audio hashes and transcripts. Historical server weights,
 runtime, and RNG state are unavailable, so the comparison remains diagnostic.
 The historical S2 entry is experimental and outside the paper's 18-model set.
 
-Deterministic HTTP generation remains unresolved: the first cold-service
-request differs from subsequent identical-seed requests; both two-sample
-warm repeats agree with the corresponding full-run outputs. These differences
-are retained in `reproduction/comparisons/fish_s2_http_repeatability.json`.
-Setting a request seed alone is insufficient evidence of repeatability.
-An additional control set the native seed and deterministic cuDNN flags before
-API initialization and warmup. Both cold outputs still differed from their
-warm repeats, so startup seed setup alone is not a correction. With token
-tracing, the first reference's codec token hash changes between cold and warm
-requests, followed by generated lengths of 68 versus 62 tokens. The second
-reference and generated token hashes match. This locates the first observed
-divergence in reference encoding; the underlying numerical or state cause
-was investigated further in the [codec stability audit](fish_s2_codec_stability.md),
-which provides an opt-in eager activation variant. See `fish_s2_http_seeded_startup_audit.json` and
-`fish_s2_http_token_trace_audit.json` in `reproduction/comparisons/`.
-
 For diagnosis, `scripts/serve_fish_s2.py` invokes the official single-worker
 API after native startup seed setup. It rejects multiple workers because
 spawned workers would not inherit that initialization. This is a diagnostic

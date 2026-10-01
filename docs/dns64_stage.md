@@ -45,33 +45,14 @@ stage failed. `worker_result.json` records incremental worker progress, and
 `worker.log` retains its diagnostics. Both direct and worker execution use the
 same model-only inference kernel.
 
-## Validation and remaining environment work
+## Isolated model environment
 
-Two executions on `libritts16_v1` produced 16/16 identical output WAVs.
-Comparison against the historical DNS64 run found equal rates and lengths for
-all 16; the maximum difference was 5 PCM16 units. Historical WAV hashes do not
-match, so this is a measured numeric comparison, not bitwise reproduction.
-The new outputs also completed 16/16 Qwen3-TTS generations and core scores.
-The retained evidence is
-`reproduction/comparisons/dns64_gr_archived_noise_libritts16.json`.
-
-The validated runtime is an isolated model-only overlay with denoiser 0.1.5,
-julius 0.2.7 and Torch/Torchaudio 2.6.0. Its `pip check` fails because upstream
-denoiser requires Hydra below 1.0, while the benchmark requires Hydra 1.3.
-The overlay does not establish a dependency-clean installation. A separate
-Python 3.10 environment with no system-site packages has passed `pip check`
-and strict DNS64 weight loading. Its exact package set is retained in
-`envs/dns64-worker-py310-cu124.txt`; this is a model-worker environment, not
-the benchmark's core environment. This worker now runs through the public
-CLI. Two independent worker executions produced 16/16 identical WAVs, all
-matching the earlier direct-run WAVs. The core runtime records Hydra 1.3.2
-while the worker records Hydra 0.11.3. A real 2-pair cloning canary verifies
-consumption of the worker producer manifest; the matching direct-run reference
-bytes were already used in the retained full 16-pair generation/scoring.
-Worker evidence is retained in
-`reproduction/comparisons/dns64_clean_worker_libritts16.json`.
-This increment leaves the existing `run_denoiser.py` edits and shared
-environments untouched.
+DNS64 requires legacy Hydra, which conflicts with the benchmark core.
+Use a separate Python 3.10 worker environment with no system-site packages.
+The pinned packages in `envs/dns64-worker-py310-cu124.txt` have passed
+`pip check` and real subset inference. Direct and worker outputs match on
+the fixed 16-pair selection. Historical DNS64 output differs by up to
+5 PCM16 units, so bitwise historical equivalence remains unestablished.
 
 The isolated model environment can be reconstructed with Python 3.10:
 
