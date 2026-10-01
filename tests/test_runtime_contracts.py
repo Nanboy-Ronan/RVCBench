@@ -166,6 +166,14 @@ def test_generation_fingerprint_tracks_auxiliary_upstream_source(tmp_path):
     first = generation_runtime(tmp_path, conf, {})
     module.write_text('TEMPERATURE = 2\n')
     assert generation_runtime(tmp_path, conf, {})['source_sha256'] != first['source_sha256']
+    module.write_text('import transformers\n')
+    first = generation_runtime(tmp_path, conf, {'transformers': '4.51.3'})
+    second = generation_runtime(tmp_path, conf, {'transformers': '4.57.3'})
+    assert first['packages']['transformers'] == '4.51.3'
+    assert second['packages'] != first['packages']
+    requirements = source / 'requirements.txt'
+    requirements.write_text('transformers==4.51.3\n')
+    assert generation_runtime(tmp_path, conf, {})['source_sha256'] != first['source_sha256']
 
 
 def test_cosyvoice_explicit_matcha_source_rejects_cached_other_checkout(tmp_path):
@@ -186,6 +194,18 @@ def test_cosyvoice_explicit_matcha_source_rejects_cached_other_checkout(tmp_path
     generator.config.matcha_code_path = tmp_path / 'missing'
     with pytest.raises(FileNotFoundError, match='Configured Matcha-TTS source'):
         generator._ensure_matcha_dependency()
+
+
+def test_cosyvoice_rejects_transformers_drift_before_model_loading(tmp_path):
+    from src.models.cosyvoice.generator import CosyVoiceGenerator
+    generator = CosyVoiceGenerator.__new__(CosyVoiceGenerator)
+    generator.config = SimpleNamespace(code_path=tmp_path)
+    (tmp_path / 'requirements.txt').write_text('transformers==4.51.3\n')
+    with patch('importlib.metadata.version', return_value='4.57.3'):
+        with pytest.raises(RuntimeError, match='source requires transformers==4.51.3'):
+            generator._validate_transformers_version()
+    with patch('importlib.metadata.version', return_value='4.51.3'):
+        generator._validate_transformers_version()
 
 
 def test_xtts_managed_lifetime_retains_generator_between_samples(setup_run, tmp_path):

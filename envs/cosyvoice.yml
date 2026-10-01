@@ -3,7 +3,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3.10
+  - python=3.11
   - pip
   - ffmpeg
   - libsndfile
@@ -11,4 +11,7 @@ dependencies:
   - pip:
       - --extra-index-url https://download.pytorch.org/whl/cu121
       - -e ..
+      - numpy==1.26.4
+      - transformers==4.51.3
+      - tokenizers==0.21.4
       - matcha-tts

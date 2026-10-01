@@ -3,8 +3,8 @@
   "model": "cosyvoice",
   "matched_pairs": 16,
   "speakers": 8,
-  "run_manifest": "/tealab-data/rjin02/RVCBench/results/reproduce_v2_cosyvoice_libritts16_score/20260930-235628-6e886608/run_manifest.json",
-  "run_manifest_sha256": "c2ec570e6585e79013d1051d9683f9ff5e55bc8d3116690c21c4ed984fc9d2ab",
+  "run_manifest": "/tealab-data/rjin02/RVCBench/results/reproduce_v2_cosyvoice_libritts16_transformers451_score/20261001-000929-dee42e8a/run_manifest.json",
+  "run_manifest_sha256": "7b3945b7794739d2d7f23d96c34bf39dc6407b40dd4ddb927ea7e8d7f90b571d",
   "historical_csv": "/tealab-data/rjin02/AudioWatermarkBench/results/cosyvoice_ots_on_libritts/20260722-183308/generation_sample_metrics.csv",
   "historical_csv_sha256": "ebb87a0606f13ae9c836e04888691c1fd72259804015aef9da76a109a24b4d35",
   "historical_config": {
@@ -60,33 +60,33 @@
   },
   "metrics": {
     "mcd": {
-      "current_mean": 11.36764347624684,
+      "current_mean": 6.116097847688122,
       "historical_mean": 5.575846090505975,
-      "paired_mean_delta": 5.791797385740866,
-      "mean_absolute_delta": 5.791797385740866,
+      "paired_mean_delta": 0.5402517571821472,
+      "mean_absolute_delta": 0.8450361817722507,
       "speaker_bootstrap_95_ci_delta": [
-        4.7941705240362085,
-        6.607009664077193
+        -0.015992931566306785,
+        1.3571595442714308
       ]
     },
     "wer": {
-      "current_mean": 1.065217391304348,
+      "current_mean": 0.0536120951417004,
       "historical_mean": 0.038113613360323886,
-      "paired_mean_delta": 1.0271037779440237,
-      "mean_absolute_delta": 1.0271037779440237,
+      "paired_mean_delta": 0.01549848178137652,
+      "mean_absolute_delta": 0.046748481781376514,
       "speaker_bootstrap_95_ci_delta": [
-        0.9683044358387608,
-        1.1150971989966556
+        -0.046875,
+        0.09337044534412955
       ]
     },
     "sim": {
-      "current_mean": 0.24199978820979595,
+      "current_mean": 0.6219861675053835,
       "historical_mean": 0.5946428086608648,
-      "paired_mean_delta": -0.3526430204510689,
-      "mean_absolute_delta": 0.3526430204510689,
+      "paired_mean_delta": 0.02734335884451866,
+      "mean_absolute_delta": 0.04988453909754753,
       "speaker_bootstrap_95_ci_delta": [
-        -0.40950519777834415,
-        -0.29736597649753094
+        -0.0002634045667946338,
+        0.05699473316781222
       ]
     }
   },
@@ -100,9 +100,9 @@
         "source": "pair_encoded_filename"
       },
       "current": {
-        "mcd": 13.360911400552565,
-        "wer": 2.0,
-        "sim": 0.23190179467201233
+        "mcd": 4.066230227074267,
+        "wer": 0.0,
+        "sim": 0.6078920364379883
       },
       "historical": {
         "mcd": 4.997043293141344,
@@ -119,9 +119,9 @@
         "source": "pair_encoded_filename"
       },
       "current": {
-        "mcd": 13.290979816195879,
-        "wer": 1.0,
-        "sim": 0.16314396262168884
+        "mcd": 8.380328683110937,
+        "wer": 0.125,
+        "sim": 0.5427539348602295
       },
       "historical": {
         "mcd": 7.811730362899533,
@@ -138,9 +138,9 @@
         "source": "pair_encoded_filename"
       },
       "current": {
-        "mcd": 10.96987499247205,
-        "wer": 1.0,
-        "sim": 0.3376286029815674
+        "mcd": 3.847277718449373,
+        "wer": 0.0,
+        "sim": 0.7440271973609924
       },
       "historical": {
         "mcd": 3.807908386192796,
@@ -157,9 +157,9 @@
         "source": "pair_encoded_filename"
       },
       "current": {
-        "mcd": 11.139972032245206,
-        "wer": 1.0,
-        "sim": 0.33459779620170593
+        "mcd": 3.4783896007487187,
+        "wer": 0.0,
+        "sim": 0.7156847715377808
       },
       "historical": {
         "mcd": 3.2092107715738862,
@@ -176,9 +176,9 @@
         "source": "pair_encoded_filename"
       },
       "current": {
-        "mcd": 14.877185244517538,
-        "wer": 1.0,
-        "sim": 0.3250541090965271
+        "mcd": 5.57959098374982,
+        "wer": 0.07692307692307693,
+        "sim": 0.6308425664901733
       },
       "historical": {
         "mcd": 6.506027585562799,
@@ -195,9 +195,9 @@
         "source": "pair_encoded_filename"
       },
       "current": {
-        "mcd": 9.970253954230323,
-        "wer": 1.0,
-        "sim": 0.23250064253807068
+        "mcd": 7.42559701475657,
+        "wer": 0.0,
+        "sim": 0.40263357758522034
       },
       "historical": {
         "mcd": 6.6140672869109425,
@@ -214,9 +214,9 @@
         "source": "pair_encoded_filename"
       },
       "current": {
-        "mcd": 10.239833815642829,
-        "wer": 1.0,
-        "sim": 0.30800437927246094
+        "mcd": 4.90072570590242,
+        "wer": 0.0,
+        "sim": 0.6741365194320679
       },
       "historical": {
         "mcd": 4.537487646641443,
@@ -233,9 +233,9 @@
         "source": "pair_encoded_filename"
       },
       "current": {
-        "mcd": 10.87301412183185,
-        "wer": 1.0,
-        "sim": 0.18610867857933044
+        "mcd": 10.324997907926852,
+        "wer": 0.0,
+        "sim": 0.6373672485351562
       },
       "historical": {
         "mcd": 4.227796511905489,
@@ -252,9 +252,9 @@
         "source": "pair_encoded_filename"
       },
       "current": {
-        "mcd": 12.289829492561493,
-        "wer": 1.0,
-        "sim": 0.22706112265586853
+        "mcd": 6.867266087301872,
+        "wer": 0.5789473684210527,
+        "sim": 0.5050221681594849
       },
       "historical": {
         "mcd": 5.4109700746841565,
@@ -271,9 +271,9 @@
         "source": "pair_encoded_filename"
       },
       "current": {
-        "mcd": 12.510028003229968,
-        "wer": 1.0,
-        "sim": 0.1937907636165619
+        "mcd": 6.516057331855333,
+        "wer": 0.07692307692307693,
+        "sim": 0.44218307733535767
       },
       "historical": {
         "mcd": 5.862033020882088,
@@ -290,9 +290,9 @@
         "source": "pair_encoded_filename"
       },
       "current": {
-        "mcd": 9.43558618001133,
-        "wer": 1.0,
-        "sim": 0.22906459867954254
+        "mcd": 4.861315799495396,
+        "wer": 0.0,
+        "sim": 0.5582166910171509
       },
       "historical": {
         "mcd": 4.646057124857299,
@@ -309,9 +309,9 @@
         "source": "pair_encoded_filename"
       },
       "current": {
-        "mcd": 10.322127925919368,
-        "wer": 1.0,
-        "sim": 0.19439494609832764
+        "mcd": 5.850526805909285,
+        "wer": 0.0,
+        "sim": 0.6449191570281982
       },
       "historical": {
         "mcd": 6.009345748819901,
@@ -328,9 +328,9 @@
         "source": "pair_encoded_filename"
       },
       "current": {
-        "mcd": 11.119962016539326,
-        "wer": 1.0434782608695652,
-        "sim": 0.22126774489879608
+        "mcd": 5.1604546605538895,
+        "wer": 0.0,
+        "sim": 0.6455093622207642
       },
       "historical": {
         "mcd": 5.505792919329435,
@@ -347,9 +347,9 @@
         "source": "pair_encoded_filename"
       },
       "current": {
-        "mcd": 10.157537133783043,
-        "wer": 1.0,
-        "sim": 0.3200679421424866
+        "mcd": 5.229686423015373,
+        "wer": 0.0,
+        "sim": 0.766761302947998
       },
       "historical": {
         "mcd": 4.903481920386555,
@@ -366,9 +366,9 @@
         "source": "pair_encoded_filename"
       },
       "current": {
-        "mcd": 11.1570088570789,
-        "wer": 1.0,
-        "sim": 0.2525216341018677
+        "mcd": 6.029148037699757,
+        "wer": 0.0,
+        "sim": 0.8182470798492432
       },
       "historical": {
         "mcd": 6.106016564854369,
@@ -385,9 +385,9 @@
         "source": "pair_encoded_filename"
       },
       "current": {
-        "mcd": 10.168190633137774,
-        "wer": 1.0,
-        "sim": 0.11488789319992065
+        "mcd": 9.339972575460088,
+        "wer": 0.0,
+        "sim": 0.6155819892883301
       },
       "historical": {
         "mcd": 9.058568229453561,
@@ -405,7 +405,5 @@
     }
   },
   "interpretation": "Descriptive paired regression check, not an equivalence test or full-table reproduction claim.",
-  "historical_provenance_limit": "Legacy result does not provide modern per-sample generation, weight and scorer fingerprints.",
-  "reproduction_status": "failed_quality_regression_in_unsupported_runtime",
-  "superseded_by": "cosyvoice_libritts16_v1.json"
+  "historical_provenance_limit": "Legacy result does not provide modern per-sample generation, weight and scorer fingerprints."
 }

@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import importlib
+import importlib.metadata
+import re
 import sys
 import types
 from dataclasses import dataclass, replace
@@ -158,6 +160,7 @@ class CosyVoiceGenerator(BaseModel):
         if self._model is not None:
             return
 
+        self._validate_transformers_version()
         self._ensure_pythonpath()
         self._ensure_modelscope_stub()
 
@@ -193,6 +196,21 @@ class CosyVoiceGenerator(BaseModel):
         )
         self.model = self._model
         self.sample_rate = int(getattr(self._model, "sample_rate", 24000))
+
+    def _validate_transformers_version(self) -> None:
+        requirements = self.config.code_path / 'requirements.txt'
+        if not requirements.is_file():
+            return
+        pinned = re.search(r'^\s*transformers==([^\s;#]+)', requirements.read_text(), re.MULTILINE)
+        if pinned is None:
+            return
+        installed = importlib.metadata.version('transformers')
+        if installed != pinned.group(1):
+            raise RuntimeError(
+                f'CosyVoice source requires transformers=={pinned.group(1)}; found {installed}. '
+                'Use an isolated environment matching the upstream pin. '
+                'Newer versions can generate invalid speech without raising inference errors.'
+            )
 
     # ------------------------------------------------------------------
     # Path resolution helpers

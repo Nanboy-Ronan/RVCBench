@@ -54,6 +54,16 @@ CosyVoice can pin an external Matcha-TTS checkout with
 `adversary.matcha_code_path=/absolute/path/to/Matcha-TTS`. Its source is included
 in the generation fingerprint, and a conflicting already-imported checkout is
 rejected. Use this when the dependency is outside the CosyVoice source tree.
+CosyVoice also checks the exact Transformers pin in its upstream
+`requirements.txt` before model loading. The validated local compatibility
+combination is Transformers 4.51.3 / tokenizers 0.21.4 on Python 3.11. A 4.57.3 /
+0.22.2 runtime completed inference but produced a severe quality regression;
+see `reproduction/comparisons/cosyvoice_transformers451_canary.json` for the
+matched diagnostic samples. The environment recipe remains a template; the
+local check used an isolated overlay, not a clean dependency lock installation.
+Upstream requirement files and statically imported distributions now contribute
+to the generation fingerprint, including auxiliary source trees. This is
+conservative and can include optional training dependencies.
 Missing/failed samples are retried. Use `+vc.retries=1` with `run_vc.py` for an
 additional attempt within a run. A per-sample seed is set before each adapter call.
 The effective run seed is propagated into adapters; seeds use the preserved source

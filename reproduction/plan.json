@@ -241,9 +241,9 @@
       "subset": "subsets/libritts16_v1/selection.json",
       "generation_status": "complete",
       "scoring_status": "complete",
-      "historical_comparison_status": "failed_large_quality_regression",
-      "generation_run": "results/reproduce_v2_cosyvoice_libritts16/20260930-234949-7d797094",
-      "provenance_limit": "Explicit Matcha source pin verified; severe generation quality regression persists under transformers 4.57.3. Isolated upstream-required 4.51.3 runtime check pending.",
+      "historical_comparison_status": "matched_subset_measured",
+      "generation_run": "results/reproduce_v2_cosyvoice_libritts16_transformers451/20261001-000642-745fb083",
+      "provenance_limit": "Validated isolated overlay, not a clean environment lock. Historical run lacks immutable weight/runtime records. Generation run predates expanded upstream distribution closure capture.",
       "pinned_dependency_validation": {
         "generation_run": "results/reproduce_v2_cosyvoice_libritts16_pinned_matcha/20260930-235655-3de3c6f5",
         "status": "generated",
@@ -251,10 +251,20 @@
         "requested": 16,
         "identical_generated_audio": 16
       },
-      "scoring_run": "results/reproduce_v2_cosyvoice_libritts16_score/20260930-235628-6e886608",
-      "comparison": "comparisons/cosyvoice_libritts16_initial_v1.json",
-      "reproduction_status": "failed_generation_quality_regression_under_investigation",
-      "historical_metric_replay": "comparisons/cosyvoice_metric_replay_v1.json"
+      "scoring_run": "results/reproduce_v2_cosyvoice_libritts16_transformers451_score/20261001-000929-dee42e8a",
+      "comparison": "comparisons/cosyvoice_libritts16_v1.json",
+      "reproduction_status": "runtime_regression_corrected_full_subset_measured_historical_exact_equivalence_unproven",
+      "historical_metric_replay": "comparisons/cosyvoice_metric_replay_v1.json",
+      "runtime_compatibility_canary": "comparisons/cosyvoice_transformers451_canary.json",
+      "corrected_generation_status": "complete",
+      "failed_quality_attempts": [
+        {
+          "generation_run": "results/reproduce_v2_cosyvoice_libritts16/20260930-234949-7d797094",
+          "scoring_run": "results/reproduce_v2_cosyvoice_libritts16_score/20260930-235628-6e886608",
+          "comparison": "comparisons/cosyvoice_libritts16_initial_v1.json",
+          "reason": "transformers 4.57.3/tokenizers 0.22.2 silently produced unintelligible speech; full sixteen-pair repetition with fixed Matcha source preserved every bad output"
+        }
+      ]
     },
     {
       "n": "Higgs Audio",

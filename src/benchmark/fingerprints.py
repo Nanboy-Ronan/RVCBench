@@ -71,9 +71,18 @@ def generation_runtime(root, conf, packages):
         files[str(path)] = file_hash(path)
     for key, upstream in conf.adversary.items():
         if (key == 'code_path' or key.endswith('_code_path')) and upstream and Path(str(upstream)).is_dir():
-            for path in sorted(Path(str(upstream)).rglob('*.py')):
-                if '.git' not in path.parts and '__pycache__' not in path.parts:
+            for path in sorted(Path(str(upstream)).rglob('*')):
+                runtime_file = (path.suffix == '.py' or path.name in
+                    {'pyproject.toml', 'setup.cfg', 'uv.lock', 'environment.yml'} or
+                    (path.name.startswith('requirements') and path.suffix == '.txt'))
+                if runtime_file and path.is_file() and '.git' not in path.parts and '__pycache__' not in path.parts:
                     files[str(path.resolve())] = file_hash(path)
+                    if path.suffix == '.py':
+                        for node in walk(ast.parse(path.read_text())):
+                            if isinstance(node, ast.Import):
+                                external.update(alias.name.split('.')[0] for alias in node.names)
+                            elif isinstance(node, ast.ImportFrom) and not node.level and node.module:
+                                external.add(node.module.split('.')[0])
     distributions = importlib.metadata.packages_distributions()
     requested = {name for module in external for name in distributions.get(module, [])}
     # Include installed transitive requirements (e.g. transformers behind qwen-tts).
@@ -103,6 +112,6 @@ def generation_runtime(root, conf, packages):
     worker = worker_environment(worker_python or sys.executable) if worker_python or conf.adversary.get('worker_script_path') else None
     return {'source_files': source_files, 'source_sha256': digest(source_files), 'packages': versions,
             'worker_environment': worker,
-            'dependency_scope': 'static_local_imports_and_distribution_dependency_closure_v1',
+            'dependency_scope': 'static_local_and_upstream_imports_and_distribution_dependency_closure_v2',
             'limitations': ['Unresolved dynamic upstream imports remain in full run provenance.',
                            'Worker packages are captured conservatively in full; dynamically downloaded assets need runtime capture.']}
