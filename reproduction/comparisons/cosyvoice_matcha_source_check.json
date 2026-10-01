@@ -1,0 +1,11 @@
+{
+  "status": "identical_generation_quality_regression_preserved",
+  "requested": 16,
+  "identical_generated_audio": 16,
+  "source_trees_hashed": 42,
+  "runs": [
+    "results/reproduce_v2_cosyvoice_libritts16/20260930-234949-7d797094",
+    "results/reproduce_v2_cosyvoice_libritts16_pinned_matcha/20260930-235655-3de3c6f5"
+  ],
+  "interpretation": "Fixing dependency source selection preserved all generated outputs; their large historical quality regression remains unresolved."
+}

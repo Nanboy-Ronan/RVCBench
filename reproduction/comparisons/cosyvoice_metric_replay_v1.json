@@ -1,0 +1,37 @@
+{
+  "kind": "historical_audio_metric_replay",
+  "historical_csv": "/tealab-data/rjin02/AudioWatermarkBench/results/cosyvoice_ots_on_libritts/20260722-183308/generation_sample_metrics.csv",
+  "historical_csv_sha256": "ebb87a0606f13ae9c836e04888691c1fd72259804015aef9da76a109a24b4d35",
+  "differences": {
+    "mcd": {
+      "valid": 16,
+      "requested": 16,
+      "mean_delta": 0.0,
+      "max_absolute_delta": 0.0
+    },
+    "wer": {
+      "valid": 16,
+      "requested": 16,
+      "mean_delta": 0.06958502024291498,
+      "max_absolute_delta": 0.6923076923076923
+    },
+    "sim": {
+      "valid": 16,
+      "requested": 16,
+      "mean_delta": -5.185604095458984e-06,
+      "max_absolute_delta": 3.3229589462280273e-05
+    }
+  },
+  "historical_wer_protocol": {
+    "normalization": "ascii_punctuation_removed_v2",
+    "rows": 2000,
+    "formula_matches": {
+      "lowercase_v1": 754,
+      "ascii_punctuation_removed_v2": 2000
+    }
+  },
+  "interpretation": "Tests scorer reproduction on historical audio; does not prove generation reproducibility.",
+  "source_report": "/tealab-data/rjin02/RVCBench/results/reproduction_metric_replay/cosyvoice_libritts16_v1/replay_report.json",
+  "source_sha256": "0290deca95c03b3f0ae29d8d514193eba5b5197aec25e3440769eacd70f42254",
+  "status": "partial_WER_ASR_difference"
+}
