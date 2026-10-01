@@ -59,7 +59,8 @@ def run_zero_shot(conf, base_dir, device, dataset, exp_dir, logger, protected_au
                          'seed': seed, 'sample_seed_policy': 'seed_plus_source_index_v2', 'device': str(device)}
     runtime_provenance = provenance(Path(__file__).resolve().parents[2])
     from .fingerprints import generation_runtime
-    generation_provenance = generation_runtime(Path(__file__).resolve().parents[2], conf, runtime_provenance['packages'])
+    generation_provenance = (None if evaluate_only else
+        generation_runtime(Path(__file__).resolve().parents[2], conf, runtime_provenance['packages']))
     manifest = {'schema_version': SCHEMA_VERSION, 'protocol': 'rvcbench-zero-shot-v2',
                 'status': 'running', 'evaluated': False, 'config': effective_config,
                 'provenance': runtime_provenance, 'generation_config': generation_config,
@@ -67,6 +68,7 @@ def run_zero_shot(conf, base_dir, device, dataset, exp_dir, logger, protected_au
                 'generation_fingerprint': digest(generation_config),
                 'input_fingerprint': input_fingerprint(rows), 'samples': rows,
                 'variant_selection': getattr(dataset, 'variant_selection', None),
+                'comparison_status': 'requires_pairwise_protocol_check',
                 'coverage': coverage(rows, required, evaluated=False)}
     path = Path(exp_dir) / 'run_manifest.json'
     events = Path(exp_dir) / 'sample_events.jsonl'
@@ -108,6 +110,8 @@ def run_zero_shot(conf, base_dir, device, dataset, exp_dir, logger, protected_au
                 raise ValueError('Resume runtime source changed; start a new run')
             if not evaluate_only and old.get('generation_provenance', old['provenance']).get('packages') != generation_provenance['packages']:
                 raise ValueError('Resume Python environment changed; start a new run')
+            if not evaluate_only and old.get('generation_provenance', {}).get('worker_environment') != generation_provenance.get('worker_environment'):
+                raise ValueError('Resume worker Python environment changed; start a new run')
             previous = {r['sample_id']: r for r in old['samples']}
             manifest['source_run'] = str(source)
             if evaluate_only:

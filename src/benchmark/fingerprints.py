@@ -1,10 +1,24 @@
 """Generation provenance scoped to reachable runtime code and dependencies."""
 import ast
 import importlib.metadata
+import json
+import subprocess
+import sys
 from pathlib import Path
 
 from .artifacts import digest, file_hash
 from .registry import _ADVERSARY_REGISTRY
+
+
+def worker_environment(runtime_python):
+    """Probe the configured interpreter without importing models or reading secrets."""
+    code = '''import importlib.metadata as m, json, platform, sys
+print(json.dumps({'python': platform.python_version(), 'executable': sys.executable,
+ 'packages': {d.metadata['Name']: d.version for d in m.distributions() if d.metadata['Name']}}))
+'''
+    result = subprocess.run([str(runtime_python), '-c', code], capture_output=True, text=True,
+                            timeout=30, check=True)
+    return json.loads(result.stdout)
 
 
 def generation_runtime(root, conf, packages):
@@ -85,7 +99,10 @@ def generation_runtime(root, conf, packages):
     normalized = {name.lower().replace('_', '-'): version for name, version in packages.items()}
     versions = {name: normalized.get(name.lower().replace('_', '-')) for name in sorted(requested)}
     source_files = {str(Path(p).relative_to(root)) if Path(p).is_relative_to(root) else p: h for p, h in sorted(files.items())}
+    worker_python = conf.adversary.get('runtime_python')
+    worker = worker_environment(worker_python or sys.executable) if worker_python or conf.adversary.get('worker_script_path') else None
     return {'source_files': source_files, 'source_sha256': digest(source_files), 'packages': versions,
+            'worker_environment': worker,
             'dependency_scope': 'static_local_imports_and_distribution_dependency_closure_v1',
             'limitations': ['Unresolved dynamic upstream imports remain in full run provenance.',
-                           'Separate worker Python environments require independent environment capture.']}
+                           'Worker packages are captured conservatively in full; dynamically downloaded assets need runtime capture.']}

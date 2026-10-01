@@ -29,6 +29,12 @@ python run_vc.py --config-name ots_vc/clean/libritts/qwen3_tts_ots \
 Use exactly the same dataset selection, transcripts, and audio as the source run.
 This command creates a new run; it does not overwrite the generation run. Generation and scoring can also be requested with `--evaluate` on the Qwen quickstart.
 
+XTTS-v2 with Coqui TTS 0.22.0 requires the Transformers 4.40.2 / tokenizers
+0.19.1 combination recorded in `envs/xtts-v2.yml`. The local subset check uses
+Python 3.11 and NumPy 1.26.4 in an isolated overlay; this validates that runtime
+combination, not a fully locked environment installation. The runner retains
+the XTTS model across samples and releases it before scoring.
+
 ```bash
 python scripts/run_qwen3tts_quickstart.py --max-samples 5 \
   --resume-from /absolute/path/to/previous/run
@@ -36,6 +42,9 @@ python scripts/run_qwen3tts_quickstart.py --max-samples 5 \
 
 Resume checks the input fingerprint, generation settings, runtime source digest,
 Python environment, and generated audio hashes. Verified successful audio is copied into a new run.
+For subprocess adapters, the worker interpreter and its installed package versions
+are recorded independently and checked on resume. Evaluation-only runs preserve
+source generation provenance and do not probe or start the model interpreter.
 Missing/failed samples are retried. Use `+vc.retries=1` with `run_vc.py` for an
 additional attempt within a run. A per-sample seed is set before each adapter call.
 The effective run seed is propagated into adapters; seeds use the preserved source
@@ -93,6 +102,14 @@ Completeness alone does not make two runs comparable: match the input fingerprin
 model version, protection settings, metric protocol, required metrics, and relevant
 runtime/hardware settings. Historical and current per-sample execution timings must not
 be merged without accounting for the protocol change.
+
+Run `rvcbench compare-check /path/to/run-a /path/to/run-b --metrics mcd wer sim`
+before comparing current model quality. This checks both runs' audio hashes,
+population, seed policy and metric-specific scorer fingerprints, and returns a
+nonzero exit code when they differ. The old coverage field
+`eligible_for_comparison` means only that coverage is complete; it does not prove
+pairwise comparability. New runs record `comparison_status` separately. Timing
+comparisons and intervention comparisons require their additional protocols.
 
 ## Export and website
 

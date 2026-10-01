@@ -228,6 +228,10 @@ class XttsZeroShotAdversary(BaseAdversary):
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
 
+    def close(self):
+        self._release_generator()
+        super().close()
+
     def attack(self, *, output_path, dataset, protected_audio_path=None):
         del protected_audio_path
 
@@ -321,6 +325,7 @@ class XttsZeroShotAdversary(BaseAdversary):
             completed += 1
 
         self._flush_synthesis_timings()
-        self._release_generator()
+        if not self._managed_lifetime:
+            self._release_generator()
         if self.logger:
             self.logger.info("[%s] Generated %d/%d utterances.", self.MODEL_NAME, completed, len(samples))

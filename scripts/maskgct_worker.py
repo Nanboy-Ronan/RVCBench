@@ -76,25 +76,41 @@ def main() -> int:
             sys.path.insert(0, str(code_path))
         os.chdir(str(code_path))
 
-        import json as _json
         import torch
+        import soundfile as sf
+        import safetensors.torch as safetensors_torch
+        from huggingface_hub import hf_hub_download
+        from models.tts.maskgct.maskgct_utils import (
+            MaskGCT_Inference_Pipeline, build_semantic_model, build_semantic_codec,
+            build_acoustic_codec, build_t2s_model, build_s2a_model, load_config,
+        )
 
-        device = _resolve_device(args.device)
-
-        with config_path.open("r", encoding="utf-8") as handle:
-            cfg = _json.load(handle)
-
-        from models.tts.maskgct.maskgct_inference import MaskGCTInference
-
-        inference_pipeline = MaskGCTInference(
-            cfg,
-            repo_id=args.repo_id,
-            device=device,
+        device = torch.device(_resolve_device(args.device))
+        cfg = load_config(str(config_path))
+        semantic_model, semantic_mean, semantic_std = build_semantic_model(device)
+        semantic_codec = build_semantic_codec(cfg.model.semantic_codec, device)
+        codec_encoder, codec_decoder = build_acoustic_codec(cfg.model.acoustic_codec, device)
+        t2s_model = build_t2s_model(cfg.model.t2s_model, device)
+        s2a_1layer = build_s2a_model(cfg.model.s2a_model.s2a_1layer, device)
+        s2a_full = build_s2a_model(cfg.model.s2a_model.s2a_full, device)
+        weights = [
+            (semantic_codec, 'semantic_codec/model.safetensors'),
+            (codec_encoder, 'acoustic_codec/model.safetensors'),
+            (codec_decoder, 'acoustic_codec/model_1.safetensors'),
+            (t2s_model, 't2s_model/model.safetensors'),
+            (s2a_1layer, 's2a_model/s2a_model_1layer/model.safetensors'),
+            (s2a_full, 's2a_model/s2a_model_full/model.safetensors'),
+        ]
+        for model, filename in weights:
+            checkpoint = hf_hub_download(args.repo_id, filename=filename)
+            safetensors_torch.load_model(model, checkpoint)
+        inference_pipeline = MaskGCT_Inference_Pipeline(
+            semantic_model, semantic_codec, codec_encoder, codec_decoder,
+            t2s_model, s2a_1layer, s2a_full, semantic_mean, semantic_std, device,
         )
 
         parameter_count = None
-        for attr in ("semantic_model", "acoustic_model", "t2s_model", "s2a_model"):
-            model_obj = getattr(inference_pipeline, attr, None)
+        for model_obj in (t2s_model, s2a_1layer, s2a_full):
             count = _maybe_count_parameters(model_obj)
             if count is not None:
                 parameter_count = (parameter_count or 0) + count
@@ -103,7 +119,7 @@ def main() -> int:
             {
                 "event": "ready",
                 "ok": True,
-                "device": device,
+                "device": str(device),
                 "parameter_count": parameter_count,
             }
         )
@@ -161,15 +177,15 @@ def main() -> int:
                 "prompt_speech_path": str(prompt_speech_path),
                 "prompt_text": prompt_text,
                 "target_text": target_text,
-                "prompt_language": prompt_language,
-                "target_language": target_language,
-                "output_path": str(output_path),
+                "language": prompt_language.lower(),
+                "target_language": target_language.lower(),
             }
             if target_len is not None:
                 infer_kwargs["target_len"] = float(target_len)
             infer_kwargs.update(gen_kwargs)
 
-            inference_pipeline.maskgct_inference_pipeline(**infer_kwargs)
+            recovered_audio = inference_pipeline.maskgct_inference(**infer_kwargs)
+            sf.write(str(output_path), recovered_audio, 24000)
 
             _emit(
                 {

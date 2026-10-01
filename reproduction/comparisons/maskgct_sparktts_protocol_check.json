@@ -1,0 +1,30 @@
+{
+  "status": "incompatible",
+  "reasons": [
+    "wer scorer code, dependencies, assets or settings differ or are missing"
+  ],
+  "metrics": [
+    "mcd",
+    "wer",
+    "sim"
+  ],
+  "requested_pairs": [
+    16,
+    16
+  ],
+  "models": [
+    "maskgct",
+    "sparktts"
+  ],
+  "sources": [
+    {
+      "manifest": "/tealab-data/rjin02/RVCBench/results/reproduce_v2_maskgct_libritts16_score/20260930-231928-b6ed62d2/run_manifest.json",
+      "sha256": "f5bdf90b53e912a873a1d9324f8a30a4a91d4a2599ee04ab55ad59a83d139bd8"
+    },
+    {
+      "manifest": "/tealab-data/rjin02/RVCBench/results/reproduce_v2_sparktts_libritts16_legacy_score/20260930-232540-fe8519b1/run_manifest.json",
+      "sha256": "51838b6809c94c692f6f02289f70f3d5e3e6481ef6009fc9b68ea3165d1b5862"
+    }
+  ],
+  "scope": "Matched quality metrics across models; does not authorize timing, intervention or historical equivalence claims."
+}

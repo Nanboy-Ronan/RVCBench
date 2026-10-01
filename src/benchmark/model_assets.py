@@ -11,17 +11,25 @@ def resolve_model_assets(conf):
     assets, unresolved, cache = {}, {}, {}
     suffixes = {'.safetensors', '.bin', '.pt', '.pth', '.ckpt', '.onnx', '.json', '.yaml', '.yml',
                 '.txt', '.tiktoken', '.model', '.vocab'}
-    fields = {'checkpoint_path', 'model_path', 'model_dir', 'models_dir', 'checkpoint_dir',
-              'config_path', 'hubert_checkpoint', 'hubert_tokenizer', 'vocoder_path'}
+    fields = {'checkpoint', 'checkpoint_path', 'model_path', 'model_dir', 'models_dir', 'checkpoint_dir',
+              'config_path', 'hubert_checkpoint', 'hubert_tokenizer', 'vocoder_path',
+              'ckpt_file', 'vocab_file', 'vocoder_local_path', 'spt_config_path', 'spt_checkpoint_path'}
     for key, value in resolved.adversary.items():
         if not isinstance(value, str) or not value or not (key in fields or key.endswith('_checkpoint_path')):
             continue
         path = Path(value).expanduser()
+        if not path.is_absolute() and not path.exists() and resolved.adversary.get('code_path'):
+            upstream_candidate = Path(resolved.adversary.code_path).expanduser() / path
+            if upstream_candidate.exists():
+                path = upstream_candidate
         if path.is_file():
             files = [path]
         elif path.is_dir():
             files = [p for p in sorted(path.rglob('*')) if p.is_file() and p.suffix in suffixes]
         else:
+            unresolved[key] = value
+            continue
+        if not files:
             unresolved[key] = value
             continue
         hashes = {}

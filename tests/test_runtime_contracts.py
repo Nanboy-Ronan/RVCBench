@@ -124,3 +124,47 @@ def test_generation_fingerprint_excludes_evaluator_and_includes_worker(tmp_path)
         assert generation_runtime(root, conf, {'numpy': '1.26.4', 'whisper': 'changed'}) == first
         worker.write_text('VERSION = 2\n')
         assert generation_runtime(root, conf, {'numpy': '1.26.4'})['source_sha256'] != first['source_sha256']
+
+
+def test_worker_environment_probe_uses_actual_interpreter():
+    from src.benchmark.fingerprints import worker_environment
+    result = worker_environment(sys.executable)
+    assert result['python'] and result['executable']
+    assert result['packages']['pytest']
+    assert set(result) == {'python', 'executable', 'packages'}
+
+
+def test_xtts_managed_lifetime_retains_generator_between_samples(setup_run, tmp_path):
+    from src.adversary.xtts_ots import XttsZeroShotAdversary
+    from src.benchmark.backends import SampleView
+    conf, dataset, _, _ = setup_run
+    adapter = XttsZeroShotAdversary(OmegaConf.create({'seed': 42}), conf.dataset,
+                                   'cpu', logging.getLogger())
+    calls = []
+    generator = SimpleNamespace(generate=lambda **kwargs: (calls.append(kwargs) or np.zeros(160), 16000))
+    adapter._generator = generator
+    adapter.prepare()
+    for sample in dataset.get_zero_shot_samples()[:2]:
+        adapter.attack(output_path=str(tmp_path / 'xtts'), dataset=SampleView(dataset, sample))
+        assert adapter._generator is generator
+    assert len(calls) == 2
+    adapter.close()
+    assert adapter._generator is None
+    assert not adapter._managed_lifetime
+
+
+def test_resume_rejects_worker_environment_drift(setup_run):
+    from src.benchmark import fingerprints
+    conf, _, run, _ = setup_run
+    original = fingerprints.generation_runtime
+    def runtime(*args):
+        result = original(*args)
+        result['worker_environment'] = {'packages': {'fixture': version[0]}}
+        return result
+    version = ['1.0']
+    with patch('src.benchmark.fingerprints.generation_runtime', side_effect=runtime):
+        first, _, _ = run('worker-v1')
+        conf.vc.resume_from = str(first)
+        version[0] = '2.0'
+        with pytest.raises(ValueError, match='worker Python environment changed'):
+            run('worker-v2')

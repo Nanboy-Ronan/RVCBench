@@ -171,6 +171,8 @@ def validate_report(manifest, *, verify_files=True):
     rows = manifest['samples']
     if len({r['sample_id'] for r in rows}) != len(rows):
         raise ValueError('Duplicate sample IDs')
+    if manifest['schema_version'] >= 2 and input_fingerprint(rows) != manifest.get('input_fingerprint'):
+        raise ValueError('Input fingerprint does not match sample records')
     expected = coverage(rows, manifest['coverage']['required_metrics'], evaluated=manifest['evaluated'])
     if manifest['schema_version'] == 1:
         for name in ('input_failed', 'pending', 'generating'):

@@ -19,6 +19,7 @@ class BaseAdversary(ABC):
         self.device = device
         self._synthesis_timing_records = []
         self._synthesis_timing_path: Optional[Path] = None
+        self._managed_lifetime = False
 
     def _sample_seed(self, sample):
         seed = self.config.get('seed')
@@ -26,6 +27,7 @@ class BaseAdversary(ABC):
 
     def prepare(self):
         """Load adapter resources once so setup failures are run-level failures."""
+        self._managed_lifetime = True
         for name in ('_ensure_generator', '_ensure_synthesizer', '_ensure_model', '_ensure_imports'):
             hook = getattr(self, name, None)
             if hook is not None:
@@ -54,6 +56,7 @@ class BaseAdversary(ABC):
                 setattr(self, name, None)
         if errors:
             raise RuntimeError('Failed to close adapter resources') from errors[0]
+        self._managed_lifetime = False
 
     def _speaker_slug(self, speaker_id: str) -> str:
         """Return a filesystem-safe identifier for the supplied speaker identifier."""

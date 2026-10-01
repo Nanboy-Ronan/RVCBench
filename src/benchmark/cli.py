@@ -22,7 +22,20 @@ def main():
     report = commands.add_parser('report', help='Validate a complete run and export a provenance-bearing JSON report')
     report.add_argument('run_dir', type=Path)
     report.add_argument('--output', type=Path, required=True)
+    compare = commands.add_parser('compare-check', help='Verify whether two complete runs share a comparison protocol')
+    compare.add_argument('left', type=Path)
+    compare.add_argument('right', type=Path)
+    compare.add_argument('--metrics', nargs='+', default=['mcd', 'wer', 'sim'])
+    compare.add_argument('--output', type=Path)
     args = parser.parse_args()
+    if args.command == 'compare-check':
+        from .comparability import check_comparability
+        from .artifacts import atomic_json
+        result = check_comparability(args.left, args.right, args.metrics)
+        if args.output:
+            atomic_json(args.output, result)
+        print(json.dumps(result, indent=2))
+        raise SystemExit(result['status'] != 'comparable')
     if args.command == 'doctor':
         names = ['torch', 'hydra', 'pandas', 'pyarrow', 'soundfile']
         if args.model:

@@ -84,9 +84,22 @@
       "status": "historical_results",
       "config": "configs/ots_vc/clean/libritts/maskgct_ots.yaml",
       "subset": "subsets/libritts16_v1/selection.json",
-      "generation_status": "pending",
-      "scoring_status": "pending",
-      "historical_comparison_status": "pending"
+      "generation_status": "complete",
+      "scoring_status": "complete",
+      "historical_comparison_status": "matched_subset_measured",
+      "runtime_python": "/data/rjin02/miniconda3/envs/maskgct/bin/python",
+      "failed_attempts": [
+        {
+          "run": "results/reproduce_v2_maskgct_libritts16/20260930-231432-99118d8f",
+          "reason": "RuntimeError: MaskGCT worker failed to start: cannot import name 'MaskGCTInference' from 'models.tts.maskgct.maskgct_inference' (/tealab-data/rjin02/AudioWatermarkBench/checkpoints/Amphion-maskgct/models/tts/maskgct/maskgct_inference.py)"
+        }
+      ],
+      "active_run_root": "results/reproduce_v2_maskgct_libritts16_api_fixed",
+      "generation_run": "results/reproduce_v2_maskgct_libritts16_api_fixed/20260930-231604-0a310655",
+      "scoring_run": "results/reproduce_v2_maskgct_libritts16_score/20260930-231928-b6ed62d2",
+      "comparison": "comparisons/maskgct_libritts16_v1.json",
+      "historical_metric_replay_status": "MCD_WER_exact_SIM_numerical_difference",
+      "historical_metric_replay": "comparisons/maskgct_metric_replay_v1.json"
     },
     {
       "n": "OpenVoice V2",
@@ -106,9 +119,35 @@
       "status": "historical_results",
       "config": "configs/ots_vc/clean/libritts/xtts_ots.yaml",
       "subset": "subsets/libritts16_v1/selection.json",
-      "generation_status": "pending",
-      "scoring_status": "pending",
-      "historical_comparison_status": "pending"
+      "generation_status": "complete",
+      "scoring_status": "complete",
+      "historical_comparison_status": "matched_subset_measured",
+      "failed_attempts": [
+        {
+          "run": "results/reproduce_v2_xtts_libritts16/20260930-232701-32ee3dcb",
+          "reason": "ImportError: Unable to import Coqui XTTS runtime. Ensure the 'TTS' package is installed and compatible with the current transformers version."
+        },
+        {
+          "run": "results/reproduce_v2_xtts_libritts16_pinned/20260930-233118-98a94d39",
+          "status": "partial",
+          "generated": 15,
+          "requested": 16,
+          "reason": "Legacy adapter released the generator after each serial request, triggering repeated checkpoint initialization; one request failed strict checkpoint loading."
+        }
+      ],
+      "generation_run": "results/reproduce_v2_xtts_libritts16_managed/20260930-233959-95d5ad60",
+      "runtime_validation": {
+        "python": "3.11",
+        "TTS": "0.22.0",
+        "transformers": "4.40.2",
+        "tokenizers": "0.19.1",
+        "numpy": "1.26.4",
+        "environment": "isolated system-site-packages overlay; clean lockfile validation pending",
+        "model_initializations": 1
+      },
+      "scoring_run": "results/reproduce_v2_xtts_libritts16_score/20260930-234149-7a6263ac",
+      "comparison": "comparisons/xtts_libritts16_v1.json",
+      "historical_metric_replay": "comparisons/xtts_metric_replay_v1.json"
     },
     {
       "n": "IndexTTS",
@@ -228,9 +267,14 @@
       "status": "historical_results",
       "config": "configs/ots_vc/clean/libritts/sparktts_ots.yaml",
       "subset": "subsets/libritts16_v1/selection.json",
-      "generation_status": "pending",
-      "scoring_status": "pending",
-      "historical_comparison_status": "pending"
+      "generation_status": "complete",
+      "scoring_status": "complete",
+      "historical_comparison_status": "matched_subset_measured",
+      "generation_run": "results/reproduce_v2_sparktts_libritts16/20260930-231928-f9defcfe",
+      "scoring_run": "results/reproduce_v2_sparktts_libritts16_legacy_score/20260930-232540-fe8519b1",
+      "comparison": "comparisons/sparktts_libritts16_v1.json",
+      "historical_metric_replay": "comparisons/sparktts_metric_replay_v1.json",
+      "historical_metric_replay_status": "partial_WER_ASR_difference"
     },
     {
       "n": "VALL-E",
