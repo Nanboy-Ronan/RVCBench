@@ -257,3 +257,12 @@ Legacy pickle loading is scoped to serial upstream model preparation, and the
 original `torch.load` is restored on success or failure. The primary checkpoint
 uses an explicit `weights_only=False` argument. Other implicit Hub assets remain
 outside the configured local asset coverage.
+
+GLM-TTS preparation and generation both run inside the configured upstream working
+directory and CUDA device context, restoring the previous directory/device afterward.
+This keeps relative frontend rules and upstream `.cuda()` calls consistent with the
+requested runtime. Model fingerprints include `ckpt_dir`, `frontend_dir` and upstream
+`configs/`, including JSONL text rules and FST files where present. Normalizer caches
+inside installed third-party packages remain outside this configured asset coverage.
+The historical January 2026 checkpoint directory is no longer present locally;
+matching its current replacement to those historical weights is unproven.

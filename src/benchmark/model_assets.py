@@ -10,14 +10,17 @@ def resolve_model_assets(conf, logger=None):
     model = str(conf.vc.model).lower()
     assets, unresolved, cache = {}, {}, {}
     suffixes = {'.safetensors', '.bin', '.pt', '.pth', '.ckpt', '.onnx', '.json', '.yaml', '.yml',
-                '.txt', '.tiktoken', '.model', '.vocab', '.py', '.t7'}
+                '.txt', '.tiktoken', '.model', '.vocab', '.py', '.t7', '.jsonl', '.fst'}
     fields = {'checkpoint', 'checkpoint_path', 'model_path', 'model_dir', 'models_dir', 'checkpoint_dir',
               'config_path', 'hubert_checkpoint', 'hubert_tokenizer', 'vocoder_path',
               'ckpt_file', 'vocab_file', 'vocab_path', 'speaker_file_path', 'base_speaker_dir',
               'vocoder_local_path', 'spt_config_path', 'spt_checkpoint_path', 'codec_path',
-              'audio_tokenizer_path', 'scene_prompt_path'}
+              'audio_tokenizer_path', 'scene_prompt_path', 'ckpt_dir', 'frontend_dir'}
     references = {key: value for key, value in resolved.adversary.items()
                   if isinstance(value, str) and value and (key in fields or key.endswith(('_checkpoint_path', '_config_path')))}
+    if model in ('glm_tts', 'glmtts') and resolved.adversary.get('code_path'):
+        upstream = Path(resolved.adversary.code_path).expanduser()
+        references['glmtts.configs'] = str(upstream / 'configs')
     if model == 'styletts2' and resolved.adversary.get('config_path'):
         configuration = OmegaConf.load(resolved.adversary.config_path)
         for name in ('ASR_config', 'ASR_path', 'F0_path', 'PLBERT_dir'):

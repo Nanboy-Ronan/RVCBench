@@ -371,9 +371,17 @@
       "status": "historical_results",
       "config": "configs/ots_vc/clean/libritts/glmtts_ots.yaml",
       "subset": "subsets/libritts16_v1/selection.json",
-      "generation_status": "pending",
-      "scoring_status": "pending",
-      "historical_comparison_status": "pending"
+      "generation_status": "complete",
+      "scoring_status": "complete",
+      "historical_comparison_status": "matched_subset_measured",
+      "generation_run": "results/reproduce_v2_glm_tts_libritts16/20261001-011331-82b3bc4e",
+      "runtime_compatibility_canary": "comparisons/glm_tts_canary.json",
+      "provenance_limit": "Historical checkpoint directory /tealab-data/rjin02/GLM-TTS-ckpt is absent; replacement weight equivalence unproven. Configured checkpoint/frontend/config assets hashed. Installed-package normalizer FST caches are not hashed. Campplus ONNX falls back to CPU because CUDA 11 libraries are absent; generation LLM uses CUDA. Shared tested runtime, not a clean environment lock.",
+      "scoring_run": "results/reproduce_v2_glm_tts_libritts16_score/20261001-011714-f5ad018f",
+      "comparison": "comparisons/glm_tts_libritts16_v1.json",
+      "historical_metric_replay": "comparisons/glm_tts_metric_replay_v1.json",
+      "historical_metric_replay_status": "partial_WER_ASR_difference",
+      "reproduction_status": "full_subset_measured_historical_exact_equivalence_unproven"
     },
     {
       "n": "GlowTTS",

@@ -4,7 +4,7 @@ from __future__ import annotations
 import importlib
 import os
 import sys
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
@@ -206,14 +206,20 @@ class GLMTTSSynthesizer(BaseModel):
         try:
             if current_dir != target_dir:
                 os.chdir(target_dir)
-            yield
+            device = torch.device(self.device)
+            with torch.cuda.device(device) if device.type == 'cuda' else nullcontext():
+                yield
         finally:
             if Path.cwd() != current_dir:
                 os.chdir(current_dir)
 
     def load_model(self) -> None:
-        if self._llm is not None:
+        if self._llm is not None and self._flow is not None:
             return
+        with self._in_code_path():
+            self._load_model_in_code_path()
+
+    def _load_model_in_code_path(self) -> None:
 
         self._ensure_imports()
 

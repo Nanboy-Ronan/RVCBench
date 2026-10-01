@@ -1,0 +1,63 @@
+{
+  "kind": "generation_scoring_canary",
+  "model": "glm_tts",
+  "coverage": {
+    "requested": 2,
+    "generated": 2,
+    "generation_failed": 0,
+    "input_failed": 0,
+    "pending": 0,
+    "generating": 0,
+    "metric_valid": {
+      "mcd": 2,
+      "wer": 2,
+      "sim": 2,
+      "sva": 2,
+      "speechmos": 0,
+      "dnsmos": 0,
+      "emotion": 0
+    },
+    "required_metrics": [
+      "mcd",
+      "wer",
+      "sim"
+    ],
+    "status": "complete",
+    "eligible_for_comparison": true
+  },
+  "generation_manifest": "/tealab-data/rjin02/RVCBench/results/debug_glm_tts_libritts2/20261001-010758-482cc2e1/run_manifest.json",
+  "generation_manifest_sha256": "ffa0218a31e7be1d3ca05c662e5f33648fcb86c4bf248aeb050791073bbf3f7a",
+  "scoring_manifest": "/tealab-data/rjin02/RVCBench/results/debug_glm_tts_libritts2_score/20261001-011126-ac9654ef/run_manifest.json",
+  "scoring_manifest_sha256": "72ebc4e312b4a2af073cdc8cb5670d18e30a3d7741539beea05255853aec2ab9",
+  "samples": [
+    {
+      "sample_id": "59c5e63512ec18bacdf941db596a939ba7953749cde66ff2b860d04d8eccc830",
+      "generated_sha256": "930f909d4099c3aedd867b0552a2ee6c8a958003127b5902d4e68b44c72c7f46",
+      "metrics": {
+        "mcd": 4.0267336629406385,
+        "wer": 0.0,
+        "predicted_text": " You'll receive the packet Thursday morning, I inquired.",
+        "sim": 0.5739541053771973,
+        "sva": true
+      }
+    },
+    {
+      "sample_id": "bbbafeab3dbc9112c48d524d97c8ffbeebe4129c00afa96c7694033fda99e34f",
+      "generated_sha256": "735fcc24bf5fdc8716bf3fcd02b631576101305f55c2abe45c6690fa561c69a9",
+      "metrics": {
+        "mcd": 7.361542935450019,
+        "wer": 0.125,
+        "predicted_text": " A transferable ticket to the Hall of Fame.",
+        "sim": 0.41082239151000977,
+        "sva": true
+      }
+    }
+  ],
+  "interpretation": "Initial canary predates checkpoint/frontend/config asset capture and preparation context repair; runtime/scoring evidence only, not historical equivalence.",
+  "repair_repeat_check": {
+    "full_manifest": "/tealab-data/rjin02/RVCBench/results/reproduce_v2_glm_tts_libritts16/20261001-011331-82b3bc4e/run_manifest.json",
+    "full_manifest_sha256": "391944642b4a1b0d607fde0be925c2a659ed58d9a92d5fe7047c3a962400e73b",
+    "matched": 2,
+    "identical_waveform_hashes": 2
+  }
+}

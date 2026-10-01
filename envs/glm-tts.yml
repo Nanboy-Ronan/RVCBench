@@ -1,13 +1,31 @@
+# Key versions from the validated shared generation runtime.
+# A clean installation and historical runtime equivalence are not yet validated.
+# Campplus uses CPU fallback: this ONNX runtime requires unavailable CUDA 11 libs.
 name: glm-tts
 channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3.10
+  - python=3.11
   - pip
   - ffmpeg
   - libsndfile
-  - espeak-ng
   - pip:
-      - --extra-index-url https://download.pytorch.org/whl/cu121
+      - --extra-index-url https://download.pytorch.org/whl/cu126
       - -e ..
+      - torch==2.8.0
+      - torchaudio==2.8.0
+      - numpy==1.26.4
+      - transformers==4.57.3
+      - tokenizers==0.22.2
+      - WeTextProcessing==1.0.4.1
+      - onnxruntime-gpu==1.18.0
+      - sentencepiece==0.2.1
+      - x-transformers==1.42.26
+      - hyperpyyaml==1.2.2
+      - inflect==7.0.0
+      - contractions==0.1.73
+      - einops==0.8.1
+      - librosa
+      - jieba
+      - tiktoken
