@@ -50,6 +50,7 @@ class VallEZeroShotAdversary(BaseAdversary):
             top_k=self.top_k,
             temperature=self.temperature,
             output_sample_rate=self.output_sample_rate,
+            text_tokens_path=self.config.get('text_tokens_path'),
         )
         self._generator = VallEGenerator(generator_config, self.device, self.logger)
 
@@ -77,12 +78,6 @@ class VallEZeroShotAdversary(BaseAdversary):
         if not samples:
             raise RuntimeError("No zero-shot samples available for VALL-E adversary.")
 
-        sample_prompt_texts: Dict[str, str] = {}
-        for sample in samples:
-            prompt_path = self._resolve_prompt_path(sample)
-            if prompt_path is not None:
-                sample_prompt_texts[str(prompt_path.resolve())] = sample.prompt_text or ""
-
         prompt_count = self._count_available_prompts(samples)
 
         self._log_attack_plan("VALL-E", samples, prompt_count)
@@ -96,18 +91,15 @@ class VallEZeroShotAdversary(BaseAdversary):
                         "[VALL-E] Sample %d missing prompt audio; skipping.",
                         idx,
                     )
-                continue
-            prompt_text = sample_prompt_texts.get(
-                str(reference_path.resolve()),
-                self.default_prompt_text,
-            )
+                raise ValueError('VALL-E requires reference audio')
+            prompt_text = str(sample.prompt_text or '').strip()
+            if not prompt_text:
+                raise ValueError('VALL-E requires the actual reference transcript')
 
             # Use the ground-truth target text for synthesis; fall back to the prompt/ default only if missing.
             text = (sample.target_text or "").strip()
             if not text:
-                text = (sample.prompt_text or "").strip()
-            if not text:
-                text = prompt_text
+                raise ValueError('VALL-E requires target text')
             speaker_id = str(sample.speaker_id)
             speaker_dir = self._speaker_output_dir(output_dir, speaker_id)
 

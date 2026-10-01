@@ -39,6 +39,18 @@ their cohort directory, requiring a unique source record and target hash match.
 
 ## Generate, evaluate, recover
 
+The VALL-E integration selects `lifeiteng/vall-e`, with strict checkpoint
+loading and native text/EnCodec APIs. Reference audio requires its actual
+transcript; missing target text is rejected. Empty codec output is not padded
+into artificial success, and mismatched weights are not filtered into a partial
+model. Native dependencies must be installed; no dependency stubs are injected.
+`+adversary.text_tokens_path=/absolute/path/to/vocabulary` selects and fingerprints
+the checkpoint's vocabulary explicitly. The configured checkpoint is absent
+locally, so native subset reproduction remains pending. A released Amphion VALLE
+checkpoint exists locally, but requires a separate runtime/configuration and
+cannot be used as a lifeiteng checkpoint. See
+`reproduction/comparisons/valle_runtime_audit.json`.
+
 FireRedTTS2 decodes output at 24 kHz; its native `sample_rate=16000` field is
 the reference input rate. The wrapper now saves codec output at 24 kHz and
 rejects invalid waveforms instead of replacing NaNs or clipping values.

@@ -394,9 +394,12 @@
       "status": "experimental_adapter",
       "config": "configs/ots_vc/clean/libritts/vall_e_ots.yaml",
       "subset": "subsets/libritts16_v1/selection.json",
-      "generation_status": "pending",
+      "generation_status": "pending_compatible_checkpoint_and_runtime",
       "scoring_status": "pending",
-      "historical_comparison_status": "historical_reference_not_established"
+      "historical_comparison_status": "historical_reference_not_established",
+      "runtime_audit": "comparisons/valle_runtime_audit.json",
+      "implementation": "lifeiteng/vall-e",
+      "alternate_variant_status": "Amphion_released_checkpoint_located_requires_explicit_runtime"
     },
     {
       "n": "StyleTTS 2",
