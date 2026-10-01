@@ -18,6 +18,7 @@ class MossTTSGeneratorConfig:
     attn_implementation: str = "sdpa"
     max_new_tokens: int = 4096
     language: Optional[str] = None
+    codec_path: Optional[str] = None
 
 
 class MossTTSGenerator(BaseModel):
@@ -72,6 +73,7 @@ class MossTTSGenerator(BaseModel):
         self._processor = AutoProcessor.from_pretrained(
             self.config.checkpoint,
             trust_remote_code=True,
+            **({'codec_path': self.config.codec_path} if self.config.codec_path else {}),
         )
         self._processor.audio_tokenizer = self._processor.audio_tokenizer.to(device)
 

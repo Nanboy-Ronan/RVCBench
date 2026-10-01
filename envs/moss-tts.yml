@@ -1,26 +1,6 @@
-# MOSS-TTS (OpenMOSS-Team/MOSS-TTS-v1.5) via plain `transformers`
-# AutoModel/AutoProcessor with trust_remote_code=True.
-#
-# This needs a recent torch/transformers, so it gets its own isolated env
-# rather than sharing `audiobench` (whose deps are pinned much older).
-#
-# IMPORTANT: installing this as a single `pip install -r` (or as one big
-# `pip:` block in `conda env create -f`) fails to resolve: openai-whisper's
-# `triton<3` pin conflicts with torch 2.8's `triton==3.4.0` when solved in
-# one shot. Installing sequentially avoids the resolver seeing both
-# constraints at once (whisper tolerates the newer triton fine at runtime;
-# only its optional JIT kernel path is metadata-incompatible, not broken).
-# Install order:
-#   1. conda create -n moss-tts python=3.11 pip ffmpeg libsndfile
-#   2. pip install transformers>=4.57.0 accelerate
-#   3. pip install the harness deps (hydra-core, omegaconf, hydra-colorlog,
-#      jiwer, librosa, matplotlib, openai_whisper, pymcd, pysndfx,
-#      speechbrain, torch_stoi, tqdm, pandas, GPUtil, psutil, onnxruntime)
-#   4. pip install monotonic-align (src/models/__init__.py unconditionally
-#      imports bertvits2_model, which needs this)
-#   5. pip install "setuptools<81" (pyworld/pymcd still imports pkg_resources)
-#   6. pip install --extra-index-url https://download.pytorch.org/whl/cu126
-#      torch==2.8.0 torchaudio==2.8.0   (LAST: step 3 drags torch backward)
+# Validated generation runtime for the local MOSS-TTS v1.5 and codec snapshots.
+# Existing environment validation; a clean installation has not yet been tested.
+# Run scorers separately in the eval environment (NumPy 1.26.4 / Torch 2.6).
 name: moss-tts
 channels:
   - conda-forge
@@ -30,3 +10,12 @@ dependencies:
   - pip
   - ffmpeg
   - libsndfile
+  - pip:
+      - --extra-index-url https://download.pytorch.org/whl/cu126
+      - -e ..
+      - torch==2.8.0
+      - torchaudio==2.8.0
+      - transformers==5.14.1
+      - tokenizers==0.22.2
+      - numpy==2.4.6
+      - accelerate==1.14.0

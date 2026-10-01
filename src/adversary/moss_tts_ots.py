@@ -36,6 +36,7 @@ class MossTTSZeroShotAdversary(BaseAdversary):
         self.attn_implementation = str(self.config.get("attn_implementation", "sdpa"))
         self.max_new_tokens = int(self.config.get("max_new_tokens", 4096))
         self.language = self.config.get("language")
+        self.codec_path = self.config.get("codec_path")
         self.max_samples = self.config.get("max_samples")
 
         self._generator: Optional[MossTTSGenerator] = None
@@ -52,6 +53,7 @@ class MossTTSZeroShotAdversary(BaseAdversary):
             attn_implementation=self.attn_implementation,
             max_new_tokens=self.max_new_tokens,
             language=self.language,
+            codec_path=self.codec_path,
         )
         self._generator = MossTTSGenerator(generator_config, self.device, self.logger)
 

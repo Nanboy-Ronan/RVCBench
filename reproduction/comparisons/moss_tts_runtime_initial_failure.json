@@ -1,0 +1,35 @@
+{
+  "kind": "runtime_preparation_failure",
+  "model": "moss_tts",
+  "requested": 2,
+  "run_manifest": "/tealab-data/rjin02/RVCBench/results/debug_moss_tts_libritts2/20261001-004009-b52b3dac/run_manifest.json",
+  "run_manifest_sha256": "8339d3716bb3481b96ab9fbcfad3096ab175ae8af904594ea3cc43c86d14b197",
+  "coverage": {
+    "requested": 2,
+    "generated": 0,
+    "generation_failed": 0,
+    "input_failed": 0,
+    "pending": 2,
+    "generating": 0,
+    "metric_valid": {
+      "mcd": 0,
+      "wer": 0,
+      "sim": 0,
+      "sva": 0,
+      "speechmos": 0,
+      "dnsmos": 0,
+      "emotion": 0
+    },
+    "required_metrics": [
+      "mcd",
+      "wer",
+      "sim"
+    ],
+    "status": "partial",
+    "eligible_for_comparison": false
+  },
+  "error": "Transformers 4.57.3 processing_utils has no MODALITY_TO_BASE_CLASS_MAPPING; checkpoint requires 5.x processor API.",
+  "log": "/tmp/rvcbench-moss-tts-canary.log",
+  "log_sha256": "42f5a5a424d663fbc727feda9eb52a353d4803ee38a03b15887cc46d82e9c15b",
+  "interpretation": "No audio generated; not a synthesis quality or reproduction result."
+}

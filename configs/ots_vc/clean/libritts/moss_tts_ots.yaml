@@ -13,6 +13,8 @@ output_paths:
 
 adversary:
   checkpoint: "checkpoints/MOSS-TTS-v1.5"
+  # Set to a local snapshot to freeze the auxiliary audio tokenizer.
+  codec_path: null
   attn_implementation: "sdpa"
   max_new_tokens: 4096
   language: null

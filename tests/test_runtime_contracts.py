@@ -155,6 +155,44 @@ def test_model_fingerprint_tracks_converter_config_and_speaker_embedding(tmp_pat
     assert 'base_speaker_dir' in resolve_model_assets(conf)[1]['unresolved_references']
 
 
+def test_model_fingerprint_tracks_checkpoint_code_and_auxiliary_codec(tmp_path):
+    from src.benchmark.model_assets import resolve_model_assets
+    checkpoint, codec = tmp_path / 'tts', tmp_path / 'codec'
+    checkpoint.mkdir()
+    codec.mkdir()
+    implementation = checkpoint / 'modeling.py'
+    implementation.write_text('VERSION = 1\n')
+    weights = codec / 'model.safetensors'
+    weights.write_bytes(b'codec-v1')
+    conf = OmegaConf.create({'vc': {'model': 'moss_tts'}, 'adversary': {
+        'checkpoint': str(checkpoint), 'codec_path': str(codec)}})
+    _, reference, first = resolve_model_assets(conf)
+    assert 'modeling.py' in reference['assets']['checkpoint']['files']
+    assert 'model.safetensors' in reference['assets']['codec_path']['files']
+    implementation.write_text('VERSION = 2\n')
+    second = resolve_model_assets(conf)[2]
+    assert second != first
+    weights.write_bytes(b'codec-v2')
+    assert resolve_model_assets(conf)[2] != second
+
+
+def test_moss_processor_receives_explicit_codec_path(tmp_path):
+    from src.models.moss_tts.generator import MossTTSGenerator, MossTTSGeneratorConfig
+    from unittest.mock import Mock
+    import torch
+    processor = SimpleNamespace(audio_tokenizer=SimpleNamespace(to=lambda device: object()),
+                                model_config=SimpleNamespace(sampling_rate=24000))
+    generator = MossTTSGenerator(MossTTSGeneratorConfig(checkpoint=str(tmp_path), codec_path='frozen-codec'),
+                                 torch.device('cpu'), logging.getLogger())
+    load_processor = Mock(return_value=processor)
+    transformers = SimpleNamespace(AutoProcessor=SimpleNamespace(from_pretrained=load_processor),
+                                   AutoModel=SimpleNamespace(from_pretrained=Mock(return_value=torch.nn.Linear(1, 1))))
+    with patch.dict(sys.modules, {'transformers': transformers}):
+        generator.load_model()
+    assert load_processor.call_args.kwargs['codec_path'] == 'frozen-codec'
+    assert generator._sample_rate == 24000
+
+
 def test_generation_fingerprint_tracks_auxiliary_upstream_source(tmp_path):
     from src.benchmark.fingerprints import generation_runtime
     source = tmp_path / 'melo'

@@ -232,3 +232,10 @@ on LibriTTS. Tokenizer selection follows the trained checkpoint, not the dataset
 name. The historical March 2026 clean run also used `emilia`; the former `libritts`
 default produced a severe content regression. Explicit tokenizer overrides remain
 available for custom checkpoints. Invalid names fail before weight loading.
+
+MOSS-TTS v1.5 uses Transformers 5.x processor APIs and an auxiliary audio
+tokenizer. Set `adversary.codec_path` to a local tokenizer snapshot to avoid an
+implicit Hub download. Configured checkpoint directories now hash their Python
+implementations alongside weights, vocabulary and configuration files; changing
+checkpoint code or codec weights changes the model fingerprint. Unconfigured
+downloads remain outside this asset coverage.

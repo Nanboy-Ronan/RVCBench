@@ -404,9 +404,24 @@
       "status": "experimental_adapter",
       "config": "configs/ots_vc/clean/libritts/moss_tts_ots.yaml",
       "subset": "subsets/libritts16_v1/selection.json",
-      "generation_status": "pending",
-      "scoring_status": "pending",
-      "historical_comparison_status": "historical_reference_not_established"
+      "generation_status": "complete",
+      "scoring_status": "complete",
+      "historical_comparison_status": "matched_subset_measured",
+      "failed_attempts": [
+        {
+          "evidence": "comparisons/moss_tts_runtime_initial_failure.json",
+          "reason": "Transformers 4.57.3 processing_utils has no MODALITY_TO_BASE_CLASS_MAPPING; checkpoint requires 5.x processor API."
+        }
+      ],
+      "generation_run": "results/reproduce_v2_moss_tts_libritts16/20261001-004619-0fd3edd2",
+      "runtime_compatibility_canary": "comparisons/moss_tts_pinned_canary.json",
+      "provenance_limit": "Validated existing isolated environment, not a clean installation lock. Explicit local main checkpoint and codec include Python implementation hashes. Historical run lacks immutable weights/runtime records.",
+      "scoring_run": "results/reproduce_v2_moss_tts_libritts16_score/20261001-004826-fc075466",
+      "comparison": "comparisons/moss_tts_libritts16_v1.json",
+      "historical_metric_replay": "comparisons/moss_tts_metric_replay_v1.json",
+      "historical_metric_replay_status": "partial_WER_ASR_difference",
+      "historical_reference_scope": "August 2026 local run; remains an experimental adapter in the paper model catalog.",
+      "reproduction_status": "full_subset_measured_historical_exact_equivalence_unproven"
     },
     {
       "n": "dots.tts",
