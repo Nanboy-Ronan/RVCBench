@@ -555,7 +555,12 @@ equivalence.
 
 Fatal CUDA device assertions and illegal memory accesses terminate a run after
 journaling the failed sample. Subsequent samples stay pending, and scorers are
-not launched in the invalid context. Ordinary per-sample errors continue to use
+not launched in the invalid context. The same stop rule applies to scorer
+initialization and per-sample scoring: completed metric caches are preserved,
+the fatal sample and scorer are recorded, and later samples/metrics are not
+assigned dependent failures. Cleanup errors do not mask the fatal error, and
+the evaluator skips CUDA cache operations after context failure.
+Ordinary per-sample errors continue to use
 the configured retry policy. An empty dataset now reports the dataset root and
 asks the caller to check `manifest_filename`, before accessing variant metadata.
 

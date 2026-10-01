@@ -47,6 +47,52 @@ class FakeScorer:
         self.calls.append(('close', self.name))
 
 
+@pytest.mark.parametrize('stage', ['prepare', 'score'])
+def test_invalid_cuda_context_stops_all_following_scoring_and_preserves_evidence(setup_run, tmp_path, stage):
+    import json
+    _, _, run, _ = setup_run
+    _, manifest, _ = run('source')
+    rows = copy.deepcopy(manifest['samples'])
+    rows.append({**copy.deepcopy(rows[0]), 'sample_id': 'f' * 64})
+    calls, events = [], []
+    fatal = RuntimeError('CUDA error: illegal memory access')
+
+    class FatalScorer(FakeScorer):
+        def prepare(self):
+            super().prepare()
+            if stage == 'prepare':
+                raise fatal
+
+        def score(self, request):
+            if sum(c[0] == 'score' for c in calls) == 1:
+                raise fatal
+            return super().score(request)
+
+        def close(self):
+            super().close()
+            raise RuntimeError('secondary cleanup error')
+
+    output = tmp_path / 'fatal'
+    with patch('src.evaluation.pipeline.create_scorer', side_effect=lambda n, *_: FatalScorer(n, calls)), \
+            patch('src.utils.seeding.configure_seeds'), patch('torch.cuda.empty_cache') as empty_cache:
+        with pytest.raises(RuntimeError) as raised:
+            evaluate_run(rows, ['sim', 'wer'], output, 'cpu', logging.getLogger(),
+                         on_sample=lambda row: events.append(copy.deepcopy(row)))
+    assert raised.value is fatal
+    assert ('prepare', 'wer') not in calls and calls[-1] == ('close', 'sim')
+    empty_cache.assert_not_called()
+    spec = json.loads((output / 'scoring_manifest.json').read_text())
+    assert spec['sim']['fatal_runtime_error'] and 'wer' not in spec
+    assert not rows[-1].get('metric_errors') and not rows[-1].get('metrics')
+    if stage == 'score':
+        assert rows[0]['metrics']['sim'] == .5
+        assert events[-1]['fatal_runtime_error'] and events[-1]['sample_id'] == rows[1]['sample_id']
+        assert len(list((output / 'metric_cache').glob('*.json'))) == 2
+        assert spec['sim']['fingerprint']
+    else:
+        assert not events and not any(c[0] == 'score' for c in calls)
+
+
 def test_metric_resume_after_interruption_and_independent_failures(setup_run, tmp_path):
     _, _, run, _ = setup_run
     _, manifest, _ = run('source')
@@ -78,6 +124,20 @@ def test_metric_cache_rejects_modified_source(setup_run, tmp_path):
     Path(rows[0]['generated_path']).write_bytes(b'changed')
     with pytest.raises(ValueError, match='changed before evaluation'):
         evaluate_run(rows, ['sim'], tmp_path / 'scores', 'cpu', logging.getLogger())
+
+
+def test_runner_persists_fatal_scoring_failure(setup_run):
+    import json
+    _, _, run, root = setup_run
+    conf, _, _, _ = setup_run
+    conf.vc.generate_only = False
+    with patch('src.evaluation.pipeline.create_scorer', side_effect=RuntimeError('CUDA error: device-side assert triggered')):
+        with pytest.raises(RuntimeError, match='device-side assert'):
+            run('fatal-scoring', config=conf)
+    saved = json.loads((root / 'fatal-scoring/run_manifest.json').read_text())
+    assert saved['status'] == 'failed' and not saved['evaluated']
+    assert saved['coverage']['generated'] == 2 and saved['coverage']['metric_valid']['sim'] == 0
+    assert 'device-side assert' in saved['error']
 
 
 def test_variants_preserve_both_transcripts_and_disambiguate_identity(setup_run):

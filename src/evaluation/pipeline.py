@@ -11,12 +11,14 @@ from pathlib import Path
 
 from src.benchmark.artifacts import METRIC_COLUMNS, atomic_json, digest, file_hash, finite, metric_value_valid as _valid
 from .scorers import ScoreInput, create_scorer
+from src.utils.runtime_errors import invalid_cuda_context
 
 
 def _scorer_provenance(scorer, seed, cap):
     from .scorers import text
     implementation = Path(inspect.getfile(type(scorer)))
-    paths = [implementation, Path(__file__), Path(text.__file__)]
+    paths = [implementation, Path(__file__), Path(text.__file__),
+             Path(__file__).parents[1] / 'utils/runtime_errors.py']
     if implementation.stem == 'auxiliary':
         paths += [Path(__file__).with_name('generation.py'), Path(__file__).with_name('fidelity.py')]
     packages = {}
@@ -81,6 +83,7 @@ def evaluate_run(rows, required, output, device, logger, *, seed=42, cap=None,
     provenance = {}
     for group, metrics in groups.items():
         scorer = None
+        fatal_error = False
         try:
             configure_seeds(seed, logger=None)
             scorer = create_scorer(group, device, logger)
@@ -124,6 +127,13 @@ def evaluate_run(rows, required, output, device, logger, *, seed=42, cap=None,
                         row['metrics'].pop(METRIC_COLUMNS[metric], None)
                         row['metric_errors'][metric] = error
                     logger.warning('Scoring %s failed for %s: %s', group, row['sample_id'], error)
+                    if invalid_cuda_context(exc):
+                        fatal_error = True
+                        row.update(status='metric_failed', error=error, fatal_runtime_error=True)
+                        atomic_json(cache / (key + '.json'), record)
+                        if on_sample:
+                            on_sample(row)
+                        raise
                 atomic_json(cache / (key + '.json'), record)
                 row['status'] = 'scoring'
                 if on_sample:
@@ -131,8 +141,13 @@ def evaluate_run(rows, required, output, device, logger, *, seed=42, cap=None,
                 logger.info('[%s %d/%d] %s', group, index + 1, len(active), record['status'])
         except Exception as exc:
             error = f'{type(exc).__name__}: {exc}'
-            provenance[group] = {'status': 'failed', 'error': error}
+            provenance[group] = {**provenance.get(group, {}), 'status': 'failed', 'error': error}
             logger.error('Scorer %s unavailable: %s', group, error)
+            if fatal_error or invalid_cuda_context(exc):
+                fatal_error = True
+                provenance[group]['fatal_runtime_error'] = True
+                atomic_json(output / 'scoring_manifest.json', provenance)
+                raise
             for row in active:
                 for metric in metrics:
                     row['metric_errors'][metric] = error
@@ -140,10 +155,15 @@ def evaluate_run(rows, required, output, device, logger, *, seed=42, cap=None,
                     on_sample(row)
         finally:
             if scorer is not None:
-                scorer.close()
+                try:
+                    scorer.close()
+                except Exception as exc:
+                    if not fatal_error:
+                        raise
+                    logger.error('Scorer cleanup after fatal runtime error failed: %s', exc)
                 del scorer
             gc.collect()
-            if torch.cuda.is_available():
+            if not fatal_error and torch.cuda.is_available():
                 torch.cuda.empty_cache()
         atomic_json(output / 'scoring_manifest.json', provenance)
     for row in active:

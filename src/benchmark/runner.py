@@ -9,6 +9,7 @@ import time
 from pathlib import Path
 
 from omegaconf import OmegaConf
+from src.utils.runtime_errors import invalid_cuda_context
 from .artifacts import (SCHEMA_VERSION, METRIC_COLUMNS, atomic_json, append_sample_event, load_run, coverage, digest,
                         file_hash, input_fingerprint, input_records, output_path, provenance)
 
@@ -184,10 +185,7 @@ def run_zero_shot(conf, base_dir, device, dataset, exp_dir, logger, protected_au
                         # These CUDA errors invalidate the process's context. Retrying
                         # or evaluating subsequent samples would produce dependent
                         # failures rather than independent benchmark observations.
-                        message = str(exc).lower()
-                        if any(marker in message for marker in (
-                                'device-side assert', 'illegal memory access',
-                                'cuda_error_assert', 'cuda_error_illegal_address')):
+                        if invalid_cuda_context(exc):
                             row['fatal_runtime_error'] = True
                             append_sample_event(events, row)
                             raise
