@@ -31,8 +31,8 @@ class OzSpeechZeroShotAdversary(BaseAdversary):
             else None
         )
 
-        encoder_key = next((k for k in ("codec_encoder_path", "facodec_encoder_path") if k in self.config), None)
-        decoder_key = next((k for k in ("codec_decoder_path", "facodec_decoder_path") if k in self.config), None)
+        encoder_key = next((k for k in ("codec_encoder_path", "facodec_encoder_path") if self.config.get(k)), None)
+        decoder_key = next((k for k in ("codec_decoder_path", "facodec_decoder_path") if self.config.get(k)), None)
         codec_encoder_value = self.config.get(encoder_key) if encoder_key is not None else None
         codec_decoder_value = self.config.get(decoder_key) if decoder_key is not None else None
 

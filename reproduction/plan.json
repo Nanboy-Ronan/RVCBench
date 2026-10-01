@@ -532,9 +532,16 @@
       "status": "historical_results",
       "config": "configs/ots_vc/clean/libritts/ozspeech_ots.yaml",
       "subset": "subsets/libritts16_v1/selection.json",
-      "generation_status": "pending",
-      "scoring_status": "pending",
-      "historical_comparison_status": "pending"
+      "generation_status": "complete",
+      "scoring_status": "complete",
+      "historical_comparison_status": "matched_subset_measured",
+      "generation_run": "results/reproduce_v2_ozspeech_device_libritts16/20261001-021703-3f95d57a",
+      "canary": "comparisons/ozspeech_canary.json",
+      "provenance_limit": "Configured main/codec weights and upstream lexicon/source hashed; historical immutable weights/runtime unavailable. G2P/NLTK package resources not frozen; key pins are not a clean installation lock. Runtime explicitly moves main model and both codecs to requested device; historical timing/device equivalence unproven.",
+      "initial_runtime_probe": "comparisons/ozspeech_initial_runtime.json",
+      "scoring_run": "results/reproduce_v2_ozspeech_device_libritts16_score/20261001-021850-0723053d",
+      "comparison": "comparisons/ozspeech_libritts16_v1.json",
+      "historical_metric_replay": "comparisons/ozspeech_metric_replay_v1.json"
     },
     {
       "n": "VibeVoice",

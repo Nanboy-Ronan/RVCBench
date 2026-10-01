@@ -1,0 +1,45 @@
+{
+  "kind": "initial_runtime_probe",
+  "model": "ozspeech",
+  "run_manifest": "/tealab-data/rjin02/RVCBench/results/debug_ozspeech_libritts2/20261001-021049-ea505631/run_manifest.json",
+  "run_manifest_sha256": "142b9304d0de9ad6d95e539c87ee1e28ac6776d40ed7c7b6db918c48bd2958aa",
+  "coverage": {
+    "requested": 2,
+    "generated": 2,
+    "generation_failed": 0,
+    "input_failed": 0,
+    "pending": 0,
+    "generating": 0,
+    "metric_valid": {
+      "mcd": 0,
+      "wer": 0,
+      "sim": 0,
+      "sva": 0,
+      "speechmos": 0,
+      "dnsmos": 0,
+      "emotion": 0
+    },
+    "required_metrics": [
+      "mcd",
+      "wer",
+      "sim"
+    ],
+    "status": "generated",
+    "eligible_for_comparison": false
+  },
+  "samples": [
+    {
+      "sample_id": "59c5e63512ec18bacdf941db596a939ba7953749cde66ff2b860d04d8eccc830",
+      "generated_sha256": "1dddbbbc097a85e4e7876399ad4f84091f729ba7443d9928935ecdad36aadc4c",
+      "synthesis_time_sec": 38.83595789875835,
+      "timing_scope": "adapter_call_including_lazy_initialization"
+    },
+    {
+      "sample_id": "bbbafeab3dbc9112c48d524d97c8ffbeebe4129c00afa96c7694033fda99e34f",
+      "generated_sha256": "c3ecb798347088b5e8bb73672899d6d82d7bf1924caabfbfca92b06aef6036df",
+      "synthesis_time_sec": 35.87100999429822,
+      "timing_scope": "adapter_call_including_lazy_initialization"
+    }
+  ],
+  "interpretation": "Initial probe predates explicit device placement, scoped checkpoint allowlist, codec and lexicon hashing. Generated 2/2; actual parameter devices were not logged. Retained as preliminary runtime evidence, not canonical subset reproduction."
+}

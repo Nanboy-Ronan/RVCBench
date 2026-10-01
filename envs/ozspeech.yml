@@ -1,13 +1,23 @@
+# Key pins validated in the existing local runtime, not a clean installation lock.
+# Install remaining OZSpeech checkout dependencies separately; score in eval env.
 name: ozspeech
 channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3.10
+  - python=3.11
   - pip
   - ffmpeg
   - libsndfile
   - espeak-ng
   - pip:
-      - --extra-index-url https://download.pytorch.org/whl/cu121
+      - --extra-index-url https://download.pytorch.org/whl/cu126
       - -e ..
+      - torch==2.8.0
+      - torchaudio==2.8.0
+      - transformers==4.57.3
+      - numpy==1.26.4
+      - pytorch-lightning==2.5.3
+      - omegaconf==2.3.0
+      - g2p-en==2.1.0
+      - phonemizer==3.3.0

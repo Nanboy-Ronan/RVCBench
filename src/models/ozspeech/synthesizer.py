@@ -11,7 +11,6 @@ import sys
 import numpy as np
 import soundfile as sf
 import torch
-from huggingface_hub import hf_hub_download
 from omegaconf import DictConfig, OmegaConf
 from omegaconf.nodes import AnyNode
 from omegaconf.base import ContainerMetadata, Metadata
@@ -159,37 +158,27 @@ class OzSpeechSynthesizer(BaseModel):
         assert self._zact_class is not None
         self.logger.info("[OZSpeech] Loading ZACT model (device=%s)...", self._device_string)
 
-        try:
-            from torch.serialization import add_safe_globals
-
-            add_safe_globals(
-                [
-                    list,
-                    int,
-                    float,
-                    bool,
-                    str,
-                    dict,
-                    tuple,
-                    set,
-                    ListConfig,
-                    DictConfig,
-                    ContainerMetadata,
-                    Metadata,
-                    AnyNode,
-                    Any,
-                    defaultdict,
-                ]
+        allowed = [list, int, float, bool, str, dict, tuple, set, ListConfig,
+                   DictConfig, ContainerMetadata, Metadata, AnyNode, Any, defaultdict]
+        existing = torch.serialization.get_safe_globals()
+        # Exclude existing entries: safe_globals removes entries on exit, so
+        # adding an already-allowed type would remove caller-owned state.
+        with torch.serialization.safe_globals([value for value in allowed if value not in existing]):
+            self._model = self._zact_class.from_pretrained(
+                cfg=cfg,
+                ckpt_path=str(self.checkpoint_path),
+                device=self._device_string,
+                training_mode=False,
             )
-        except Exception:
-            pass
+        for label, resource in [('ZACT', self._model), ('FACodec encoder', self._codec_encoder),
+                                ('FACodec decoder', self._codec_decoder)]:
+            resource.to(self.device).eval()
+            self.logger.info('[OZSpeech] %s parameter device: %s', label,
+                             next(resource.parameters()).device)
 
-        self._model = self._zact_class.from_pretrained(
-            cfg=cfg,
-            ckpt_path=str(self.checkpoint_path),
-            device=self._device_string,
-            training_mode=False,
-        )
+    def close(self):
+        self.model = self._model = self._codec_encoder = self._codec_decoder = None
+        self._model_ready = False
 
     def _ensure_dependencies(self) -> None:
         if self.code_path is not None and str(self.code_path) not in sys.path:
@@ -239,6 +228,9 @@ class OzSpeechSynthesizer(BaseModel):
 
         if self._facodec_encoder_class is None or self._facodec_decoder_class is None:
             raise RuntimeError("FACodec classes not loaded; call _ensure_dependencies first")
+
+        if self.codec_encoder_path is None or self.codec_decoder_path is None:
+            from huggingface_hub import hf_hub_download
 
         encoder_weights = (
             str(self.codec_encoder_path)

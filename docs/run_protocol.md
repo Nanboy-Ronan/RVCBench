@@ -329,3 +329,19 @@ a clean installation. The upstream constructor still checks/downloads its NLTK
 tagger resource, which is not yet included in configured asset hashes. Historical
 Hub revision and environment equivalence are also unproven; these limits prevent
 a claim of fully frozen generation provenance.
+
+OZSpeech places ZACT and both FACodec modules explicitly on the requested device
+and logs their actual parameter devices after loading. Loading tensors with a
+CUDA `map_location` alone does not move a newly constructed model's parameters.
+Main/codec references are released before scoring. Its OmegaConf checkpoint
+allowlist exists only during the upstream `weights_only=True` load; existing
+caller-owned allowlist entries are preserved on success and failure.
+
+Both codec path spellings (`codec_*_path`, `facodec_*_path`) are accepted, including
+an alias when the primary YAML field is null. Local codec weights and the upstream
+`zact/lexicon/librispeech-lexicon.txt` are hashed. Missing codec paths resolve the
+two default Hub files at one immutable revision before loading. The validated
+runtime uses Torch 2.8.0, Transformers 4.57.3 and Lightning 2.5.3. Its environment
+recipe records key pins rather than a clean-install lock. G2P/NLTK package resource
+assets and historical immutable weights/runtime are not yet established, so
+matched-input generation and scoring comparisons remain evidence-bounded.

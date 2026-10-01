@@ -1,0 +1,63 @@
+{
+  "kind": "generation_scoring_canary",
+  "model": "ozspeech",
+  "coverage": {
+    "requested": 2,
+    "generated": 2,
+    "generation_failed": 0,
+    "input_failed": 0,
+    "pending": 0,
+    "generating": 0,
+    "metric_valid": {
+      "mcd": 2,
+      "wer": 2,
+      "sim": 2,
+      "sva": 2,
+      "speechmos": 0,
+      "dnsmos": 0,
+      "emotion": 0
+    },
+    "required_metrics": [
+      "mcd",
+      "wer",
+      "sim"
+    ],
+    "status": "complete",
+    "eligible_for_comparison": true
+  },
+  "generation_manifest": "/tealab-data/rjin02/RVCBench/results/debug_ozspeech_device_libritts2/20261001-021347-ea2f082b/run_manifest.json",
+  "generation_manifest_sha256": "5f4dced94e6d4db49ec244188a7e8bdb55e91478e36088e191a41917cc51683f",
+  "scoring_manifest": "/tealab-data/rjin02/RVCBench/results/debug_ozspeech_device_libritts2_score/20261001-021459-99071774/run_manifest.json",
+  "scoring_manifest_sha256": "52e1f672486b9f49bd1a769a276187dc3f3be0c28933b4dfa3b0948d5f6cb2be",
+  "samples": [
+    {
+      "sample_id": "59c5e63512ec18bacdf941db596a939ba7953749cde66ff2b860d04d8eccc830",
+      "generated_sha256": "49a9d5ec1d9b5cdbcbbfe5b62904a6a3aa355084ce0861aac85eeb6b4ac5e609",
+      "metrics": {
+        "mcd": 6.944660225232239,
+        "wer": 0.0,
+        "predicted_text": " You'll receive the packet Thursday morning. I inquired.",
+        "sim": 0.4677886962890625,
+        "sva": true
+      }
+    },
+    {
+      "sample_id": "bbbafeab3dbc9112c48d524d97c8ffbeebe4129c00afa96c7694033fda99e34f",
+      "generated_sha256": "b624462bd44748a753e9e8156e531e2647683c14d102c1e2337285094bad6402",
+      "metrics": {
+        "mcd": 7.102536720401898,
+        "wer": 0.125,
+        "predicted_text": " a transferable ticket to the Hall of Fame.",
+        "sim": 0.4351792633533478,
+        "sva": true
+      }
+    }
+  ],
+  "repair_repeat_check": {
+    "full_manifest": "/tealab-data/rjin02/RVCBench/results/reproduce_v2_ozspeech_device_libritts16/20261001-021703-3f95d57a/run_manifest.json",
+    "full_manifest_sha256": "d6505cc252676324353b474e1bae9aba9860f28744dd6f9ff8d44377e87da2b6",
+    "matched": 2,
+    "identical_waveform_hashes": 2
+  },
+  "interpretation": "Device-placement canary predates lexicon hashing and lazy Hub import repair. Both audio hashes repeated in full subset. Initial pre-device-placement debug run retained separately; historical immutable weights/device equivalence unproven."
+}
