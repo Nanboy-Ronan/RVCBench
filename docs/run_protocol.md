@@ -216,3 +216,19 @@ Target-only legacy output names also require a complete, ordered generation log
 that verifies reference audio identity; target audio alone is insufficient.
 Even with matching formulas, Whisper predictions can differ across runtime
 versions. Replay reports retain those differences and do not claim equivalence.
+
+ZipVoice defaults to retained native inference: weights and vocoder are loaded
+once in preparation and released before scoring. Setting `adversary.runtime_python`
+selects CLI inference in that interpreter; `adversary.execution_backend` can
+explicitly select `native` or `cli`. Native inference requires the current Python
+interpreter. Interpreter paths preserve virtual-environment symlinks so that the
+requested environment is actually used, including for MaskGCT and IndexTTS workers.
+CLI inference starts a process and loads weights per sample; its reported synthesis
+time includes that overhead, while native preparation is outside per-sample timing.
+Do not compare their RTF as equivalent timing protocols.
+
+The published ZipVoice checkpoint uses the `emilia` tokenizer even when evaluated
+on LibriTTS. Tokenizer selection follows the trained checkpoint, not the dataset
+name. The historical March 2026 clean run also used `emilia`; the former `libritts`
+default produced a severe content regression. Explicit tokenizer overrides remain
+available for custom checkpoints. Invalid names fail before weight loading.

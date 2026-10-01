@@ -44,14 +44,14 @@ class ZipVoiceZeroShotAdversary(BaseAdversary):
         )
         runtime_python_value = self.config.get("runtime_python")
         self.runtime_python = (
-            Path(to_absolute_path(str(runtime_python_value))).resolve()
+            Path(to_absolute_path(str(runtime_python_value))).absolute()
             if runtime_python_value not in (None, "")
             else None
         )
 
         self.model_name = str(self.config.get("model_name", "zipvoice")).strip().lower()
         self.checkpoint_name = str(self.config.get("checkpoint_name", "model.pt"))
-        self.tokenizer = str(self.config.get("tokenizer", "libritts"))
+        self.tokenizer = str(self.config.get("tokenizer", "emilia"))
         self.default_lang = str(self.config.get("lang", "en-us"))
         self.use_sample_language = bool(self.config.get("use_sample_language", False))
         self.guidance_scale = self.config.get("guidance_scale")
@@ -99,6 +99,7 @@ class ZipVoiceZeroShotAdversary(BaseAdversary):
             num_thread=self.num_thread,
             seed=(int(self.seed) if self.seed is not None else None),
             runtime_python=self.runtime_python,
+            execution_backend=str(self.config.get('execution_backend', 'auto')),
         )
         self._generator = ZipVoiceGenerator(generator_config, self.device, self.logger)
 

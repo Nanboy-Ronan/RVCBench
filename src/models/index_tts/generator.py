@@ -48,7 +48,7 @@ class IndexTTSGenerator(BaseModel):
             model_dir=Path(config.model_dir).expanduser().resolve(),
             config_path=Path(config.config_path).expanduser().resolve(),
             runtime_python=(
-                Path(config.runtime_python).expanduser().resolve()
+                Path(config.runtime_python).expanduser().absolute()
                 if config.runtime_python is not None
                 else None
             ),

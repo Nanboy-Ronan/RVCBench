@@ -1,4 +1,4 @@
-"""ZipVoice generator wrapper backed by the upstream CLI."""
+"""ZipVoice inference with retained native models or an explicit CLI runtime."""
 
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ class ZipVoiceGeneratorConfig:
     model_dir: Optional[Path] = None
     checkpoint_name: str = "model.pt"
     vocoder_path: Optional[Path] = None
-    tokenizer: str = "libritts"
+    tokenizer: str = "emilia"
     lang: str = "en-us"
     guidance_scale: Optional[float] = None
     num_step: Optional[int] = None
@@ -41,10 +41,11 @@ class ZipVoiceGeneratorConfig:
     seed: Optional[int] = None
     runtime_python: Optional[Path] = None
     worker_script_path: Optional[Path] = None
+    execution_backend: str = 'auto'
 
 
 class ZipVoiceGenerator(BaseModel):
-    """Runs the upstream ZipVoice CLI in a fresh process per request."""
+    """Retains native models; a configured foreign interpreter selects the CLI."""
 
     def __init__(self, config: ZipVoiceGeneratorConfig, device: torch.device, logger) -> None:
         materialised = replace(
@@ -58,7 +59,7 @@ class ZipVoiceGenerator(BaseModel):
                 else None
             ),
             runtime_python=(
-                Path(config.runtime_python).expanduser().resolve()
+                Path(config.runtime_python).expanduser().absolute()
                 if config.runtime_python is not None
                 else None
             ),
@@ -74,11 +75,29 @@ class ZipVoiceGenerator(BaseModel):
             logger=logger,
         )
         self.config = materialised
+        if materialised.tokenizer not in ('emilia', 'libritts', 'espeak', 'simple'):
+            raise ValueError(f'Unsupported ZipVoice tokenizer: {materialised.tokenizer}')
+        self.execution_backend = materialised.execution_backend
+        if self.execution_backend == 'auto':
+            self.execution_backend = 'cli' if materialised.runtime_python else 'native'
+        if self.execution_backend not in ('native', 'cli'):
+            raise ValueError('ZipVoice execution_backend must be auto, native or cli')
+        if (self.execution_backend == 'native' and materialised.runtime_python and
+                materialised.runtime_python.absolute() != Path(sys.executable).absolute()):
+            raise ValueError('Native ZipVoice must run in the current interpreter; use execution_backend=cli for runtime_python')
+        self._previous_num_threads = None
         self.sample_rate: int = 24000
         self.vocoder = None
         self._validate_paths()
 
     def load_model(self) -> None:
+        if self.execution_backend == 'cli':
+            result = subprocess.run([str(self.config.runtime_python or sys.executable), '-c',
+                                     'import zipvoice.bin.infer_zipvoice'], cwd=self.config.code_path,
+                                    capture_output=True, text=True, timeout=120)
+            if result.returncode:
+                raise RuntimeError(result.stderr.strip() or 'ZipVoice runtime preflight failed')
+            return
         if isinstance(self.model, torch.nn.Module):
             return
 
@@ -87,6 +106,9 @@ class ZipVoiceGenerator(BaseModel):
             sys.path.insert(0, code_path)
 
         infer_module = importlib.import_module("zipvoice.bin.infer_zipvoice")
+        self._generate_sentence = infer_module.generate_sentence
+        self._previous_num_threads = torch.get_num_threads()
+        torch.set_num_threads(self.config.num_thread)
         checkpoint_module = importlib.import_module("zipvoice.utils.checkpoint")
 
         hf_hub_download = getattr(infer_module, "hf_hub_download")
@@ -144,6 +166,8 @@ class ZipVoiceGenerator(BaseModel):
 
         model = model.to(self.device)
         model.eval()
+        if self.config.trt_engine_path:
+            infer_module.load_trt(model, str(self.config.trt_engine_path))
         self.model = model
 
         self.vocoder = get_vocoder(str(self.config.vocoder_path) if self.config.vocoder_path else None)
@@ -152,6 +176,15 @@ class ZipVoiceGenerator(BaseModel):
         feature_extractor = VocosFbank()
         self.sample_rate = int(model_config_data["feature"]["sampling_rate"])
         self._feature_extractor = feature_extractor
+        self._tokenizer = tokenizer
+
+    def close(self) -> None:
+        self.model = self.vocoder = None
+        self._tokenizer = self._feature_extractor = None
+        self._model_ready = False
+        if self._previous_num_threads is not None:
+            torch.set_num_threads(self._previous_num_threads)
+            self._previous_num_threads = None
 
     def generate(
         self,
@@ -175,6 +208,29 @@ class ZipVoiceGenerator(BaseModel):
 
         with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as handle:
             output_path = Path(handle.name)
+
+        if self.execution_backend == 'native':
+            try:
+                if self.config.seed is not None:
+                    from src.utils.seeding import configure_seeds
+                    configure_seeds(int(self.config.seed) + int(sample_index), logger=None)
+                if self.config.tokenizer == 'espeak' and lang and lang != self.config.lang:
+                    raise ValueError('Native ZipVoice espeak language must match its prepared tokenizer')
+                defaults = (16, 1.0) if self.config.model_name == 'zipvoice' else (8, 3.0)
+                with torch.inference_mode():
+                    self._generate_sentence(
+                        save_path=str(output_path), prompt_text=prompt_text, prompt_wav=str(prompt_path),
+                        text=text, model=self.model, vocoder=self.vocoder, tokenizer=self._tokenizer,
+                        feature_extractor=self._feature_extractor, device=self.device,
+                        num_step=self.config.num_step if self.config.num_step is not None else defaults[0],
+                        guidance_scale=self.config.guidance_scale if self.config.guidance_scale is not None else defaults[1],
+                        feat_scale=self.config.feat_scale, speed=self.config.speed, t_shift=self.config.t_shift,
+                        target_rms=self.config.target_rms, sampling_rate=self.sample_rate,
+                        max_duration=self.config.max_duration, remove_long_sil=self.config.remove_long_sil)
+                waveform, sample_rate = sf.read(str(output_path), dtype='float32')
+                return np.asarray(waveform, dtype=np.float32).reshape(-1), int(sample_rate)
+            finally:
+                output_path.unlink(missing_ok=True)
 
         command = [
             str(self.config.runtime_python or Path(sys.executable)),

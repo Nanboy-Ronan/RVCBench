@@ -35,7 +35,7 @@ class MaskGCTZeroShotAdversary(BaseAdversary):
         ).resolve()
         runtime_python_value = self.config.get("runtime_python")
         self.runtime_python = (
-            Path(to_absolute_path(str(runtime_python_value))).resolve()
+            Path(to_absolute_path(str(runtime_python_value))).absolute()
             if runtime_python_value not in (None, "")
             else None
         )

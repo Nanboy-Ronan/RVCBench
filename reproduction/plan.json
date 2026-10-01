@@ -177,9 +177,25 @@
       "status": "historical_results",
       "config": "configs/ots_vc/clean/libritts/zipvoice_ots.yaml",
       "subset": "subsets/libritts16_v1/selection.json",
-      "generation_status": "pending",
-      "scoring_status": "pending",
-      "historical_comparison_status": "pending"
+      "generation_status": "complete",
+      "scoring_status": "complete",
+      "historical_comparison_status": "matched_subset_measured",
+      "generation_run": "results/reproduce_v2_zipvoice_native_emilia_libritts16/20261001-003543-0cf09252",
+      "scoring_run": "results/reproduce_v2_zipvoice_native_emilia_libritts16_score/20261001-003621-8cf5314f",
+      "comparison": "comparisons/zipvoice_libritts16_v1.json",
+      "historical_metric_replay": "comparisons/zipvoice_metric_replay_v1.json",
+      "historical_metric_replay_status": "partial_WER_ASR_difference",
+      "reproduction_status": "tokenizer_regression_corrected_full_subset_measured_historical_exact_equivalence_unproven",
+      "provenance_limit": "Pinned local model/vocoder snapshots and upstream source fingerprints; historical run lacks immutable weight/runtime records. Corrected generation predates invalid-tokenizer validation guard. Native and CLI are distinct timing protocols.",
+      "failed_quality_attempts": [
+        {
+          "generation_run": "results/reproduce_v2_zipvoice_native_libritts16/20261001-002305-67008eb0",
+          "scoring_run": "results/reproduce_v2_zipvoice_native_libritts16_score/20261001-002433-1495fa0a",
+          "comparison": "comparisons/zipvoice_libritts16_initial_v1.json",
+          "reason": "libritts tokenizer used with published emilia checkpoint; WER 1.0335. Same inputs/weights/seed with emilia reduce WER to 0.0921."
+        }
+      ],
+      "native_cli_canary": "comparisons/zipvoice_emilia_native_cli_canary.json"
     },
     {
       "n": "FishSpeech",

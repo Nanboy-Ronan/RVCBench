@@ -15,7 +15,8 @@ adversary:
   code_path: "checkpoints/ZipVoice"
   model_dir: null
   model_name: zipvoice
-  tokenizer: libritts
+  # Tokenizer follows the pretrained checkpoint, not the evaluation corpus.
+  tokenizer: emilia
   lang: en-us
   use_sample_language: false
   checkpoint_name: model.pt

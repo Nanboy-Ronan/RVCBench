@@ -1,0 +1,37 @@
+{
+  "kind": "historical_audio_metric_replay",
+  "historical_csv": "/tealab-data/rjin02/AudioWatermarkBench/results/zipvoice_ots_on_libritts/20260328-093814/generation_sample_metrics.csv",
+  "historical_csv_sha256": "4108a4fcbaec2019f18ce4d21b048ae95e1895e136e972ddd59fddc7ab0f7283",
+  "differences": {
+    "mcd": {
+      "valid": 16,
+      "requested": 16,
+      "mean_delta": 0.0,
+      "max_absolute_delta": 0.0
+    },
+    "wer": {
+      "valid": 16,
+      "requested": 16,
+      "mean_delta": 0.04487179487179487,
+      "max_absolute_delta": 0.6923076923076923
+    },
+    "sim": {
+      "valid": 16,
+      "requested": 16,
+      "mean_delta": 8.344650268554688e-07,
+      "max_absolute_delta": 1.4066696166992188e-05
+    }
+  },
+  "historical_wer_protocol": {
+    "normalization": "ascii_punctuation_removed_v2",
+    "rows": 2000,
+    "formula_matches": {
+      "lowercase_v1": 856,
+      "ascii_punctuation_removed_v2": 2000
+    }
+  },
+  "interpretation": "Tests scorer reproduction on historical audio; does not prove generation reproducibility.",
+  "source_report": "/tealab-data/rjin02/RVCBench/results/reproduction_metric_replay/zipvoice_libritts16_v1/replay_report.json",
+  "source_sha256": "d8b1e8d7911f7ce2a13d338fe66f6da2f83256e297915fc094d63ae7511a3af1",
+  "status": "partial_WER_ASR_difference"
+}
