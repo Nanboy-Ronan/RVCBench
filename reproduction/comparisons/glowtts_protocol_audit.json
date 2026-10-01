@@ -1,0 +1,28 @@
+{
+  "status": "protocol_gap_verified_runtime_pending",
+  "model": "glowtts",
+  "experimental": true,
+  "adapter": "/tealab-data/rjin02/RVCBench/src/adversary/glowtts_ots.py",
+  "adapter_sha256": "d6dec404facf6e4d026bc37e72baaa26821bec7d4f6ec2e65910bd3ddbe31b06",
+  "upstream_workspace_wrapper": "/tealab-data/rjin02/AudioWatermarkBench/src/models/glowtts/synthesizer.py",
+  "upstream_workspace_wrapper_sha256": "e3a7cd535c211c2330f8156ae230cf48a21e33e09d07d1436eb27363c3fb5806",
+  "official_reference": "https://github.com/jaywalnut310/glow-tts",
+  "findings": [
+    {
+      "issue": "reference_text_selected_before_target_text",
+      "evidence": "attack selects sample.prompt_text before sample.target_text, but the benchmark scores against the target waveform/text.",
+      "repair_requirement": "Use target text and reject missing target text; validate with a working wrapper."
+    },
+    {
+      "issue": "reference_waveform_not_used_by_synthesis",
+      "evidence": "attack passes only text and dataset speaker_id to synthesize. Intended synthesizer maps speaker IDs to learned speaker embeddings, including modulo/cache assignment for unknown IDs.",
+      "repair_requirement": "Reference-conditioned voice cloning requires an actual compatible model mechanism. A closed-set TTS control must be explicitly distinguished and must not silently assign arbitrary trained speaker IDs."
+    },
+    {
+      "issue": "wrapper_and_configured_assets_unavailable",
+      "evidence": "src.models.glowtts is absent; configured glowtts_libritts.json/pretrained_libritts.pt paths were not found in the current or upstream checkpoints root.",
+      "repair_requirement": "Restore a validated wrapper and locate weights/configuration matching its actual protocol; do not substitute a different TTS model under this key."
+    }
+  ],
+  "interpretation": "The configured adapter cannot currently substantiate zero-shot voice cloning. It remains in scope and pending; no synthetic or unrelated-model metrics replace real validation."
+}

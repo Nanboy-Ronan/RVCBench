@@ -393,9 +393,12 @@
       "status": "experimental_adapter",
       "config": "configs/ots_vc/clean/libritts/glowtts_ots.yaml",
       "subset": "subsets/libritts16_v1/selection.json",
-      "generation_status": "pending",
+      "generation_status": "pending_missing_wrapper_and_assets",
       "scoring_status": "pending",
-      "historical_comparison_status": "historical_reference_not_established"
+      "historical_comparison_status": "historical_reference_not_established",
+      "protocol_audit": "comparisons/glowtts_protocol_audit.json",
+      "reference_conditioning_status": "not_implemented_by_current_adapter",
+      "provenance_limit": "Current adapter prioritizes reference text and uses dataset speaker IDs without reference-audio conditioning. Missing wrapper and configured assets prevent runtime validation; no unrelated model substitution."
     },
     {
       "n": "Kimi Audio",
@@ -412,7 +415,8 @@
       "subset_validation": "comparisons/kimi_audio_libritts16_validation.json",
       "runtime_audit": "comparisons/kimi_audio_runtime_audit.json",
       "reproduction_status": "full_subset_measured_historical_reference_not_established",
-      "provenance_limit": "Local main/Whisper/detokenizer/vocoder/GLM-tokenizer weights and upstream Python hashed. Supplemental native kernel source audit; clean install and historical reference unverified. Reference-history conditioning does not establish effective voice cloning."
+      "provenance_limit": "Local main/Whisper/detokenizer/vocoder/GLM-tokenizer weights and upstream Python hashed. Supplemental native kernel source audit; clean install and historical reference unverified. Reference-history conditioning does not establish effective voice cloning.",
+      "current_native_source_scope_audit": "comparisons/kimi_audio_native_source_scope_v4.json"
     },
     {
       "n": "MGM-Omni",
@@ -535,7 +539,8 @@
         "generation_status": "complete",
         "scoring_status": "complete",
         "historical_comparison_status": "matched_subset_measured"
-      }
+      },
+      "current_native_source_scope_audit": "comparisons/zonos2_native_source_scope_v4.json"
     },
     {
       "n": "PlayDiffusion",

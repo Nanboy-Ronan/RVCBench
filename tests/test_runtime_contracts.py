@@ -134,6 +134,74 @@ def test_worker_environment_probe_uses_actual_interpreter():
     assert set(result) == {'python', 'executable', 'packages'}
 
 
+@pytest.mark.parametrize('suffix', ['.cu', '.cuh', '.cpp', '.h', '.pyx', '.pxd', '.cmake'])
+def test_upstream_native_source_changes_generation_fingerprint(tmp_path, suffix):
+    from src.benchmark.fingerprints import generation_runtime
+    adapter = tmp_path / 'src/adversary/fixture.py'
+    adapter.parent.mkdir(parents=True)
+    adapter.write_text('')
+    upstream = tmp_path / 'upstream'
+    upstream.mkdir()
+    source = upstream / ('kernel' + suffix)
+    source.write_text('source version one')
+    conf = OmegaConf.create({'vc': {'mode': 'ots', 'model': 'fixture'},
+                            'adversary': {'code_path': str(upstream)}})
+    with patch.dict('src.benchmark.fingerprints._ADVERSARY_REGISTRY',
+                    {'ots': {'fixture': 'src.adversary.fixture:Adapter'}}), \
+            patch('importlib.metadata.packages_distributions', return_value={}):
+        before = generation_runtime(tmp_path, conf, {})
+        assert str(source.relative_to(tmp_path)) in before['source_files']
+        source.write_text('source version two')
+        after = generation_runtime(tmp_path, conf, {})
+    assert before['source_sha256'] != after['source_sha256']
+
+
+def test_authored_build_definition_changes_resume_but_generated_outputs_do_not(tmp_path):
+    from src.benchmark.fingerprints import generation_runtime
+    adapter = tmp_path / 'src/adversary/fixture.py'
+    adapter.parent.mkdir(parents=True)
+    adapter.write_text('')
+    upstream = tmp_path / 'upstream'
+    upstream.mkdir()
+    definition = upstream / 'CMakeLists.txt'
+    definition.write_text('set(FLAG 1)')
+    conf = OmegaConf.create({'vc': {'mode': 'ots', 'model': 'fixture'},
+                            'adversary': {'code_path': str(upstream)}})
+    with patch.dict('src.benchmark.fingerprints._ADVERSARY_REGISTRY',
+                    {'ots': {'fixture': 'src.adversary.fixture:Adapter'}}), \
+            patch('importlib.metadata.packages_distributions', return_value={}):
+        before = generation_runtime(tmp_path, conf, {})
+        for dirname in ('build', 'dist', '.venv', '__pycache__', '.git'):
+            directory = upstream / dirname
+            directory.mkdir()
+            (directory / 'generated.cpp').write_text('generated output')
+            (directory / 'invalid.py').write_text('not valid Python!')
+        (upstream / 'kernel.so').write_bytes(b'compiled output')
+        assert generation_runtime(tmp_path, conf, {}) == before
+        definition.write_text('set(FLAG 2)')
+        assert generation_runtime(tmp_path, conf, {})['source_sha256'] != before['source_sha256']
+
+
+def test_runner_rejects_resume_after_native_source_change(setup_run):
+    conf, _, run, tmp_path = setup_run
+    upstream = tmp_path / 'native-upstream'
+    upstream.mkdir()
+    kernel = upstream / 'kernel.cu'
+    kernel.write_text('kernel version one')
+    conf.adversary.code_path = str(upstream)
+    first, _, _ = run('native-first')
+    conf.vc.resume_from = str(first)
+    build = upstream / 'build'
+    build.mkdir()
+    (build / 'temporary.cpp').write_text('generated compiler output')
+    with patch('src.benchmark.backends.select_adversary', side_effect=AssertionError('must reuse')):
+        _, resumed, _ = run('native-build-reuse')
+    assert all(row['reused'] for row in resumed['samples'])
+    kernel.write_text('kernel version two')
+    with pytest.raises(ValueError, match='runtime source changed'):
+        run('native-source-rejected')
+
+
 @pytest.mark.parametrize('settings,imports', [
     ({'attn_implementation': 'flash_attention_2'}, ''),
     ({'use_flash_attn': True}, ''),

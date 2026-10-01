@@ -63,7 +63,18 @@ still differ from historical audio; unavailable historical weight/runtime
 revisions prevent an exact-equivalence claim. Both protocol variants are retained.
 LibriTTS validation is retained separately, including two repeated audio hashes.
 
-Generation dependency scope v3 records `flash-attn` even when absent if a
+Generation dependency scope v4 also hashes authored upstream C/C++/CUDA headers
+and sources, Cython sources and native build definitions under configured runtime
+roots. Generated `build`/`dist` trees and virtual environments are excluded, so
+first-time compilation alone does not invalidate recovery. Changing a kernel
+source or authored build definition does invalidate resume. Native sources outside
+the Python runtime root can be included through a separate
+`+adversary.native_code_path=/path/to/native/source` override.
+Compiled binaries, compiler flags and effective kernel selection remain outside
+this source fingerprint. Older generation manifests retain their original scope;
+their quality-scoring evidence is preserved, and they are not retroactively upgraded.
+
+This scope records `flash-attn` even when absent if a
 FlashAttention option is selected, an upstream source imports it, or Transformers
 is in the dependency closure. Installing or changing this optional dependency
 therefore changes the generation fingerprint and prevents silent resume across
