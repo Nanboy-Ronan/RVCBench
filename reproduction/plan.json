@@ -383,7 +383,7 @@
   "requirements": [
     {
       "item": "Explicit backend requests and results with deterministic resource cleanup",
-      "status": "qwen3_direct_requests_verified_other_adapters_use_legacy_bridge"
+      "status": "qwen3_and_f5_direct_requests_verified_other_adapters_use_legacy_bridge"
     },
     {
       "item": "Original sample seed propagation including subprocess and HTTP adapters",

@@ -4,7 +4,8 @@ Revision resolution preserves an explicit full 40-character lowercase Git
 commit without a separate `model_info` request. Branches, tags, abbreviated commits
 and unspecified revisions are resolved online. Offline use of such mutable
 references fails with an instruction to pin a full commit first. This applies
-to Qwen3-TTS, PlayDiffusion presets and OzSpeech's downloaded codec assets.
+to Qwen3-TTS, F5-TTS checkpoints/vocoders, PlayDiffusion presets and
+OzSpeech's downloaded codec assets.
 Snapshot downloads may still contact the Hub when online.
 
 The pin identifies a version; it does not prove that the required files exist
@@ -38,3 +39,28 @@ HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python run_vc.py \
 
 This is an example revision used in the retained reproduction artifacts, not
 a claim that every upstream revision supports the same cloning interface.
+
+## F5-TTS assets
+
+F5-TTS resolves checkpoint and vocoder revisions independently. The runner
+supplies local versioned assets to the upstream API, records their hashes,
+and hashes the installed preset configuration and default vocabulary.
+Explicit `ckpt_file`, `vocab_file` and `vocoder_local_path` overrides are retained.
+Checkpoint paths preserve the logical `.safetensors` filename in Hub caches;
+resolving the symlink to a bare blob filename can select the wrong loader.
+
+With both snapshots cached, the validated default preset can run offline:
+
+```bash
+HF_HUB_OFFLINE=1 python run_vc.py \
+  --config-name ots_vc/clean/libritts/f5_tts_ots \
+  dataset.use_hf_dataset=false \
+  +dataset.manifest_filename=reproduction/subsets/libritts16_v1/metadata.json \
+  adversary.revision=84e5a410d9cead4de2f847e7c9369a6440bdfaca \
+  adversary.vocoder_revision=0feb3fdd929bcd6649e0e7c5a688cf7dd012ef21 \
+  +vc.generate_only=true +seed=42
+```
+
+These pins apply to `F5TTS_v1_Base` and its Vocos vocoder. Another preset or
+vocoder needs compatible revisions or explicit local assets. Current asset
+provenance does not reconstruct missing checkpoint identities from legacy runs.

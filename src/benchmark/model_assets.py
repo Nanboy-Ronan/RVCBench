@@ -38,6 +38,46 @@ def resolve_model_assets(conf, logger=None):
                   if isinstance(value, str) and value and (key in fields or key.endswith(('_checkpoint_path', '_config_path')))}
     if model == 'moss_ttsd' and resolved.adversary.get('use_prompt_transcript', False):
         references.pop('reference_asr_model', None)
+    if model == 'f5_tts':
+        from importlib.resources import files
+        from huggingface_hub import hf_hub_download, snapshot_download
+        preset = str(resolved.adversary.get('model', 'F5TTS_v1_Base'))
+        package_root = files('f5_tts')
+        config_path = Path(str(package_root.joinpath(f'configs/{preset}.yaml')))
+        preset_config = OmegaConf.load(config_path)
+        mel = preset_config.model.mel_spec.mel_spec_type
+        references['f5_tts.package_config'] = str(config_path)
+        if not resolved.adversary.get('vocab_file'):
+            vocab = str(package_root.joinpath('infer/examples/vocab.txt'))
+            OmegaConf.update(resolved, 'adversary.vocab_file', vocab, force_add=True)
+            references['vocab_file'] = vocab
+        if not resolved.adversary.get('ckpt_file'):
+            repo = 'SWivid/E2-TTS' if preset == 'E2TTS_Base' else 'SWivid/F5-TTS'
+            step = 1200000 if preset in ('F5TTS_Base', 'E2TTS_Base') else 1250000
+            filename = f'{preset}/model_{step}.safetensors'
+            if preset == 'F5TTS_Base' and mel == 'bigvgan':
+                filename = 'F5TTS_Base_bigvgan/model_1250000.pt'
+            revision = resolve_hub_revision(repo, resolved.adversary.get('revision'))
+            checkpoint = hf_hub_download(repo, filename=filename, revision=revision,
+                                         cache_dir=resolved.adversary.get('hf_cache_dir'))
+            OmegaConf.update(resolved, 'adversary.ckpt_file', checkpoint, force_add=True)
+            OmegaConf.update(resolved, 'adversary.revision', revision, force_add=True)
+            references['ckpt_file'] = checkpoint
+            assets['f5_tts.hub'] = {'repo_id': repo, 'revision': revision, 'filename': filename}
+        if not resolved.adversary.get('vocoder_local_path'):
+            repos = {'vocos': 'charactr/vocos-mel-24khz',
+                     'bigvgan': 'nvidia/bigvgan_v2_24khz_100band_256x'}
+            if mel not in repos:
+                raise ValueError(f'F5-TTS vocoder requires explicit local assets: {mel}')
+            repo = repos[mel]
+            revision = resolve_hub_revision(repo, resolved.adversary.get('vocoder_revision'))
+            vocoder = snapshot_download(repo, revision=revision,
+                cache_dir=resolved.adversary.get('hf_cache_dir'),
+                allow_patterns=['config.yaml', 'pytorch_model.bin'] if mel == 'vocos' else None)
+            OmegaConf.update(resolved, 'adversary.vocoder_local_path', vocoder, force_add=True)
+            OmegaConf.update(resolved, 'adversary.vocoder_revision', revision, force_add=True)
+            references['vocoder_local_path'] = vocoder
+            assets['f5_tts.vocoder_hub'] = {'repo_id': repo, 'revision': revision}
     if model == 'ozspeech':
         missing_codecs = [name for name in ('encoder', 'decoder')
                           if not (resolved.adversary.get('codec_' + name + '_path') or

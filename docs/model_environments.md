@@ -48,7 +48,7 @@ cd ..
 | CosyVoice | `envs/cosyvoice.yml` | `cosyvoice` |
 | dots.tts | `envs/dots-tts.yml` | `dots-tts` |
 | Fish Audio S2 native | `envs/fish-s2-native.yml` ([setup](fish_s2_native.md); base recipe) | `fish-s2-native` |
-| F5-TTS | `envs/f5-tts.yml` | `f5-tts` |
+| F5-TTS | `envs/f5-tts.yml` (validated Python 3.11 / Torch 2.8 / SDK 1.1.18 pins; base recipe) | `f5-tts` |
 | Fish Audio S2 (local API server) | `envs/fish-speech-s2.yml` (base env; serves the model, see [README](../README.md)) | `fish-speech-s2` |
 | FishSpeech | `envs/fishspeech.yml` | `fishspeech` |
 | GLM-TTS | `envs/glm-tts.yml` | `glm-tts` |

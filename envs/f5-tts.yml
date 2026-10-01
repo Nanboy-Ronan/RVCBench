@@ -3,12 +3,16 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3.10
+  - python=3.11
   - pip
   - ffmpeg
   - libsndfile
   - espeak-ng
   - pip:
-      - --extra-index-url https://download.pytorch.org/whl/cu121
+      - --extra-index-url https://download.pytorch.org/whl/cu126
       - -e ..
-      - f5-tts
+      - torch==2.8.0+cu126
+      - torchaudio==2.8.0+cu126
+      - numpy==1.26.4
+      - transformers==4.57.3
+      - f5-tts==1.1.18

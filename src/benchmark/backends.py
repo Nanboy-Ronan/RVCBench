@@ -93,8 +93,10 @@ class LegacyAdversaryBackend:
             self.adapter = None
 
 
-class Qwen3Backend(LegacyAdversaryBackend):
-    """Qwen3 inference consumes samples directly without a dataset facade."""
+class SingleSampleBackend(LegacyAdversaryBackend):
+    """Inference consumes explicit samples without a dataset facade."""
+
+    timing_scope: str
 
     def generate_batch(self, requests):
         from src.utils.seeding import configure_seeds
@@ -104,15 +106,23 @@ class Qwen3Backend(LegacyAdversaryBackend):
         for request in requests:
             native_seed = self.adapter.seed
             if native_seed is not None and int(native_seed) + request.sample.index != request.seed:
-                raise ValueError('Qwen3 native seed differs from the generation request')
+                raise ValueError('Native seed differs from the generation request')
             configure_seeds(request.seed, logger=None)
             path, elapsed = self.adapter.generate_sample(request.sample, output_dir=request.output_dir)
             results.append(GenerationResult(sample_id(request.sample), path, elapsed,
-                'qwen3_generate_excluding_prompt_encoding_and_io_v1',
+                self.timing_scope,
                 native_seed=request.seed, native_seed_policy='source_index', native_requested_seed=request.seed))
         return results
 
 
+class Qwen3Backend(SingleSampleBackend):
+    timing_scope = 'qwen3_generate_excluding_prompt_encoding_and_io_v1'
+
+
+class F5Backend(SingleSampleBackend):
+    timing_scope = 'f5_sequential_inference_excluding_transcription_and_output_write_v1'
+
+
 def create_backend(conf, dataset, device, logger):
-    backend = Qwen3Backend if conf.vc.model == 'qwen3_tts' else LegacyAdversaryBackend
+    backend = {'qwen3_tts': Qwen3Backend, 'f5_tts': F5Backend}.get(conf.vc.model, LegacyAdversaryBackend)
     return backend(conf, dataset, device, logger)

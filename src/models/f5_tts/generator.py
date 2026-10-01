@@ -99,10 +99,9 @@ class F5TTSGenerator(BaseModel):
                 from f5_tts.model.utils import seed_everything
 
                 seed_everything(int(seed))
-            except Exception:
-                torch.manual_seed(int(seed))
-                if torch.cuda.is_available():
-                    torch.cuda.manual_seed_all(int(seed))
+            except ImportError:
+                from src.utils.seeding import configure_seeds
+                configure_seeds(int(seed), logger=None)
 
         wav, sample_rate = self._infer_sequential(
             ref_audio=str(ref_audio),
@@ -110,7 +109,8 @@ class F5TTSGenerator(BaseModel):
             gen_text=str(gen_text),
         )
         audio = np.asarray(wav, dtype=np.float32).reshape(-1)
-        audio = np.nan_to_num(audio, nan=0.0, posinf=0.0, neginf=0.0)
+        if not np.isfinite(audio).all():
+            raise FloatingPointError("F5-TTS returned nonfinite audio")
         audio = np.clip(audio, -1.0, 1.0)
         return audio, int(sample_rate)
 
@@ -120,7 +120,7 @@ class F5TTSGenerator(BaseModel):
             return raw
         path = Path(raw).expanduser()
         if path.exists():
-            return str(path.resolve())
+            return str(path.absolute())
         return raw
 
     def _infer_sequential(self, *, ref_audio: str, ref_text: str, gen_text: str) -> Tuple[np.ndarray, int]:
@@ -173,8 +173,13 @@ class F5TTSGenerator(BaseModel):
             )
             generated_wave, _generated_sr, _generated_spec = next(result_iter)
             if generated_wave is None:
-                continue
-            generated_waves.append(np.asarray(generated_wave, dtype=np.float32))
+                raise RuntimeError("F5-TTS returned no audio for a text chunk")
+            chunk = np.asarray(generated_wave, dtype=np.float32)
+            if chunk.ndim != 1 or not chunk.size or not np.isfinite(chunk).all():
+                raise ValueError("F5-TTS returned an empty, nonfinite or non-mono text chunk")
+            if int(_generated_sr) != target_sample_rate:
+                raise ValueError("F5-TTS text chunk sample rate differs from the configured rate")
+            generated_waves.append(chunk)
 
         if not generated_waves:
             raise RuntimeError("F5-TTS returned no audio for the provided prompt.")

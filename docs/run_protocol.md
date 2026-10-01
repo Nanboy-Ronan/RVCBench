@@ -36,6 +36,11 @@ Model NaN/Inf output fails that sample, and prompt caches are released when the
 backend closes. Its `qwen3_generate_excluding_prompt_encoding_and_io_v1` timing
 measures the native generation call, excluding prompt encoding and file writing.
 This scope alone does not establish timing comparability with another adapter.
+F5-TTS also accepts individual samples directly. Its
+`f5_sequential_inference_excluding_transcription_and_output_write_v1` timing
+includes reference preprocessing, file reading, chunk generation and vocoding;
+explicit reference transcription and output WAV writing occur outside this call.
+A missing, empty, nonfinite or incorrectly sampled text chunk fails the sample.
 Other integrations currently use the legacy adapter bridge.
 
 To freeze a new subset before examining model outcomes:

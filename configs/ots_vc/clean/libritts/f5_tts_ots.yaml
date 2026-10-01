@@ -12,6 +12,8 @@ output_paths:
   metrics_file: "results/f5_tts_ots_on_libritts/metrics.json"
 
 adversary:
+  revision: null # resolved to an immutable checkpoint commit
+  vocoder_revision: null # resolved independently for the configured vocoder
   model: "F5TTS_v1_Base"
   ckpt_file: ""
   vocab_file: ""
