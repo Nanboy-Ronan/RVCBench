@@ -412,9 +412,20 @@
       "status": "historical_results",
       "config": "configs/ots_vc/clean/libritts/mgm_omni_ots.yaml",
       "subset": "subsets/libritts16_v1/selection.json",
-      "generation_status": "pending",
-      "scoring_status": "pending",
-      "historical_comparison_status": "pending"
+      "generation_status": "complete",
+      "scoring_status": "complete",
+      "historical_comparison_status": "matched_subset_measured",
+      "generation_run": "results/reproduce_v2_mgm_omni_scoped_libritts16/20261001-015626-f0c22657",
+      "canary": "comparisons/mgm_omni_canary.json",
+      "failed_attempts": [
+        {
+          "evidence": "comparisons/mgm_omni_runtime_initial_failures.json"
+        }
+      ],
+      "scoring_run": "results/reproduce_v2_mgm_omni_scoped_libritts16_score/20261001-015756-80407160",
+      "comparison": "comparisons/mgm_omni_libritts16_v1.json",
+      "historical_metric_replay": "comparisons/mgm_omni_metric_replay_v1.json",
+      "provenance_limit": "Current MGM model/auxiliary checkpoint snapshot and repo_root source hashed; historical immutable Hub revision/runtime absent, so weight equivalence unproven. Key environment pins validated in existing runtime, not a clean lock. Content failure samples are retained."
     },
     {
       "n": "MOSS TTSD",

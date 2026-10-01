@@ -1,3 +1,5 @@
+# Key pins validated in the existing local runtime, not a clean installation lock.
+# MGM checkout and its third_party/Matcha-TTS must be available through repo_root.
 name: mgm-omni
 channels:
   - conda-forge
@@ -9,7 +11,13 @@ dependencies:
   - libsndfile
   - espeak-ng
   - pip:
-      - --extra-index-url https://download.pytorch.org/whl/cu121
+      - --extra-index-url https://download.pytorch.org/whl/cu124
       - -e ..
+      - torch==2.6.0
+      - torchaudio==2.6.0
+      - transformers==4.52.3
+      - tokenizers==0.21.1
+      - numpy==1.26.4
+      - flash-attn==2.7.4.post1
       - matcha-tts
       - modelscope==1.31.0

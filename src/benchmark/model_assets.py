@@ -15,7 +15,8 @@ def resolve_model_assets(conf, logger=None):
               'config_path', 'hubert_checkpoint', 'hubert_tokenizer', 'vocoder_path',
               'ckpt_file', 'vocab_file', 'vocab_path', 'speaker_file_path', 'base_speaker_dir',
               'vocoder_local_path', 'spt_config_path', 'spt_checkpoint_path', 'codec_path',
-              'audio_tokenizer_path', 'scene_prompt_path', 'ckpt_dir', 'frontend_dir', 'reference_asr_model'}
+              'audio_tokenizer_path', 'scene_prompt_path', 'ckpt_dir', 'frontend_dir', 'reference_asr_model',
+              'cosyvoice_path'}
     references = {key: value for key, value in resolved.adversary.items()
                   if isinstance(value, str) and value and (key in fields or key.endswith(('_checkpoint_path', '_config_path')))}
     if model == 'moss_ttsd' and resolved.adversary.get('use_prompt_transcript', False):

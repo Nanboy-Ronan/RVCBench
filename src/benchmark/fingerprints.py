@@ -70,7 +70,7 @@ def generation_runtime(root, conf, packages):
         path = Path(str(worker)).resolve()
         files[str(path)] = file_hash(path)
     for key, upstream in conf.adversary.items():
-        if (key == 'code_path' or key.endswith('_code_path')) and upstream and Path(str(upstream)).is_dir():
+        if (key in ('code_path', 'repo_root') or key.endswith('_code_path')) and upstream and Path(str(upstream)).is_dir():
             for path in sorted(Path(str(upstream)).rglob('*')):
                 runtime_file = (path.suffix == '.py' or path.name in
                     {'pyproject.toml', 'setup.cfg', 'uv.lock', 'environment.yml'} or

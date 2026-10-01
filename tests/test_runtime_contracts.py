@@ -213,14 +213,15 @@ def test_moss_processor_receives_explicit_codec_path(tmp_path):
     assert generator._sample_rate == 24000
 
 
-def test_generation_fingerprint_tracks_auxiliary_upstream_source(tmp_path):
+@pytest.mark.parametrize('model,path_field', [('openvoice', 'melo_code_path'), ('mgm_omni', 'repo_root')])
+def test_generation_fingerprint_tracks_auxiliary_upstream_source(tmp_path, model, path_field):
     from src.benchmark.fingerprints import generation_runtime
     source = tmp_path / 'melo'
     source.mkdir()
     module = source / 'infer.py'
     module.write_text('TEMPERATURE = 1\n')
-    conf = OmegaConf.create({'vc': {'mode': 'ots', 'model': 'openvoice'},
-                            'adversary': {'melo_code_path': str(source)}})
+    conf = OmegaConf.create({'vc': {'mode': 'ots', 'model': model},
+                            'adversary': {path_field: str(source)}})
     first = generation_runtime(tmp_path, conf, {})
     module.write_text('TEMPERATURE = 2\n')
     assert generation_runtime(tmp_path, conf, {})['source_sha256'] != first['source_sha256']

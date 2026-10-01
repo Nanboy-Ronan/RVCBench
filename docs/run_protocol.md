@@ -294,3 +294,21 @@ journaling the failed sample. Subsequent samples stay pending, and scorers are
 not launched in the invalid context. Ordinary per-sample errors continue to use
 the configured retry policy. An empty dataset now reports the dataset root and
 asks the caller to check `manifest_filename`, before accessing variant metadata.
+
+MGM-Omni's legacy loader chooses its architecture from the checkpoint directory
+name. For local checkpoints declaring `model_type=MGMTTS`, RVCBench selects the
+TTS branch from that metadata, so a Hub snapshot directory named by revision hash
+loads correctly. The upstream name hook, Torch initialization overrides and
+Transformers generation initializer are restored after preparation, including
+on errors. Generation re-enters the upstream initializer within a scoped CUDA
+device context. Main model, tokenizer and fallback Whisper references are released
+before scoring. This remains a serial compatibility bridge.
+
+Configured `repo_root` checkouts now contribute Python source and dependency
+files to generation provenance, and `cosyvoice_path` contributes local auxiliary
+weights/configuration to the model fingerprint. The validated MGM runtime uses
+Torch 2.6.0, Transformers 4.52.3 and flash-attn 2.7.4.post1; its recipe records
+key pins rather than a fully resolved clean-install lock. Historical runs selected
+a Hub model name without an immutable revision, so current snapshot hashes alone
+do not establish equality to historical weights. Content failures remain in the
+fixed subset and are included in aggregate metrics.

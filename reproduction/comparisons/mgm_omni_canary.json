@@ -1,0 +1,63 @@
+{
+  "kind": "generation_scoring_canary",
+  "model": "mgm_omni",
+  "coverage": {
+    "requested": 2,
+    "generated": 2,
+    "generation_failed": 0,
+    "input_failed": 0,
+    "pending": 0,
+    "generating": 0,
+    "metric_valid": {
+      "mcd": 2,
+      "wer": 2,
+      "sim": 2,
+      "sva": 2,
+      "speechmos": 0,
+      "dnsmos": 0,
+      "emotion": 0
+    },
+    "required_metrics": [
+      "mcd",
+      "wer",
+      "sim"
+    ],
+    "status": "complete",
+    "eligible_for_comparison": true
+  },
+  "generation_manifest": "/tealab-data/rjin02/RVCBench/results/debug_mgm_omni_scoped_libritts2/20261001-015432-e38e459c/run_manifest.json",
+  "generation_manifest_sha256": "c7a21af2d398591da32727a962c7a477627039b2d7d77a3c08c9eeeced561ade",
+  "scoring_manifest": "/tealab-data/rjin02/RVCBench/results/debug_mgm_omni_scoped_libritts2_score/20261001-015532-e6d43c99/run_manifest.json",
+  "scoring_manifest_sha256": "106f95938c7ef204e0554f7eb8bce5c25d38464048c0b98983a7b48ca944cc1a",
+  "samples": [
+    {
+      "sample_id": "59c5e63512ec18bacdf941db596a939ba7953749cde66ff2b860d04d8eccc830",
+      "generated_sha256": "2abd30934828ed1a1b3ef1408e2682ad75cab0b6648d5a4a56091ce88ca2be9b",
+      "metrics": {
+        "mcd": 4.382730375720707,
+        "wer": 0.0,
+        "predicted_text": " You'll receive the packet Thursday morning, I inquired.",
+        "sim": 0.46707746386528015,
+        "sva": true
+      }
+    },
+    {
+      "sample_id": "bbbafeab3dbc9112c48d524d97c8ffbeebe4129c00afa96c7694033fda99e34f",
+      "generated_sha256": "945009dd6d623ec2cf04ffec3a62fe1c4a671fdf0070e5edb56a5988ff072056",
+      "metrics": {
+        "mcd": 16.445466704275525,
+        "wer": 1.0,
+        "predicted_text": " you",
+        "sim": -0.009466111660003662,
+        "sva": false
+      }
+    }
+  ],
+  "repair_repeat_check": {
+    "full_manifest": "/tealab-data/rjin02/RVCBench/results/reproduce_v2_mgm_omni_scoped_libritts16/20261001-015626-f0c22657/run_manifest.json",
+    "full_manifest_sha256": "a951f07ffda138d9e1ce9b81be97ff6baab03338f3f778f7ef63073f42ea369d",
+    "matched": 2,
+    "identical_waveform_hashes": 2
+  },
+  "interpretation": "Both canary audio hashes repeated in full subset. The second sample has WER=1.0 in both current and historical records; retained as a content failure, not excluded. Historical immutable weights/runtime absent."
+}

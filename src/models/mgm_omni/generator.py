@@ -5,6 +5,7 @@ from __future__ import annotations
 import sys
 import contextlib
 import os
+import json
 from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Optional, Tuple
@@ -66,11 +67,6 @@ class MGMOmniGenerator(BaseModel):
     def load_model(self) -> None:
         self._ensure_repo_on_path()
 
-        from mgm.model.builder import load_pretrained_model
-        from mgm.utils import disable_torch_init
-
-        disable_torch_init()
-
         device_str = self._device_string()
         model_path = str(self.config.checkpoint_path)
         speechlm_path = self.config.speechlm_checkpoint_path
@@ -78,8 +74,8 @@ class MGMOmniGenerator(BaseModel):
 
         self.logger.info("[MGM-Omni] Loading model from %s", model_path)
 
-        with self._working_dir():
-            loaded = load_pretrained_model(
+        with self._working_dir(), self._upstream_runtime(preparing=True) as builder:
+            loaded = builder.load_pretrained_model(
                 model_path,
                 load_8bit=bool(self.config.load_8bit),
                 load_4bit=bool(self.config.load_4bit),
@@ -160,7 +156,7 @@ class MGMOmniGenerator(BaseModel):
         effective_max_tokens = int(max_new_tokens) if max_new_tokens is not None else int(self.config.max_new_tokens)
         do_sample = bool(self.config.do_sample) and effective_temperature > 0
 
-        with self._working_dir():
+        with self._working_dir(), self._upstream_runtime():
             with torch.inference_mode():
                 outputs = self._model.generate(
                     input_ids.clone(),
@@ -212,6 +208,43 @@ class MGMOmniGenerator(BaseModel):
             yield
         finally:
             os.chdir(original)
+
+    @contextlib.contextmanager
+    def _upstream_runtime(self, *, preparing=False):
+        # Upstream imports mutate GenerationMixin, and its setup disables Torch
+        # initialization globally. Keep those serial compatibility hooks scoped.
+        from transformers import GenerationMixin
+        initializer = GenerationMixin._maybe_initialize_input_ids_for_generation
+        linear_reset = torch.nn.Linear.reset_parameters
+        norm_reset = torch.nn.LayerNorm.reset_parameters
+        builder = original_name = None
+        device = torch.device(self.device)
+        device_context = torch.cuda.device(device) if device.type == 'cuda' else contextlib.nullcontext()
+        try:
+            from mgm.model import builder
+            original_name = builder.get_model_name_from_path
+            GenerationMixin._maybe_initialize_input_ids_for_generation = builder.initialize_input_ids_for_generation
+            metadata = Path(self.config.checkpoint_path) / 'config.json'
+            if metadata.is_file() and json.loads(metadata.read_text()).get('model_type') == 'MGMTTS':
+                # Hub snapshot directories are revision hashes. Dispatch from
+                # checkpoint metadata rather than interpreting that hash as a model name.
+                builder.get_model_name_from_path = lambda path: (
+                    'MGM-Omni-TTS' if str(path) == str(self.config.checkpoint_path) else original_name(path))
+            if preparing:
+                from mgm.utils import disable_torch_init
+                disable_torch_init()
+            with device_context:
+                yield builder
+        finally:
+            GenerationMixin._maybe_initialize_input_ids_for_generation = initializer
+            torch.nn.Linear.reset_parameters = linear_reset
+            torch.nn.LayerNorm.reset_parameters = norm_reset
+            if builder is not None and original_name is not None:
+                builder.get_model_name_from_path = original_name
+
+    def close(self):
+        self.model = self._model = self._tokenizer = self._whisper_model = None
+        self._model_ready = False
 
     def _resolve_cosyvoice_path(self, raw_value: Optional[str]) -> Optional[str]:
         if raw_value is None:
