@@ -78,7 +78,10 @@
         "scoring_status": "partial_8_of_10",
         "validation": "comparisons/fireredtts2_short10_retry3_partial_v1.json"
       },
-      "reproduction_status": "full_fixed_short10_measured_not_exact_generation_reproduction"
+      "reproduction_status": "full_fixed_short10_measured_not_exact_generation_reproduction",
+      "cpu_loader_validation": "comparisons/fireredtts2_cpu_loader_validation.json",
+      "cpu_load_status": "native_llm_and_codec_loaded_global_loader_unchanged",
+      "cpu_inference_status": "not_validated"
     },
     {
       "n": "VoxCPM",

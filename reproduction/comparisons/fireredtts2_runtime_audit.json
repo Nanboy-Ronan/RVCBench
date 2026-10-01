@@ -13,7 +13,8 @@
     "Reject invalid/multiple waveform output and exhausted short-token retries",
     "Propagate generation failures to runner; release owned generator before scoring",
     "Scope CUDA device and validate configured runtime import source",
-    "Reject missing actual transcript/target text; closing resets model readiness"
+    "Reject missing actual transcript/target text; closing resets model readiness",
+    "CPU codec factory binds checkpoint mapping privately; no shared torch.load/class/module rebinding. Failed loads reset state for retry."
   ],
   "legacy_prompted_policy": {
     "min_token_frames": 18,
@@ -22,8 +23,8 @@
   },
   "pending": [
     "Clean-install runtime environment validation",
-    "Remove legacy CPU global torch.load override with validated native CPU support",
-    "Historical seed and immutable checkpoint/runtime revision recovery"
+    "Historical seed and immutable checkpoint/runtime revision recovery",
+    "CPU native speech generation has not been validated"
   ],
   "interpretation": "All ten fixed historical input pairs generated and scored under explicit retry20 variant. Raw historical deltas are header-confounded; separate PCM-identical 24kHz controls use identical scorers. Retry3 failures and originals remain preserved.",
   "download_log": "/tmp/rvcbench-firered-assets-download.log",
@@ -58,5 +59,6 @@
     "first_two_wave_hashes_match_canary": true,
     "retry20_variant_status": "complete_10_of_10",
     "retry20_comparison": "reproduction/comparisons/fireredtts2_short10_retry20_v1.json"
-  }
+  },
+  "cpu_loader_validation": "reproduction/comparisons/fireredtts2_cpu_loader_validation.json"
 }

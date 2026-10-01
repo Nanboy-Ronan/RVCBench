@@ -59,3 +59,54 @@ def test_pretrained_weights_and_tokenizer_change_asset_fingerprint(tmp_path):
     second = resolve_model_assets(conf)[2]
     (tokenizer / 'tokenizer.json').write_text('{"changed": true}')
     assert resolve_model_assets(conf)[2] != second
+
+
+def test_cpu_factory_preserves_shared_torch_and_native_class(monkeypatch):
+    namespace = {'torch': torch}
+    exec('''
+class RedCodecInfer:
+    @classmethod
+    def from_pretrained(cls, path, *, marker=1):
+        return torch.load(path, marker=marker)
+class NativeGenerator:
+    def __init__(self, path):
+        self.codec = RedCodecInfer.from_pretrained(path)
+''', namespace)
+    native, codec = namespace['NativeGenerator'], namespace['RedCodecInfer']
+    factory = codec.from_pretrained.__func__
+    constructor = native.__init__
+    calls = []
+    def load(path, **kwargs):
+        assert torch.load is load
+        assert codec.from_pretrained.__func__ is factory and native.__init__ is constructor
+        calls.append(kwargs)
+        return 'loaded'
+    monkeypatch.setattr(torch, 'load', load)
+    scoped = FireRedTTS2Generator._cpu_generator_class(native, codec)
+    assert scoped('weights.pt').codec == 'loaded'
+    assert calls[0]['map_location'] == torch.device('cpu')
+    codec.from_pretrained('ordinary.pt')
+    assert 'map_location' not in calls[1]
+    assert namespace['RedCodecInfer'] is codec
+
+
+def test_failed_load_resets_state_and_can_be_retried(monkeypatch):
+    import src.models.fireredtts2.generator as runtime
+    attempts = []
+    def native(**kwargs):
+        attempts.append(kwargs)
+        if len(attempts) == 1:
+            raise RuntimeError('checkpoint failure')
+        return SimpleNamespace(_model='ready')
+    wrapper = FireRedTTS2Generator(FireRedTTS2GeneratorConfig('fixture'),
+        torch.device('cpu'), logging.getLogger(__name__))
+    monkeypatch.setattr(wrapper, '_cpu_generator_class', lambda cls, codec: cls)
+    module = SimpleNamespace(FireRedTTS2=native, RedCodecInfer=object)
+    monkeypatch.setattr(runtime.importlib, 'import_module',
+        lambda name: module if name == 'fireredtts2.fireredtts2' else SimpleNamespace())
+    with pytest.raises(RuntimeError, match='checkpoint failure'):
+        wrapper.ensure_model()
+    assert wrapper._generator is wrapper.model is None
+    assert not wrapper.is_model_ready()
+    wrapper.ensure_model()
+    assert wrapper.is_model_ready() and wrapper.model == 'ready'

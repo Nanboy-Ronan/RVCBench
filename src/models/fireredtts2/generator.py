@@ -5,10 +5,11 @@ from __future__ import annotations
 import gc
 import importlib
 import sys
-from contextlib import contextmanager, nullcontext
+from contextlib import nullcontext
 from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Optional, Tuple
+from types import FunctionType
 
 import numpy as np
 import torch
@@ -70,15 +71,26 @@ class FireRedTTS2Generator(BaseModel):
             if not getattr(module, '__file__', None) or not Path(module.__file__).resolve().is_relative_to(root):
                 raise ImportError('Imported FireRedTTS2 runtime is outside configured code_path')
 
-        with self._device_scope(), self._cpu_safe_torch_load():
-            self._generator = generator_cls(
-                pretrained_dir=str(self.config.pretrained_dir),
-                gen_type=str(self.config.gen_type),
-                device=str(self.device),
-                use_bf16=bool(self.config.use_bf16),
-            )
-        self.model = getattr(self._generator, "_model", self._generator)
-        self._spliter_module = importlib.import_module("fireredtts2.utils.spliter")
+        try:
+            if self.device.type == 'cpu':
+                if self.config.use_bf16:
+                    raise ValueError('FireRedTTS2 CPU loading requires use_bf16=false')
+                generator_cls = self._cpu_generator_class(generator_cls, module.RedCodecInfer)
+            # Import every dependency before publishing a partially loaded model.
+            spliter = importlib.import_module("fireredtts2.utils.spliter")
+            with self._device_scope():
+                generator = generator_cls(
+                    pretrained_dir=str(self.config.pretrained_dir),
+                    gen_type=str(self.config.gen_type),
+                    device=str(self.device),
+                    use_bf16=bool(self.config.use_bf16),
+                )
+            self._generator = generator
+            self.model = getattr(generator, "_model", generator)
+            self._spliter_module = spliter
+        except Exception:
+            self.close()
+            raise
 
     def generate(
         self,
@@ -198,20 +210,32 @@ class FireRedTTS2Generator(BaseModel):
     def _cleanup_after_generation(self) -> None:
         gc.collect()
 
-    @contextmanager
-    def _cpu_safe_torch_load(self):
-        if str(self.device) != "cpu":
-            yield
-            return
+    @staticmethod
+    def _cpu_generator_class(generator_cls, codec_cls):
+        """Bind CPU checkpoint loading only to this generator's codec factory.
 
-        original_torch_load = torch.load
+        The pinned upstream codec checkpoint contains CUDA storages, while its
+        factory omits map_location. Clone the Python functions with private
+        globals; leave torch.load, native class methods and module globals intact.
+        The native LLM loader already explicitly maps checkpoints to CPU.
+        """
+        class CPUTorch:
+            def __getattr__(self, name):
+                return getattr(torch, name)
 
-        def patched_torch_load(*args, **kwargs):
-            kwargs.setdefault("map_location", torch.device("cpu"))
-            return original_torch_load(*args, **kwargs)
+            def load(self, *args, **kwargs):
+                kwargs.setdefault('map_location', torch.device('cpu'))
+                return torch.load(*args, **kwargs)
 
-        torch.load = patched_torch_load
-        try:
-            yield
-        finally:
-            torch.load = original_torch_load
+        def bind(function, replacements):
+            if not isinstance(function, FunctionType):
+                raise TypeError('FireRedTTS2 CPU loader requires the pinned Python runtime API')
+            scoped = FunctionType(function.__code__, {**function.__globals__, **replacements},
+                                  function.__name__, function.__defaults__, function.__closure__)
+            scoped.__kwdefaults__ = function.__kwdefaults__
+            return scoped
+
+        factory = bind(codec_cls.from_pretrained.__func__, {'torch': CPUTorch()})
+        scoped_codec = type('RVCBenchCPUCodec', (codec_cls,), {'from_pretrained': classmethod(factory)})
+        constructor = bind(generator_cls.__init__, {'RedCodecInfer': scoped_codec})
+        return type('RVCBenchCPUFireRedTTS2', (generator_cls,), {'__init__': constructor})

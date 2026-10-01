@@ -52,6 +52,13 @@ Reference-conditioned generation requires the actual reference transcript and
 nonempty target text. Missing text is rejected before loading or synthesizing;
 the adapter does not substitute a default sentence. Closing resets readiness
 so a subsequent use reloads the model.
+CPU loading binds a private codec factory with CPU checkpoint mapping; it does
+not reassign shared `torch.load`, upstream class methods or module globals.
+Failed initialization clears owned references and readiness before propagating
+the exception, allowing a later load attempt. Native CPU loading verifies all
+LLM and codec parameters are on CPU and close resets readiness; CPU inference
+has not been exercised. See
+`reproduction/comparisons/fireredtts2_cpu_loader_validation.json`.
 
 The historical sample-rate control preserves the source WAV files and verifies
 that the copied PCM bytes are identical. Under the same current scorer
