@@ -1,0 +1,32 @@
+{
+  "status": "wrapper_corrected_native_subset_pending",
+  "upstream_url": "https://github.com/FireRedTeam/FireRedTTS2",
+  "source_revision": "404f3f61d25bb4804859b588a6a734bf8468090c",
+  "native_api_sha256": "da805c860c9c9e4693c64e8f60bf4a573c7b73c173e515e291890671e97bd043",
+  "weights_revision": "4af3f5cc4963373b86b52d750220d4de85261f05",
+  "weights_status": "initial_download_failed_disk_full; workspace_cache_resume_started",
+  "reference_input_sample_rate": 16000,
+  "codec_output_sample_rate": 24000,
+  "corrections": [
+    "Use 24 kHz codec output rate instead of 16 kHz reference input field",
+    "Hash pretrained_dir weights, configs and nested tokenizer assets",
+    "Reject invalid/multiple waveform output and exhausted short-token retries",
+    "Propagate generation failures to runner; release owned generator before scoring",
+    "Scope CUDA device and validate configured runtime import source"
+  ],
+  "legacy_prompted_policy": {
+    "min_token_frames": 18,
+    "max_prompt_retries": 3,
+    "trim_leading_token_frames": 2
+  },
+  "pending": [
+    "Native dependencies and pinned environment validation",
+    "Frozen subset inference/scoring and historical audio replay",
+    "Remove legacy CPU global torch.load override with validated native CPU support",
+    "Historical files may carry legacy 16 kHz header: inspect before metric equivalence claims"
+  ],
+  "interpretation": "Source/API audit and mocked regression tests only; not a measured model subset or reproduction claim.",
+  "download_log": "/tmp/rvcbench-firered-assets-download.log",
+  "next_cache": "/tealab-data/rjin02/RVCBench/checkpoints/hf-cache",
+  "workspace_download_log": "/tmp/rvcbench-firered-assets-workspace-download.log"
+}

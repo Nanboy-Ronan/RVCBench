@@ -49,9 +49,11 @@
       "status": "experimental_adapter",
       "config": "configs/ots_vc/clean/libritts/fireredtts2_ots.yaml",
       "subset": "subsets/libritts16_v1/selection.json",
-      "generation_status": "pending",
+      "generation_status": "pending_native_runtime_validation",
       "scoring_status": "pending",
-      "historical_comparison_status": "historical_reference_not_established"
+      "historical_comparison_status": "historical_reference_not_established",
+      "runtime_audit": "comparisons/fireredtts2_runtime_audit.json",
+      "runtime_corrections": "24kHz output, pretrained asset hashing, invalid waveform rejection, bounded prompt failures and generator cleanup"
     },
     {
       "n": "VoxCPM",

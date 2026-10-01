@@ -18,6 +18,8 @@ adversary:
   use_bf16: false
   temperature: 0.75
   topk: 20
+  min_token_frames: 18
+  max_prompt_retries: 3
   max_samples: null
   default_prompt_text: "Here is a sample of the desired voice."
   require_prompt_text: false

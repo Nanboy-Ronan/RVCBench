@@ -39,6 +39,15 @@ their cohort directory, requiring a unique source record and target hash match.
 
 ## Generate, evaluate, recover
 
+FireRedTTS2 decodes output at 24 kHz; its native `sample_rate=16000` field is
+the reference input rate. The wrapper now saves codec output at 24 kHz and
+rejects invalid waveforms instead of replacing NaNs or clipping values.
+Its legacy prompted generation uses at most three attempts to exceed 18 token
+frames and trims two leading token frames. Exhausting those attempts is an
+explicit failure. `pretrained_dir` weights and nested tokenizer/config files
+are included in generation asset fingerprints. Native subset validation remains
+pending; see `reproduction/comparisons/fireredtts2_runtime_audit.json`.
+
 VoxCPM2 now passes seed plus original source index to the native API explicitly.
 Native badcase retries may increment that seed; sample rows distinguish
 `native_requested_seed` from the final `native_seed`, including after resume and

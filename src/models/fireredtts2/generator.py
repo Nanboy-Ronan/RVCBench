@@ -5,7 +5,7 @@ from __future__ import annotations
 import gc
 import importlib
 import sys
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Optional, Tuple
@@ -60,8 +60,12 @@ class FireRedTTS2Generator(BaseModel):
         generator_cls = getattr(module, "FireRedTTS2", None)
         if generator_cls is None:
             raise ImportError("fireredtts2.fireredtts2 does not expose FireRedTTS2.")
+        if self.config.code_path:
+            root = Path(self.config.code_path).expanduser().resolve()
+            if not getattr(module, '__file__', None) or not Path(module.__file__).resolve().is_relative_to(root):
+                raise ImportError('Imported FireRedTTS2 runtime is outside configured code_path')
 
-        with self._cpu_safe_torch_load():
+        with self._device_scope(), self._cpu_safe_torch_load():
             self._generator = generator_cls(
                 pretrained_dir=str(self.config.pretrained_dir),
                 gen_type=str(self.config.gen_type),
@@ -91,7 +95,7 @@ class FireRedTTS2Generator(BaseModel):
         if prompt_text:
             kwargs["prompt_text"] = str(prompt_text)
 
-        with torch.inference_mode():
+        with self._device_scope(), torch.inference_mode():
             if prompt_wav and prompt_text:
                 waveform = self._generate_prompted_monologue(
                     text=str(text),
@@ -106,11 +110,22 @@ class FireRedTTS2Generator(BaseModel):
             audio = np.asarray(waveform)
         del waveform
         self._cleanup_after_generation()
-        audio = np.asarray(audio, dtype=np.float32).reshape(-1)
-        audio = np.nan_to_num(audio, nan=0.0, posinf=0.0, neginf=0.0)
-        audio = np.clip(audio, -1.0, 1.0)
-        sample_rate = int(getattr(self._generator, "sample_rate", 24000))
-        return audio, sample_rate
+        audio = np.asarray(audio, dtype=np.float32)
+        if audio.ndim == 2 and audio.shape[0] == 1:
+            audio = audio[0]
+        if audio.ndim != 1 or not audio.size or not np.isfinite(audio).all():
+            raise ValueError('FireRedTTS2 returned an empty, nonfinite or multiple waveform output')
+        # Upstream sample_rate=16000 describes prompt input, not codec output.
+        # Official monologue examples save decoded audio at 24000 Hz.
+        return audio, 24000
+
+    def close(self) -> None:
+        self._generator = None
+        self.model = None
+        self._spliter_module = None
+
+    def _device_scope(self):
+        return torch.cuda.device(self.device) if self.device.type == 'cuda' else nullcontext()
 
     def _ensure_pythonpath(self) -> None:
         raw = self.config.code_path
@@ -160,6 +175,8 @@ class FireRedTTS2Generator(BaseModel):
                 gen_tokens = candidate
 
             assert gen_tokens is not None
+            if gen_tokens.shape[2] <= int(self.config.min_token_frames):
+                raise ValueError('FireRedTTS2 exhausted prompt retries without sufficient token frames')
             cut = 2 if gen_tokens.shape[2] > 2 else 0
             trimmed_tokens = gen_tokens[:, :, cut:]
             audio = self._generator._audio_tokenizer.decode(trimmed_tokens).squeeze(0).squeeze(0)

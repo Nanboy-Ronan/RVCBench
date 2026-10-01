@@ -30,6 +30,8 @@ class FireRedTTS2ZeroShotAdversary(BaseAdversary):
         self.use_bf16 = bool(self.config.get("use_bf16", False))
         self.temperature = float(self.config.get("temperature", 0.75))
         self.topk = int(self.config.get("topk", 20))
+        self.min_token_frames = int(self.config.get('min_token_frames', 18))
+        self.max_prompt_retries = int(self.config.get('max_prompt_retries', 3))
         self.max_samples = self.config.get("max_samples")
         self.default_prompt_text = str(
             self.config.get("default_prompt_text", "Here is a sample of the desired voice.")
@@ -61,6 +63,8 @@ class FireRedTTS2ZeroShotAdversary(BaseAdversary):
             use_bf16=self.use_bf16,
             temperature=self.temperature,
             topk=self.topk,
+            min_token_frames=self.min_token_frames,
+            max_prompt_retries=self.max_prompt_retries,
         )
         self._generator = FireRedTTS2Generator(generator_config, self.device, self.logger)
 
@@ -103,7 +107,7 @@ class FireRedTTS2ZeroShotAdversary(BaseAdversary):
                         self.MODEL_NAME,
                         idx,
                     )
-                continue
+                raise ValueError('FireRedTTS2 requires reference audio')
 
             target_text = (sample.target_text or "").strip()
             prompt_text = (sample.prompt_text or "").strip()
@@ -151,12 +155,11 @@ class FireRedTTS2ZeroShotAdversary(BaseAdversary):
                         speaker_id,
                         exc,
                     )
-                continue
+                raise
 
             wav = np.asarray(wav, dtype=np.float32)
-            if not np.isfinite(wav).all():
-                wav = np.nan_to_num(wav)
-            wav = np.clip(wav, -1.0, 1.0)
+            if not np.isfinite(wav).all() or not wav.size:
+                raise ValueError('FireRedTTS2 returned invalid audio')
 
             output_filename = self._cloned_filename(sample, idx)
             output_wav_path = speaker_dir / output_filename
