@@ -136,6 +136,7 @@ class IndexTTSGenerator(BaseModel):
         ref_audio: Path,
         text: str,
         output_path: Path,
+        seed: Optional[int] = None,
         emo_audio_prompt: Optional[Path] = None,
         emo_alpha: float = 1.0,
     ) -> Path:
@@ -146,6 +147,7 @@ class IndexTTSGenerator(BaseModel):
 
         request = {
             "action": "generate",
+            "seed": seed,
             "ref_audio": str(Path(ref_audio).expanduser().resolve()),
             "text": str(text).strip(),
             "output_path": str(Path(output_path).expanduser().resolve()),
@@ -180,6 +182,7 @@ class IndexTTSGenerator(BaseModel):
         return result_path
 
     def close(self) -> None:
+        atexit.unregister(self.close)
         process = self._process
         self._process = None
         if process is None:
@@ -195,6 +198,7 @@ class IndexTTSGenerator(BaseModel):
         except Exception:
             try:
                 process.kill()
+                process.wait(timeout=5)
             except Exception:
                 pass
         self._close_stderr_log()

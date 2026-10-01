@@ -20,6 +20,41 @@ class BaseAdversary(ABC):
         self._synthesis_timing_records = []
         self._synthesis_timing_path: Optional[Path] = None
 
+    def _sample_seed(self, sample):
+        seed = self.config.get('seed')
+        return None if seed is None else int(seed) + int(sample.index)
+
+    def prepare(self):
+        """Load adapter resources once so setup failures are run-level failures."""
+        for name in ('_ensure_generator', '_ensure_synthesizer', '_ensure_model', '_ensure_imports'):
+            hook = getattr(self, name, None)
+            if hook is not None:
+                hook()
+                break
+        for name in ('_generator', '_synthesizer'):
+            resource = getattr(self, name, None)
+            ensure = getattr(resource, 'ensure_model', None)
+            if ensure is not None:
+                ensure()
+
+    def close(self) -> None:
+        """Release owned generators, including persistent subprocess workers."""
+        errors = []
+        for name in ('_generator', '_synthesizer'):
+            resource = getattr(self, name, None)
+            if resource is None:
+                continue
+            try:
+                close = getattr(resource, 'close', None)
+                if close is not None:
+                    close()
+            except Exception as exc:
+                errors.append(exc)
+            else:
+                setattr(self, name, None)
+        if errors:
+            raise RuntimeError('Failed to close adapter resources') from errors[0]
+
     def _speaker_slug(self, speaker_id: str) -> str:
         """Return a filesystem-safe identifier for the supplied speaker identifier."""
         token = str(speaker_id or "").strip()

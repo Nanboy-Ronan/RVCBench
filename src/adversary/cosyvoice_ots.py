@@ -172,7 +172,7 @@ class CosyVoiceZeroShotAdversary(BaseAdversary):
                 prompt_transcript=prompt_text,
             )
 
-            self._set_seed(idx)
+            self._set_seed(sample.index)
             try:
                 synth_start = time.perf_counter()
                 waveform, sample_rate = self._generator.generate(

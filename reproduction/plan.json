@@ -1,0 +1,440 @@
+{
+  "objective": "Refactor the benchmark and validate every integrated model on a fixed subset, tracing paper reproduction to matched historical samples.",
+  "paper_reference": "https://arxiv.org/abs/2602.00443v2",
+  "models": [
+    {
+      "n": "BertVITS2",
+      "key": "bert",
+      "b": false,
+      "status": "experimental_adapter",
+      "config": "configs/ots_vc/clean/libritts/bert_ots.yaml",
+      "subset": "subsets/libritts16_v1/selection.json",
+      "generation_status": "pending",
+      "scoring_status": "pending",
+      "historical_comparison_status": "historical_reference_not_established"
+    },
+    {
+      "n": "Qwen3-TTS",
+      "key": "qwen3_tts",
+      "b": true,
+      "status": "historical_results",
+      "config": "configs/ots_vc/clean/libritts/qwen3_tts_ots.yaml",
+      "subset": "subsets/libritts16_v1/selection.json",
+      "generation_status": "complete",
+      "scoring_status": "complete",
+      "historical_comparison_status": "matched_subset_measured",
+      "generation_run": "results/reproduce_v2_qwen3_tts_libritts16/20260930-223300-9e739660",
+      "scoring_run": "results/reproduce_v2_qwen3_tts_libritts16_score/20260930-223755-4501bf0b",
+      "comparison": "comparisons/qwen3_tts_libritts16_v1.json",
+      "historical_metric_replay": "comparisons/qwen3_tts_metric_replay_v1.json"
+    },
+    {
+      "n": "Qwen3-Omni",
+      "key": "qwen3_omni",
+      "b": false,
+      "status": "experimental_adapter",
+      "config": "configs/ots_vc/clean/libritts/qwen3_omni_ots.yaml",
+      "subset": "subsets/libritts16_v1/selection.json",
+      "generation_status": "pending",
+      "scoring_status": "pending",
+      "historical_comparison_status": "historical_reference_not_established"
+    },
+    {
+      "n": "FireRedTTS-2",
+      "key": "fireredtts2",
+      "b": false,
+      "status": "experimental_adapter",
+      "config": "configs/ots_vc/clean/libritts/fireredtts2_ots.yaml",
+      "subset": "subsets/libritts16_v1/selection.json",
+      "generation_status": "pending",
+      "scoring_status": "pending",
+      "historical_comparison_status": "historical_reference_not_established"
+    },
+    {
+      "n": "VoxCPM",
+      "key": "voxcpm",
+      "b": false,
+      "status": "experimental_adapter",
+      "config": "configs/ots_vc/clean/libritts/voxcpm_ots.yaml",
+      "subset": "subsets/libritts16_v1/selection.json",
+      "generation_status": "pending",
+      "scoring_status": "pending",
+      "historical_comparison_status": "historical_reference_not_established"
+    },
+    {
+      "n": "F5-TTS",
+      "key": "f5_tts",
+      "b": true,
+      "status": "historical_results",
+      "config": "configs/ots_vc/clean/libritts/f5_tts_ots.yaml",
+      "subset": "subsets/libritts16_v1/selection.json",
+      "generation_status": "complete",
+      "scoring_status": "complete",
+      "historical_comparison_status": "matched_subset_measured",
+      "generation_run": "results/reproduce_v2_f5_tts_libritts16/20260930-230725-5da60e6e",
+      "scoring_run": "results/reproduce_v2_f5_tts_libritts16_score/20260930-230926-125a36f4",
+      "comparison": "comparisons/f5_tts_libritts16_v1.json",
+      "historical_metric_replay_status": "running"
+    },
+    {
+      "n": "MaskGCT",
+      "key": "maskgct",
+      "b": true,
+      "status": "historical_results",
+      "config": "configs/ots_vc/clean/libritts/maskgct_ots.yaml",
+      "subset": "subsets/libritts16_v1/selection.json",
+      "generation_status": "pending",
+      "scoring_status": "pending",
+      "historical_comparison_status": "pending"
+    },
+    {
+      "n": "OpenVoice V2",
+      "key": "openvoice",
+      "b": true,
+      "status": "historical_results",
+      "config": "configs/ots_vc/clean/libritts/openvoice_ots.yaml",
+      "subset": "subsets/libritts16_v1/selection.json",
+      "generation_status": "pending",
+      "scoring_status": "pending",
+      "historical_comparison_status": "pending"
+    },
+    {
+      "n": "Coqui XTTS-v2",
+      "key": "xtts",
+      "b": true,
+      "status": "historical_results",
+      "config": "configs/ots_vc/clean/libritts/xtts_ots.yaml",
+      "subset": "subsets/libritts16_v1/selection.json",
+      "generation_status": "pending",
+      "scoring_status": "pending",
+      "historical_comparison_status": "pending"
+    },
+    {
+      "n": "IndexTTS",
+      "key": "index_tts",
+      "b": true,
+      "status": "historical_results",
+      "config": "configs/ots_vc/clean/libritts/index_tts_ots.yaml",
+      "subset": "subsets/libritts16_v1/selection.json",
+      "generation_status": "complete",
+      "scoring_status": "complete",
+      "historical_comparison_status": "matched_subset_measured",
+      "generation_run": "results/reproduce_v2_index_tts_libritts16/20260930-230123-df8787be",
+      "scoring_run": "results/reproduce_v2_index_tts_libritts16/20260930-230123-df8787be",
+      "comparison": "comparisons/index_tts_libritts16_v1.json",
+      "historical_metric_replay": "comparisons/index_tts_metric_replay_v1.json",
+      "historical_metric_replay_status": "partial_WER_ASR_difference"
+    },
+    {
+      "n": "ZipVoice",
+      "key": "zipvoice",
+      "b": true,
+      "status": "historical_results",
+      "config": "configs/ots_vc/clean/libritts/zipvoice_ots.yaml",
+      "subset": "subsets/libritts16_v1/selection.json",
+      "generation_status": "pending",
+      "scoring_status": "pending",
+      "historical_comparison_status": "pending"
+    },
+    {
+      "n": "FishSpeech",
+      "key": "fishspeech",
+      "b": true,
+      "status": "historical_results",
+      "config": "configs/ots_vc/clean/libritts/fishspeech_ots.yaml",
+      "subset": "subsets/libritts16_v1/selection.json",
+      "generation_status": "complete",
+      "scoring_status": "complete",
+      "historical_comparison_status": "matched_subset_measured",
+      "failed_attempts": [
+        {
+          "run": "results/reproduce_v2_fishspeech_libritts16/20260930-224405-761269e0",
+          "reason": "Evaluation environment lacks audiotools; retried in existing fish-speech-s2 environment."
+        },
+        {
+          "run": "results/reproduce_v2_fishspeech_libritts16/20260930-224737-271468d8",
+          "reason": "S2-era upstream code is incompatible with released S1 tokenizer; resolved with isolated S1 code revision."
+        }
+      ],
+      "generation_run": "results/reproduce_v2_fishspeech_libritts16_s1/20260930-225025-8fb94160",
+      "scoring_run": "results/reproduce_v2_fishspeech_libritts16_legacy_score/20260930-230607-877a11c2",
+      "comparison": "comparisons/fishspeech_libritts16_legacy_v1.json",
+      "upstream_revision": "d3df50503b36314a964f66cac1af1e19e95bcfa3",
+      "historical_selection": "Newest complete 2000-row run; prompt identity verified against all 2000 ordered generation log entries.",
+      "wer_normalization": "lowercase_v1",
+      "historical_metric_replay": "comparisons/fishspeech_metric_replay_v1.json",
+      "historical_metric_replay_status": "partial_WER_ASR_difference"
+    },
+    {
+      "n": "Fish Audio S2 (in-proc)",
+      "key": "fishspeech_s2",
+      "b": false,
+      "status": "experimental_adapter",
+      "config": "configs/ots_vc/clean/libritts/fishspeech_s2_ots.yaml",
+      "subset": "subsets/libritts16_v1/selection.json",
+      "generation_status": "pending",
+      "scoring_status": "pending",
+      "historical_comparison_status": "historical_reference_not_established"
+    },
+    {
+      "n": "Fish Audio S2 (server)",
+      "key": "fish_audio_s2",
+      "b": false,
+      "status": "experimental_adapter",
+      "config": "configs/ots_vc/clean/libritts/fish_audio_s2_ots.yaml",
+      "subset": "subsets/libritts16_v1/selection.json",
+      "generation_status": "pending",
+      "scoring_status": "pending",
+      "historical_comparison_status": "historical_reference_not_established"
+    },
+    {
+      "n": "CosyVoice / 2",
+      "key": "cosyvoice",
+      "b": true,
+      "status": "historical_results",
+      "config": "configs/ots_vc/clean/libritts/cosyvoice_ots.yaml",
+      "subset": "subsets/libritts16_v1/selection.json",
+      "generation_status": "pending",
+      "scoring_status": "pending",
+      "historical_comparison_status": "pending"
+    },
+    {
+      "n": "Higgs Audio",
+      "key": "higgs_audio",
+      "b": true,
+      "status": "historical_results",
+      "config": "configs/ots_vc/clean/libritts/higgs_audio_ots.yaml",
+      "subset": "subsets/libritts16_v1/selection.json",
+      "generation_status": "pending",
+      "scoring_status": "pending",
+      "historical_comparison_status": "pending"
+    },
+    {
+      "n": "Higgs TTS 3",
+      "key": "higgs_tts_3",
+      "b": false,
+      "status": "experimental_adapter",
+      "config": "configs/ots_vc/clean/libritts/higgs_tts3_ots.yaml",
+      "subset": "subsets/libritts16_v1/selection.json",
+      "generation_status": "pending",
+      "scoring_status": "pending",
+      "historical_comparison_status": "historical_reference_not_established"
+    },
+    {
+      "n": "SparkTTS",
+      "key": "sparktts",
+      "b": true,
+      "status": "historical_results",
+      "config": "configs/ots_vc/clean/libritts/sparktts_ots.yaml",
+      "subset": "subsets/libritts16_v1/selection.json",
+      "generation_status": "pending",
+      "scoring_status": "pending",
+      "historical_comparison_status": "pending"
+    },
+    {
+      "n": "VALL-E",
+      "key": "vall_e",
+      "b": false,
+      "status": "experimental_adapter",
+      "config": "configs/ots_vc/clean/libritts/vall_e_ots.yaml",
+      "subset": "subsets/libritts16_v1/selection.json",
+      "generation_status": "pending",
+      "scoring_status": "pending",
+      "historical_comparison_status": "historical_reference_not_established"
+    },
+    {
+      "n": "StyleTTS 2",
+      "key": "styletts2",
+      "b": true,
+      "status": "historical_results",
+      "config": "configs/ots_vc/clean/libritts/styletts2_ots.yaml",
+      "subset": "subsets/libritts16_v1/selection.json",
+      "generation_status": "pending",
+      "scoring_status": "pending",
+      "historical_comparison_status": "pending"
+    },
+    {
+      "n": "GLM-TTS",
+      "key": "glm_tts",
+      "b": true,
+      "status": "historical_results",
+      "config": "configs/ots_vc/clean/libritts/glmtts_ots.yaml",
+      "subset": "subsets/libritts16_v1/selection.json",
+      "generation_status": "pending",
+      "scoring_status": "pending",
+      "historical_comparison_status": "pending"
+    },
+    {
+      "n": "GlowTTS",
+      "key": "glowtts",
+      "b": false,
+      "status": "experimental_adapter",
+      "config": "configs/ots_vc/clean/libritts/glowtts_ots.yaml",
+      "subset": "subsets/libritts16_v1/selection.json",
+      "generation_status": "pending",
+      "scoring_status": "pending",
+      "historical_comparison_status": "historical_reference_not_established"
+    },
+    {
+      "n": "Kimi Audio",
+      "key": "kimi_audio",
+      "b": false,
+      "status": "experimental_adapter",
+      "config": "configs/ots_vc/clean/libritts/kimi_audio_ots.yaml",
+      "subset": "subsets/libritts16_v1/selection.json",
+      "generation_status": "pending",
+      "scoring_status": "pending",
+      "historical_comparison_status": "historical_reference_not_established"
+    },
+    {
+      "n": "MGM-Omni",
+      "key": "mgm_omni",
+      "b": true,
+      "status": "historical_results",
+      "config": "configs/ots_vc/clean/libritts/mgm_omni_ots.yaml",
+      "subset": "subsets/libritts16_v1/selection.json",
+      "generation_status": "pending",
+      "scoring_status": "pending",
+      "historical_comparison_status": "pending"
+    },
+    {
+      "n": "MOSS TTSD",
+      "key": "moss_ttsd",
+      "b": true,
+      "status": "historical_results",
+      "config": "configs/ots_vc/clean/libritts/moss_ttsd_ots.yaml",
+      "subset": "subsets/libritts16_v1/selection.json",
+      "generation_status": "pending",
+      "scoring_status": "pending",
+      "historical_comparison_status": "pending"
+    },
+    {
+      "n": "MOSS-TTS",
+      "key": "moss_tts",
+      "b": false,
+      "status": "experimental_adapter",
+      "config": "configs/ots_vc/clean/libritts/moss_tts_ots.yaml",
+      "subset": "subsets/libritts16_v1/selection.json",
+      "generation_status": "pending",
+      "scoring_status": "pending",
+      "historical_comparison_status": "historical_reference_not_established"
+    },
+    {
+      "n": "dots.tts",
+      "key": "dots_tts",
+      "b": false,
+      "status": "experimental_adapter",
+      "config": "configs/ots_vc/clean/libritts/dots_tts_ots.yaml",
+      "subset": "subsets/libritts16_v1/selection.json",
+      "generation_status": "pending",
+      "scoring_status": "pending",
+      "historical_comparison_status": "historical_reference_not_established"
+    },
+    {
+      "n": "ZONOS2",
+      "key": "zonos2",
+      "b": false,
+      "status": "experimental_adapter",
+      "config": "configs/ots_vc/clean/libritts/zonos2_ots.yaml",
+      "subset": "subsets/libritts16_v1/selection.json",
+      "generation_status": "pending",
+      "scoring_status": "pending",
+      "historical_comparison_status": "historical_reference_not_established"
+    },
+    {
+      "n": "PlayDiffusion",
+      "key": "playdiffusion",
+      "b": true,
+      "status": "historical_results",
+      "config": "configs/ots_vc/clean/libritts/playdiffusion_ots.yaml",
+      "subset": "subsets/libritts16_v1/selection.json",
+      "generation_status": "pending",
+      "scoring_status": "pending",
+      "historical_comparison_status": "pending"
+    },
+    {
+      "n": "Bark Voice Clone",
+      "key": "bark_voice_clone",
+      "b": false,
+      "status": "experimental_adapter",
+      "config": "configs/ots_vc/clean/libritts/bark_voice_clone_ots.yaml",
+      "subset": "subsets/libritts16_v1/selection.json",
+      "generation_status": "pending",
+      "scoring_status": "pending",
+      "historical_comparison_status": "historical_reference_not_established"
+    },
+    {
+      "n": "OZSpeech",
+      "key": "ozspeech",
+      "b": true,
+      "status": "historical_results",
+      "config": "configs/ots_vc/clean/libritts/ozspeech_ots.yaml",
+      "subset": "subsets/libritts16_v1/selection.json",
+      "generation_status": "pending",
+      "scoring_status": "pending",
+      "historical_comparison_status": "pending"
+    },
+    {
+      "n": "VibeVoice",
+      "key": "vibevoice",
+      "b": true,
+      "status": "historical_results",
+      "config": "configs/ots_vc/clean/libritts/vibevoice_ots.yaml",
+      "subset": "subsets/libritts16_v1/selection.json",
+      "generation_status": "pending",
+      "scoring_status": "pending",
+      "historical_comparison_status": "pending"
+    }
+  ],
+  "requirements": [
+    {
+      "item": "Explicit backend requests and results with deterministic resource cleanup",
+      "status": "bridge_implemented_adapter_migration_in_progress"
+    },
+    {
+      "item": "Original sample seed propagation including subprocess and HTTP adapters",
+      "status": "implemented_validation_in_progress"
+    },
+    {
+      "item": "Preserve manifest variants and select historical protocol explicitly",
+      "status": "implemented"
+    },
+    {
+      "item": "Fixed subset with input hashes and matched historical population",
+      "status": "subset_frozen_historical_alignment_in_progress"
+    },
+    {
+      "item": "Independently loaded versioned scorers with sample-level metric recovery",
+      "status": "core_real_run_verified_auxiliary_validation_pending"
+    },
+    {
+      "item": "Dependency-scoped code, weights, worker environments and hardware provenance",
+      "status": "partial"
+    },
+    {
+      "item": "Protocol and stage plan for protection, denoising, generation and scoring",
+      "status": "pending"
+    },
+    {
+      "item": "Separate completion, protocol validity and cross-run comparability",
+      "status": "pending"
+    },
+    {
+      "item": "Speaker-aware paired comparison and consistent timing provenance",
+      "status": "paired_subset_comparison_implemented_timing_comparability_pending"
+    },
+    {
+      "item": "Every integrated model: real generation, scoring, historical comparison where supported",
+      "status": "in_progress"
+    },
+    {
+      "item": "CLI, documentation, website and HF integration with full checks",
+      "status": "pending"
+    }
+  ],
+  "caveats": [
+    "Subset checks do not establish full-paper table reproduction.",
+    "Historical results lacking weight revisions or seeds cannot establish bitwise generation equivalence.",
+    "Historical source data and result artifacts remain preserved."
+  ]
+}

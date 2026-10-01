@@ -151,7 +151,7 @@ class MossTTSDZeroShotAdversary(BaseAdversary):
                 text=dialogue,
                 prompt_audio=reference_path,
                 prompt_text=prompt_text_tagged,
-                sample_index=idx,
+                sample_index=sample.index,
             )
             synth_elapsed = time.perf_counter() - synth_start
 

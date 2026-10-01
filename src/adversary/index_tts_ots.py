@@ -171,6 +171,7 @@ class IndexTTSZeroShotAdversary(BaseAdversary):
                     ref_audio=reference_path,
                     text=target_text,
                     output_path=output_wav_path,
+                    seed=self._sample_seed(sample),
                     emo_audio_prompt=emo_prompt,
                     emo_alpha=self.emo_alpha,
                 )

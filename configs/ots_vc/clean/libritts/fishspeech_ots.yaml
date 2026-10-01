@@ -13,7 +13,7 @@ output_paths:
 
 adversary:
   name: "fishspeech_ots"
-  code_path: "checkpoints/fish_speech"
+  code_path: "checkpoints/fish_speech_s1"
   llama_checkpoint_path: "checkpoints/fish_speech/openaudio-s1-mini"
   decoder_checkpoint_path: "checkpoints/fish_speech/openaudio-s1-mini/codec.pth"
   decoder_config_name: "modded_dac_vq"

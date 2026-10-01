@@ -45,7 +45,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-samples", type=int, default=3, help="Samples to generate")
     parser.add_argument("--device", default=None, help="CUDA device, e.g. cuda:0")
     parser.add_argument("--hf-config", default="VCTK", help="HF dataset config name")
-    parser.add_argument("--fish-repo-dir", default=str(REPO_DIR / "checkpoints" / "fish_speech"),
+    parser.add_argument("--fish-repo-dir", default=str(REPO_DIR / "checkpoints" / "fish_speech_s1"),
                         help="Local Fish-Speech repo checkout")
     parser.add_argument("--fish-ckpt-dir", default=str(REPO_DIR / "checkpoints" / "fish_speech" / "openaudio-s1-mini"),
                         help="Local fishaudio/s1-mini checkpoint directory")

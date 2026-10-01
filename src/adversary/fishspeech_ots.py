@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import numbers
 import sys
+import threading
 import time
 from pathlib import Path
 from typing import List, Optional, Sequence, Tuple
@@ -51,7 +52,7 @@ class FishSpeechZeroShotAdversary(BaseAdversary):
         self.logger = logger
 
         # Resolve key filesystem locations eagerly so we can fail fast.
-        self.code_path = self._resolve_path(self.config.get("code_path", "checkpoints/fish_speech"))
+        self.code_path = self._resolve_path(self.config.get("code_path", "checkpoints/fish_speech_s1"))
         self.llama_checkpoint_path = self._resolve_path(self.config["llama_checkpoint_path"])
         self.decoder_checkpoint_path = self._resolve_path(self.config["decoder_checkpoint_path"])
         self.decoder_config_name = str(self.config.get("decoder_config_name", "modded_dac_vq"))
@@ -88,6 +89,7 @@ class FishSpeechZeroShotAdversary(BaseAdversary):
         self._tts_engine = None
         self._ServeTTSRequest = None
         self._ServeReferenceAudio = None
+        self._worker_thread = None
 
     # ------------------------------------------------------------------
     # Internal helpers
@@ -121,12 +123,23 @@ class FishSpeechZeroShotAdversary(BaseAdversary):
         try:
             from tools.server.model_manager import ModelManager
             from fish_speech.utils.schema import ServeReferenceAudio, ServeTTSRequest
+            from fish_speech.tokenizer import FishTokenizer
         except ModuleNotFoundError as exc:
             hint = (
                 "Ensure Fish-Speech is installed (e.g., `pip install -e checkpoints/fish_speech`) "
                 "and the code_path is correct."
             )
-            raise ModuleNotFoundError(f"Unable to import Fish-Speech modules: {hint}") from exc
+            raise ModuleNotFoundError(f"Unable to import Fish-Speech modules ({exc}): {hint}") from exc
+
+        try:
+            # Validate checkpoint/tokenizer compatibility before starting a GPU worker.
+            FishTokenizer.from_pretrained(str(self.llama_checkpoint_path))
+        except Exception as exc:
+            raise RuntimeError(
+                'Fish-Speech code and checkpoint tokenizer are incompatible. '
+                'For S1-mini use the S1 checkout documented in docs/quickstart_model_setup.md. '
+                f'Original error: {exc}'
+            ) from exc
 
         device_str = self._map_device_to_string()
 
@@ -148,6 +161,29 @@ class FishSpeechZeroShotAdversary(BaseAdversary):
         self._tts_engine = self._model_manager.tts_inference_engine
         self._ServeTTSRequest = ServeTTSRequest
         self._ServeReferenceAudio = ServeReferenceAudio
+        # Older upstream releases return only a Queue, not a joinable worker.
+        # Identify only the thread whose closure owns this exact queue.
+        queue = self._model_manager.llama_queue
+        for thread in threading.enumerate():
+            target = getattr(thread, '_target', None)
+            cells = getattr(target, '__closure__', None) or ()
+            if any(cell.cell_contents is queue for cell in cells):
+                self._worker_thread = thread
+                break
+
+    def close(self):
+        if self._model_manager is not None:
+            queue = getattr(self._model_manager, 'llama_queue', None)
+            if queue is not None:
+                queue.put(None)
+            if self._worker_thread is not None:
+                self._worker_thread.join(timeout=30)
+                if self._worker_thread.is_alive():
+                    raise RuntimeError('FishSpeech generation worker did not terminate within 30 seconds')
+            elif queue is not None:
+                raise RuntimeError('FishSpeech upstream worker lifetime could not be verified')
+            self._tts_engine = self._model_manager = self._worker_thread = None
+        super().close()
 
     def _map_device_to_string(self) -> str:
         if self.device.type == "cuda":
@@ -160,6 +196,7 @@ class FishSpeechZeroShotAdversary(BaseAdversary):
         text: str,
         reference_path: Path,
         reference_text: Optional[str] = None,
+        sample_index: int = 0,
     ):
         assert self._ServeTTSRequest is not None and self._ServeReferenceAudio is not None
         reference_bytes = reference_path.read_bytes()
@@ -176,7 +213,7 @@ class FishSpeechZeroShotAdversary(BaseAdversary):
             repetition_penalty=self.repetition_penalty,
             temperature=self.temperature,
             normalize=self.normalize,
-            seed=self.seed,
+            seed=None if self.seed is None else int(self.seed) + sample_index,
             use_memory_cache=self.use_memory_cache,
             streaming=False,
         )
@@ -251,6 +288,7 @@ class FishSpeechZeroShotAdversary(BaseAdversary):
                 text=request_text,
                 reference_path=reference_path,
                 reference_text=reference_transcript,
+                sample_index=sample.index,
             )
 
             synth_start = time.perf_counter()

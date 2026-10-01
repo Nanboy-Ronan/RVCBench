@@ -97,7 +97,7 @@ def _normalize_record(record: Dict[str, object], dataset_name: str, source_manif
 
     result = {
         "dataset_name": _stringify(normalized.get("dataset_name") or dataset_name),
-        "split": _stringify(normalized.get("split") or "default"),
+        "split": _stringify(normalized.get("split") or normalized.get("data_split") or "default"),
         "pair_id": _stringify(
             normalized.get("pair_id")
             or f"{dataset_name}-{speaker_id or 'unknown'}-{source_row:06d}"
@@ -117,8 +117,8 @@ def _normalize_record(record: Dict[str, object], dataset_name: str, source_manif
         "target_phonemes": _stringify(normalized.get("target_phonemes")),
         "target_tone": _stringify(normalized.get("target_tone")),
         "target_word2ph": _stringify(normalized.get("target_word2ph")),
-        "source_manifest": source_manifest,
-        "source_row": source_row,
+        "source_manifest": normalized.get("source_manifest") or source_manifest,
+        "source_row": normalized.get("source_row", source_row),
     }
     reserved = set(result.keys()) | set(LEGACY_TO_CANONICAL.keys())
     for key, value in normalized.items():
@@ -166,6 +166,8 @@ def load_canonical_manifest(
         )
     else:
         df = pd.read_parquet(manifest_path)
+        if 'split' not in df and 'data_split' in df:
+            df['split'] = df['data_split']
     for column in CANONICAL_COLUMNS:
         if column not in df.columns:
             df[column] = ""
@@ -219,6 +221,7 @@ def load_dataset_manifest(
     speaker_id: Optional[str] = None,
     dataset_name: Optional[str] = None,
     manifest_filename: Optional[str] = None,
+    manifest_variant: Optional[str] = None,
 ) -> pd.DataFrame:
     root_path = Path(root_path)
     dataset_name = dataset_name or root_path.name
@@ -238,8 +241,7 @@ def load_dataset_manifest(
         if column not in df.columns:
             df[column] = ""
     ordered = list(CANONICAL_COLUMNS) + [column for column in df.columns if column not in CANONICAL_COLUMNS]
-    return df.loc[:, ordered].reset_index(drop=True)
-
+    return select_manifest_variant(df.loc[:, ordered].reset_index(drop=True), manifest_variant)
 
 def to_internal_manifest(df: pd.DataFrame) -> pd.DataFrame:
     internal = df.copy()
@@ -247,6 +249,29 @@ def to_internal_manifest(df: pd.DataFrame) -> pd.DataFrame:
         if internal_key not in internal.columns and canonical_key in internal.columns:
             internal[internal_key] = internal[canonical_key]
     return internal
+
+
+def select_manifest_variant(frame: pd.DataFrame, variant: Optional[str] = None) -> pd.DataFrame:
+    """Name source variants without dropping or rewriting any source artifact.
+
+    Selection is explicit. In particular, speaker_text rows are not silently
+    deduplicated against speaker rows even when their waveforms are identical.
+    """
+    frame = frame.copy()
+    if 'manifest_variant' not in frame:
+        frame['manifest_variant'] = 'default'
+        source = frame.source_manifest.astype(str)
+        speaker = frame.speaker_id.astype(str)
+        frame.loc[source.eq(speaker + '.json'), 'manifest_variant'] = 'speaker'
+        frame.loc[source.eq(speaker + '_text.json'), 'manifest_variant'] = 'speaker_text'
+    available = sorted(frame.manifest_variant.astype(str).unique())
+    if variant is not None:
+        frame = frame[frame.manifest_variant == variant].copy()
+        if frame.empty:
+            raise ValueError(f'Manifest variant {variant!r} is unavailable; available: {available}')
+    frame.attrs['variant_selection'] = {'selected': variant or 'all', 'available': available,
+                                       'selected_rows': len(frame)}
+    return frame
 
 
 def resolve_hf_dataset_root(
@@ -303,6 +328,7 @@ def discover_speakers(
     explicit_speaker_id: Optional[str] = None,
     dataset_name: Optional[str] = None,
     manifest_filename: Optional[str] = None,
+    manifest_variant: Optional[str] = None,
 ) -> List[str]:
     if explicit_speaker_id is not None:
         return [str(explicit_speaker_id)]
@@ -312,6 +338,7 @@ def discover_speakers(
         root_path,
         dataset_name=dataset_name,
         manifest_filename=manifest_filename,
+        manifest_variant=manifest_variant,
     )
     if not df.empty:
         speakers = sorted({str(value) for value in df["speaker_id"].tolist() if str(value)})

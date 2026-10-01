@@ -112,6 +112,7 @@ class MaskGCTGenerator(BaseModel):
         prompt_text: str,
         target_text: str,
         output_path: Path,
+        seed: Optional[int] = None,
         prompt_language: str = "en",
         target_language: str = "en",
         target_len: Optional[float] = None,
@@ -120,6 +121,7 @@ class MaskGCTGenerator(BaseModel):
         self.ensure_model()
         request = {
             "action": "generate",
+            "seed": seed,
             "prompt_speech_path": str(Path(prompt_speech_path).expanduser().resolve()),
             "prompt_text": str(prompt_text or "").strip(),
             "target_text": str(target_text or "").strip(),
@@ -147,6 +149,7 @@ class MaskGCTGenerator(BaseModel):
         return result_path
 
     def close(self) -> None:
+        atexit.unregister(self.close)
         process = self._process
         self._process = None
         if process is None:
@@ -162,6 +165,7 @@ class MaskGCTGenerator(BaseModel):
         except Exception:
             try:
                 process.kill()
+                process.wait(timeout=5)
             except Exception:
                 pass
         self._close_stderr_log()

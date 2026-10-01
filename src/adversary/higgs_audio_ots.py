@@ -140,7 +140,7 @@ class HiggsAudioZeroShotAdversary(BaseAdversary):
             )
 
             synth_start = time.perf_counter()
-            wav, sr = self._generator.generate(text, speaker_id, reference_path, idx)
+            wav, sr = self._generator.generate(text, speaker_id, reference_path, sample.index)
             synth_elapsed = time.perf_counter() - synth_start
             output_name = self._cloned_filename(sample, idx)
             output_path = speaker_dir / output_name

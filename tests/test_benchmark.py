@@ -22,9 +22,20 @@ from src.adversary.smoke import SmokeAdversary
 
 @contextmanager
 def mocked_evaluator(function):
-    import src.evaluation as package
-    fake = SimpleNamespace(evaluate_pairs=function)
-    with patch.dict(sys.modules, {'src.evaluation.generation': fake}), patch.object(package, 'generation', fake, create=True):
+    def bridge(rows, required, directory, device, logger, **kwargs):
+        pairs = [(Path(r['target_path']), Path(r['generated_path']),
+                  {'sample_id': r['sample_id'], 'speaker_id': r['speaker_id'], 'text': r['target_text']})
+                 for r in rows if r.get('generated_sha256')]
+        result = function(pairs, directory / 'generated_audio', device, logger)
+        with Path(result['sample_metrics_csv']).open() as f:
+            scores = {r['sample_id']: r for r in csv.DictReader(f)}
+        for row in rows:
+            if row.get('generated_sha256'):
+                row['metrics'] = scores.get(row['sample_id'], {})
+                row['status'] = 'complete'
+        result['evaluation_fingerprint'] = 'test-only-fingerprint'
+        return result
+    with patch('src.evaluation.pipeline.evaluate_run', side_effect=bridge):
         yield
 
 
@@ -74,7 +85,7 @@ def test_generate_and_resume(setup_run):
     assert old['coverage']['generated'] == 2
     assert not old['coverage']['eligible_for_comparison']
     conf.vc.resume_from = str(first)
-    with patch('src.workflows.vc._select_adversary', side_effect=AssertionError('must not regenerate')):
+    with patch('src.benchmark.backends.select_adversary', side_effect=AssertionError('must not regenerate')):
         _, new, _ = run('resumed')
     assert all(r['reused'] for r in new['samples'])
     assert (first / 'run_manifest.json').read_text() == json.dumps(old, indent=2, ensure_ascii=False) + '\n'
@@ -104,14 +115,14 @@ def test_retry_and_missing_samples(setup_run):
                 raise RuntimeError('temporary failure')
             return super().attack(**kwargs)
     conf.vc.retries = 1
-    with patch('src.workflows.vc._select_adversary', return_value=Flaky(conf, conf.dataset, 'cpu', logging.getLogger())):
+    with patch('src.benchmark.backends.select_adversary', return_value=Flaky(conf, conf.dataset, 'cpu', logging.getLogger())):
         _, manifest, _ = run('retry')
     assert manifest['samples'][0]['attempts'] == 2
     assert manifest['coverage']['generated'] == 2
     class Missing(SmokeAdversary):
         def attack(self, **kwargs):
             pass
-    with patch('src.workflows.vc._select_adversary', return_value=Missing(conf, conf.dataset, 'cpu', logging.getLogger())):
+    with patch('src.benchmark.backends.select_adversary', return_value=Missing(conf, conf.dataset, 'cpu', logging.getLogger())):
         _, manifest, _ = run('missing')
     assert manifest['status'] == 'partial'
     assert manifest['coverage']['requested'] == 2
@@ -174,7 +185,7 @@ def test_hydra_entrypoint_writes_status(setup_run):
     proc = subprocess.run([sys.executable, 'run_vc.py', '--config-name', 'ots_vc/clean/libritts/qwen3_tts_ots',
         'vc.model=smoke', '+vc.generate_only=true', 'device=cpu',
         f'base_dir={root}', f'dataset.root_path={conf.dataset.root_path}',
-        'dataset.use_hf_dataset=false', 'dataset.speaker_id=one',
+        'dataset.use_hf_dataset=false', 'dataset.speaker_id=one', 'dataset.manifest_variant=null',
         '+dataset.manifest_filename=metadata.json', 'adversary.max_samples=1',
         f'hydra.run.dir={root}/hydra'], capture_output=True, text=True)
     assert proc.returncode == 0, proc.stderr
@@ -191,7 +202,7 @@ def test_interruption_retains_progress(setup_run):
     class Interrupted(SmokeAdversary):
         def attack(self, **kwargs):
             raise KeyboardInterrupt()
-    with patch('src.workflows.vc._select_adversary', return_value=Interrupted(conf, conf.dataset, 'cpu', logging.getLogger())):
+    with patch('src.benchmark.backends.select_adversary', return_value=Interrupted(conf, conf.dataset, 'cpu', logging.getLogger())):
         with pytest.raises(KeyboardInterrupt):
             run('interrupted')
     manifest = json.loads((root / 'interrupted/run_manifest.json').read_text())
@@ -261,6 +272,6 @@ def test_journal_recovers_progress_and_ignores_torn_tail(setup_run):
     assert all(r['status'] == 'generated' for r in recovered['samples'])
     assert recovered['status'] == 'running'  # progress is not process liveness/completion
     conf.vc.resume_from = str(out)
-    with patch('src.workflows.vc._select_adversary', side_effect=AssertionError('must replay journal')):
+    with patch('src.benchmark.backends.select_adversary', side_effect=AssertionError('must replay journal')):
         _, resumed, _ = run('journal-resumed')
     assert resumed['coverage']['generated'] == 2

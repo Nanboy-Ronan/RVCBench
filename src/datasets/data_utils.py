@@ -99,6 +99,7 @@ class TextAudioSpeakerDataset(torch.utils.data.Dataset):
                 speaker_id=sid,
                 dataset_name=getattr(data_conf, "name", self.data_root.name),
                 manifest_filename=getattr(data_conf, "manifest_filename", None),
+                manifest_variant=getattr(data_conf, "manifest_variant", None),
             )
             self.audiopaths_sid_text = to_internal_manifest(manifest_df)
             if not isinstance(self.audiopaths_sid_text, pd.DataFrame):
@@ -447,6 +448,7 @@ class AllSpeakerData:
                 self._dataset_root,
                 dataset_name=getattr(self.dataset_config, "name", self._dataset_root.name),
                 manifest_filename=getattr(self.dataset_config, "manifest_filename", None),
+                manifest_variant=getattr(self.dataset_config, "manifest_variant", None),
             )
         self.speaker_id_indices = {}
         for idx, sid in enumerate(self.speakers_ids):
@@ -530,6 +532,7 @@ class AllSpeakerData:
             self._dataset_root,
             dataset_name=getattr(self.dataset_config, "name", self._dataset_root.name),
             manifest_filename=getattr(self.dataset_config, "manifest_filename", None),
+            manifest_variant=getattr(self.dataset_config, "manifest_variant", None),
         )
         if manifest_df.empty:
             self._zero_shot_samples = []

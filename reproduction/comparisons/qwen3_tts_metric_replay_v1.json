@@ -1,0 +1,28 @@
+{
+  "source_report": "/tealab-data/rjin02/RVCBench/results/reproduction_metric_replay/qwen3_tts_libritts16_v1/replay_report.json",
+  "source_sha256": "ec0fb276f199d1a3a701ca3f27b13f57c1e4deefe22d0acf304620a34ff70ea7",
+  "kind": "historical_audio_metric_replay",
+  "historical_csv": "/tealab-data/rjin02/AudioWatermarkBench/results/qwen3_tts_ots_on_libratts/20260326-142727/generation_sample_metrics.csv",
+  "historical_csv_sha256": "ef5e020f2675ec2c604ab5a85de1be5d21577c6dfec09ac0412cc644334df3fb",
+  "differences": {
+    "mcd": {
+      "valid": 16,
+      "requested": 16,
+      "mean_delta": 0.0,
+      "max_absolute_delta": 0.0
+    },
+    "wer": {
+      "valid": 16,
+      "requested": 16,
+      "mean_delta": 0.0,
+      "max_absolute_delta": 0.0
+    },
+    "sim": {
+      "valid": 16,
+      "requested": 16,
+      "mean_delta": -5.751848220825195e-06,
+      "max_absolute_delta": 6.532669067382812e-05
+    }
+  },
+  "interpretation": "Tests scorer reproduction on historical audio; does not prove generation reproducibility."
+}

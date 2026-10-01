@@ -184,6 +184,7 @@ class ZipVoiceZeroShotAdversary(BaseAdversary):
                     prompt_wav=reference_path,
                     prompt_text=prompt_text,
                     lang=self._select_language(sample),
+                    sample_index=sample.index,
                 )
                 synth_elapsed = time.perf_counter() - synth_start
             except Exception as exc:

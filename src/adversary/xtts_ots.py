@@ -290,7 +290,7 @@ class XttsZeroShotAdversary(BaseAdversary):
             )
 
             try:
-                self._set_seed(idx)
+                self._set_seed(sample.index)
                 synth_start = time.perf_counter()
                 wav, sample_rate = self._generator.generate(
                     text=target_text,

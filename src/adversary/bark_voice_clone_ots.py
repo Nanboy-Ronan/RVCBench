@@ -8,10 +8,6 @@ import soundfile as sf
 from hydra.utils import to_absolute_path
 
 from .base_adversary import BaseAdversary
-# from src.models.bark_voice_clone import (
-#     BarkVoiceCloneGenerator,
-#     BarkVoiceCloneGeneratorConfig,
-# )
 
 
 class BarkVoiceCloneZeroShotAdversary(BaseAdversary):
@@ -69,6 +65,7 @@ class BarkVoiceCloneZeroShotAdversary(BaseAdversary):
     def _ensure_generator(self) -> None:
         if self._generator is not None:
             return
+        from src.models.bark_voice_clone import BarkVoiceCloneGenerator, BarkVoiceCloneGeneratorConfig
 
         generator_config = BarkVoiceCloneGeneratorConfig(
             code_path=self.code_path,
@@ -157,7 +154,7 @@ class BarkVoiceCloneZeroShotAdversary(BaseAdversary):
             audio_np, sample_rate = self._generator.generate(
                 text=utterance_text,
                 prompt_audio=reference_path,
-                sample_index=idx,
+                sample_index=sample.index,
             )
             synth_elapsed = time.perf_counter() - synth_start
 

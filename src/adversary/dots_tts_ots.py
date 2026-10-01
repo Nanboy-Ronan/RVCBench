@@ -117,7 +117,7 @@ class DotsTTSZeroShotAdversary(BaseAdversary):
                 text=desired_text,
                 prompt_audio=reference_path,
                 prompt_text=prompt_transcript,
-                sample_index=idx,
+                sample_index=sample.index,
                 language=resolve_dots_language(self.language, sample.target_language),
             )
             synth_elapsed = time.perf_counter() - synth_start

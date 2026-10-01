@@ -160,6 +160,7 @@ class ZipVoiceGenerator(BaseModel):
         prompt_wav: Path,
         prompt_text: str,
         lang: Optional[str] = None,
+        sample_index: int = 0,
     ) -> Tuple[np.ndarray, int]:
         self.ensure_model()
 
@@ -219,7 +220,7 @@ class ZipVoiceGenerator(BaseModel):
         if self.config.num_step is not None:
             command.extend(["--num-step", str(int(self.config.num_step))])
         if self.config.seed is not None:
-            command.extend(["--seed", str(int(self.config.seed))])
+            command.extend(["--seed", str(int(self.config.seed) + int(sample_index))])
         if self.config.remove_long_sil:
             command.append("--remove-long-sil")
 

@@ -180,7 +180,7 @@ class KimiAudioZeroShotAdversary(BaseAdversary):
                         idx,
                     )
                 continue
-            self._set_seed(idx)
+            self._set_seed(sample.index)
 
             lookup_key = str(reference_path)
             prompt_transcript = sample_prompt_transcripts.get(lookup_key, "")
@@ -192,7 +192,7 @@ class KimiAudioZeroShotAdversary(BaseAdversary):
                 target_text = target_override or prompt_transcript or ""
             messages = self._build_messages(reference_path, prompt_transcript, target_text)
             synth_start = time.perf_counter()
-            wav, sr = self._generator.generate(messages, sample_index=idx)
+            wav, sr = self._generator.generate(messages, sample_index=sample.index)
             synth_elapsed = time.perf_counter() - synth_start
             speaker_id = str(sample.speaker_id)
             speaker_dir = self._speaker_output_dir(output_dir, speaker_id)

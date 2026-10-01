@@ -1,0 +1,43 @@
+"""Resolve model references separately from orchestration."""
+from pathlib import Path
+
+from omegaconf import OmegaConf
+from .artifacts import digest, file_hash
+
+
+def resolve_model_assets(conf):
+    resolved = OmegaConf.create(OmegaConf.to_container(conf, resolve=True))
+    model = str(conf.vc.model).lower()
+    assets, unresolved, cache = {}, {}, {}
+    suffixes = {'.safetensors', '.bin', '.pt', '.pth', '.ckpt', '.onnx', '.json', '.yaml', '.yml',
+                '.txt', '.tiktoken', '.model', '.vocab'}
+    fields = {'checkpoint_path', 'model_path', 'model_dir', 'models_dir', 'checkpoint_dir',
+              'config_path', 'hubert_checkpoint', 'hubert_tokenizer', 'vocoder_path'}
+    for key, value in resolved.adversary.items():
+        if not isinstance(value, str) or not value or not (key in fields or key.endswith('_checkpoint_path')):
+            continue
+        path = Path(value).expanduser()
+        if path.is_file():
+            files = [path]
+        elif path.is_dir():
+            files = [p for p in sorted(path.rglob('*')) if p.is_file() and p.suffix in suffixes]
+        else:
+            unresolved[key] = value
+            continue
+        hashes = {}
+        for file in files:
+            identity = str(file.resolve())
+            if identity not in cache:
+                cache[identity] = file_hash(file)
+            hashes[str(file.relative_to(path)) if path.is_dir() else file.name] = cache[identity]
+        assets[key] = {'configured_path': value, 'files': hashes}
+    if model in ('qwen3_tts', 'qwentts') and 'checkpoint_path' in unresolved:
+        from huggingface_hub import HfApi
+        repo_id = unresolved.pop('checkpoint_path')
+        revision = HfApi().model_info(repo_id, revision=resolved.adversary.get('revision')).sha
+        OmegaConf.update(resolved, 'adversary.revision', revision, force_add=True)
+        assets['checkpoint_path'] = {'repo_id': repo_id, 'revision': revision}
+    reference = {'assets': assets, 'unresolved_references': unresolved,
+                 'coverage': 'configured_local_assets_and_supported_hub_resolvers',
+                 'note': 'Implicit upstream downloads and service-side models require additional provenance.'}
+    return resolved, reference, digest(reference)

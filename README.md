@@ -457,12 +457,14 @@ python run_vc.py --config-name ots_vc/clean/libritts/qwen3_tts_ots \
   adversary.checkpoint_path=checkpoints/Qwen3-TTS-12Hz-1.7B-Base
 
 # FishSpeech only
-git clone https://github.com/fishaudio/fish-speech.git checkpoints/fish_speech
+git clone https://github.com/fishaudio/fish-speech.git checkpoints/fish_speech_s1
+git -C checkpoints/fish_speech_s1 checkout d3df50503b36314a964f66cac1af1e19e95bcfa3
+python -m pip install -e checkpoints/fish_speech_s1
 huggingface-cli download fishaudio/s1-mini \
   --local-dir checkpoints/fish_speech/openaudio-s1-mini
 python run_vc.py --config-name ots_vc/clean/vctk/fishspeech_ots \
   dataset.speaker_id=p226 \
-  adversary.code_path=checkpoints/fish_speech \
+  adversary.code_path=checkpoints/fish_speech_s1 \
   adversary.llama_checkpoint_path=checkpoints/fish_speech/openaudio-s1-mini \
   adversary.decoder_checkpoint_path=checkpoints/fish_speech/openaudio-s1-mini/codec.pth
 ```
@@ -494,7 +496,7 @@ CUDA_VISIBLE_DEVICES=<gpu> checkpoints/ZONOS2-repo/.venv/bin/python run_vc.py \
 
 - `Qwen3-TTS` can use either the Hugging Face model ID `Qwen/Qwen3-TTS-12Hz-1.7B-Base` directly or a local directory passed via `adversary.checkpoint_path=...`. It also needs the `qwen-tts` Python package.
 - `FishSpeech` needs both a local checkout of `fishaudio/fish-speech` and the `fishaudio/s1-mini` checkpoint directory. Pass them with `adversary.code_path=...`, `adversary.llama_checkpoint_path=...`, and `adversary.decoder_checkpoint_path=...`.
-- `Fish Audio S2` ([paper](https://arxiv.org/abs/2603.08823)) reuses the same `fishaudio/fish-speech` checkout as `FishSpeech`, pointed at the `fishaudio/s2-pro` checkpoint instead of `s1-mini`. S2 uses a different dual-AR decoder architecture than S1; the wrapper defaults `decoder_config_name` to `modded_dac_vq` as a best-effort setting that has not been validated against a downloaded `s2-pro` checkpoint — see [docs/quickstart_model_setup.md](docs/quickstart_model_setup.md#4-fish-audio-s2-quickstart).
+- `Fish Audio S2` ([paper](https://arxiv.org/abs/2603.08823)) requires a separate S2-compatible checkout and `fishaudio/s2-pro` assets. Keep the pinned S1 checkout separate: newer upstream tokenizer code is incompatible with the released S1-mini tiktoken files. S2 remains experimental until its runtime validation is complete; see [setup instructions](docs/quickstart_model_setup.md#4-fish-audio-s2-quickstart).
 - `FireRedTTS-2` expects a local upstream checkout at `checkpoints/FireRedTTS2` and pretrained weights under `checkpoints/FireRedTTS2/pretrained_models/FireRedTTS2` by default.
 - `VoxCPM` defaults to the Hugging Face model ID `openbmb/VoxCPM2`. If you want to force offline/local loading, override `adversary.local_files_only=true` and optionally set `adversary.cache_dir=/path/to/cache`.
 - `dots.tts` (`rednote-hilab/dots.tts-soar`, pip-installable) needs its own env (`envs/dots-tts.yml`, see the file for the exact install order — it requires `torch>=2.8.0`, newer than the repo-wide `requirements.txt` pin). `device: cuda:N` is honoured.

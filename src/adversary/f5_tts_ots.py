@@ -177,7 +177,7 @@ class F5TTSZeroShotAdversary(BaseAdversary):
 
             try:
                 ref_text = self._resolve_prompt_transcript(reference_path, prompt_text)
-                sample_seed = None if self.seed is None else int(self.seed) + int(idx)
+                sample_seed = None if self.seed is None else int(self.seed) + int(sample.index)
                 synth_start = time.perf_counter()
                 wav, sample_rate = self._generator.generate(
                     ref_audio=str(reference_path.resolve()),

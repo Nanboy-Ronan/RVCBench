@@ -218,7 +218,7 @@ class QwenOmniBaseZeroShotAdversary(BaseAdversary):
             messages = self._build_messages(reference_path, prompt_transcript, target_text)
 
             synth_start = time.perf_counter()
-            wav, sample_rate = self._generator.generate(messages, sample_index=idx)
+            wav, sample_rate = self._generator.generate(messages, sample_index=sample.index)
             synth_elapsed = time.perf_counter() - synth_start
 
             wav = np.asarray(wav, dtype=np.float32)

@@ -138,7 +138,7 @@ class PlayDiffusionZeroShotAdversary(BaseAdversary):
                 text=script_text,
                 prompt_audio=reference_path,
                 prompt_text=prompt_transcript,
-                sample_index=idx,
+                sample_index=sample.index,
             )
             synth_elapsed = time.perf_counter() - synth_start
 

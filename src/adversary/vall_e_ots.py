@@ -126,7 +126,7 @@ class VallEZeroShotAdversary(BaseAdversary):
                 text=text,
                 prompt_audio=reference_path,
                 prompt_text=prompt_text,
-                sample_index=idx,
+                sample_index=sample.index,
             )
             synth_elapsed = time.perf_counter() - synth_start
             output_name = self._cloned_filename(sample, idx)

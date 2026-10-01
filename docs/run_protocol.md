@@ -1,4 +1,4 @@
-# Run protocol (zero-shot v1)
+# Run protocol (zero-shot v2)
 
 Use `pip install -e .` from the repository root. Model runtimes and evaluation
 models are separate dependencies. The initial supported onboarding path is
@@ -27,8 +27,7 @@ python run_vc.py --config-name ots_vc/clean/libritts/qwen3_tts_ots \
 ```
 
 Use exactly the same dataset selection, transcripts, and audio as the source run.
-This command creates a new run; it does not overwrite the generation run. Full
-metrics can also be requested with `--evaluate` on the Qwen quickstart.
+This command creates a new run; it does not overwrite the generation run. Generation and scoring can also be requested with `--evaluate` on the Qwen quickstart.
 
 ```bash
 python scripts/run_qwen3tts_quickstart.py --max-samples 5 \
@@ -39,12 +38,14 @@ Resume checks the input fingerprint, generation settings, runtime source digest,
 Python environment, and generated audio hashes. Verified successful audio is copied into a new run.
 Missing/failed samples are retried. Use `+vc.retries=1` with `run_vc.py` for an
 additional attempt within a run. A per-sample seed is set before each adapter call.
-Adapters may additionally apply their own configured seed policy, captured in the
-config. GPU kernels and external services may still be nondeterministic.
+The effective run seed is propagated into adapters; seeds use the preserved source
+index rather than the index within a retry batch. Subprocess workers receive explicit
+per-sample seeds. GPU kernels and external services may still be nondeterministic.
 
-The v1 runner dispatches one sample per adapter call, prioritizing explicit
+The v2 runner dispatches one sample per adapter call, prioritizing explicit
 failure accounting and resumability. It does not promise high-throughput batching
-or multi-node scheduling. Model objects are reused and released before evaluation.
+or multi-node scheduling. Model setup runs before generation so missing runtime dependencies fail the run
+early. Owned subprocess workers are explicitly closed before evaluation.
 
 Inspect a running or interrupted job with `rvcbench status /path/to/run`.
 
@@ -60,6 +61,11 @@ Inspect a running or interrupted job with `rvcbench status /path/to/run`.
 - `sample_events.jsonl`: durable per-sample updates, replayed on resume after
   interruption. A truncated final journal line is ignored; earlier corruption is
   rejected. This avoids rewriting the entire manifest for each sample.
+- `scoring_manifest.json`: metric-specific implementation, package and model asset
+  provenance. Core MCD, Whisper WER and ECAPA scorers load separately.
+- `metric_cache/`: atomic sample-by-scorer results. Successful records can be reused
+  from the source run when inputs, scorer code, weights and settings match. Failed
+  records are retried; each completed metric is also journaled.
 - `generation_sample_metrics.csv`: sample IDs and individual scores, with missing
   metrics retained as missing rather than assigned successful scores.
 - `generated_audio/synthesis_timings.csv`: adapter synthesis timing when provided;
@@ -75,8 +81,9 @@ may leave `running`/`generating`; these statuses must not be interpreted as succ
 
 The default required metrics are MCD, WER and SIM. Configure a stricter gate with
 `+evaluation.required_metrics=[mcd,wer,sim,sva,speechmos,dnsmos,emotion]`.
-The full evaluator still computes all available metrics; this option sets the
-comparison gate, not the model-loading selection. `metric_valid` always uses the
+Only requested metrics are loaded and evaluated. SIM and SVA share one ECAPA
+scorer. Optional SpeechMOS, DNSMOS and emotion metrics have separate lifetimes;
+their current wrappers retain historical implementations and record cached asset hashes. `metric_valid` always uses the
 requested population as its denominator. Diagnostic averages remain available
 for partial runs, but the report exporter rejects them. The existing bootstrap
 uses utterance resampling, not speaker-cluster resampling; choose a statistical
@@ -84,7 +91,7 @@ protocol appropriate to the claim before publishing.
 
 Completeness alone does not make two runs comparable: match the input fingerprint,
 model version, protection settings, metric protocol, required metrics, and relevant
-runtime/hardware settings. Historical and v1 per-sample execution timings must not
+runtime/hardware settings. Historical and current per-sample execution timings must not
 be merged without accounting for the protocol change.
 
 ## Export and website
@@ -128,3 +135,48 @@ Use `rvcbench doctor --model qwen3 --eval --imports` to detect import-time
 compatibility errors before launching. Qwen/evaluation extras constrain NumPy to
 1.26.4; the evaluator also constrains Numba. Install these in an isolated environment
 rather than upgrading a shared environment used by other experiments.
+
+## Manifest variants and subset reproduction
+
+LibriTTS contains 4,000 distinct waveforms forming 2,000 reference–target pairs.
+Older exports also contain a second transcript representation in `speaker_text`
+rows. Both representations are preserved and receive distinct sample identities.
+`configs/dataset/libritts.yaml` explicitly selects `manifest_variant: speaker`,
+matching the original `<speaker>.json` evaluation loader. Use
+`dataset.manifest_variant=speaker_text` to select the alternate representation,
+or `dataset.manifest_variant=null` to retain all variants. A custom manifest can
+store `manifest_variant` explicitly. No source audio or manifest is rewritten by
+selection. See `docs/audits/libritts_manifest_20260930.json` for the source audit.
+
+The frozen `reproduction/subsets/libritts16_v1` selection contains eight speakers
+and two pairs per speaker, selected by a fixed hash ranking before model outcomes
+were examined. It records content hashes, original indices and transcript versions.
+Load it using the original dataset audio root:
+
+```bash
+python run_vc.py --config-name ots_vc/clean/libritts/qwen3_tts_ots \
+  dataset.use_hf_dataset=false \
+  +dataset.manifest_filename=/absolute/path/to/reproduction/subsets/libritts16_v1/metadata.json \
+  +vc.generate_only=true +seed=42
+```
+
+`scripts/compare_reproduction_subset.py` validates exact historical pair filenames,
+speaker identities, target transcripts and both input audio hashes before comparing
+scores. It reports paired deltas and a speaker-cluster bootstrap interval.
+`scripts/replay_historical_metrics.py` separately checks whether current scorers
+reproduce scores on the original generated audio. These are different checks:
+stochastic new generation can differ even when historical metric replay agrees.
+Neither a 16-pair check nor a confidence interval alone establishes full-table
+reproduction or statistical equivalence. Per-model progress and remaining
+architecture requirements are recorded in `reproduction/plan.json`.
+
+Historical English WER used more than one normalization formula. Set
+`+evaluation.wer_normalization=lowercase_v1` to preserve punctuation, or
+`+evaluation.wer_normalization=ascii_punctuation_removed_v2` for the current
+default. The choice is recorded in the scorer version and cache fingerprint.
+The historical replay script verifies the formula against every saved transcript
+before selecting it. The paired comparator rejects different formulas.
+Target-only legacy output names also require a complete, ordered generation log
+that verifies reference audio identity; target audio alone is insufficient.
+Even with matching formulas, Whisper predictions can differ across runtime
+versions. Replay reports retain those differences and do not claim equivalence.

@@ -171,6 +171,7 @@ class MaskGCTZeroShotAdversary(BaseAdversary):
                     prompt_text=prompt_text,
                     target_text=target_text,
                     output_path=output_wav_path,
+                    seed=self._sample_seed(sample),
                     prompt_language=prompt_language,
                     target_language=target_language,
                     target_len=self.target_len,

@@ -67,64 +67,44 @@ python scripts/run_protect_qwen3tts_quickstart.py \
   --qwen-checkpoint-path checkpoints/Qwen3-TTS-12Hz-1.7B-Base
 ```
 
-## 3. FishSpeech Quickstart
+## 3. FishSpeech S1-mini Quickstart
 
-Clone the inference repo and install it editable:
+Use an isolated S1 checkout pinned before the S2 tokenizer change:
+
+```bash
+git clone https://github.com/fishaudio/fish-speech.git checkpoints/fish_speech_s1
+git -C checkpoints/fish_speech_s1 checkout d3df50503b36314a964f66cac1af1e19e95bcfa3
+python -m pip install -e checkpoints/fish_speech_s1
+huggingface-cli download fishaudio/s1-mini \
+  --local-dir checkpoints/fish_speech/openaudio-s1-mini
+python scripts/run_fishspeech_quickstart.py \
+  --fish-repo-dir checkpoints/fish_speech_s1 \
+  --fish-ckpt-dir checkpoints/fish_speech/openaudio-s1-mini
+```
+
+The S1-mini release contains `tokenizer.tiktoken` and `special_tokens.json`.
+Newer S2 tokenizer code expects Hugging Face tokenizer assets and can fail on
+S1-mini even when all model weights load. The adapter validates the tokenizer
+before starting its GPU worker. Keep upstream environments isolated because their
+Torch and NumPy requirements can differ from the evaluation environment.
+
+## 4. Fish Audio S2 Quickstart
+
+Use a separate S2-compatible checkout and environment. Do not update the pinned
+S1 checkout in place.
 
 ```bash
 git clone https://github.com/fishaudio/fish-speech.git checkpoints/fish_speech
 python -m pip install -e checkpoints/fish_speech
-```
-
-Download the gated S1-mini checkpoint into the location expected by the config:
-
-```bash
-huggingface-cli download fishaudio/s1-mini \
-  --local-dir checkpoints/fish_speech/openaudio-s1-mini
-```
-
-Launch:
-
-```bash
-python scripts/run_fishspeech_quickstart.py \
-  --fish-repo-dir checkpoints/fish_speech \
-  --fish-ckpt-dir checkpoints/fish_speech/openaudio-s1-mini
-```
-
-## 4. Fish Audio S2 Quickstart
-
-Fish Audio S2 ([paper](https://arxiv.org/abs/2603.08823)) ships from the same
-`fishaudio/fish-speech` repo as S1, so it reuses the `fishspeech` conda
-environment and code checkout above — make sure your checkout is up to date:
-
-```bash
-cd checkpoints/fish_speech && git pull && cd -
-python -m pip install -e checkpoints/fish_speech
-```
-
-Download the S2-Pro checkpoint:
-
-```bash
 huggingface-cli download fishaudio/s2-pro \
   --local-dir checkpoints/fish_speech/s2-pro
-```
-
-Launch:
-
-```bash
 python scripts/run_fishspeech_s2_quickstart.py \
   --fish-repo-dir checkpoints/fish_speech \
   --fish-ckpt-dir checkpoints/fish_speech/s2-pro
 ```
 
-> [!WARNING]
-> S2 uses a different generation architecture from S1 (a dual autoregressive
-> "slow AR / fast AR" decoder over a 10-codebook codec, vs. S1's single-AR
-> LLaMA-style model). The wrapper reuses S1's `ModelManager`/`TTSInferenceEngine`
-> code path with `decoder_config_name: "modded_dac_vq"` as a best-effort default —
-> confirm this still matches the codec config shipped with `s2-pro` once you've
-> downloaded the checkpoint, and update the `configs/ots_vc/clean/*/fishspeech_s2_ots.yaml`
-> files if upstream exposes a different config name for the S2 codec.
+The S2 integration remains experimental while checkpoint-specific inference and
+metric validation are pending. See `reproduction/plan.json` for measured status.
 
 ## 5. SafeSpeech / BertVITS2 Setup (advanced)
 

@@ -12,7 +12,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 METRIC_COLUMNS = {
     'mcd': 'mcd', 'wer': 'wer', 'sim': 'sim', 'sva': 'sva',
     'speechmos': 'speechmos_mos', 'dnsmos': 'dnsmos_ovrl', 'emotion': 'emotion_match',
@@ -35,6 +35,8 @@ def sample_id(sample):
     extra = getattr(sample, 'extra', {}) or {}
     identity = {k: str(extra.get(k) or '') for k in ('dataset_name', 'split', 'pair_id')}
     identity['speaker_id'] = str(sample.speaker_id)
+    if extra.get('manifest_variant'):
+        identity['manifest_variant'] = str(extra['manifest_variant'])
     if not identity['pair_id']:
         # Legacy manifests: relative names plus transcripts, never machine-specific roots.
         identity.update(prompt=str(extra.get('prompt_file_name') or Path(str(sample.prompt_path)).name),
@@ -71,9 +73,20 @@ def provenance(root):
         name = distribution.metadata['Name']
         if name:
             packages.setdefault(name, distribution.version)
+    import torch
+    hardware = {'machine': platform.machine(), 'processor': platform.processor(),
+                'torch': torch.__version__, 'torch_cuda': torch.version.cuda,
+                'cuda_visible_devices': os.environ.get('CUDA_VISIBLE_DEVICES'), 'gpus': []}
+    if torch.cuda.is_available():
+        for index in range(torch.cuda.device_count()):
+            props = torch.cuda.get_device_properties(index)
+            hardware['gpus'].append({'visible_index': index, 'name': props.name,
+                                    'total_memory': props.total_memory,
+                                    'compute_capability': [props.major, props.minor]})
     return {'git_commit': git('rev-parse', 'HEAD'), 'git_dirty': bool(git('status', '--porcelain')),
             'source_sha256': digest({str(p.relative_to(root)): file_hash(p) for p in sorted((Path(root) / 'src').rglob('*.py'))}),
-            'python': platform.python_version(), 'platform': platform.platform(), 'packages': packages}
+            'python': platform.python_version(), 'platform': platform.platform(), 'packages': packages,
+            'hardware': hardware}
 
 
 def input_records(samples):
@@ -88,6 +101,9 @@ def input_records(samples):
         row = {'sample_id': sid, 'pair_id': str(sample.extra.get('pair_id') or ''),
                'speaker_id': str(sample.speaker_id), 'target_text': sample.target_text,
                'prompt_text': sample.prompt_text, 'language': sample.target_language,
+               'prompt_language': sample.prompt_language, 'target_language': sample.target_language,
+               'source_index': sample.index,
+               'manifest_variant': sample.extra.get('manifest_variant', 'default'),
                'status': 'pending', 'error': None}
         for name in ('prompt', 'target'):
             path = getattr(sample, name + '_path')
@@ -102,7 +118,7 @@ def input_records(samples):
 
 def input_fingerprint(rows):
     return digest([{k: r[k] for k in ('sample_id', 'prompt_sha256', 'target_sha256',
-                                     'prompt_text', 'target_text', 'language')} for r in rows])
+                                     'prompt_text', 'target_text', 'prompt_language', 'target_language', 'source_index')} for r in rows])
 
 
 def finite(value):
@@ -116,25 +132,50 @@ def finite(value):
         return False
 
 
+def metric_value_valid(metric, value):
+    if not finite(value):
+        return False
+    if metric in ('sva', 'emotion'):
+        if isinstance(value, str) and value.lower() in ('true', 'false'):
+            return True
+        return float(value) in (0, 1)
+    if isinstance(value, bool) or (isinstance(value, str) and value.lower() in ('true', 'false')):
+        return False
+    number = float(value)
+    if metric in ('mcd', 'wer'):
+        return number >= 0
+    if metric == 'sim':
+        return -1.000001 <= number <= 1.000001
+    return True
+
+
 def coverage(rows, required_metrics, *, evaluated):
     requested = len(rows)
     generated = sum(r.get('generated_sha256') is not None for r in rows)
-    counts = {m: sum(finite(r.get('metrics', {}).get(METRIC_COLUMNS[m])) for r in rows)
+    counts = {m: sum(metric_value_valid(m, r.get('metrics', {}).get(METRIC_COLUMNS[m])) and m not in r.get('metric_errors', {}) for r in rows)
               for m in METRIC_COLUMNS}
     complete = bool(requested) and generated == requested and evaluated and all(counts[m] == requested for m in required_metrics)
-    return {'requested': requested, 'generated': generated, 'generation_failed': requested - generated,
+    return {'requested': requested, 'generated': generated,
+            'generation_failed': sum(r.get('status') == 'generation_failed' for r in rows),
+            'input_failed': sum(r.get('status') == 'input_failed' for r in rows),
+            'pending': sum(r.get('status') == 'pending' for r in rows),
+            'generating': sum(r.get('status') == 'generating' for r in rows),
             'metric_valid': counts, 'required_metrics': list(required_metrics),
             'status': 'complete' if complete else ('generated' if not evaluated and generated == requested and requested else 'partial'),
             'eligible_for_comparison': complete}
 
 
 def validate_report(manifest, *, verify_files=True):
-    if manifest.get('schema_version') != SCHEMA_VERSION:
+    if manifest.get('schema_version') not in (1, SCHEMA_VERSION):
         raise ValueError('Unsupported run schema')
     rows = manifest['samples']
     if len({r['sample_id'] for r in rows}) != len(rows):
         raise ValueError('Duplicate sample IDs')
     expected = coverage(rows, manifest['coverage']['required_metrics'], evaluated=manifest['evaluated'])
+    if manifest['schema_version'] == 1:
+        for name in ('input_failed', 'pending', 'generating'):
+            expected.pop(name)
+        expected['generation_failed'] = expected['requested'] - expected['generated']
     if expected != manifest['coverage']:
         raise ValueError('Coverage does not match sample records')
     if not expected['eligible_for_comparison'] or manifest['status'] != 'complete':

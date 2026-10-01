@@ -136,6 +136,16 @@ def main() -> int:
             continue
 
         try:
+            if request.get('seed') is not None:
+                import random
+                import numpy as np
+                import torch
+                seed = int(request['seed'])
+                random.seed(seed)
+                np.random.seed(seed % (2**32 - 1))
+                torch.manual_seed(seed)
+                if torch.cuda.is_available():
+                    torch.cuda.manual_seed_all(seed)
             ref_audio = Path(str(request["ref_audio"])).expanduser().resolve()
             text = str(request["text"]).strip()
             output_path = Path(str(request["output_path"])).expanduser().resolve()

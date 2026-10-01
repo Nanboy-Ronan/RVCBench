@@ -34,7 +34,11 @@ class ZeroShotDataset:
                                           revision=dataset_config.get('hf_revision'), logger=logger)
         self._dataset_root = root.resolve()
         frame = load_dataset_manifest(self._dataset_root, dataset_name=dataset_config.get('name', root.name),
-                                      manifest_filename=dataset_config.get('manifest_filename'))
+                                      manifest_filename=dataset_config.get('manifest_filename'),
+                                      manifest_variant=dataset_config.get('manifest_variant'))
+        self.variant_selection = frame.attrs['variant_selection']
+        if 'source_index' not in frame.columns:
+            frame['source_index'] = range(len(frame))
         selected = dataset_config.get('speaker_id')
         if selected is not None:
             frame = frame[frame.speaker_id.astype(str) == str(selected)]
@@ -50,7 +54,7 @@ class ZeroShotDataset:
                 candidates = [self._dataset_root / p, self._dataset_root.parent / p]
                 return next((p.resolve() for p in candidates if p.is_file()), candidates[0].resolve())
             self._zero_shot_samples.append(ZeroShotSample(
-                str(row['speaker_id']), idx, resolve(row.get('prompt_file_name')),
+                str(row['speaker_id']), int(row['source_index']), resolve(row.get('prompt_file_name')),
                 row.get('prompt_text') or '', row.get('prompt_language'), resolve(row.get('target_file_name')),
                 row.get('target_text') or '', row.get('target_language'), row))
         if not self._zero_shot_samples:

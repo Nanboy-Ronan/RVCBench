@@ -1,0 +1,26 @@
+# @package _global_
+defaults:
+  - _self_
+  - /dataset: libritts
+run_name: bark_voice_clone_ots_on_libritts
+device: cuda:0
+base_dir: .
+vc:
+  mode: ots
+  model: bark_voice_clone
+adversary:
+  code_path: checkpoints/bark-with-voice-clone
+  models_dir: null
+  cache_dir: null
+  prompt_cache_dir: null
+  hubert_checkpoint: null
+  hubert_tokenizer: null
+  max_samples: null
+  seed: null
+batch_size: 1
+evaluation:
+  bootstrap:
+    enabled: true
+    num_samples: 1000
+    confidence_level: 0.95
+    seed: 42

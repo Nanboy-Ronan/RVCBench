@@ -50,7 +50,7 @@ class FishAudioS2ServerZeroShotAdversary(BaseAdversary):
         if self.use_memory_cache not in {"on", "off"}:
             raise ValueError("use_memory_cache must be 'on' or 'off'.")
 
-    def _build_payload(self, text: str, reference_path: Path, reference_text: str) -> bytes:
+    def _build_payload(self, text: str, reference_path: Path, reference_text: str, sample_index: int = 0) -> bytes:
         payload = {
             "text": text,
             "references": [
@@ -69,7 +69,7 @@ class FishAudioS2ServerZeroShotAdversary(BaseAdversary):
             "normalize": self.normalize,
             "streaming": False,
             "use_memory_cache": self.use_memory_cache,
-            "seed": self.seed,
+            "seed": None if self.seed is None else int(self.seed) + sample_index,
         }
         return ormsgpack.packb(payload)
 
@@ -157,7 +157,7 @@ class FishAudioS2ServerZeroShotAdversary(BaseAdversary):
 
             synth_start = time.perf_counter()
             audio_bytes = self._post_generation(
-                self._build_payload(text, reference_path, reference_text)
+                self._build_payload(text, reference_path, reference_text, sample.index)
             )
             synth_elapsed = time.perf_counter() - synth_start
 
