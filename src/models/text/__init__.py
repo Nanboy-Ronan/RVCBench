@@ -19,12 +19,14 @@ def cleaned_text_to_sequence(cleaned_text, tones, language):
 
 
 def get_bert(norm_text, word2ph, language, device, style_text=None, style_weight=0.7):
-    from .chinese_bert import get_bert_feature as zh_bert
-    from .english_bert_mock import get_bert_feature as en_bert
-    from .japanese_bert import get_bert_feature as jp_bert
-
-    lang_bert_func_map = {"ZH": zh_bert, "EN": en_bert, "JP": jp_bert}
-    bert = lang_bert_func_map[language](
+    from importlib import import_module
+    modules = {'ZH': 'chinese_bert', 'EN': 'english_bert_mock', 'JP': 'japanese_bert'}
+    try:
+        module = modules[language]
+    except KeyError as exc:
+        raise ValueError(f'Unsupported text language: {language}') from exc
+    get_feature = import_module(f'{__name__}.{module}').get_bert_feature
+    bert = get_feature(
         norm_text, word2ph, device, style_text, style_weight
     )
     return bert
@@ -50,7 +52,3 @@ def init_openjtalk():
         import pyopenjtalk
 
         pyopenjtalk.g2p("こんにちは，世界。")
-
-
-init_openjtalk()
-check_bert_models()

@@ -23,24 +23,8 @@ from src.models.modules.bertvits2_module import SynthesizerTrn, MultiPeriodDiscr
 from src.models.model import BaseModel
 import numpy as np
 
-whisper_model_path = "openai/whisper-large-v2"
-
-""" from https://github.com/keithito/tacotron """
-
-'''
-Defines the set of symbols used in text input to the model.
-'''
-_pad        = '_'
-_punctuation = ';:,.!?¡¿—…"«»“” '
-_letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
-_letters_ipa = "ɑɐɒæɓʙβɔɕçɗɖðʤəɘɚɛɜɝɞɟʄɡɠɢʛɦɧħɥʜɨɪʝɭɬɫɮʟɱɯɰŋɳɲɴøɵɸθœɶʘɹɺɾɻʀʁɽʂʃʈʧʉʊʋⱱʌɣɤʍχʎʏʑʐʒʔʡʕʢǀǁǂǃˈˌːˑʼʴʰʱʲʷˠˤ˞↓↑→↗↘'̩'ᵻ"
-
-
-# Export all symbols:
-symbols = [_pad] + list(_punctuation) + list(_letters) + list(_letters_ipa)
-
-# Special symbol ids
-SPACE_ID = symbols.index(" ")
+# Use the exact symbol order consumed by the dataset and native generator.
+from src.models.text.symbols import symbols
 
 
 class BertVits2Wrapper(BaseModel):
@@ -52,6 +36,10 @@ class BertVits2Wrapper(BaseModel):
         self.model_config.net_g['n_speakers'] =self.dataset_config.n_speakers
         self.hop_size= self.dataset_config.hop_length
         self.n_fft= self.dataset_config.filter_length
+        self.checkpoint_load_policy = self.model_config.get('checkpoint_load_policy', 'strict')
+        if self.checkpoint_load_policy not in ('strict', 'legacy_partial'):
+            raise ValueError('checkpoint_load_policy must be strict or legacy_partial')
+        self.checkpoint_reports = {}
         self.load_model()
 
     def load_model(self):
@@ -83,7 +71,9 @@ class BertVits2Wrapper(BaseModel):
         def _try_load(glob, module):
             ckpt_path = latest_checkpoint_path(model_path, glob)
             if ckpt_path:
-                load_checkpoint(ckpt_path, module, self.logger, None, skip_optimizer=True)
+                load_checkpoint(ckpt_path, module, self.logger, None, skip_optimizer=True,
+                                strict=self.checkpoint_load_policy == 'strict')
+                self.checkpoint_reports[glob] = module._checkpoint_load_report
                 self.logger.info(f"Loaded: {ckpt_path}")
 
         _try_load("G_*.pth", self.model.net_g)

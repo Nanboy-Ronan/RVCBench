@@ -4,65 +4,46 @@ from torch.nn import functional as F
 import glob
 import os
 import numpy as np
-from scipy.io.wavfile import read
 
 
-def load_checkpoint(checkpoint_path, model,logger, optimizer=None, skip_optimizer=False):
-    assert os.path.isfile(checkpoint_path)
-    checkpoint_dict = torch.load(checkpoint_path, map_location="cpu")
-    if "model" in checkpoint_dict:
-        saved_state_dict = checkpoint_dict["model"]
-        iteration = checkpoint_dict.get("iteration", 0)
-        learning_rate = checkpoint_dict.get("learning_rate", 0)
-        if (
-            optimizer is not None
-            and not skip_optimizer
-            and "optimizer" in checkpoint_dict and checkpoint_dict["optimizer"] is not None
-        ):
-            optimizer.load_state_dict(checkpoint_dict["optimizer"])
+def load_checkpoint(checkpoint_path, model, logger, optimizer=None, skip_optimizer=False, strict=True):
+    """Load complete weights by default; partial legacy loading must be explicit."""
+    if not os.path.isfile(checkpoint_path):
+        raise FileNotFoundError(checkpoint_path)
+    checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=True)
+    saved = checkpoint.get('model', checkpoint)
+    target = model.module if hasattr(model, 'module') else model
+    expected = target.state_dict()
+    missing = sorted(set(expected) - set(saved))
+    unexpected = sorted(set(saved) - set(expected))
+    mismatched = sorted(k for k in expected.keys() & saved.keys()
+                        if not isinstance(saved[k], torch.Tensor) or saved[k].shape != expected[k].shape)
+    report = {'path': str(checkpoint_path), 'policy': 'strict' if strict else 'legacy_partial',
+              'expected_tensors': len(expected), 'missing': missing,
+              'unexpected': unexpected, 'shape_mismatched': mismatched,
+              'loaded_tensors': len(expected) - len(missing) - len(mismatched)}
+    if strict and (missing or unexpected or mismatched):
+        raise ValueError(f'Checkpoint is incompatible with the model: missing={missing[:5]}, '
+                         f'unexpected={unexpected[:5]}, shape_mismatched={mismatched[:5]}. '
+                         'Use matching trained weights and model configuration.')
+    if strict:
+        target.load_state_dict(saved, strict=True)
     else:
-        saved_state_dict = checkpoint_dict
-        iteration = 0
-        learning_rate = 0
-
-    if hasattr(model, "module"):
-        state_dict = model.module.state_dict()
-    else:
-        state_dict = model.state_dict()
-
-    new_state_dict = {}
-    for k, v in state_dict.items():
-        try:
-            # assert "emb_g" not in k
-            new_state_dict[k] = saved_state_dict[k]
-            assert saved_state_dict[k].shape == v.shape, (
-                saved_state_dict[k].shape,
-                v.shape,
-            )
-        except:
-            # For upgrading from the old version
-            if "ja_bert_proj" in k:
-                v = torch.zeros_like(v)
-                logger.warn(
-                    f"Seems you are using the old version of the model, the {k} is automatically set to zero for backward compatibility"
-                )
-            else:
-                logger.error(f"{k} is not in the checkpoint")
-
-            new_state_dict[k] = v
-
-    if hasattr(model, "module"):
-        model.module.load_state_dict(new_state_dict, strict=False)
-    else:
-        model.load_state_dict(new_state_dict, strict=False)
-
-    logger.info(
-        "Loaded checkpoint '{}' (iteration {})".format(checkpoint_path, iteration)
-    )
-
+        state = {k: saved[k] if k not in missing and k not in mismatched else
+                 torch.zeros_like(v) if 'ja_bert_proj' in k else v for k, v in expected.items()}
+        target.load_state_dict(state, strict=True)
+        logger.warning('Explicit legacy partial checkpoint loading: %s', report)
+    if optimizer is not None and not skip_optimizer and checkpoint.get('optimizer') is not None:
+        optimizer.load_state_dict(checkpoint['optimizer'])
+    target._checkpoint_load_report = report
+    iteration, learning_rate = checkpoint.get('iteration', 0), checkpoint.get('learning_rate', 0)
+    logger.info('Loaded checkpoint %s with %s policy (%d/%d tensors)', checkpoint_path,
+                report['policy'], report['loaded_tensors'], report['expected_tensors'])
     return model, optimizer, learning_rate, iteration
 
+
 def load_wav_to_torch(full_path):
+    from scipy.io.wavfile import read
     sampling_rate, data = read(full_path)
     return torch.FloatTensor(data.astype(np.float32)), sampling_rate
 

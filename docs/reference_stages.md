@@ -51,3 +51,11 @@ write WAVs under `<speaker>/<filename>`. Enkidu requires batch size 1 and
 is 24 kHz. Its surrogate optimization retains the historical gradient
 accumulation behavior. Validate full production separately from binding
 an existing protected directory.
+
+SafeSpeech/SPEC/EM surrogate loading requires the canonical 112-symbol table
+and matching complete checkpoints. The default `model.checkpoint_load_policy=strict`
+rejects missing or differently shaped weights before applying them. An explicit
+`model.checkpoint_load_policy=legacy_partial` retains legacy initialization
+fallbacks and records the affected tensors; this is a distinct diagnostic
+protocol and does not establish trained-surrogate equivalence.
+Text symbol imports do not prepare language models or download checkpoints.
