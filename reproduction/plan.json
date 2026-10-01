@@ -289,9 +289,23 @@
       "status": "historical_results",
       "config": "configs/ots_vc/clean/libritts/higgs_audio_ots.yaml",
       "subset": "subsets/libritts16_v1/selection.json",
-      "generation_status": "pending",
-      "scoring_status": "pending",
-      "historical_comparison_status": "pending"
+      "generation_status": "complete",
+      "scoring_status": "complete",
+      "historical_comparison_status": "matched_subset_measured",
+      "runtime_compatibility_canary": "comparisons/higgs_audio_pinned_canary.json",
+      "failed_attempts": [
+        {
+          "evidence": "comparisons/higgs_audio_runtime_initial_failures.json"
+        }
+      ],
+      "provenance_limit": "Validated overlay, not a clean environment lock. Explicit main/tokenizer snapshots. Historical log omits reference_role; assistant inferred from preceding source edc38f4. Current YAML explicitly uses user. Historical weights/runtime immutable records absent.",
+      "generation_run": "results/reproduce_v2_higgs_audio_libritts16/20261001-005635-895f9eb9",
+      "scoring_run": "results/reproduce_v2_higgs_audio_libritts16_score/20261001-005922-743b6010",
+      "comparison": "comparisons/higgs_audio_libritts16_v1.json",
+      "historical_metric_replay": "comparisons/higgs_audio_metric_replay_v1.json",
+      "historical_metric_replay_status": "partial_WER_ASR_difference",
+      "runtime_guard": "comparisons/higgs_audio_runtime_guard.json",
+      "reproduction_status": "full_subset_measured_historical_exact_equivalence_unproven"
     },
     {
       "n": "Higgs TTS 3",

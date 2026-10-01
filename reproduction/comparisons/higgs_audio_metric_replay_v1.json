@@ -1,0 +1,37 @@
+{
+  "kind": "historical_audio_metric_replay",
+  "historical_csv": "/tealab-data/rjin02/AudioWatermarkBench/results/higgs_audio_ots_on_libritts/20251123-074810/generation_sample_metrics.csv",
+  "historical_csv_sha256": "5baf068bf89b531559cf17d41a0fb25ddf20c10282c27a4749ef48c8100f59c7",
+  "differences": {
+    "mcd": {
+      "valid": 16,
+      "requested": 16,
+      "mean_delta": 0.0,
+      "max_absolute_delta": 0.0
+    },
+    "wer": {
+      "valid": 16,
+      "requested": 16,
+      "mean_delta": 0.027261925717303293,
+      "max_absolute_delta": 0.31578947368421056
+    },
+    "sim": {
+      "valid": 16,
+      "requested": 16,
+      "mean_delta": -7.72625207901001e-06,
+      "max_absolute_delta": 3.910064697265625e-05
+    }
+  },
+  "historical_wer_protocol": {
+    "normalization": "lowercase_v1",
+    "rows": 2000,
+    "formula_matches": {
+      "lowercase_v1": 2000,
+      "ascii_punctuation_removed_v2": 812
+    }
+  },
+  "interpretation": "Tests scorer reproduction on historical audio; does not prove generation reproducibility.",
+  "source_report": "/tealab-data/rjin02/RVCBench/results/reproduction_metric_replay/higgs_audio_libritts16_v1/replay_report.json",
+  "source_sha256": "243c3d6683a4ec44fdc46876dc7a1c95a254517314d97ad20e39098a1208ce23",
+  "status": "partial_WER_ASR_difference"
+}

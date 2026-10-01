@@ -1,0 +1,8 @@
+{
+  "kind": "runtime_compatibility_gate",
+  "model": "higgs_audio",
+  "status": "incompatible_runtime_rejected_before_upstream_import",
+  "error": "Higgs Audio source requires transformers<4.47.0,>=4.45.1; found transformers 4.57.3. Run generation in a compatible isolated environment.",
+  "upstream_requirements_sha256": "e2829b92dda503249eceed06e3ab9b6d7140ce33e6c47c6e89515e82c67b2dd1",
+  "generated": 0
+}

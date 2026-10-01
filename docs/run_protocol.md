@@ -239,3 +239,13 @@ implicit Hub download. Configured checkpoint directories now hash their Python
 implementations alongside weights, vocabulary and configuration files; changing
 checkpoint code or codec weights changes the model fingerprint. Unconfigured
 downloads remain outside this asset coverage.
+
+Higgs Audio loads `examples/generation.py` from the configured checkout by file
+path, so another installed `examples` package cannot shadow that entrypoint.
+Before loading it, the wrapper checks Transformers against that checkout's declared
+requirement. The validated overlay uses Transformers 4.46.3 and tokenizers 0.20.3.
+Model assets also hash configured `audio_tokenizer_path` and `scene_prompt_path`.
+The historical November 2025 log omitted `reference_role`; reproduction explicitly
+uses `assistant`, the default in the nearest preceding source revision. This is
+source-derived historical alignment, not an immutable record of the executed code.
+The current clean YAML's explicit `user` reference role remains a distinct setting.

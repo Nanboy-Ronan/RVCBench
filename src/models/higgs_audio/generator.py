@@ -2,11 +2,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import hashlib
+import importlib.util
+from importlib.metadata import version
 from pathlib import Path
 from typing import List, Optional, Tuple
 
 import numpy as np
 import torch
+from packaging.requirements import Requirement
 
 from src.models.model import BaseModel
 
@@ -180,6 +184,19 @@ class HiggsAudioGenerator(BaseModel):
         if self._imports_loaded:
             return
 
+        requirements = self.config.code_path / 'requirements.txt'
+        if requirements.is_file():
+            for line in requirements.read_text().splitlines():
+                if not line.strip().startswith('transformers'):
+                    continue
+                requirement = Requirement(line.split('#', 1)[0].strip())
+                if requirement.name != 'transformers' or (requirement.marker and not requirement.marker.evaluate()):
+                    continue
+                installed = version('transformers')
+                if installed not in requirement.specifier:
+                    raise RuntimeError(f'Higgs Audio source requires {requirement}; found transformers {installed}. '
+                                       'Run generation in a compatible isolated environment.')
+
         import os
         import sys
 
@@ -214,12 +231,20 @@ class HiggsAudioGenerator(BaseModel):
         except Exception:
             pass
 
+        entrypoint = (self.config.code_path / 'examples' / 'generation.py').resolve()
+        if not entrypoint.is_file():
+            raise FileNotFoundError(f'Higgs Audio generation entrypoint not found: {entrypoint}')
+        module_name = '_rvcbench_higgs_generation_' + hashlib.sha256(str(entrypoint).encode()).hexdigest()
+        spec = importlib.util.spec_from_file_location(module_name, entrypoint)
+        if spec is None or spec.loader is None:
+            raise ImportError(f'Cannot load Higgs Audio generation entrypoint: {entrypoint}')
+        generation_mod = importlib.util.module_from_spec(spec)
+        sys.modules[module_name] = generation_mod
         try:
-            generation_mod = __import__("examples.generation", fromlist=["*"])
-        except ModuleNotFoundError as exc:
-            raise ModuleNotFoundError(
-                "Unable to import 'examples.generation' from the Higgs Audio repository."
-            ) from exc
+            spec.loader.exec_module(generation_mod)
+        except BaseException:
+            sys.modules.pop(module_name, None)
+            raise
 
         self._generation_mod = generation_mod
         self._Message = generation_mod.Message

@@ -176,6 +176,26 @@ def test_model_fingerprint_tracks_checkpoint_code_and_auxiliary_codec(tmp_path):
     assert resolve_model_assets(conf)[2] != second
 
 
+def test_model_fingerprint_tracks_higgs_audio_tokenizer_and_scene_prompt(tmp_path):
+    from src.benchmark.model_assets import resolve_model_assets
+    tokenizer = tmp_path / 'tokenizer'
+    tokenizer.mkdir()
+    weights = tokenizer / 'model.pth'
+    weights.write_bytes(b'tokenizer-v1')
+    prompt = tmp_path / 'scene.txt'
+    prompt.write_text('Quiet recording.')
+    conf = OmegaConf.create({'vc': {'model': 'higgs_audio'}, 'adversary': {
+        'audio_tokenizer_path': str(tokenizer), 'scene_prompt_path': str(prompt)}})
+    _, reference, first = resolve_model_assets(conf)
+    assert not reference['unresolved_references']
+    assert set(reference['assets']) == {'audio_tokenizer_path', 'scene_prompt_path'}
+    weights.write_bytes(b'tokenizer-v2')
+    second = resolve_model_assets(conf)[2]
+    assert first != second
+    prompt.write_text('Noisy recording.')
+    assert second != resolve_model_assets(conf)[2]
+
+
 def test_moss_processor_receives_explicit_codec_path(tmp_path):
     from src.models.moss_tts.generator import MossTTSGenerator, MossTTSGeneratorConfig
     from unittest.mock import Mock

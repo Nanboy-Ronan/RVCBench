@@ -1,13 +1,33 @@
+# Validated overlay runtime; a clean installation has not yet been tested.
+# Upstream Higgs Audio requires Transformers >=4.45.1,<4.47.0.
+# Keep generation separate from the core scorer environment.
 name: higgs-audio
 channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3.10
+  - python=3.11
   - pip
   - ffmpeg
   - libsndfile
-  - espeak-ng
   - pip:
-      - --extra-index-url https://download.pytorch.org/whl/cu121
+      - --extra-index-url https://download.pytorch.org/whl/cu126
       - -e ..
+      - torch==2.8.0
+      - torchaudio==2.8.0
+      - numpy==1.26.4
+      - transformers==4.46.3
+      - tokenizers==0.20.3
+      - descript-audio-codec
+      - dacite
+      - boto3==1.35.36
+      - s3fs
+      - json_repair
+      - pydantic
+      - vector_quantize_pytorch
+      - loguru
+      - pydub
+      - librosa
+      - click
+      - langid
+      - jieba
