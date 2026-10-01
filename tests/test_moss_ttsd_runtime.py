@@ -65,11 +65,14 @@ def test_native_checkpoint_dispatches_declared_class_and_restores_pad(tmp_path):
     codec = torch.nn.Linear(2, 2)
     loaded_config = SimpleNamespace()  # modern config discards generation fields
     xy = SimpleNamespace(XY_Tokenizer=SimpleNamespace(load_from_checkpoint=Mock(return_value=codec)))
+    loader = Mock(return_value=(native, {}))
+    transformers = SimpleNamespace(
+        AutoTokenizer=SimpleNamespace(from_pretrained=Mock(return_value=SimpleNamespace(pad_token_id=152694))),
+        AutoConfig=SimpleNamespace(from_pretrained=Mock(return_value=loaded_config)),
+        AutoModel=SimpleNamespace(from_pretrained=loader))
     with patch('src.models.moss_ttsd.generator._check_native_runtime'), \
-            patch('transformers.AutoTokenizer.from_pretrained', return_value=SimpleNamespace(pad_token_id=152694)), \
-            patch('transformers.AutoConfig.from_pretrained', return_value=loaded_config), \
-            patch('transformers.AutoModel.from_pretrained', return_value=(native, {})) as loader, \
-            patch.dict('sys.modules', {'XY_Tokenizer.xy_tokenizer.model': xy, 'whisper': None}):
+            patch.dict('sys.modules', {'transformers': transformers,
+                                      'XY_Tokenizer.xy_tokenizer.model': xy, 'whisper': None}):
         generator.load_model()
     assert generator._model is native
     assert loader.call_args.kwargs['config'].pad_token_id == 152694
