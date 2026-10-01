@@ -29,7 +29,16 @@
       "generation_run": "results/reproduce_v2_qwen3_tts_libritts16/20260930-223300-9e739660",
       "scoring_run": "results/reproduce_v2_qwen3_tts_libritts16_score/20260930-223755-4501bf0b",
       "comparison": "comparisons/qwen3_tts_libritts16_v1.json",
-      "historical_metric_replay": "comparisons/qwen3_tts_metric_replay_v1.json"
+      "historical_metric_replay": "comparisons/qwen3_tts_metric_replay_v1.json",
+      "pinned_snapshot_variant": {
+        "status": "offline_generated_and_core_scored_16_pairs",
+        "generation_run": "results/reproduce_v2_qwen3_offline_snapshot_libritts16/20261001-104928-4fb9aacf",
+        "scoring_run": "results/reproduce_v2_qwen3_offline_snapshot_libritts16_score/20261001-105336-0769f68b",
+        "comparison": "comparisons/qwen3_offline_snapshot_libritts16.json",
+        "runtime_audit": "comparisons/qwen3_offline_snapshot_runtime_audit.json",
+        "identical_previous_wavs": 15,
+        "limits": "One WAV differs; no bitwise equivalence or full-paper reproduction claim."
+      }
     },
     {
       "n": "Qwen3-Omni",

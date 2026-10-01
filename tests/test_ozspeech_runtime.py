@@ -73,7 +73,8 @@ def test_default_codec_downloads_share_a_pinned_revision(tmp_path):
         return str(path)
     api = Mock(); api.model_info.return_value.sha = 'immutable-revision'
     fetch = Mock(side_effect=download)
-    hub = SimpleNamespace(HfApi=Mock(return_value=api), hf_hub_download=fetch)
+    hub = SimpleNamespace(HfApi=Mock(return_value=api), hf_hub_download=fetch,
+                          constants=SimpleNamespace(HF_HUB_OFFLINE=False))
     conf = OmegaConf.create({'vc': {'model': 'ozspeech'}, 'adversary': {}})
     with patch.dict('sys.modules', {'huggingface_hub': hub}):
         resolved, reference, _ = resolve_model_assets(conf)

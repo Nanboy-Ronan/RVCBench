@@ -59,7 +59,8 @@ def test_hub_preset_is_pinned_before_snapshot_download(tmp_path):
     api = Mock()
     api.model_info.return_value.sha = 'immutable-revision'
     download = Mock(return_value=str(tmp_path))
-    hub = SimpleNamespace(HfApi=Mock(return_value=api), snapshot_download=download)
+    hub = SimpleNamespace(HfApi=Mock(return_value=api), snapshot_download=download,
+                          constants=SimpleNamespace(HF_HUB_OFFLINE=False))
     conf = OmegaConf.create({'vc': {'model': 'playdiffusion'}, 'adversary': {'cache_dir': 'chosen-cache'}})
     with patch.dict('sys.modules', {'huggingface_hub': hub}):
         resolved, reference, _ = resolve_model_assets(conf)

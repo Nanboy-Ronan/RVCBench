@@ -1,8 +1,24 @@
 """Resolve model references separately from orchestration."""
 from pathlib import Path
+import re
 
 from omegaconf import OmegaConf
 from .artifacts import digest, file_hash
+
+
+def resolve_hub_revision(repo_id, revision=None):
+    """Preserve a full commit pin; resolve mutable references only online.
+
+    A pin identifies a version, not the presence or integrity of its weights.
+    Model/download loaders remain responsible for finding that version.
+    """
+    if isinstance(revision, str) and re.fullmatch(r'[0-9a-f]{40}', revision):
+        return revision
+    from huggingface_hub import HfApi, constants
+    if constants.HF_HUB_OFFLINE:
+        raise ValueError(f'Offline model resolution requires a full 40-character commit revision '
+                         f'for {repo_id}; received {revision!r}. Resolve and pin it online first.')
+    return HfApi().model_info(repo_id, revision=revision).sha
 
 
 def resolve_model_assets(conf, logger=None):
@@ -27,9 +43,9 @@ def resolve_model_assets(conf, logger=None):
                           if not (resolved.adversary.get('codec_' + name + '_path') or
                                   resolved.adversary.get('facodec_' + name + '_path'))]
         if missing_codecs:
-            from huggingface_hub import HfApi, hf_hub_download
+            from huggingface_hub import hf_hub_download
             repo_id = 'amphion/naturalspeech3_facodec'
-            revision = HfApi().model_info(repo_id, revision=resolved.adversary.get('codec_revision')).sha
+            revision = resolve_hub_revision(repo_id, resolved.adversary.get('codec_revision'))
             for name in missing_codecs:
                 key = 'codec_' + name + '_path'
                 path = hf_hub_download(repo_id=repo_id, revision=revision,
@@ -46,9 +62,9 @@ def resolve_model_assets(conf, logger=None):
                      for key in PRESET_FILES}
         preset = resolved.adversary.get('preset_dir')
         if not preset:
-            from huggingface_hub import HfApi, snapshot_download
+            from huggingface_hub import snapshot_download
             repo_id = resolved.adversary.get('hf_repo_id', 'PlayHT/inpainter')
-            revision = HfApi().model_info(repo_id, revision=resolved.adversary.get('hf_revision')).sha
+            revision = resolve_hub_revision(repo_id, resolved.adversary.get('hf_revision'))
             preset = snapshot_download(repo_id=repo_id, revision=revision,
                 cache_dir=resolved.adversary.get('cache_dir'), allow_patterns=list(filenames.values()))
             OmegaConf.update(resolved, 'adversary.preset_dir', preset, force_add=True)
@@ -77,6 +93,19 @@ def resolve_model_assets(conf, logger=None):
                 if not dependency.is_absolute():
                     dependency = Path(resolved.adversary.code_path).expanduser() / dependency
                 references['styletts2.' + name] = str(dependency)
+    if model in ('qwen3_tts', 'qwentts') and references.get('checkpoint_path'):
+        checkpoint = references['checkpoint_path']
+        if not Path(checkpoint).expanduser().exists():
+            from huggingface_hub import snapshot_download
+            revision = resolve_hub_revision(checkpoint, resolved.adversary.get('revision'))
+            # The upstream wrapper forwards revision to the model but not its
+            # processor. A local snapshot binds both to the same commit.
+            snapshot = snapshot_download(repo_id=checkpoint, revision=revision,
+                allow_patterns=['*' + suffix for suffix in sorted(suffixes)])
+            OmegaConf.update(resolved, 'adversary.revision', revision, force_add=True)
+            OmegaConf.update(resolved, 'adversary.checkpoint_path', snapshot, force_add=True)
+            references['checkpoint_path'] = snapshot
+            assets['qwen3_tts.hub'] = {'repo_id': checkpoint, 'revision': revision}
     for key, value in references.items():
         path = Path(value).expanduser()
         if not path.is_absolute() and not path.exists() and resolved.adversary.get('code_path'):
@@ -105,12 +134,6 @@ def resolve_model_assets(conf, logger=None):
         assets[key] = {'configured_path': value, 'files': hashes}
         if logger:
             logger.info('Verified %s asset hashes', key)
-    if model in ('qwen3_tts', 'qwentts') and 'checkpoint_path' in unresolved:
-        from huggingface_hub import HfApi
-        repo_id = unresolved.pop('checkpoint_path')
-        revision = HfApi().model_info(repo_id, revision=resolved.adversary.get('revision')).sha
-        OmegaConf.update(resolved, 'adversary.revision', revision, force_add=True)
-        assets['checkpoint_path'] = {'repo_id': repo_id, 'revision': revision}
     reference = {'assets': assets, 'unresolved_references': unresolved,
                  'coverage': 'configured_local_assets_and_supported_hub_resolvers',
                  'note': 'Implicit upstream downloads and service-side models require additional provenance.'}
