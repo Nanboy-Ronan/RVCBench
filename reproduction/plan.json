@@ -757,7 +757,8 @@
     },
     {
       "item": "Protocol and stage plan for protection, denoising, generation and scoring",
-      "status": "pending"
+      "status": "strict_reference_binding_real_qwen3_protected_and_denoised_16_pair_generation_and_core_scoring_verified_producers_pending",
+      "evidence": "comparisons/reference_stage_qwen3_libritts16.json"
     },
     {
       "item": "Separate completion, protocol validity and cross-run comparability",

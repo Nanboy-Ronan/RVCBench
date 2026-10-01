@@ -473,6 +473,10 @@ rather than upgrading a shared environment used by other experiments.
 
 ## Manifest variants and subset reproduction
 
+For protected or denoised reference inputs, see
+[reference-stage binding](reference_stages.md). Explicit directories are bound
+before model loading, with clean and replacement hashes retained for resume.
+
 LibriTTS contains 4,000 distinct waveforms forming 2,000 reference–target pairs.
 Older exports also contain a second transcript representation in `speaker_text`
 rows. Both representations are preserved and receive distinct sample identities.

@@ -1,0 +1,866 @@
+{
+  "model": "qwen3_tts",
+  "subset": "libritts16_v1",
+  "status": "reference_binding_generation_and_core_scoring_verified",
+  "producer_reproduction_status": "pending",
+  "variants": [
+    {
+      "variant": "protected_grnoise_legacy",
+      "generation_run": "results/reproduce_v2_reference_grnoise_qwen3_libritts16/20261001-103805-00bd5d21",
+      "scoring_run": "results/reproduce_v2_reference_grnoise_qwen3_libritts16_score/20261001-104203-68c7e914",
+      "generation_manifest_sha256": "41ba72768982d6c2ab6796d87f6137dc7ea0e754f1157f329dd621a42a96aa79",
+      "scoring_manifest_sha256": "5df67402e654ab983cda20ff733a168a0a282bc5294b621dae836914c5f1174d",
+      "reference_stage": {
+        "kind": "protected_grnoise_legacy",
+        "directory": "/tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/protected_audio",
+        "bindings": [
+          {
+            "sample_id": "59c5e63512ec18bacdf941db596a939ba7953749cde66ff2b860d04d8eccc830",
+            "speaker_id": "121",
+            "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/121/121_127105_000043_000007.wav",
+            "clean_prompt_sha256": "a572b3155d7e82e77aad127a259333da4cc2cd59407e1969702cc5d93afe7c80",
+            "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/protected_audio/121/121_127105_000043_000007.wav",
+            "reference_sha256": "e7392b71e7f185b4b9620b3526146d295f8b031a2f2ea7a428ed46b1a54d5634"
+          },
+          {
+            "sample_id": "bbbafeab3dbc9112c48d524d97c8ffbeebe4129c00afa96c7694033fda99e34f",
+            "speaker_id": "121",
+            "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/121/121_127105_000028_000002.wav",
+            "clean_prompt_sha256": "4aa06f726bd45988c2fe6c9983a4d084767ea3f7d5a2b9c6a3c6aad5172f69c6",
+            "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/protected_audio/121/121_127105_000028_000002.wav",
+            "reference_sha256": "78ada150daf53902296cf9ec96089441abc3d9a9831c38ef24dcc73e399a7490"
+          },
+          {
+            "sample_id": "aab57c47ff2f5bfb6c61cd66e8b6010f0216d7a50e7f54657b48d03d549278ad",
+            "speaker_id": "1462",
+            "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/1462/1462_170142_000031_000001.wav",
+            "clean_prompt_sha256": "32cfd2b555cbfd1e7b85d8ce81a6dececb255dc1e4f039659ab28778079ba6f2",
+            "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/protected_audio/1462/1462_170142_000031_000001.wav",
+            "reference_sha256": "4f46ed44b1a490c7cac19c81dac23238b5583722288fccd4042bc350694a59ce"
+          },
+          {
+            "sample_id": "256a7d549878a87a47389cfbe8b30d1a4af57d3742301df83127129f98b629ef",
+            "speaker_id": "1462",
+            "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/1462/1462_170142_000025_000001.wav",
+            "clean_prompt_sha256": "09b45233b8e37423096fc54f0def7bd417e7ff2dbb876578deebfe833799570c",
+            "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/protected_audio/1462/1462_170142_000025_000001.wav",
+            "reference_sha256": "cb1fe8c2c186b2ee0edc19c918a6e51780e7565efcbc9f2550c480c6f6d92bf2"
+          },
+          {
+            "sample_id": "29b1f775187a47ea70994bf44b6611acaae57c51e27dd083493e5e9107aae915",
+            "speaker_id": "237",
+            "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/237/237_134500_000036_000002.wav",
+            "clean_prompt_sha256": "1c446bbf2233c29b372c411c10a24416672d70128ee9f1b9fed1f5693d45a86a",
+            "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/protected_audio/237/237_134500_000036_000002.wav",
+            "reference_sha256": "a6c6223557541a220138a2991221e6e7ee983fe80f99783a2c44cd8c57af7d67"
+          },
+          {
+            "sample_id": "119b2b82f7f4c017ab67ea45f1ee994d031ff04ceec6375f25c3e895307c398c",
+            "speaker_id": "237",
+            "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/237/237_126133_000032_000001.wav",
+            "clean_prompt_sha256": "03cf4fad999226d3dc7015dea3fbae1a46c67359a97f9bab79c331fb22832d87",
+            "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/protected_audio/237/237_126133_000032_000001.wav",
+            "reference_sha256": "b3cc38599d09de398a560ffcc40b61bd350308988c09d2debbf6b39905789721"
+          },
+          {
+            "sample_id": "287812ddd3899f7174ff55f8c15a5e8272056a4e7b0dd814728e5c4819295b70",
+            "speaker_id": "2428",
+            "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/2428/2428_83705_000027_000001.wav",
+            "clean_prompt_sha256": "2ffb5f2bf61e9459a374ebe30d3f81c96c921326ea3ce11f45aff2a9d83fec7f",
+            "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/protected_audio/2428/2428_83705_000027_000001.wav",
+            "reference_sha256": "f82f5071c6cca8b56d9b53c5c865d56381ddfe1f7b8c1db88f79955fe2e19aa2"
+          },
+          {
+            "sample_id": "fecd6a254b295c63f62e4b76beea470714c4042578824d8c12ce56c82d2f3267",
+            "speaker_id": "2428",
+            "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/2428/2428_83705_000039_000007.wav",
+            "clean_prompt_sha256": "6e68e82ee48230d6bc06fcd7a1de5d717590568a67e00375603ca5bebce089ae",
+            "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/protected_audio/2428/2428_83705_000039_000007.wav",
+            "reference_sha256": "265a0c3ced13f31b96147da4d6d0f7f7967ed546aa764876b7d3e48e74f6a3dc"
+          },
+          {
+            "sample_id": "52a70d6b2b36735e4c16152898ef40c54641f2fc6d6136ec79f08df70953ef54",
+            "speaker_id": "251",
+            "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/251/251_136532_000009_000001.wav",
+            "clean_prompt_sha256": "3dcc2da010fb409d55b366508730eff28ab6d1cdcb11fed5cc982077a25e7d22",
+            "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/protected_audio/251/251_136532_000009_000001.wav",
+            "reference_sha256": "380ad702d5d2c19010091c24058148470db5a9d92cff428f4b5c5ea3bf73dd4f"
+          },
+          {
+            "sample_id": "af57d176fed29e48575dfd61eddd7835254516fa2eeb6cebe30dd675148f8eac",
+            "speaker_id": "251",
+            "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/251/251_137823_000030_000000.wav",
+            "clean_prompt_sha256": "47184db5c13be79d11a449b16561f0aef48e9fb22489829023099ea2f26b76a4",
+            "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/protected_audio/251/251_137823_000030_000000.wav",
+            "reference_sha256": "2e03394c5bcf9b3758bf80cfa07ab6122eea05ffdfd6cfbb639afeb5cab2ceda"
+          },
+          {
+            "sample_id": "e48deb17f83ee2bcdc078274d4bb4027487b5556324b40c77d050cf2b6912cbd",
+            "speaker_id": "4992",
+            "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/4992/4992_41806_000024_000001.wav",
+            "clean_prompt_sha256": "dc455cc28d6fb43d156158c4280f6cfebd89bbc766c46151338e2f694ac4260b",
+            "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/protected_audio/4992/4992_41806_000024_000001.wav",
+            "reference_sha256": "2a391b9647fe2289807963debc8a1aff554e0586fde643c0630cb990a160dc81"
+          },
+          {
+            "sample_id": "f63943cdb6384940de51249a150038ac27cef4386e5896de774703e37a7a2a88",
+            "speaker_id": "4992",
+            "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/4992/4992_23283_000034_000000.wav",
+            "clean_prompt_sha256": "05b8ff7c8982ac4719275a8e7f3c7e91b1aeabf48834dcd12e6740df86e36f82",
+            "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/protected_audio/4992/4992_23283_000034_000000.wav",
+            "reference_sha256": "bb6bd3b5138c6f0ae480f44fdac28a28acf02725099d1206f215ffdd51fc4060"
+          },
+          {
+            "sample_id": "85d81c78a789a9a7a1a2f85e2b90fcf7a2368078a6fdc7507a34ba43f31742a1",
+            "speaker_id": "5694",
+            "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/5694/5694_64038_000021_000000.wav",
+            "clean_prompt_sha256": "85a8911ded8b05fc4107a5d1c8938fab1d629af91bd18ecd6ea0000ea8e1ae67",
+            "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/protected_audio/5694/5694_64038_000021_000000.wav",
+            "reference_sha256": "f603f250ec584008208aaa4f3b29c892ffcfe8d93e82b7b4619096a5e4053b1e"
+          },
+          {
+            "sample_id": "4a7f70b24cde8d277eb5084528616e7729c3b1cdee7045a51690c265d7287894",
+            "speaker_id": "5694",
+            "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/5694/5694_64029_000028_000001.wav",
+            "clean_prompt_sha256": "f70281832ef4d1d9cffa521ac2a9a66506629e8bb789889eddfd62e6b8ee26be",
+            "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/protected_audio/5694/5694_64029_000028_000001.wav",
+            "reference_sha256": "5c63923f360548bd58ee90da981472eec7e4d9ef143f02e3525a5af44a019111"
+          },
+          {
+            "sample_id": "40290f9edf8d6d7ace3a9bc87646ec7c3eebe406dcb1eb570a63f755bf3dce39",
+            "speaker_id": "8455",
+            "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/8455/8455_210777_000050_000005.wav",
+            "clean_prompt_sha256": "4d9f0c2d5af16388fc7d4c7fa071339e0f3167fee7fe19ee6ff234d3f66f2a49",
+            "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/protected_audio/8455/8455_210777_000050_000005.wav",
+            "reference_sha256": "6af99c160d164575c499b2e3b99a49e3b7417eee368cf4f2ae256e08dc296c36"
+          },
+          {
+            "sample_id": "082cbba9c12a38815b54ab904dfd8c03913772e80527ec05d9aa4474fe8163e4",
+            "speaker_id": "8455",
+            "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/8455/8455_210777_000048_000000.wav",
+            "clean_prompt_sha256": "3e6c8e4ae20a15a0f1a0122c1cadb97d101536463fade9701ed45cd56d7e09b4",
+            "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/protected_audio/8455/8455_210777_000048_000000.wav",
+            "reference_sha256": "ea84d0836028af79b4556ef4176dbd2295e2966a5e6570d475167fb6ea4bc44c"
+          }
+        ],
+        "producer_manifest": null,
+        "producer_manifest_sha256": null,
+        "producer_status": "legacy_directory_content_only",
+        "fingerprint": "46e5bddef3895671544b9b7f1d3aebba50dfd8c2f70a6191942333ab26152c12"
+      },
+      "coverage": {
+        "requested": 16,
+        "generated": 16,
+        "generation_failed": 0,
+        "input_failed": 0,
+        "pending": 0,
+        "generating": 0,
+        "metric_valid": {
+          "mcd": 16,
+          "wer": 16,
+          "sim": 16,
+          "sva": 16,
+          "speechmos": 0,
+          "dnsmos": 0,
+          "emotion": 0
+        },
+        "required_metrics": [
+          "mcd",
+          "wer",
+          "sim"
+        ],
+        "status": "complete",
+        "eligible_for_comparison": true
+      },
+      "means": {
+        "mcd": 6.767655493530724,
+        "wer": 0.022488613360323886,
+        "sim": 0.4522344544529915
+      },
+      "paired_clean_input_checks": 16,
+      "rows": [
+        {
+          "sample_id": "59c5e63512ec18bacdf941db596a939ba7953749cde66ff2b860d04d8eccc830",
+          "speaker_id": "121",
+          "clean_prompt_sha256": "a572b3155d7e82e77aad127a259333da4cc2cd59407e1969702cc5d93afe7c80",
+          "prompt_sha256": "e7392b71e7f185b4b9620b3526146d295f8b031a2f2ea7a428ed46b1a54d5634",
+          "target_sha256": "21f6ee81d04001118e5e889e60248cb830d068c82f291d4f914e6dc1bc6b6218",
+          "generated_sha256": "ec0ed4ed5223e7431c0d30c2871fa356ecc8b291eebb581516281eea4541c3b2",
+          "metrics": {
+            "mcd": 5.4002292042067115,
+            "wer": 0.0,
+            "predicted_text": " You'll receive the packet Thursday morning, I inquired.",
+            "sim": 0.6344046592712402,
+            "sva": true
+          }
+        },
+        {
+          "sample_id": "bbbafeab3dbc9112c48d524d97c8ffbeebe4129c00afa96c7694033fda99e34f",
+          "speaker_id": "121",
+          "clean_prompt_sha256": "4aa06f726bd45988c2fe6c9983a4d084767ea3f7d5a2b9c6a3c6aad5172f69c6",
+          "prompt_sha256": "78ada150daf53902296cf9ec96089441abc3d9a9831c38ef24dcc73e399a7490",
+          "target_sha256": "01905b4af709679086f9997c0d5e798f1e5bc683e64cbb0761160f142ace466b",
+          "generated_sha256": "2f575ab27ba0383b849d5475bb1c73caa59952119ccc8f0842373c5ff385edaa",
+          "metrics": {
+            "mcd": 9.22281642681424,
+            "wer": 0.125,
+            "predicted_text": " A transferable ticket to the Hall of Fame?",
+            "sim": 0.5099840760231018,
+            "sva": true
+          }
+        },
+        {
+          "sample_id": "aab57c47ff2f5bfb6c61cd66e8b6010f0216d7a50e7f54657b48d03d549278ad",
+          "speaker_id": "1462",
+          "clean_prompt_sha256": "32cfd2b555cbfd1e7b85d8ce81a6dececb255dc1e4f039659ab28778079ba6f2",
+          "prompt_sha256": "4f46ed44b1a490c7cac19c81dac23238b5583722288fccd4042bc350694a59ce",
+          "target_sha256": "b801ab938096fbf3f0afa86ee298efbe32526dc08ecee9fecc05973c35a17d54",
+          "generated_sha256": "8b06d117e108ec7c8ef2b4e785b03bccde368501ff2d5925d6648ae53005a0b0",
+          "metrics": {
+            "mcd": 6.825258572376939,
+            "wer": 0.0,
+            "predicted_text": " There was something about him that made Hilda wish herself at her hotel again, in the street below, anywhere but where she was.",
+            "sim": 0.4282175302505493,
+            "sva": true
+          }
+        },
+        {
+          "sample_id": "256a7d549878a87a47389cfbe8b30d1a4af57d3742301df83127129f98b629ef",
+          "speaker_id": "1462",
+          "clean_prompt_sha256": "09b45233b8e37423096fc54f0def7bd417e7ff2dbb876578deebfe833799570c",
+          "prompt_sha256": "cb1fe8c2c186b2ee0edc19c918a6e51780e7565efcbc9f2550c480c6f6d92bf2",
+          "target_sha256": "4d3e39750c94552362d98e1fb2e866e5b7b33fcb4094fe4d585df5828acd050f",
+          "generated_sha256": "3346714330b99c94224aab6a07d7dfd407f94e71e87e867d07f4015a965182ea",
+          "metrics": {
+            "mcd": 4.249868133262448,
+            "wer": 0.0,
+            "predicted_text": " She crept across to him, drawing her stool after her.",
+            "sim": 0.389903724193573,
+            "sva": true
+          }
+        },
+        {
+          "sample_id": "29b1f775187a47ea70994bf44b6611acaae57c51e27dd083493e5e9107aae915",
+          "speaker_id": "237",
+          "clean_prompt_sha256": "1c446bbf2233c29b372c411c10a24416672d70128ee9f1b9fed1f5693d45a86a",
+          "prompt_sha256": "a6c6223557541a220138a2991221e6e7ee983fe80f99783a2c44cd8c57af7d67",
+          "target_sha256": "b499574bb213c8d1e387234810eabbcbb11cb8592c93071af513333c319cbf1c",
+          "generated_sha256": "7e7273162e9f7d9d3f7837fa991f878c27e616b18f1111603ad439f5878b05c1",
+          "metrics": {
+            "mcd": 5.632701368357087,
+            "wer": 0.07692307692307693,
+            "predicted_text": " Franzi said Jasper quickly, What do you suppose Prince said the other day?",
+            "sim": 0.4794405996799469,
+            "sva": true
+          }
+        },
+        {
+          "sample_id": "119b2b82f7f4c017ab67ea45f1ee994d031ff04ceec6375f25c3e895307c398c",
+          "speaker_id": "237",
+          "clean_prompt_sha256": "03cf4fad999226d3dc7015dea3fbae1a46c67359a97f9bab79c331fb22832d87",
+          "prompt_sha256": "b3cc38599d09de398a560ffcc40b61bd350308988c09d2debbf6b39905789721",
+          "target_sha256": "4026c6ab3a5e4fee843e71487ee8dc4ec2903946ea20245662c1ae1075cdf252",
+          "generated_sha256": "2ba724c305ff0ccaf9869ef27835cf7f2c36aadaeea4b658aae2851cd2bf4553",
+          "metrics": {
+            "mcd": 10.784074393162939,
+            "wer": 0.0,
+            "predicted_text": " He felt it rather than saw it.",
+            "sim": 0.152256041765213,
+            "sva": false
+          }
+        },
+        {
+          "sample_id": "287812ddd3899f7174ff55f8c15a5e8272056a4e7b0dd814728e5c4819295b70",
+          "speaker_id": "2428",
+          "clean_prompt_sha256": "2ffb5f2bf61e9459a374ebe30d3f81c96c921326ea3ce11f45aff2a9d83fec7f",
+          "prompt_sha256": "f82f5071c6cca8b56d9b53c5c865d56381ddfe1f7b8c1db88f79955fe2e19aa2",
+          "target_sha256": "ea9e52dae1e3dc9ee80d38a923d0f50330d4b17ee61bcb25d007df7901d8636c",
+          "generated_sha256": "5f7ae01cdebddc2913b74d1ac5011bd6e719574abf59dd7f008990382f697d4e",
+          "metrics": {
+            "mcd": 6.686704305344104,
+            "wer": 0.0,
+            "predicted_text": " After a few seconds interval, the pit pat of what was obviously one pair of feet came towards the door.",
+            "sim": 0.6378827095031738,
+            "sva": true
+          }
+        },
+        {
+          "sample_id": "fecd6a254b295c63f62e4b76beea470714c4042578824d8c12ce56c82d2f3267",
+          "speaker_id": "2428",
+          "clean_prompt_sha256": "6e68e82ee48230d6bc06fcd7a1de5d717590568a67e00375603ca5bebce089ae",
+          "prompt_sha256": "265a0c3ced13f31b96147da4d6d0f7f7967ed546aa764876b7d3e48e74f6a3dc",
+          "target_sha256": "eb36eed494b55ef4c59654af7c659df486a4fde6e6f241948b2d0eaeced761c5",
+          "generated_sha256": "effd54b4e6a8681250160a2c9e5dbe6221f92c870301a9282f6ca53bf164ef20",
+          "metrics": {
+            "mcd": 5.536924002264744,
+            "wer": 0.0,
+            "predicted_text": " The woman's name is Brady.",
+            "sim": 0.5023802518844604,
+            "sva": true
+          }
+        },
+        {
+          "sample_id": "52a70d6b2b36735e4c16152898ef40c54641f2fc6d6136ec79f08df70953ef54",
+          "speaker_id": "251",
+          "clean_prompt_sha256": "3dcc2da010fb409d55b366508730eff28ab6d1cdcb11fed5cc982077a25e7d22",
+          "prompt_sha256": "380ad702d5d2c19010091c24058148470db5a9d92cff428f4b5c5ea3bf73dd4f",
+          "target_sha256": "7a23a8591601829019cc544ecc918fb79ba653172699017b84f470defc5806ef",
+          "generated_sha256": "744d5c2a0505b5235a46b2f6fb6eb121668e47488f24036637b82bc69d37a9a6",
+          "metrics": {
+            "mcd": 6.356632002327426,
+            "wer": 0.15789473684210525,
+            "predicted_text": " The 18-year-old inventor accepted the challenge with a smile. I'll be glad to try, sir, he replied.",
+            "sim": 0.5202372670173645,
+            "sva": true
+          }
+        },
+        {
+          "sample_id": "af57d176fed29e48575dfd61eddd7835254516fa2eeb6cebe30dd675148f8eac",
+          "speaker_id": "251",
+          "clean_prompt_sha256": "47184db5c13be79d11a449b16561f0aef48e9fb22489829023099ea2f26b76a4",
+          "prompt_sha256": "2e03394c5bcf9b3758bf80cfa07ab6122eea05ffdfd6cfbb639afeb5cab2ceda",
+          "target_sha256": "c92e9d939cc2e6e8ffecc6b3f606bbc788d840913cc96488f64514bd1d04cff7",
+          "generated_sha256": "96d108fbcbb83b230b4f0654f98c847ee99bcbf5c20814733fe56ec6f097f08e",
+          "metrics": {
+            "mcd": 6.100496490021344,
+            "wer": 0.0,
+            "predicted_text": " Of the four other company engineers, two were now stirring and partly conscious.",
+            "sim": 0.31055158376693726,
+            "sva": true
+          }
+        },
+        {
+          "sample_id": "e48deb17f83ee2bcdc078274d4bb4027487b5556324b40c77d050cf2b6912cbd",
+          "speaker_id": "4992",
+          "clean_prompt_sha256": "dc455cc28d6fb43d156158c4280f6cfebd89bbc766c46151338e2f694ac4260b",
+          "prompt_sha256": "2a391b9647fe2289807963debc8a1aff554e0586fde643c0630cb990a160dc81",
+          "target_sha256": "0116ed896ea61c7c0cd7953c2ce8742492000abf3312f4ce7a1f49c92c11d386",
+          "generated_sha256": "272291c715ff786c91b622bb2586b71ac7000daff82ff1d3843eef01077b80ef",
+          "metrics": {
+            "mcd": 8.067066916910658,
+            "wer": 0.0,
+            "predicted_text": " Thank you, Mr. Popham,\" said Mrs. Carey, her eyes twinkling as she looked at the laughing children.",
+            "sim": 0.4198717772960663,
+            "sva": true
+          }
+        },
+        {
+          "sample_id": "f63943cdb6384940de51249a150038ac27cef4386e5896de774703e37a7a2a88",
+          "speaker_id": "4992",
+          "clean_prompt_sha256": "05b8ff7c8982ac4719275a8e7f3c7e91b1aeabf48834dcd12e6740df86e36f82",
+          "prompt_sha256": "bb6bd3b5138c6f0ae480f44fdac28a28acf02725099d1206f215ffdd51fc4060",
+          "target_sha256": "cb0e28e4a063c3fb28ec55ff6063f9290e5b7351ac0a3cd5d2b90970a14c5a3f",
+          "generated_sha256": "b68754feabff6109988cce5499ce3b81d12ff8dbb142ab5f48ff8aae50ec3a2d",
+          "metrics": {
+            "mcd": 6.766303763656873,
+            "wer": 0.0,
+            "predicted_text": " Lord Elmwood was sensible of the embarrassment his presence gave Miss Woodley and understood the reproaches which she seemed to vent upon herself in silence.",
+            "sim": 0.3969419002532959,
+            "sva": true
+          }
+        },
+        {
+          "sample_id": "85d81c78a789a9a7a1a2f85e2b90fcf7a2368078a6fdc7507a34ba43f31742a1",
+          "speaker_id": "5694",
+          "clean_prompt_sha256": "85a8911ded8b05fc4107a5d1c8938fab1d629af91bd18ecd6ea0000ea8e1ae67",
+          "prompt_sha256": "f603f250ec584008208aaa4f3b29c892ffcfe8d93e82b7b4619096a5e4053b1e",
+          "target_sha256": "65c128b6659b36587ab48c3dfc50c7b882e628404f81bfaf0b5830ca59f27194",
+          "generated_sha256": "acced44ae7271b2268db0a600bfc5158907168c0691a87d94870630334899fd3",
+          "metrics": {
+            "mcd": 5.1054208237812135,
+            "wer": 0.0,
+            "predicted_text": " In fact, no one was expected to pass at this point, but while standing at my post a horseman rode up behind me.",
+            "sim": 0.5458186864852905,
+            "sva": true
+          }
+        },
+        {
+          "sample_id": "4a7f70b24cde8d277eb5084528616e7729c3b1cdee7045a51690c265d7287894",
+          "speaker_id": "5694",
+          "clean_prompt_sha256": "f70281832ef4d1d9cffa521ac2a9a66506629e8bb789889eddfd62e6b8ee26be",
+          "prompt_sha256": "5c63923f360548bd58ee90da981472eec7e4d9ef143f02e3525a5af44a019111",
+          "target_sha256": "c98a64ac75c76a72494add751a995df56c1ec7c063ac21b754174337fcb50cbf",
+          "generated_sha256": "1875b7fd6d10a25868c0c4758c6c686a5934d4db815ec9a994221dbeaebab6bb",
+          "metrics": {
+            "mcd": 6.173750887539892,
+            "wer": 0.0,
+            "predicted_text": " I remember that they had to cross an open field in our front, and we were lying behind a fence, and as they advanced we kept up firing and would run them back every time, until they brought up a regiment that whooped and yelled and charged our skirmish line, and then we fell back again.",
+            "sim": 0.4958731234073639,
+            "sva": true
+          }
+        },
+        {
+          "sample_id": "40290f9edf8d6d7ace3a9bc87646ec7c3eebe406dcb1eb570a63f755bf3dce39",
+          "speaker_id": "8455",
+          "clean_prompt_sha256": "4d9f0c2d5af16388fc7d4c7fa071339e0f3167fee7fe19ee6ff234d3f66f2a49",
+          "prompt_sha256": "6af99c160d164575c499b2e3b99a49e3b7417eee368cf4f2ae256e08dc296c36",
+          "target_sha256": "5a1e3192635c9a42d14fd029c8e6b3fc031362cec882e849f9ddf53956e51a21",
+          "generated_sha256": "858bd2d05b6c8c2db308449250790ee7b962c115fa79a46bb5878955d66f43e6",
+          "metrics": {
+            "mcd": 6.940237618937578,
+            "wer": 0.0,
+            "predicted_text": " Had the telegraph been invented in the days of ancient Rome, would the Romans have accepted it, or have stoned Wheatstone? So thinking, I resolved that I was before my age and that I must pay the allotted penalty.",
+            "sim": 0.38793855905532837,
+            "sva": true
+          }
+        },
+        {
+          "sample_id": "082cbba9c12a38815b54ab904dfd8c03913772e80527ec05d9aa4474fe8163e4",
+          "speaker_id": "8455",
+          "clean_prompt_sha256": "3e6c8e4ae20a15a0f1a0122c1cadb97d101536463fade9701ed45cd56d7e09b4",
+          "prompt_sha256": "ea84d0836028af79b4556ef4176dbd2295e2966a5e6570d475167fb6ea4bc44c",
+          "target_sha256": "3baa331f1f893da7488b8f3b1a23997cdefca6dc4371d5ea5fe9e2d0d4dc95a9",
+          "generated_sha256": "a0a7c74452d5c6b55df9303d1e164d9c656e8ed5827824c199a247b753302509",
+          "metrics": {
+            "mcd": 8.434002987527384,
+            "wer": 0.0,
+            "predicted_text": " And yet that something must be playful in its nature.",
+            "sim": 0.4240487813949585,
+            "sva": true
+          }
+        }
+      ],
+      "historical_producer_metadata": {
+        "path": "/tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/metrics.json",
+        "sha256": "33c023d0ff368eba47b5a0dd7937b4451a3bfcb5ee3de4a26cee907f9decf4d4",
+        "attestation": "configuration_record_only"
+      },
+      "generation_python": "3.10.19",
+      "scoring_python": "3.11.14"
+    },
+    {
+      "variant": "denoised_grnoise_dns64_legacy",
+      "generation_run": "results/reproduce_v2_reference_dns64_grnoise_qwen3_libritts16/20261001-103851-0fa44de9",
+      "scoring_run": "results/reproduce_v2_reference_dns64_grnoise_qwen3_libritts16_score/20261001-104222-1a0e6d30",
+      "generation_manifest_sha256": "7ed5549521f5005f8ae9c7c334ac8afce342ba84e985ac9c8f8a02053ee8b960",
+      "scoring_manifest_sha256": "8735111740da3ef61493d2e0143a3edb7799983a976fc947a01b4cfa4a86025a",
+      "reference_stage": {
+        "kind": "denoised_grnoise_dns64_legacy",
+        "directory": "/tealab-data/rjin02/AudioWatermarkBench/results/denoiser_dns64_on_grnoise_libritts/20260124-145829/denoised_audio/protected_audio",
+        "bindings": [
+          {
+            "sample_id": "59c5e63512ec18bacdf941db596a939ba7953749cde66ff2b860d04d8eccc830",
+            "speaker_id": "121",
+            "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/121/121_127105_000043_000007.wav",
+            "clean_prompt_sha256": "a572b3155d7e82e77aad127a259333da4cc2cd59407e1969702cc5d93afe7c80",
+            "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/denoiser_dns64_on_grnoise_libritts/20260124-145829/denoised_audio/protected_audio/121/121_127105_000043_000007.wav",
+            "reference_sha256": "2a36d8a21732046960334bd289b456c5371c0f4f059d79e7828851aa1039f0e5"
+          },
+          {
+            "sample_id": "bbbafeab3dbc9112c48d524d97c8ffbeebe4129c00afa96c7694033fda99e34f",
+            "speaker_id": "121",
+            "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/121/121_127105_000028_000002.wav",
+            "clean_prompt_sha256": "4aa06f726bd45988c2fe6c9983a4d084767ea3f7d5a2b9c6a3c6aad5172f69c6",
+            "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/denoiser_dns64_on_grnoise_libritts/20260124-145829/denoised_audio/protected_audio/121/121_127105_000028_000002.wav",
+            "reference_sha256": "9c31e1957c207a9aaed4c1aaddc7704300a97f422b0ef8356be22a9e551089b6"
+          },
+          {
+            "sample_id": "aab57c47ff2f5bfb6c61cd66e8b6010f0216d7a50e7f54657b48d03d549278ad",
+            "speaker_id": "1462",
+            "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/1462/1462_170142_000031_000001.wav",
+            "clean_prompt_sha256": "32cfd2b555cbfd1e7b85d8ce81a6dececb255dc1e4f039659ab28778079ba6f2",
+            "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/denoiser_dns64_on_grnoise_libritts/20260124-145829/denoised_audio/protected_audio/1462/1462_170142_000031_000001.wav",
+            "reference_sha256": "8d195507f8317eb9a58056909b66085ae4c926dc622857325fd0ee1c8a294d82"
+          },
+          {
+            "sample_id": "256a7d549878a87a47389cfbe8b30d1a4af57d3742301df83127129f98b629ef",
+            "speaker_id": "1462",
+            "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/1462/1462_170142_000025_000001.wav",
+            "clean_prompt_sha256": "09b45233b8e37423096fc54f0def7bd417e7ff2dbb876578deebfe833799570c",
+            "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/denoiser_dns64_on_grnoise_libritts/20260124-145829/denoised_audio/protected_audio/1462/1462_170142_000025_000001.wav",
+            "reference_sha256": "80fc3bf1128e7bbd36ddd0b37a422d332010f0e7ff394e3a81d35b0bf1011352"
+          },
+          {
+            "sample_id": "29b1f775187a47ea70994bf44b6611acaae57c51e27dd083493e5e9107aae915",
+            "speaker_id": "237",
+            "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/237/237_134500_000036_000002.wav",
+            "clean_prompt_sha256": "1c446bbf2233c29b372c411c10a24416672d70128ee9f1b9fed1f5693d45a86a",
+            "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/denoiser_dns64_on_grnoise_libritts/20260124-145829/denoised_audio/protected_audio/237/237_134500_000036_000002.wav",
+            "reference_sha256": "071574850c72bf0b496067e877b00c3ab774a27a8987f85926c2da47ebf2582e"
+          },
+          {
+            "sample_id": "119b2b82f7f4c017ab67ea45f1ee994d031ff04ceec6375f25c3e895307c398c",
+            "speaker_id": "237",
+            "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/237/237_126133_000032_000001.wav",
+            "clean_prompt_sha256": "03cf4fad999226d3dc7015dea3fbae1a46c67359a97f9bab79c331fb22832d87",
+            "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/denoiser_dns64_on_grnoise_libritts/20260124-145829/denoised_audio/protected_audio/237/237_126133_000032_000001.wav",
+            "reference_sha256": "878da57dafac159d255b2a72d0148a6bcb8d4ed29266292cb6e84ea4aa2b4978"
+          },
+          {
+            "sample_id": "287812ddd3899f7174ff55f8c15a5e8272056a4e7b0dd814728e5c4819295b70",
+            "speaker_id": "2428",
+            "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/2428/2428_83705_000027_000001.wav",
+            "clean_prompt_sha256": "2ffb5f2bf61e9459a374ebe30d3f81c96c921326ea3ce11f45aff2a9d83fec7f",
+            "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/denoiser_dns64_on_grnoise_libritts/20260124-145829/denoised_audio/protected_audio/2428/2428_83705_000027_000001.wav",
+            "reference_sha256": "8fcbb845b02c6b582b993ddbbe4d527cf08228849686c243ffc3d98fd6a15c50"
+          },
+          {
+            "sample_id": "fecd6a254b295c63f62e4b76beea470714c4042578824d8c12ce56c82d2f3267",
+            "speaker_id": "2428",
+            "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/2428/2428_83705_000039_000007.wav",
+            "clean_prompt_sha256": "6e68e82ee48230d6bc06fcd7a1de5d717590568a67e00375603ca5bebce089ae",
+            "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/denoiser_dns64_on_grnoise_libritts/20260124-145829/denoised_audio/protected_audio/2428/2428_83705_000039_000007.wav",
+            "reference_sha256": "e35967601307f46931cce81c5690c3eef625071d0f08b39f7e608249f158690f"
+          },
+          {
+            "sample_id": "52a70d6b2b36735e4c16152898ef40c54641f2fc6d6136ec79f08df70953ef54",
+            "speaker_id": "251",
+            "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/251/251_136532_000009_000001.wav",
+            "clean_prompt_sha256": "3dcc2da010fb409d55b366508730eff28ab6d1cdcb11fed5cc982077a25e7d22",
+            "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/denoiser_dns64_on_grnoise_libritts/20260124-145829/denoised_audio/protected_audio/251/251_136532_000009_000001.wav",
+            "reference_sha256": "b622679baab0de18cb9b8164f8b41bc3a6a9269f195ef724b8b4d340bcc3d351"
+          },
+          {
+            "sample_id": "af57d176fed29e48575dfd61eddd7835254516fa2eeb6cebe30dd675148f8eac",
+            "speaker_id": "251",
+            "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/251/251_137823_000030_000000.wav",
+            "clean_prompt_sha256": "47184db5c13be79d11a449b16561f0aef48e9fb22489829023099ea2f26b76a4",
+            "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/denoiser_dns64_on_grnoise_libritts/20260124-145829/denoised_audio/protected_audio/251/251_137823_000030_000000.wav",
+            "reference_sha256": "5de21bc985ec8d49836a7ef11987e3a8d821429b1947f24a5bbf9fcf2c900f4c"
+          },
+          {
+            "sample_id": "e48deb17f83ee2bcdc078274d4bb4027487b5556324b40c77d050cf2b6912cbd",
+            "speaker_id": "4992",
+            "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/4992/4992_41806_000024_000001.wav",
+            "clean_prompt_sha256": "dc455cc28d6fb43d156158c4280f6cfebd89bbc766c46151338e2f694ac4260b",
+            "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/denoiser_dns64_on_grnoise_libritts/20260124-145829/denoised_audio/protected_audio/4992/4992_41806_000024_000001.wav",
+            "reference_sha256": "cab2f99a17e843b9db8b724e396ef5baaf61edc8a1bea269b4d5988497a07be4"
+          },
+          {
+            "sample_id": "f63943cdb6384940de51249a150038ac27cef4386e5896de774703e37a7a2a88",
+            "speaker_id": "4992",
+            "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/4992/4992_23283_000034_000000.wav",
+            "clean_prompt_sha256": "05b8ff7c8982ac4719275a8e7f3c7e91b1aeabf48834dcd12e6740df86e36f82",
+            "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/denoiser_dns64_on_grnoise_libritts/20260124-145829/denoised_audio/protected_audio/4992/4992_23283_000034_000000.wav",
+            "reference_sha256": "4c5296bc390aeecc6f2fc992b71b5a4f0ac4c608b4549186a824b03785cf2274"
+          },
+          {
+            "sample_id": "85d81c78a789a9a7a1a2f85e2b90fcf7a2368078a6fdc7507a34ba43f31742a1",
+            "speaker_id": "5694",
+            "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/5694/5694_64038_000021_000000.wav",
+            "clean_prompt_sha256": "85a8911ded8b05fc4107a5d1c8938fab1d629af91bd18ecd6ea0000ea8e1ae67",
+            "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/denoiser_dns64_on_grnoise_libritts/20260124-145829/denoised_audio/protected_audio/5694/5694_64038_000021_000000.wav",
+            "reference_sha256": "0f0874492ecb5d35458b0be4e0f9084c596cddbcb82de55ec9db3e86b448db86"
+          },
+          {
+            "sample_id": "4a7f70b24cde8d277eb5084528616e7729c3b1cdee7045a51690c265d7287894",
+            "speaker_id": "5694",
+            "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/5694/5694_64029_000028_000001.wav",
+            "clean_prompt_sha256": "f70281832ef4d1d9cffa521ac2a9a66506629e8bb789889eddfd62e6b8ee26be",
+            "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/denoiser_dns64_on_grnoise_libritts/20260124-145829/denoised_audio/protected_audio/5694/5694_64029_000028_000001.wav",
+            "reference_sha256": "edda915eaffa6abeda919953efa6ae81f70138f9446a0c2812d7164e65dd73af"
+          },
+          {
+            "sample_id": "40290f9edf8d6d7ace3a9bc87646ec7c3eebe406dcb1eb570a63f755bf3dce39",
+            "speaker_id": "8455",
+            "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/8455/8455_210777_000050_000005.wav",
+            "clean_prompt_sha256": "4d9f0c2d5af16388fc7d4c7fa071339e0f3167fee7fe19ee6ff234d3f66f2a49",
+            "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/denoiser_dns64_on_grnoise_libritts/20260124-145829/denoised_audio/protected_audio/8455/8455_210777_000050_000005.wav",
+            "reference_sha256": "dfa707ec8417aa3a0f9286df880202f7e653207ef3c6a63ac1676512d7024f43"
+          },
+          {
+            "sample_id": "082cbba9c12a38815b54ab904dfd8c03913772e80527ec05d9aa4474fe8163e4",
+            "speaker_id": "8455",
+            "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/8455/8455_210777_000048_000000.wav",
+            "clean_prompt_sha256": "3e6c8e4ae20a15a0f1a0122c1cadb97d101536463fade9701ed45cd56d7e09b4",
+            "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/denoiser_dns64_on_grnoise_libritts/20260124-145829/denoised_audio/protected_audio/8455/8455_210777_000048_000000.wav",
+            "reference_sha256": "431eb81bc946c62bf791d4883acb2d64c3f1210330305338aeb8e1a5510927a3"
+          }
+        ],
+        "producer_manifest": null,
+        "producer_manifest_sha256": null,
+        "producer_status": "legacy_directory_content_only",
+        "fingerprint": "d6be887defde5c06f44f283a4684ad0e25edea67fc817b31267b95340910eb09"
+      },
+      "coverage": {
+        "requested": 16,
+        "generated": 16,
+        "generation_failed": 0,
+        "input_failed": 0,
+        "pending": 0,
+        "generating": 0,
+        "metric_valid": {
+          "mcd": 16,
+          "wer": 16,
+          "sim": 16,
+          "sva": 16,
+          "speechmos": 0,
+          "dnsmos": 0,
+          "emotion": 0
+        },
+        "required_metrics": [
+          "mcd",
+          "wer",
+          "sim"
+        ],
+        "status": "complete",
+        "eligible_for_comparison": true
+      },
+      "means": {
+        "mcd": 5.419402642812472,
+        "wer": 0.034988613360323884,
+        "sim": 0.45698823872953653
+      },
+      "paired_clean_input_checks": 16,
+      "rows": [
+        {
+          "sample_id": "59c5e63512ec18bacdf941db596a939ba7953749cde66ff2b860d04d8eccc830",
+          "speaker_id": "121",
+          "clean_prompt_sha256": "a572b3155d7e82e77aad127a259333da4cc2cd59407e1969702cc5d93afe7c80",
+          "prompt_sha256": "2a36d8a21732046960334bd289b456c5371c0f4f059d79e7828851aa1039f0e5",
+          "target_sha256": "21f6ee81d04001118e5e889e60248cb830d068c82f291d4f914e6dc1bc6b6218",
+          "generated_sha256": "9ac2365dfec17f64c664b09646ec0370c50d7b19652a08f2ecfc897d376dde73",
+          "metrics": {
+            "mcd": 5.072523693245367,
+            "wer": 0.0,
+            "predicted_text": " You'll receive the packet Thursday morning, I inquired.",
+            "sim": 0.24080213904380798,
+            "sva": false
+          }
+        },
+        {
+          "sample_id": "bbbafeab3dbc9112c48d524d97c8ffbeebe4129c00afa96c7694033fda99e34f",
+          "speaker_id": "121",
+          "clean_prompt_sha256": "4aa06f726bd45988c2fe6c9983a4d084767ea3f7d5a2b9c6a3c6aad5172f69c6",
+          "prompt_sha256": "9c31e1957c207a9aaed4c1aaddc7704300a97f422b0ef8356be22a9e551089b6",
+          "target_sha256": "01905b4af709679086f9997c0d5e798f1e5bc683e64cbb0761160f142ace466b",
+          "generated_sha256": "4ca2280e51d721a04ace7c5724505737172da7ab4dc701eae9694205a054698b",
+          "metrics": {
+            "mcd": 5.388152996140603,
+            "wer": 0.125,
+            "predicted_text": " A transferable ticket to the Hall of Fame.",
+            "sim": 0.4590418338775635,
+            "sva": true
+          }
+        },
+        {
+          "sample_id": "aab57c47ff2f5bfb6c61cd66e8b6010f0216d7a50e7f54657b48d03d549278ad",
+          "speaker_id": "1462",
+          "clean_prompt_sha256": "32cfd2b555cbfd1e7b85d8ce81a6dececb255dc1e4f039659ab28778079ba6f2",
+          "prompt_sha256": "8d195507f8317eb9a58056909b66085ae4c926dc622857325fd0ee1c8a294d82",
+          "target_sha256": "b801ab938096fbf3f0afa86ee298efbe32526dc08ecee9fecc05973c35a17d54",
+          "generated_sha256": "d1bae75c08a703e8981ff854a48252092ef9887d3a9b031a9e75120855002616",
+          "metrics": {
+            "mcd": 3.799676573283872,
+            "wer": 0.0,
+            "predicted_text": " There was something about him that made Hilda wish herself at her hotel again, in the street below, anywhere but where she was.",
+            "sim": 0.606937050819397,
+            "sva": true
+          }
+        },
+        {
+          "sample_id": "256a7d549878a87a47389cfbe8b30d1a4af57d3742301df83127129f98b629ef",
+          "speaker_id": "1462",
+          "clean_prompt_sha256": "09b45233b8e37423096fc54f0def7bd417e7ff2dbb876578deebfe833799570c",
+          "prompt_sha256": "80fc3bf1128e7bbd36ddd0b37a422d332010f0e7ff394e3a81d35b0bf1011352",
+          "target_sha256": "4d3e39750c94552362d98e1fb2e866e5b7b33fcb4094fe4d585df5828acd050f",
+          "generated_sha256": "aada424256111013e7685662fa3b79acc0c153040a2bf3f18bec6bbb74ede861",
+          "metrics": {
+            "mcd": 3.284763356671876,
+            "wer": 0.0,
+            "predicted_text": " She crept across to him, drawing her stool after her.",
+            "sim": 0.5453993678092957,
+            "sva": true
+          }
+        },
+        {
+          "sample_id": "29b1f775187a47ea70994bf44b6611acaae57c51e27dd083493e5e9107aae915",
+          "speaker_id": "237",
+          "clean_prompt_sha256": "1c446bbf2233c29b372c411c10a24416672d70128ee9f1b9fed1f5693d45a86a",
+          "prompt_sha256": "071574850c72bf0b496067e877b00c3ab774a27a8987f85926c2da47ebf2582e",
+          "target_sha256": "b499574bb213c8d1e387234810eabbcbb11cb8592c93071af513333c319cbf1c",
+          "generated_sha256": "6f12cfebf0b60a8511b92b7523b7e8fae1950dcacd0e2d2efca74d5a648ac5c9",
+          "metrics": {
+            "mcd": 5.4338550249169355,
+            "wer": 0.07692307692307693,
+            "predicted_text": " \"'Fronsy,' said Jasper quickly, \"'what do you suppose Prince said the other day?'",
+            "sim": 0.3939781188964844,
+            "sva": true
+          }
+        },
+        {
+          "sample_id": "119b2b82f7f4c017ab67ea45f1ee994d031ff04ceec6375f25c3e895307c398c",
+          "speaker_id": "237",
+          "clean_prompt_sha256": "03cf4fad999226d3dc7015dea3fbae1a46c67359a97f9bab79c331fb22832d87",
+          "prompt_sha256": "878da57dafac159d255b2a72d0148a6bcb8d4ed29266292cb6e84ea4aa2b4978",
+          "target_sha256": "4026c6ab3a5e4fee843e71487ee8dc4ec2903946ea20245662c1ae1075cdf252",
+          "generated_sha256": "45f86fccba814bf9c3c1c98316e64c4c7d6a6156872fb25cf9d9e7e4f7805cd2",
+          "metrics": {
+            "mcd": 7.985096442298492,
+            "wer": 0.0,
+            "predicted_text": " He felt it rather than saw it.",
+            "sim": 0.23799997568130493,
+            "sva": false
+          }
+        },
+        {
+          "sample_id": "287812ddd3899f7174ff55f8c15a5e8272056a4e7b0dd814728e5c4819295b70",
+          "speaker_id": "2428",
+          "clean_prompt_sha256": "2ffb5f2bf61e9459a374ebe30d3f81c96c921326ea3ce11f45aff2a9d83fec7f",
+          "prompt_sha256": "8fcbb845b02c6b582b993ddbbe4d527cf08228849686c243ffc3d98fd6a15c50",
+          "target_sha256": "ea9e52dae1e3dc9ee80d38a923d0f50330d4b17ee61bcb25d007df7901d8636c",
+          "generated_sha256": "f928bc6a38974db886978652db253ca1a538ae6426237824ee1876d1d5b0376f",
+          "metrics": {
+            "mcd": 4.823693604791987,
+            "wer": 0.0,
+            "predicted_text": " After a few seconds interval, the pit pat of what was obviously one pair of feet came towards the door.",
+            "sim": 0.5904408693313599,
+            "sva": true
+          }
+        },
+        {
+          "sample_id": "fecd6a254b295c63f62e4b76beea470714c4042578824d8c12ce56c82d2f3267",
+          "speaker_id": "2428",
+          "clean_prompt_sha256": "6e68e82ee48230d6bc06fcd7a1de5d717590568a67e00375603ca5bebce089ae",
+          "prompt_sha256": "e35967601307f46931cce81c5690c3eef625071d0f08b39f7e608249f158690f",
+          "target_sha256": "eb36eed494b55ef4c59654af7c659df486a4fde6e6f241948b2d0eaeced761c5",
+          "generated_sha256": "534980a7b0d843caa320baba032804ab6c8055835683b3e46a3b21ac4ead1b1d",
+          "metrics": {
+            "mcd": 5.409069751590264,
+            "wer": 0.0,
+            "predicted_text": " The woman's name is Brady.",
+            "sim": 0.5849689245223999,
+            "sva": true
+          }
+        },
+        {
+          "sample_id": "52a70d6b2b36735e4c16152898ef40c54641f2fc6d6136ec79f08df70953ef54",
+          "speaker_id": "251",
+          "clean_prompt_sha256": "3dcc2da010fb409d55b366508730eff28ab6d1cdcb11fed5cc982077a25e7d22",
+          "prompt_sha256": "b622679baab0de18cb9b8164f8b41bc3a6a9269f195ef724b8b4d340bcc3d351",
+          "target_sha256": "7a23a8591601829019cc544ecc918fb79ba653172699017b84f470defc5806ef",
+          "generated_sha256": "dbaaf623c30703864333f7130843cb60fbc3db3f90b8ba1f2b3fcfa137936781",
+          "metrics": {
+            "mcd": 5.703390656530215,
+            "wer": 0.15789473684210525,
+            "predicted_text": " The 18-year-old inventor accepted the challenge with a smile. I'll be glad to try, sir, he replied.",
+            "sim": 0.5462890863418579,
+            "sva": true
+          }
+        },
+        {
+          "sample_id": "af57d176fed29e48575dfd61eddd7835254516fa2eeb6cebe30dd675148f8eac",
+          "speaker_id": "251",
+          "clean_prompt_sha256": "47184db5c13be79d11a449b16561f0aef48e9fb22489829023099ea2f26b76a4",
+          "prompt_sha256": "5de21bc985ec8d49836a7ef11987e3a8d821429b1947f24a5bbf9fcf2c900f4c",
+          "target_sha256": "c92e9d939cc2e6e8ffecc6b3f606bbc788d840913cc96488f64514bd1d04cff7",
+          "generated_sha256": "c252126b95caf908ae07ea8614e73413ddb1f355bfbddeef9a530a396f65af66",
+          "metrics": {
+            "mcd": 6.014272249251592,
+            "wer": 0.0,
+            "predicted_text": " Of the four other company engineers, two were now stirring and partly conscious.",
+            "sim": 0.5723762512207031,
+            "sva": true
+          }
+        },
+        {
+          "sample_id": "e48deb17f83ee2bcdc078274d4bb4027487b5556324b40c77d050cf2b6912cbd",
+          "speaker_id": "4992",
+          "clean_prompt_sha256": "dc455cc28d6fb43d156158c4280f6cfebd89bbc766c46151338e2f694ac4260b",
+          "prompt_sha256": "cab2f99a17e843b9db8b724e396ef5baaf61edc8a1bea269b4d5988497a07be4",
+          "target_sha256": "0116ed896ea61c7c0cd7953c2ce8742492000abf3312f4ce7a1f49c92c11d386",
+          "generated_sha256": "34f10262bda68a4656c09a5cdfa5fde7e5fa44ba9af02fe85dc3e76d6e289440",
+          "metrics": {
+            "mcd": 5.066982261134138,
+            "wer": 0.0,
+            "predicted_text": " Thank you, Mr. Popham,\" said Mrs. Carey, her eyes twinkling as she looked at the laughing children.",
+            "sim": 0.4618653655052185,
+            "sva": true
+          }
+        },
+        {
+          "sample_id": "f63943cdb6384940de51249a150038ac27cef4386e5896de774703e37a7a2a88",
+          "speaker_id": "4992",
+          "clean_prompt_sha256": "05b8ff7c8982ac4719275a8e7f3c7e91b1aeabf48834dcd12e6740df86e36f82",
+          "prompt_sha256": "4c5296bc390aeecc6f2fc992b71b5a4f0ac4c608b4549186a824b03785cf2274",
+          "target_sha256": "cb0e28e4a063c3fb28ec55ff6063f9290e5b7351ac0a3cd5d2b90970a14c5a3f",
+          "generated_sha256": "89b31b75c30a25effea72dd14f780b9230484b3a75e0ec36213e5ebce0060b4d",
+          "metrics": {
+            "mcd": 5.144275098161054,
+            "wer": 0.0,
+            "predicted_text": " Lord Elmwood was sensible of the embarrassment his presence gave Miss Woodley and understood the reproaches which she seemed to vent upon herself in silence.",
+            "sim": 0.41925281286239624,
+            "sva": true
+          }
+        },
+        {
+          "sample_id": "85d81c78a789a9a7a1a2f85e2b90fcf7a2368078a6fdc7507a34ba43f31742a1",
+          "speaker_id": "5694",
+          "clean_prompt_sha256": "85a8911ded8b05fc4107a5d1c8938fab1d629af91bd18ecd6ea0000ea8e1ae67",
+          "prompt_sha256": "0f0874492ecb5d35458b0be4e0f9084c596cddbcb82de55ec9db3e86b448db86",
+          "target_sha256": "65c128b6659b36587ab48c3dfc50c7b882e628404f81bfaf0b5830ca59f27194",
+          "generated_sha256": "beaae3b488ea3a92c75414d90c7fae953b5089b5bf3f041043e53d063f189fe4",
+          "metrics": {
+            "mcd": 4.973988454478878,
+            "wer": 0.0,
+            "predicted_text": " In fact, no one was expected to pass at this point, but while standing at my post, a horseman rode up behind me.",
+            "sim": 0.41316425800323486,
+            "sva": true
+          }
+        },
+        {
+          "sample_id": "4a7f70b24cde8d277eb5084528616e7729c3b1cdee7045a51690c265d7287894",
+          "speaker_id": "5694",
+          "clean_prompt_sha256": "f70281832ef4d1d9cffa521ac2a9a66506629e8bb789889eddfd62e6b8ee26be",
+          "prompt_sha256": "edda915eaffa6abeda919953efa6ae81f70138f9446a0c2812d7164e65dd73af",
+          "target_sha256": "c98a64ac75c76a72494add751a995df56c1ec7c063ac21b754174337fcb50cbf",
+          "generated_sha256": "0bdcf629600a65f70708c330da810b2da1141eb0745b2787d14596a6c04c8e85",
+          "metrics": {
+            "mcd": 5.458037985066322,
+            "wer": 0.0,
+            "predicted_text": " I remember that they had to cross an open field in our front and we were lying behind a fence and as they advanced we kept up firing and would run them back every time until they brought up a regiment that whooped and yelled and charged our skirmish line and then we fell back again.",
+            "sim": 0.24183304607868195,
+            "sva": false
+          }
+        },
+        {
+          "sample_id": "40290f9edf8d6d7ace3a9bc87646ec7c3eebe406dcb1eb570a63f755bf3dce39",
+          "speaker_id": "8455",
+          "clean_prompt_sha256": "4d9f0c2d5af16388fc7d4c7fa071339e0f3167fee7fe19ee6ff234d3f66f2a49",
+          "prompt_sha256": "dfa707ec8417aa3a0f9286df880202f7e653207ef3c6a63ac1676512d7024f43",
+          "target_sha256": "5a1e3192635c9a42d14fd029c8e6b3fc031362cec882e849f9ddf53956e51a21",
+          "generated_sha256": "84e7b95bee15967ef0956f77cffa59c0beb51970de5aa871a3930b2b9468772e",
+          "metrics": {
+            "mcd": 6.144250148899009,
+            "wer": 0.0,
+            "predicted_text": " Had the telegraph been invented in the days of ancient Rome, would the Romans have accepted it or have stoned Wheatstone? So thinking, I resolved that I was before my age and that I must pay the allotted penalty.",
+            "sim": 0.5175080895423889,
+            "sva": true
+          }
+        },
+        {
+          "sample_id": "082cbba9c12a38815b54ab904dfd8c03913772e80527ec05d9aa4474fe8163e4",
+          "speaker_id": "8455",
+          "clean_prompt_sha256": "3e6c8e4ae20a15a0f1a0122c1cadb97d101536463fade9701ed45cd56d7e09b4",
+          "prompt_sha256": "431eb81bc946c62bf791d4883acb2d64c3f1210330305338aeb8e1a5510927a3",
+          "target_sha256": "3baa331f1f893da7488b8f3b1a23997cdefca6dc4371d5ea5fe9e2d0d4dc95a9",
+          "generated_sha256": "acb0b27bd29140b37f2cc484828adfa1f414ceefb16d06c9a1fc46323ab075ff",
+          "metrics": {
+            "mcd": 7.0084139885389565,
+            "wer": 0.2,
+            "predicted_text": " I asked. And yet that something must be playful in its nature.",
+            "sim": 0.47995463013648987,
+            "sva": true
+          }
+        }
+      ],
+      "historical_producer_metadata": {
+        "path": "/tealab-data/rjin02/AudioWatermarkBench/results/denoiser_dns64_on_grnoise_libritts/20260124-145829/metrics.json",
+        "sha256": "88491db4b9b9e6aae2e83e156152b994c48c860ba863c1e69c34ffbfbac8e70e",
+        "attestation": "configuration_record_only"
+      },
+      "generation_python": "3.10.19",
+      "scoring_python": "3.11.14"
+    }
+  ],
+  "validation": {
+    "pytest_passed": 227,
+    "offline_quickstarts_passed": 4
+  },
+  "limits": [
+    "Legacy producer files record configuration but do not attest source code, weights or original input hashes.",
+    "These runs validate replacement-reference execution; they do not reproduce protection or denoising production.",
+    "Concurrent workers used shared GPUs; synthesis timings are not an isolated efficiency benchmark.",
+    "No historical protection table equivalence or full-paper reproduction is established."
+  ]
+}

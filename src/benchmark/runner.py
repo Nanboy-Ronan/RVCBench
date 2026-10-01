@@ -48,7 +48,20 @@ def run_zero_shot(conf, base_dir, device, dataset, exp_dir, logger, protected_au
     samples = dataset.get_zero_shot_samples(max_samples=limit)
     if not samples:
         raise ValueError('Empty evaluation selection')
+    reference_stage = None
+    if (options.get('reference_audio_dir') and protected_audio_dir and
+            Path(str(options.reference_audio_dir)).expanduser().resolve() !=
+            Path(protected_audio_dir).expanduser().resolve()):
+        raise ValueError('Conflicting reference_audio_dir and protected_audio_dir')
+    reference_root = options.get('reference_audio_dir') or protected_audio_dir
+    if reference_root:
+        from .reference_stages import bind_reference_stage
+        samples, reference_stage = bind_reference_stage(samples, dataset._dataset_root,
+            reference_root, options.get('reference_stage', 'external_reference'))
     rows = input_records(samples)
+    if reference_stage:
+        for row, binding in zip(rows, reference_stage['bindings']):
+            row.update({k: binding[k] for k in ('clean_prompt_path', 'clean_prompt_sha256')})
     audio_dir = Path(exp_dir) / 'generated_audio'
     audio_dir.mkdir(parents=True, exist_ok=True)
     effective_config = OmegaConf.to_container(conf, resolve=True)
@@ -58,6 +71,8 @@ def run_zero_shot(conf, base_dir, device, dataset, exp_dir, logger, protected_au
     seed = int(seed if seed is not None else 42)
     generation_config = {'model': options.get('model'), 'adversary': effective_config['adversary'],
                          'seed': seed, 'sample_seed_policy': 'seed_plus_source_index_v2', 'device': str(device)}
+    if reference_stage:
+        generation_config['reference_stage_fingerprint'] = reference_stage['fingerprint']
     runtime_provenance = provenance(Path(__file__).resolve().parents[2])
     from .fingerprints import generation_runtime
     generation_provenance = (None if evaluate_only else
@@ -69,6 +84,7 @@ def run_zero_shot(conf, base_dir, device, dataset, exp_dir, logger, protected_au
                 'generation_fingerprint': digest(generation_config),
                 'input_fingerprint': input_fingerprint(rows), 'samples': rows,
                 'variant_selection': getattr(dataset, 'variant_selection', None),
+                'reference_stage': reference_stage,
                 'comparison_status': 'requires_pairwise_protocol_check',
                 'coverage': coverage(rows, required, evaluated=False)}
     path = Path(exp_dir) / 'run_manifest.json'
@@ -103,6 +119,9 @@ def run_zero_shot(conf, base_dir, device, dataset, exp_dir, logger, protected_au
             old = load_run(source)
             if old.get('schema_version') != SCHEMA_VERSION or old.get('input_fingerprint') != manifest['input_fingerprint']:
                 raise ValueError('Resume/evaluation input manifest differs from the source run')
+            if ((old.get('reference_stage') or {}).get('fingerprint') !=
+                    (reference_stage or {}).get('fingerprint')):
+                raise ValueError('Resume/evaluation reference stage lineage differs from the source run')
             if evaluate_only and old['config']['vc']['model'] != options.get('model'):
                 raise ValueError('Evaluation model label differs from source generation run')
             if not evaluate_only and old.get('generation_fingerprint') != manifest['generation_fingerprint']:

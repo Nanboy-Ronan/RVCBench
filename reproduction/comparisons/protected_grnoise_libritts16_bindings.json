@@ -1,0 +1,138 @@
+{
+  "kind": "protected_grnoise",
+  "directory": "/tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/protected_audio",
+  "bindings": [
+    {
+      "sample_id": "59c5e63512ec18bacdf941db596a939ba7953749cde66ff2b860d04d8eccc830",
+      "speaker_id": "121",
+      "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/121/121_127105_000043_000007.wav",
+      "clean_prompt_sha256": "a572b3155d7e82e77aad127a259333da4cc2cd59407e1969702cc5d93afe7c80",
+      "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/protected_audio/121/121_127105_000043_000007.wav",
+      "reference_sha256": "e7392b71e7f185b4b9620b3526146d295f8b031a2f2ea7a428ed46b1a54d5634"
+    },
+    {
+      "sample_id": "bbbafeab3dbc9112c48d524d97c8ffbeebe4129c00afa96c7694033fda99e34f",
+      "speaker_id": "121",
+      "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/121/121_127105_000028_000002.wav",
+      "clean_prompt_sha256": "4aa06f726bd45988c2fe6c9983a4d084767ea3f7d5a2b9c6a3c6aad5172f69c6",
+      "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/protected_audio/121/121_127105_000028_000002.wav",
+      "reference_sha256": "78ada150daf53902296cf9ec96089441abc3d9a9831c38ef24dcc73e399a7490"
+    },
+    {
+      "sample_id": "aab57c47ff2f5bfb6c61cd66e8b6010f0216d7a50e7f54657b48d03d549278ad",
+      "speaker_id": "1462",
+      "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/1462/1462_170142_000031_000001.wav",
+      "clean_prompt_sha256": "32cfd2b555cbfd1e7b85d8ce81a6dececb255dc1e4f039659ab28778079ba6f2",
+      "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/protected_audio/1462/1462_170142_000031_000001.wav",
+      "reference_sha256": "4f46ed44b1a490c7cac19c81dac23238b5583722288fccd4042bc350694a59ce"
+    },
+    {
+      "sample_id": "256a7d549878a87a47389cfbe8b30d1a4af57d3742301df83127129f98b629ef",
+      "speaker_id": "1462",
+      "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/1462/1462_170142_000025_000001.wav",
+      "clean_prompt_sha256": "09b45233b8e37423096fc54f0def7bd417e7ff2dbb876578deebfe833799570c",
+      "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/protected_audio/1462/1462_170142_000025_000001.wav",
+      "reference_sha256": "cb1fe8c2c186b2ee0edc19c918a6e51780e7565efcbc9f2550c480c6f6d92bf2"
+    },
+    {
+      "sample_id": "29b1f775187a47ea70994bf44b6611acaae57c51e27dd083493e5e9107aae915",
+      "speaker_id": "237",
+      "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/237/237_134500_000036_000002.wav",
+      "clean_prompt_sha256": "1c446bbf2233c29b372c411c10a24416672d70128ee9f1b9fed1f5693d45a86a",
+      "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/protected_audio/237/237_134500_000036_000002.wav",
+      "reference_sha256": "a6c6223557541a220138a2991221e6e7ee983fe80f99783a2c44cd8c57af7d67"
+    },
+    {
+      "sample_id": "119b2b82f7f4c017ab67ea45f1ee994d031ff04ceec6375f25c3e895307c398c",
+      "speaker_id": "237",
+      "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/237/237_126133_000032_000001.wav",
+      "clean_prompt_sha256": "03cf4fad999226d3dc7015dea3fbae1a46c67359a97f9bab79c331fb22832d87",
+      "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/protected_audio/237/237_126133_000032_000001.wav",
+      "reference_sha256": "b3cc38599d09de398a560ffcc40b61bd350308988c09d2debbf6b39905789721"
+    },
+    {
+      "sample_id": "287812ddd3899f7174ff55f8c15a5e8272056a4e7b0dd814728e5c4819295b70",
+      "speaker_id": "2428",
+      "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/2428/2428_83705_000027_000001.wav",
+      "clean_prompt_sha256": "2ffb5f2bf61e9459a374ebe30d3f81c96c921326ea3ce11f45aff2a9d83fec7f",
+      "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/protected_audio/2428/2428_83705_000027_000001.wav",
+      "reference_sha256": "f82f5071c6cca8b56d9b53c5c865d56381ddfe1f7b8c1db88f79955fe2e19aa2"
+    },
+    {
+      "sample_id": "fecd6a254b295c63f62e4b76beea470714c4042578824d8c12ce56c82d2f3267",
+      "speaker_id": "2428",
+      "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/2428/2428_83705_000039_000007.wav",
+      "clean_prompt_sha256": "6e68e82ee48230d6bc06fcd7a1de5d717590568a67e00375603ca5bebce089ae",
+      "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/protected_audio/2428/2428_83705_000039_000007.wav",
+      "reference_sha256": "265a0c3ced13f31b96147da4d6d0f7f7967ed546aa764876b7d3e48e74f6a3dc"
+    },
+    {
+      "sample_id": "52a70d6b2b36735e4c16152898ef40c54641f2fc6d6136ec79f08df70953ef54",
+      "speaker_id": "251",
+      "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/251/251_136532_000009_000001.wav",
+      "clean_prompt_sha256": "3dcc2da010fb409d55b366508730eff28ab6d1cdcb11fed5cc982077a25e7d22",
+      "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/protected_audio/251/251_136532_000009_000001.wav",
+      "reference_sha256": "380ad702d5d2c19010091c24058148470db5a9d92cff428f4b5c5ea3bf73dd4f"
+    },
+    {
+      "sample_id": "af57d176fed29e48575dfd61eddd7835254516fa2eeb6cebe30dd675148f8eac",
+      "speaker_id": "251",
+      "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/251/251_137823_000030_000000.wav",
+      "clean_prompt_sha256": "47184db5c13be79d11a449b16561f0aef48e9fb22489829023099ea2f26b76a4",
+      "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/protected_audio/251/251_137823_000030_000000.wav",
+      "reference_sha256": "2e03394c5bcf9b3758bf80cfa07ab6122eea05ffdfd6cfbb639afeb5cab2ceda"
+    },
+    {
+      "sample_id": "e48deb17f83ee2bcdc078274d4bb4027487b5556324b40c77d050cf2b6912cbd",
+      "speaker_id": "4992",
+      "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/4992/4992_41806_000024_000001.wav",
+      "clean_prompt_sha256": "dc455cc28d6fb43d156158c4280f6cfebd89bbc766c46151338e2f694ac4260b",
+      "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/protected_audio/4992/4992_41806_000024_000001.wav",
+      "reference_sha256": "2a391b9647fe2289807963debc8a1aff554e0586fde643c0630cb990a160dc81"
+    },
+    {
+      "sample_id": "f63943cdb6384940de51249a150038ac27cef4386e5896de774703e37a7a2a88",
+      "speaker_id": "4992",
+      "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/4992/4992_23283_000034_000000.wav",
+      "clean_prompt_sha256": "05b8ff7c8982ac4719275a8e7f3c7e91b1aeabf48834dcd12e6740df86e36f82",
+      "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/protected_audio/4992/4992_23283_000034_000000.wav",
+      "reference_sha256": "bb6bd3b5138c6f0ae480f44fdac28a28acf02725099d1206f215ffdd51fc4060"
+    },
+    {
+      "sample_id": "85d81c78a789a9a7a1a2f85e2b90fcf7a2368078a6fdc7507a34ba43f31742a1",
+      "speaker_id": "5694",
+      "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/5694/5694_64038_000021_000000.wav",
+      "clean_prompt_sha256": "85a8911ded8b05fc4107a5d1c8938fab1d629af91bd18ecd6ea0000ea8e1ae67",
+      "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/protected_audio/5694/5694_64038_000021_000000.wav",
+      "reference_sha256": "f603f250ec584008208aaa4f3b29c892ffcfe8d93e82b7b4619096a5e4053b1e"
+    },
+    {
+      "sample_id": "4a7f70b24cde8d277eb5084528616e7729c3b1cdee7045a51690c265d7287894",
+      "speaker_id": "5694",
+      "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/5694/5694_64029_000028_000001.wav",
+      "clean_prompt_sha256": "f70281832ef4d1d9cffa521ac2a9a66506629e8bb789889eddfd62e6b8ee26be",
+      "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/protected_audio/5694/5694_64029_000028_000001.wav",
+      "reference_sha256": "5c63923f360548bd58ee90da981472eec7e4d9ef143f02e3525a5af44a019111"
+    },
+    {
+      "sample_id": "40290f9edf8d6d7ace3a9bc87646ec7c3eebe406dcb1eb570a63f755bf3dce39",
+      "speaker_id": "8455",
+      "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/8455/8455_210777_000050_000005.wav",
+      "clean_prompt_sha256": "4d9f0c2d5af16388fc7d4c7fa071339e0f3167fee7fe19ee6ff234d3f66f2a49",
+      "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/protected_audio/8455/8455_210777_000050_000005.wav",
+      "reference_sha256": "6af99c160d164575c499b2e3b99a49e3b7417eee368cf4f2ae256e08dc296c36"
+    },
+    {
+      "sample_id": "082cbba9c12a38815b54ab904dfd8c03913772e80527ec05d9aa4474fe8163e4",
+      "speaker_id": "8455",
+      "clean_prompt_path": "/tealab-data/rjin02/RVCBench/data/Libritts/audios/8455/8455_210777_000048_000000.wav",
+      "clean_prompt_sha256": "3e6c8e4ae20a15a0f1a0122c1cadb97d101536463fade9701ed45cd56d7e09b4",
+      "reference_path": "/tealab-data/rjin02/AudioWatermarkBench/results/grnoise_on_libritts/20251130-144554/protected_audio/8455/8455_210777_000048_000000.wav",
+      "reference_sha256": "ea84d0836028af79b4556ef4176dbd2295e2966a5e6570d475167fb6ea4bc44c"
+    }
+  ],
+  "producer_manifest": null,
+  "producer_manifest_sha256": null,
+  "producer_status": "legacy_directory_content_only",
+  "fingerprint": "5bf9ba6c43456fc4d4cea2b29ddc430d7d7b50d6b075f9708f3c0aa353588bcd"
+}
