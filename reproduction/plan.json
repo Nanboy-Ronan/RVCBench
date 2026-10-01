@@ -314,7 +314,9 @@
       "runtime_audit": "comparisons/fish_s2_http_service_audit.json",
       "repeatability_status": "cold_and_warm_http_outputs_differ",
       "repeatability_audit": "comparisons/fish_s2_http_repeatability.json",
-      "provenance_limit": "Owned pinned official service and independently checked local weights; historical server weights/runtime/seeds unavailable. Cold-start repeatability remains unresolved."
+      "provenance_limit": "Owned pinned official service and independently checked local weights; historical server weights/runtime/seeds unavailable. Cold-start repeatability remains unresolved.",
+      "repeatability_localization": "first_reference_codec_tokens_change_cold_vs_warm_startup_seed_does_not_resolve",
+      "repeatability_localization_audit": "comparisons/fish_s2_http_token_trace_audit.json"
     },
     {
       "n": "CosyVoice / 2",

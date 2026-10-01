@@ -1,0 +1,8 @@
+{"kind": "reference_tokens", "shape": [10, 293], "dtype": "torch.int64", "sha256": "079d88b317058f54910151be15e2cafa8ffede5aec74672cd9388768a9c28848", "audio_sha256": "a572b3155d7e82e77aad127a259333da4cc2cd59407e1969702cc5d93afe7c80"}
+{"kind": "generated_tokens", "shape": [10, 68], "dtype": "torch.int64", "sha256": "15eb5b5a2d37994de29198623637893a5e3336ddac424e86b2b6c30592c0c692"}
+{"kind": "reference_tokens", "shape": [10, 34], "dtype": "torch.int64", "sha256": "1a90efddc981bdccf1227934eb0f0134f2a6c98b3fc17102cb0b1888a7264465", "audio_sha256": "4aa06f726bd45988c2fe6c9983a4d084767ea3f7d5a2b9c6a3c6aad5172f69c6"}
+{"kind": "generated_tokens", "shape": [10, 67], "dtype": "torch.int64", "sha256": "e6733f27b744d70b62836b3ef24166669b1f0a448cfe602893e4149721661435"}
+{"kind": "reference_tokens", "shape": [10, 293], "dtype": "torch.int64", "sha256": "3c4ed13c078e96f39c34798fd28f183a6e394c2658dbb4a33dbc7a1be67dfaa5", "audio_sha256": "a572b3155d7e82e77aad127a259333da4cc2cd59407e1969702cc5d93afe7c80"}
+{"kind": "generated_tokens", "shape": [10, 62], "dtype": "torch.int64", "sha256": "4e27cf2bb8398a1d9a39c0270bc6e1625c3e7e6a59dabf028e137cbb5168c0a3"}
+{"kind": "reference_tokens", "shape": [10, 34], "dtype": "torch.int64", "sha256": "1a90efddc981bdccf1227934eb0f0134f2a6c98b3fc17102cb0b1888a7264465", "audio_sha256": "4aa06f726bd45988c2fe6c9983a4d084767ea3f7d5a2b9c6a3c6aad5172f69c6"}
+{"kind": "generated_tokens", "shape": [10, 67], "dtype": "torch.int64", "sha256": "e6733f27b744d70b62836b3ef24166669b1f0a448cfe602893e4149721661435"}

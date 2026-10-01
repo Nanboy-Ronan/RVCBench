@@ -58,6 +58,33 @@ request differs from subsequent identical-seed requests; both two-sample
 warm repeats agree with the corresponding full-run outputs. These differences
 are retained in `reproduction/comparisons/fish_s2_http_repeatability.json`.
 Setting a request seed alone is insufficient evidence of repeatability.
-Reference encoding before seed setup is a possible cause requiring a separate
-controlled cold-start experiment. The validation server has been stopped;
-existing services were preserved.
+An additional control set the native seed and deterministic cuDNN flags before
+API initialization and warmup. Both cold outputs still differed from their
+warm repeats, so startup seed setup alone is not a correction. With token
+tracing, the first reference's codec token hash changes between cold and warm
+requests, followed by generated lengths of 68 versus 62 tokens. The second
+reference and generated token hashes match. This locates the first observed
+divergence in reference encoding; the underlying numerical or state cause
+remains unresolved. See `fish_s2_http_seeded_startup_audit.json` and
+`fish_s2_http_token_trace_audit.json` in `reproduction/comparisons/`.
+
+For diagnosis, `scripts/serve_fish_s2.py` invokes the official single-worker
+API after native startup seed setup. It rejects multiple workers because
+spawned workers would not inherit that initialization. This is a diagnostic
+launcher, not a guarantee of deterministic inference. An optional
+`--diagnostic-trace /absolute/path/to/new_trace.jsonl` records reference and
+generated token hashes on the owned engine instance. It synchronizes CUDA,
+so traced runs must not be used for timing comparisons. The original upstream
+checkout is unchanged. Example from the repository root:
+
+```bash
+python scripts/serve_fish_s2.py \
+  --code-path checkpoints/fish-speech-s2-native --startup-seed 42 \
+  --diagnostic-trace /absolute/path/to/new_trace.jsonl -- \
+  --listen 127.0.0.1:18011 --workers 1 --device cuda:0 \
+  --llama-checkpoint-path /absolute/path/to/s2-pro \
+  --decoder-checkpoint-path /absolute/path/to/s2-pro/codec.pth \
+  --decoder-config-name modded_dac_vq
+```
+
+All owned validation services have been stopped; existing services were preserved.
