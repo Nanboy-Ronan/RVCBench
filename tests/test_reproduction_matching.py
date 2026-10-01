@@ -6,6 +6,15 @@ import pytest
 from src.benchmark.reproduction import historical_prompt_ledger
 
 
+def test_robotcall_conditions_share_one_bootstrap_cluster():
+    from src.benchmark.reproduction import speaker_cluster
+    assert speaker_cluster('Robotcall', 'p227robocall') == speaker_cluster('Robotcall', 'p227vctk')
+    assert speaker_cluster('Robotcall', 'p232vctk') != speaker_cluster('Robotcall', 'p227vctk')
+    assert speaker_cluster('VCTK', 'p227') == 'p227'
+    with pytest.raises(ValueError, match='speaker-condition'):
+        speaker_cluster('Robotcall', 'unverified_alias')
+
+
 def test_target_only_ledger_requires_complete_ordered_log(tmp_path):
     rows = [dict(speaker_id='one', ground_truth_text='First sentence.', generated_path='first.wav'),
             dict(speaker_id='two', ground_truth_text='Second sentence.', generated_path='second.wav')]
@@ -38,7 +47,7 @@ def test_wer_protocol_inferred_from_all_transcripts(tmp_path):
         infer_english_wer_protocol(path)
 
 
-@pytest.mark.parametrize('dataset', ['LibriTTS', 'VCTK'])
+@pytest.mark.parametrize('dataset', ['LibriTTS', 'VCTK', 'Robotcall'])
 def test_pair_match_requires_dataset_identity_and_immutable_reference_audio(tmp_path, dataset):
     import csv
     import json

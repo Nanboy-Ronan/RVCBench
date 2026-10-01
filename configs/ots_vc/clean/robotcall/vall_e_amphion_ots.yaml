@@ -1,0 +1,11 @@
+# @package _global_
+defaults:
+  - vall_e_ots
+  - _self_
+run_name: vall_e_amphion_ots_on_robotcall
+adversary:
+  implementation: amphion
+  code_path: checkpoints/Amphion-valle
+  checkpoint_path: checkpoints/amphion-valle/pytorch_model.bin
+  config_path: checkpoints/amphion-valle/args.json
+  text_tokens_path: checkpoints/amphion-valle/symbols.dict

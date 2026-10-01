@@ -85,6 +85,21 @@ the resulting audio in the evaluation environment with `+vc.evaluate_only=true`
 and `+vc.evaluation.generated_audio_dir=/absolute/path/to/generated_audio`,
 keeping the same dataset and frozen manifest selection.
 
+The separate `robotcall20_v1` subset selects one pair from each of 20 speaker
+condition groups by the same fixed hash ranking. These are normal and scam
+conditions for 10 physical VCTK speakers. All 300 historical Amphion Robocall
+rows match the current pair names, target transcripts and input audio hashes;
+the selected 20 also pass the strict historical matcher. Native generation is
+running with `ots_vc/clean/robotcall/vall_e_amphion_ots` and that frozen manifest.
+The comparator reports condition-specific means and bootstraps by the physical
+speaker shared by both conditions. Scam target WAVs are VCTK carrier audio,
+not recordings of the scam text: scam MCD remains a historical acoustic proxy.
+Historical-audio replay reproduces all 20 MCD values exactly and SIM within
+0.000081; WER differs by up to 0.1429 because ASR predictions change. The saved
+historical transcripts all match the selected WER formula, but the historical
+ASR runtime and immutable weights are unknown. See
+`reproduction/comparisons/amphion_valle_robotcall20_input_audit.json`.
+
 FireRedTTS2 decodes output at 24 kHz; its native `sample_rate=16000` field is
 the reference input rate. The wrapper now saves codec output at 24 kHz and
 rejects invalid waveforms instead of replacing NaNs or clipping values.

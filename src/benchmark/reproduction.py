@@ -84,8 +84,8 @@ def match_historical(run, historical_csv):
     historical_csv = Path(historical_csv).resolve()
     historical = json.loads((historical_csv.parent / 'metrics.json').read_text())
     dataset_name = str(historical['config']['dataset']['name']).lower()
-    if dataset_name not in ('libritts', 'vctk'):
-        raise ValueError('This matcher requires the audited LibriTTS or VCTK pair naming protocol')
+    if dataset_name not in ('libritts', 'vctk', 'robotcall'):
+        raise ValueError('This matcher requires the audited LibriTTS, VCTK or Robotcall pair naming protocol')
     if str(run['config']['dataset']['name']).lower() != dataset_name:
         raise ValueError('Historical dataset identity differs from the current run')
     aliases = {'qwentts': 'qwen3_tts', 'xtts_v2': 'xtts', 'glmtts': 'glm_tts', 'cozyvoice': 'cosyvoice'}
@@ -132,6 +132,16 @@ def match_historical(run, historical_csv):
     return historical, matches
 
 
+def speaker_cluster(dataset_name, speaker_id):
+    """Robotcall condition directories share a physical VCTK speaker."""
+    if str(dataset_name).lower() != 'robotcall':
+        return speaker_id
+    match = re.fullmatch(r'(p\d+)(robocall|vctk)', str(speaker_id))
+    if not match:
+        raise ValueError('Unrecognized Robotcall speaker-condition identity')
+    return match[1]
+
+
 def compare(run_dir, historical_csv, output):
     import numpy as np
     run = load_run(run_dir)
@@ -145,7 +155,9 @@ def compare(run_dir, historical_csv, output):
     if current_normalization != historical_wer_protocol['normalization']:
         raise ValueError('WER normalization differs from historical results; rescore with evaluation.wer_normalization=' +
                          historical_wer_protocol['normalization'])
-    speakers = sorted({r['speaker_id'] for r, _ in pairs})
+    dataset_name = run['config']['dataset']['name']
+    cluster = lambda row: speaker_cluster(dataset_name, row['speaker_id'])
+    speakers = sorted({cluster(r) for r, _ in pairs})
     metrics, samples = {}, []
     for metric in ('mcd', 'wer', 'sim'):
         if any(not finite(new.get('metrics', {}).get(metric)) or not finite(old.get(metric)) for new, old in pairs):
@@ -153,7 +165,7 @@ def compare(run_dir, historical_csv, output):
         new_values = np.array([float(new['metrics'][metric]) for new, old in pairs])
         old_values = np.array([float(old[metric]) for new, old in pairs])
         delta = new_values - old_values
-        groups = [np.array([i for i, (r, _) in enumerate(pairs) if r['speaker_id'] == speaker]) for speaker in speakers]
+        groups = [np.array([i for i, (r, _) in enumerate(pairs) if cluster(r) == speaker]) for speaker in speakers]
         rng = np.random.default_rng(20260930)
         draws = [float(delta[np.concatenate([groups[i] for i in rng.integers(len(groups), size=len(groups))])].mean()) for _ in range(2000)]
         metrics[metric] = {'current_mean': float(new_values.mean()), 'historical_mean': float(old_values.mean()),
@@ -161,6 +173,7 @@ def compare(run_dir, historical_csv, output):
             'speaker_bootstrap_95_ci_delta': np.quantile(draws, [.025, .975]).tolist()}
     for new, old in pairs:
         samples.append({'sample_id': new['sample_id'], 'speaker_id': new['speaker_id'],
+                       'speaker_cluster': cluster(new),
                        'historical_generated_path': old['generated_path'],
                        'historical_generated_sha256': file_hash(old['generated_path']),
                        'historical_prompt_evidence': old.get('prompt_evidence', {'source': 'pair_encoded_filename'}),
@@ -168,6 +181,7 @@ def compare(run_dir, historical_csv, output):
                        'historical': {m: float(old[m]) for m in metrics}})
     report = {'status': 'matched_subset_comparison', 'model': run['config']['vc']['model'],
         'matched_pairs': len(pairs), 'speakers': len(speakers),
+        'speaker_groups': len({r['speaker_id'] for r, _ in pairs}),
         'run_manifest': str(Path(run_dir).resolve() / 'run_manifest.json'),
         'run_manifest_sha256': file_hash(Path(run_dir) / 'run_manifest.json'),
         'historical_csv': str(Path(historical_csv).resolve()), 'historical_csv_sha256': file_hash(historical_csv),
@@ -175,5 +189,16 @@ def compare(run_dir, historical_csv, output):
         'historical_wer_protocol': historical_wer_protocol,
         'interpretation': 'Descriptive paired regression check, not an equivalence test or full-table reproduction claim.',
         'historical_provenance_limit': 'Legacy result does not provide modern per-sample generation, weight and scorer fingerprints.'}
+    if str(dataset_name).lower() == 'robotcall':
+        report['conditions'] = {}
+        for condition in ('robocall', 'vctk'):
+            selected = [r for r in samples if r['speaker_id'].endswith(condition)]
+            report['conditions'][condition] = {'pairs': len(selected), 'metrics': {
+                metric: {side + '_mean': float(np.mean([r[side][metric] for r in selected]))
+                         for side in ('current', 'historical')}
+                for metric in metrics}} if selected else {'pairs': 0, 'metrics': {}}
+        report['metric_interpretation'] = ('Scam target WAVs are VCTK carrier audio, not recordings of '
+            'the requested scam text. Scam MCD is a historical acoustic proxy, not matched-content '
+            'distortion. Bootstrap clusters both conditions by physical speaker.')
     atomic_json(output, report)
     return report
