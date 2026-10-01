@@ -69,11 +69,11 @@ def generation_runtime(root, conf, packages):
     if worker and Path(str(worker)).is_file():
         path = Path(str(worker)).resolve()
         files[str(path)] = file_hash(path)
-    upstream = conf.adversary.get('code_path')
-    if upstream and Path(str(upstream)).is_dir():
-        for path in sorted(Path(str(upstream)).rglob('*.py')):
-            if '.git' not in path.parts and '__pycache__' not in path.parts:
-                files[str(path.resolve())] = file_hash(path)
+    for key, upstream in conf.adversary.items():
+        if (key == 'code_path' or key.endswith('_code_path')) and upstream and Path(str(upstream)).is_dir():
+            for path in sorted(Path(str(upstream)).rglob('*.py')):
+                if '.git' not in path.parts and '__pycache__' not in path.parts:
+                    files[str(path.resolve())] = file_hash(path)
     distributions = importlib.metadata.packages_distributions()
     requested = {name for module in external for name in distributions.get(module, [])}
     # Include installed transitive requirements (e.g. transformers behind qwen-tts).

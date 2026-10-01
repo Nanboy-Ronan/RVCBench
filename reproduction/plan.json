@@ -108,9 +108,14 @@
       "status": "historical_results",
       "config": "configs/ots_vc/clean/libritts/openvoice_ots.yaml",
       "subset": "subsets/libritts16_v1/selection.json",
-      "generation_status": "pending",
-      "scoring_status": "pending",
-      "historical_comparison_status": "pending"
+      "generation_status": "complete",
+      "scoring_status": "complete",
+      "historical_comparison_status": "matched_subset_measured",
+      "generation_run": "results/reproduce_v2_openvoice_libritts16/20260930-234521-33f5c07d",
+      "scoring_run": "results/reproduce_v2_openvoice_libritts16_score/20260930-234613-fb75b3b5",
+      "comparison": "comparisons/openvoice_libritts16_v1.json",
+      "provenance_limit": "Initial subset run predates auxiliary source/config/embedding fingerprint repair; implicit Melo/BERT downloads still require runtime asset capture.",
+      "historical_metric_replay": "comparisons/openvoice_metric_replay_v1.json"
     },
     {
       "n": "Coqui XTTS-v2",
@@ -462,7 +467,7 @@
     },
     {
       "item": "Separate completion, protocol validity and cross-run comparability",
-      "status": "pending"
+      "status": "core_quality_pairwise_gate_verified_timing_and_interventions_pending"
     },
     {
       "item": "Speaker-aware paired comparison and consistent timing provenance",

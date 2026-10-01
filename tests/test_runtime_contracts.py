@@ -134,6 +134,40 @@ def test_worker_environment_probe_uses_actual_interpreter():
     assert set(result) == {'python', 'executable', 'packages'}
 
 
+def test_model_fingerprint_tracks_converter_config_and_speaker_embedding(tmp_path):
+    from src.benchmark.model_assets import resolve_model_assets
+    config_path = tmp_path / 'converter.json'
+    config_path.write_text('{"tau": 0.3}')
+    speakers = tmp_path / 'speakers'
+    speakers.mkdir()
+    embedding = speakers / 'en-au.pth'
+    embedding.write_bytes(b'first embedding')
+    conf = OmegaConf.create({'vc': {'model': 'openvoice'}, 'adversary': {
+        'converter_config_path': str(config_path), 'base_speaker_dir': str(speakers)}})
+    _, reference, first = resolve_model_assets(conf)
+    assert not reference['unresolved_references']
+    embedding.write_bytes(b'changed embedding')
+    _, _, second = resolve_model_assets(conf)
+    assert second != first
+    config_path.write_text('{"tau": 0.4}')
+    assert resolve_model_assets(conf)[2] != second
+    embedding.unlink()
+    assert 'base_speaker_dir' in resolve_model_assets(conf)[1]['unresolved_references']
+
+
+def test_generation_fingerprint_tracks_auxiliary_upstream_source(tmp_path):
+    from src.benchmark.fingerprints import generation_runtime
+    source = tmp_path / 'melo'
+    source.mkdir()
+    module = source / 'infer.py'
+    module.write_text('TEMPERATURE = 1\n')
+    conf = OmegaConf.create({'vc': {'mode': 'ots', 'model': 'openvoice'},
+                            'adversary': {'melo_code_path': str(source)}})
+    first = generation_runtime(tmp_path, conf, {})
+    module.write_text('TEMPERATURE = 2\n')
+    assert generation_runtime(tmp_path, conf, {})['source_sha256'] != first['source_sha256']
+
+
 def test_xtts_managed_lifetime_retains_generator_between_samples(setup_run, tmp_path):
     from src.adversary.xtts_ots import XttsZeroShotAdversary
     from src.benchmark.backends import SampleView

@@ -45,6 +45,11 @@ Python environment, and generated audio hashes. Verified successful audio is cop
 For subprocess adapters, the worker interpreter and its installed package versions
 are recorded independently and checked on resume. Evaluation-only runs preserve
 source generation provenance and do not probe or start the model interpreter.
+Configured auxiliary source trees such as `melo_code_path`, converter configs,
+vocabularies and base speaker embeddings also contribute to the generation
+fingerprint. This prevents resuming after those inputs change. Implicit upstream
+downloads remain outside this local-asset coverage and must be captured or pinned
+separately; earlier runs are not retroactively assigned the expanded coverage.
 Missing/failed samples are retried. Use `+vc.retries=1` with `run_vc.py` for an
 additional attempt within a run. A per-sample seed is set before each adapter call.
 The effective run seed is propagated into adapters; seeds use the preserved source
