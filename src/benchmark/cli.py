@@ -28,6 +28,10 @@ def main():
     replay.add_argument('--batch-size', type=int, default=8)
     replay.add_argument('--sample-rate', type=int, default=24000)
     replay.add_argument('--hop-length', type=int, default=512)
+    replay.add_argument('--regenerate-rng', action='store_true', help='Regenerate and verify the entire cohort noise stream')
+    replay.add_argument('--seed', type=int, default=42)
+    replay.add_argument('--epsilon', type=float, default=0.03137255)
+    replay.add_argument('--device', default='cpu')
     denoise = commands.add_parser('denoise-dns64', help='Enhance selected references with explicit local DNS64 weights')
     for name in ('dataset-root', 'subset-manifest', 'reference-directory', 'weights', 'output'):
         denoise.add_argument('--' + name, type=Path, required=True)
@@ -53,7 +57,8 @@ def main():
     if args.command == 'replay-gr':
         from .noise_replay import replay_gr_noise
         result = replay_gr_noise(args.dataset_root, args.subset_manifest, args.noise_archive,
-            args.historical_directory, args.output, args.batch_size, args.sample_rate, args.hop_length)
+            args.historical_directory, args.output, args.batch_size, args.sample_rate, args.hop_length,
+            args.seed if args.regenerate_rng else None, args.epsilon, args.device)
         print(json.dumps({'status': result['status'], 'verified': result['verified'],
                           'manifest': str(args.output / 'stage_manifest.json')}, indent=2))
         return

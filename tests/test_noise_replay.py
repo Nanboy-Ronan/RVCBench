@@ -75,3 +75,29 @@ def test_replay_mismatch_is_failed_and_never_reported_as_verified(replay_fixture
     result = json.loads((output / 'stage_manifest.json').read_text())
     assert result['status'] == 'failed' and result['verified'] == 0
     assert result['rows'][0]['reference_sha256'] != result['rows'][0]['historical_sha256']
+
+
+def test_regenerated_rng_matches_full_batch_and_selected_historical_wav(replay_fixture):
+    root, subset, archive, history, output = replay_fixture
+    generator = torch.Generator().manual_seed(42)
+    noise = torch.randn((2, 1, 2048), generator=generator) * .03137255
+    torch.save({'one': [noise]}, archive)
+    clean, rate = sf.read(root / '1.wav', dtype='int16')
+    sf.write(history / 'one' / '1.wav',
+             (torch.from_numpy(clean).float() / 32768 + noise[0, 0]).clamp(-1, 1).numpy(),
+             rate, subtype='PCM_16')
+    result = replay_gr_noise(*replay_fixture, batch_size=2, rng_seed=42)
+    assert result['variant'] == 'gr_seeded_batch_rng_v1'
+    assert result['rng_verification']['requested_batches'] == result['rng_verification']['verified_batches'] == 1
+    assert result['verified'] == 1
+    assert file_hash(output / 'protected_audio/one/1.wav') == file_hash(history / 'one/1.wav')
+
+
+def test_regenerated_rng_mismatch_fails_before_any_reference_is_written(replay_fixture):
+    with pytest.raises(ValueError, match='Regenerated RNG differs'):
+        replay_gr_noise(*replay_fixture, batch_size=2, rng_seed=42)
+    output = replay_fixture[-1]
+    result = json.loads((output / 'stage_manifest.json').read_text())
+    assert result['status'] == 'failed' and result['verified'] == 0
+    assert result['rng_verification']['verified_batches'] == 0
+    assert not list(output.rglob('*.wav'))

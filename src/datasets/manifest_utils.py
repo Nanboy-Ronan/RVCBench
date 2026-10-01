@@ -70,7 +70,16 @@ CANONICAL_TO_INTERNAL: Dict[str, str] = {
 def canonical_manifest_path(
     root_path: Path, manifest_filename: str = CANONICAL_MANIFEST_FILENAME
 ) -> Path:
-    return Path(root_path) / manifest_filename
+    declared = Path(manifest_filename).expanduser()
+    dataset_path = Path(root_path) / declared
+    if declared.is_absolute() or len(declared.parts) == 1:
+        return dataset_path
+    from hydra.utils import to_absolute_path
+    project_path = Path(to_absolute_path(str(declared)))
+    matches = {p.resolve() for p in (dataset_path, project_path) if p.is_file()}
+    if len(matches) > 1:
+        raise ValueError(f'Ambiguous manifest path {manifest_filename!r}; use an absolute path')
+    return next(iter(matches), dataset_path)
 
 
 def _stringify(value) -> str:
@@ -226,6 +235,10 @@ def load_dataset_manifest(
     root_path = Path(root_path)
     dataset_name = dataset_name or root_path.name
 
+    if manifest_filename:
+        requested = canonical_manifest_path(root_path, manifest_filename)
+        if not requested.is_file():
+            raise FileNotFoundError(f'Requested manifest does not exist: {requested}')
     df = load_canonical_manifest(
         root_path, manifest_filename or CANONICAL_MANIFEST_FILENAME
     )

@@ -40,8 +40,21 @@ the clone runner records the adjacent producer manifest hash, requires complete
 verification and checks the selected input/output hashes against its rows
 before model loading. Failed or stale producer outputs cannot be consumed.
 
-This is reproduction from frozen experimental noise, not regeneration of the
-original random-number stream. Historical batch construction, worker RNGs,
-text-feature fallbacks and runtime versions can affect newly drawn noise.
-The archived replay does not replace that outstanding reproducibility work,
-nor does it establish the denoising or other protection methods' production.
+## Regenerate the original RNG stream
+
+Add `--regenerate-rng --seed 42 --epsilon 0.03137255 --device cuda:0` to the
+command to draw new Gaussian noise for every batch in the full cohort.
+Archive values serve only as comparison data in this mode. Every regenerated
+batch must match its archived tensor exactly before any selected WAV is written;
+a mismatch fails the stage. The generated noise then produces the selected
+references, whose WAV hashes must also match the historical files.
+
+The `gr_seeded_batch_rng_v1` manifest records the seed, standard deviation,
+device and full-cohort batch verification counts. The clone runner rejects
+incomplete RNG verification. Device and Torch/CUDA version can affect RNG
+output; CPU is not assumed equivalent to the historical CUDA run.
+
+On the released LibriTTS cohort, the seed-42 CUDA stream matches all 280 archived
+batches, and the fixed 16 selected outputs match their historical WAVs.
+This establishes the checked Gaussian-noise production path; other protection
+methods require their own production and protocol validation.

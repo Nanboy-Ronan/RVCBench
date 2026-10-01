@@ -1,5 +1,6 @@
 """Reconstruct historical GR outputs from a frozen batch-noise archive."""
 import logging
+import math
 from pathlib import Path
 
 from omegaconf import OmegaConf
@@ -9,16 +10,21 @@ from src.datasets.zero_shot import ZeroShotDataset
 
 
 def replay_gr_noise(dataset_root, subset_manifest, noise_archive, historical_directory,
-                    output, batch_size=8, sample_rate=24000, hop_length=512):
+                    output, batch_size=8, sample_rate=24000, hop_length=512,
+                    rng_seed=None, epsilon=0.03137255, device='cpu'):
     """Replay selected outputs, preserving the full cohort's batch positions.
 
-    This reproduces archived perturbations, not the original RNG draws. Each
+    By default this replays archived perturbations. With rng_seed, the full
+    cohort RNG stream is regenerated and verified against every archived batch. Each
     output must match its historical WAV before the stage is marked complete.
     The supported historical input format is mono PCM16 at the declared rate.
     """
     import soundfile as sf
     import torch
 
+    if rng_seed is not None and (not isinstance(rng_seed, int) or
+            not -(2**63) <= rng_seed < 2**64 or not math.isfinite(epsilon) or epsilon < 0):
+        raise ValueError('Invalid RNG seed or Gaussian standard deviation')
     if batch_size <= 0 or sample_rate <= 0 or hop_length <= 0:
         raise ValueError('Batch size, sample rate and hop length must be positive')
     dataset_root, subset_manifest, noise_archive, historical_directory, output = [
@@ -88,7 +94,8 @@ def replay_gr_noise(dataset_root, subset_manifest, noise_archive, historical_dir
             raise FileNotFoundError(f'Historical comparison WAV missing: {historical}')
         planned.append((sample, batch, slot, destination, historical))
     output.mkdir(parents=True, exist_ok=False)
-    manifest = {'schema_version': 1, 'stage': 'protection', 'variant': 'gr_archived_noise_replay_v1',
+    manifest = {'schema_version': 1, 'stage': 'protection', 'variant': ('gr_seeded_batch_rng_v1' if rng_seed is not None
+                                                               else 'gr_archived_noise_replay_v1'),
         'status': 'running', 'requested': len(planned), 'verified': 0, 'rows': [],
         'noise_archive': str(noise_archive), 'noise_archive_sha256': file_hash(noise_archive),
         'subset_manifest': str(subset_manifest), 'subset_manifest_sha256': file_hash(subset_manifest),
@@ -104,12 +111,37 @@ def replay_gr_noise(dataset_root, subset_manifest, noise_archive, historical_dir
                                    Path(__file__).parents[1] / 'datasets/manifest_utils.py')},
         'limits': ['Uses archived noise; does not reconstruct the original RNG stream.',
                    'Historical WAV comparison is required; no alternate batch permutation is searched.']}
+    if rng_seed is not None:
+        manifest['rng_verification'] = {'seed': rng_seed, 'epsilon': epsilon, 'device': str(device),
+            'requested_batches': sum(len(v) for v in archive.values()), 'verified_batches': 0}
+        manifest['limits'] = ['Entire cohort RNG stream must match the archived batches.',
+                              'Selected WAVs must match historical outputs; cross-runtime RNG equivalence is not assumed.']
     path = output / 'stage_manifest.json'
     atomic_json(path, manifest)
     try:
+        regenerated = {}
+        if rng_seed is not None:
+            generator = torch.Generator(device=device).manual_seed(rng_seed)
+            selected_slots = {(s.speaker_id, b, slot): s for s, b, slot, _, _ in planned}
+            for speaker, cohort_samples in speakers.items():
+                for batch, start in enumerate(range(0, len(cohort_samples), batch_size)):
+                    samples = cohort_samples[start:start + batch_size]
+                    shape = (len(samples), 1, max(information[sample_id(s)].frames for s in samples))
+                    generated = (torch.randn(shape, dtype=torch.float32, device=device,
+                                             generator=generator) * epsilon).cpu()
+                    if not torch.equal(generated, archive[speaker][batch]):
+                        raise ValueError(f'Regenerated RNG differs for {speaker}, batch {batch}')
+                    for slot in range(len(samples)):
+                        sample = selected_slots.get((speaker, batch, slot))
+                        if sample is not None:
+                            frames = information[sample_id(sample)].frames
+                            regenerated[sample_id(sample)] = generated[slot, 0, :frames].clone()
+                    manifest['rng_verification']['verified_batches'] += 1
+                    atomic_json(path, manifest)
         for sample, batch, slot, destination, historical in planned:
             audio, rate = sf.read(sample.prompt_path, dtype='int16')
-            noise = archive[sample.speaker_id][batch][slot, 0, :len(audio)]
+            noise = (regenerated[sample_id(sample)] if rng_seed is not None else
+                     archive[sample.speaker_id][batch][slot, 0, :len(audio)])
             if not torch.isfinite(noise).all():
                 raise ValueError(f'Nonfinite archived noise for {sample_id(sample)}')
             result = (torch.from_numpy(audio).float() / 32768 + noise).clamp(-1, 1)

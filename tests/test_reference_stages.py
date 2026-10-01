@@ -95,7 +95,7 @@ def test_producer_manifest_changes_lineage_without_changing_audio(setup_run):
 
 
 @pytest.mark.parametrize('failure', ['failed', 'stale_output', 'wrong_count', None])
-@pytest.mark.parametrize('variant', ['gr_archived_noise_replay_v1', 'dns64_dataset_rate_v1'])
+@pytest.mark.parametrize('variant', ['gr_archived_noise_replay_v1', 'gr_seeded_batch_rng_v1', 'dns64_dataset_rate_v1'])
 def test_archived_producer_must_be_complete_and_match_selected_outputs(setup_run, failure, variant):
     conf, dataset, run, tmp_path = setup_run
     root, _, _ = stage_directory(dataset, tmp_path)
@@ -103,6 +103,8 @@ def test_archived_producer_must_be_complete_and_match_selected_outputs(setup_run
     rows = [{**b, 'historical_sha256': b['reference_sha256']} for b in baseline['bindings']]
     producer = {'schema_version': 1, 'variant': variant,
                 'status': 'complete', 'requested': len(rows), 'verified': len(rows), 'rows': rows}
+    if variant == 'gr_seeded_batch_rng_v1':
+        producer['rng_verification'] = {'requested_batches': 1, 'verified_batches': 1}
     if failure == 'failed':
         producer['status'] = 'failed'
     elif failure == 'stale_output':
@@ -118,3 +120,17 @@ def test_archived_producer_must_be_complete_and_match_selected_outputs(setup_run
     else:
         _, manifest, _ = run('verified-producer')
         assert manifest['reference_stage']['producer_status'] == 'verified_selected_output_hashes'
+
+
+def test_seeded_producer_requires_full_rng_verification(setup_run):
+    _, dataset, _, tmp_path = setup_run
+    root, _, _ = stage_directory(dataset, tmp_path)
+    samples = dataset.get_zero_shot_samples()
+    _, baseline = bind_reference_stage(samples, dataset._dataset_root, root)
+    rows = [{**b, 'historical_sha256': b['reference_sha256']} for b in baseline['bindings']]
+    producer = {'schema_version': 1, 'variant': 'gr_seeded_batch_rng_v1',
+                'status': 'complete', 'requested': len(rows), 'verified': len(rows), 'rows': rows,
+                'rng_verification': {'requested_batches': 2, 'verified_batches': 1}}
+    (root / 'stage_manifest.json').write_text(json.dumps(producer))
+    with pytest.raises(ValueError, match='regenerated RNG'):
+        bind_reference_stage(samples, dataset._dataset_root, root)

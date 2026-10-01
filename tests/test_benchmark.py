@@ -373,3 +373,34 @@ def test_journal_recovers_progress_and_ignores_torn_tail(setup_run):
     with patch('src.benchmark.backends.select_adversary', side_effect=AssertionError('must replay journal')):
         _, resumed, _ = run('journal-resumed')
     assert resumed['coverage']['generated'] == 2
+
+
+def test_repository_relative_subset_manifest(setup_run, monkeypatch):
+    conf, _, _, tmp_path = setup_run
+    monkeypatch.chdir(tmp_path)
+    subset = tmp_path / 'reproduction' / 'subset.json'
+    subset.parent.mkdir()
+    subset.write_text((Path(conf.dataset.root_path) / 'metadata.json').read_text())
+    conf.dataset.manifest_filename = 'reproduction/subset.json'
+    dataset = ZeroShotDataset(conf, conf.dataset, logging.getLogger())
+    assert len(dataset.get_zero_shot_samples()) == 2
+    assert all(s.prompt_path.is_file() for s in dataset.get_zero_shot_samples())
+
+
+def test_relative_subset_manifest_rejects_ambiguous_roots(setup_run, monkeypatch):
+    conf, _, _, tmp_path = setup_run
+    monkeypatch.chdir(tmp_path)
+    for base in [tmp_path, Path(conf.dataset.root_path)]:
+        subset = base / 'reproduction' / 'subset.json'
+        subset.parent.mkdir()
+        subset.write_text((Path(conf.dataset.root_path) / 'metadata.json').read_text())
+    conf.dataset.manifest_filename = 'reproduction/subset.json'
+    with pytest.raises(ValueError, match='Ambiguous manifest path'):
+        ZeroShotDataset(conf, conf.dataset, logging.getLogger())
+
+
+def test_missing_explicit_subset_never_falls_back_to_other_manifests(setup_run):
+    conf, _, _, _ = setup_run
+    conf.dataset.manifest_filename = 'missing-subset.json'
+    with pytest.raises(FileNotFoundError, match='Requested manifest'):
+        ZeroShotDataset(conf, conf.dataset, logging.getLogger())

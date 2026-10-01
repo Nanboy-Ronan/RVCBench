@@ -63,12 +63,16 @@ def bind_reference_stage(samples, dataset_root, reference_root, kind='external_r
         if 'status' in producer and producer['status'] != 'complete':
             raise ValueError('Reference stage producer is not complete')
         producer_status = 'manifest_recorded'
-        if producer.get('variant') in ('gr_archived_noise_replay_v1', 'dns64_dataset_rate_v1'):
+        if producer.get('variant') in ('gr_archived_noise_replay_v1', 'gr_seeded_batch_rng_v1', 'dns64_dataset_rate_v1'):
             records = producer.get('rows', [])
             if (producer.get('schema_version') != 1 or producer.get('status') != 'complete' or
                     not records or producer.get('verified') != len(records) or
                     producer.get('requested') != len(records)):
-                raise ValueError('Incomplete archived-noise producer verification')
+                raise ValueError('Incomplete reference stage producer verification')
+            if producer['variant'] == 'gr_seeded_batch_rng_v1':
+                rng = producer.get('rng_verification') or {}
+                if not rng.get('requested_batches') or rng.get('verified_batches') != rng['requested_batches']:
+                    raise ValueError('Incomplete regenerated RNG verification')
             by_id = {r['sample_id']: r for r in records}
             if len(by_id) != len(records):
                 raise ValueError('Duplicate producer sample identities')
@@ -77,7 +81,7 @@ def bind_reference_stage(samples, dataset_root, reference_root, kind='external_r
                 if not record or any(record.get(k) != binding[k] for k in
                         ('speaker_id', 'clean_prompt_sha256', 'reference_sha256')):
                     raise ValueError('Reference stage output differs from its producer manifest')
-                if (producer['variant'] == 'gr_archived_noise_replay_v1' and
+                if (producer['variant'] in ('gr_archived_noise_replay_v1', 'gr_seeded_batch_rng_v1') and
                         record.get('historical_sha256') != binding['reference_sha256']):
                     raise ValueError('Reference stage output is not historically verified')
             producer_status = 'verified_selected_output_hashes'

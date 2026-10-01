@@ -407,7 +407,7 @@
     },
     {
       "item": "Protocol and stage plan for protection, denoising, generation and scoring",
-      "status": "strict_reference_binding_protected_and_denoised_16_pair_generation_and_core_scoring_verified_gr_replay_and_dns64_producers_verified_other_producers_pending"
+      "status": "gr_seeded_rng_full_cohort_and_dns64_production_verified_other_protection_producers_pending"
     },
     {
       "item": "Separate completion, protocol validity and cross-run comparability",

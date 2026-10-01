@@ -28,7 +28,8 @@ and target bytes remain unchanged.
 An adjacent `stage_manifest.json` is hashed and recorded when present. This is
 recorded producer metadata; unknown producer formats do not attest their claims.
 A producer declaring an unfinished or failed status is rejected. For the known
-`gr_archived_noise_replay_v1` and `dns64_dataset_rate_v1` formats, the runner additionally requires complete
+`gr_archived_noise_replay_v1`, `gr_seeded_batch_rng_v1` and
+`dns64_dataset_rate_v1` formats, the runner additionally requires complete
 verification counts and checks selected sample identities and clean/output/
 historical hashes against the producer rows. Such bindings are labeled
 `verified_selected_output_hashes`. Historical

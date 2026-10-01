@@ -11,6 +11,9 @@ Model checkpoints are downloaded or supplied separately. See
 The released selections under `reproduction/subsets/` contain pair identities,
 transcripts and input hashes. `libritts16_v1` selects 16 pairs across eight
 speakers. Use the same selection for generation, scoring and comparisons.
+A manifest filename resolves inside the dataset; a relative path such as
+`reproduction/subsets/...` can resolve from the project directory. Ambiguous
+paths and missing explicit manifests fail instead of selecting another population.
 
 ```bash
 python run_vc.py --config-name ots_vc/clean/libritts/qwen3_tts_ots \
