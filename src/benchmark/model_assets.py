@@ -10,15 +10,24 @@ def resolve_model_assets(conf, logger=None):
     model = str(conf.vc.model).lower()
     assets, unresolved, cache = {}, {}, {}
     suffixes = {'.safetensors', '.bin', '.pt', '.pth', '.ckpt', '.onnx', '.json', '.yaml', '.yml',
-                '.txt', '.tiktoken', '.model', '.vocab', '.py'}
+                '.txt', '.tiktoken', '.model', '.vocab', '.py', '.t7'}
     fields = {'checkpoint', 'checkpoint_path', 'model_path', 'model_dir', 'models_dir', 'checkpoint_dir',
               'config_path', 'hubert_checkpoint', 'hubert_tokenizer', 'vocoder_path',
               'ckpt_file', 'vocab_file', 'vocab_path', 'speaker_file_path', 'base_speaker_dir',
               'vocoder_local_path', 'spt_config_path', 'spt_checkpoint_path', 'codec_path',
               'audio_tokenizer_path', 'scene_prompt_path'}
-    for key, value in resolved.adversary.items():
-        if not isinstance(value, str) or not value or not (key in fields or key.endswith(('_checkpoint_path', '_config_path'))):
-            continue
+    references = {key: value for key, value in resolved.adversary.items()
+                  if isinstance(value, str) and value and (key in fields or key.endswith(('_checkpoint_path', '_config_path')))}
+    if model == 'styletts2' and resolved.adversary.get('config_path'):
+        configuration = OmegaConf.load(resolved.adversary.config_path)
+        for name in ('ASR_config', 'ASR_path', 'F0_path', 'PLBERT_dir'):
+            value = configuration.get(name)
+            if value:
+                dependency = Path(value).expanduser()
+                if not dependency.is_absolute():
+                    dependency = Path(resolved.adversary.code_path).expanduser() / dependency
+                references['styletts2.' + name] = str(dependency)
+    for key, value in references.items():
         path = Path(value).expanduser()
         if not path.is_absolute() and not path.exists() and resolved.adversary.get('code_path'):
             upstream_candidate = Path(resolved.adversary.code_path).expanduser() / path

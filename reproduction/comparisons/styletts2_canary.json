@@ -1,0 +1,63 @@
+{
+  "kind": "generation_scoring_canary",
+  "model": "styletts2",
+  "coverage": {
+    "requested": 2,
+    "generated": 2,
+    "generation_failed": 0,
+    "input_failed": 0,
+    "pending": 0,
+    "generating": 0,
+    "metric_valid": {
+      "mcd": 2,
+      "wer": 2,
+      "sim": 2,
+      "sva": 2,
+      "speechmos": 0,
+      "dnsmos": 0,
+      "emotion": 0
+    },
+    "required_metrics": [
+      "mcd",
+      "wer",
+      "sim"
+    ],
+    "status": "complete",
+    "eligible_for_comparison": true
+  },
+  "generation_manifest": "/tealab-data/rjin02/RVCBench/results/debug_styletts2_libritts2/20261001-010106-aae6b6d1/run_manifest.json",
+  "generation_manifest_sha256": "6bb71c34cba349d4fda6e94db22c2950ae6be06d0cfb3a382500635342fdb6e0",
+  "scoring_manifest": "/tealab-data/rjin02/RVCBench/results/debug_styletts2_libritts2_score/20261001-010307-786efedf/run_manifest.json",
+  "scoring_manifest_sha256": "c58914e99eefa6885085d9315b3198994ee15b21e9ec38c60862e50314a65de5",
+  "samples": [
+    {
+      "sample_id": "59c5e63512ec18bacdf941db596a939ba7953749cde66ff2b860d04d8eccc830",
+      "generated_sha256": "cdfac6d5f7a65a0a2a39339dd6f48d1f284f55715c708595bdd9e4bfa4a9b166",
+      "metrics": {
+        "mcd": 5.648732997118241,
+        "wer": 0.0,
+        "predicted_text": " You'll receive the packet Thursday morning, I inquired.",
+        "sim": 0.3639954924583435,
+        "sva": true
+      }
+    },
+    {
+      "sample_id": "bbbafeab3dbc9112c48d524d97c8ffbeebe4129c00afa96c7694033fda99e34f",
+      "generated_sha256": "cf47942d795d1588c9525e96d65ae45db8cc7e104fa7e501e0a25833d6aef45f",
+      "metrics": {
+        "mcd": 7.281572880003681,
+        "wer": 0.125,
+        "predicted_text": " A transferable ticket to the Hall of Fame.",
+        "sim": 0.27523496747016907,
+        "sva": true
+      }
+    }
+  ],
+  "repair_repeat_check": {
+    "full_manifest": "/tealab-data/rjin02/RVCBench/results/reproduce_v2_styletts2_libritts16/20261001-010412-ba502ef9/run_manifest.json",
+    "full_manifest_sha256": "22a80ba49021453bc75ce8d7e31b128e7f8cfe8cf70e121192593683081b5c40",
+    "matched": 2,
+    "identical_waveform_hashes": 2
+  },
+  "interpretation": "Initial canary predates auxiliary asset capture and scoped torch.load repair. The same two outputs repeat exactly after repair within the sixteen-pair run; no historical equivalence claim."
+}

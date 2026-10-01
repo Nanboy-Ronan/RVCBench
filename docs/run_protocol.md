@@ -249,3 +249,11 @@ The historical November 2025 log omitted `reference_role`; reproduction explicit
 uses `assistant`, the default in the nearest preceding source revision. This is
 source-derived historical alignment, not an immutable record of the executed code.
 The current clean YAML's explicit `user` reference role remains a distinct setting.
+
+StyleTTS2's model fingerprint follows `ASR_config`, `ASR_path`, `F0_path` and
+`PLBERT_dir` in its YAML, resolving relative paths against the configured upstream
+checkout. This includes `.t7` checkpoints and PL-BERT implementation/configuration.
+Legacy pickle loading is scoped to serial upstream model preparation, and the
+original `torch.load` is restored on success or failure. The primary checkpoint
+uses an explicit `weights_only=False` argument. Other implicit Hub assets remain
+outside the configured local asset coverage.

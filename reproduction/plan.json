@@ -352,9 +352,17 @@
       "status": "historical_results",
       "config": "configs/ots_vc/clean/libritts/styletts2_ots.yaml",
       "subset": "subsets/libritts16_v1/selection.json",
-      "generation_status": "pending",
-      "scoring_status": "pending",
-      "historical_comparison_status": "pending"
+      "generation_status": "complete",
+      "scoring_status": "complete",
+      "historical_comparison_status": "matched_subset_measured",
+      "generation_run": "results/reproduce_v2_styletts2_libritts16/20261001-010412-ba502ef9",
+      "runtime_compatibility_canary": "comparisons/styletts2_canary.json",
+      "provenance_limit": "Configured primary and YAML-referenced ASR/F0/PL-BERT assets captured. Other implicit Hub assets and historical immutable weight/runtime records remain incomplete. Serial scoped loader compatibility; no thread-safety claim.",
+      "scoring_run": "results/reproduce_v2_styletts2_libritts16_score/20261001-010515-a811e0ab",
+      "comparison": "comparisons/styletts2_libritts16_v1.json",
+      "historical_metric_replay": "comparisons/styletts2_metric_replay_v1.json",
+      "historical_metric_replay_status": "partial_WER_ASR_difference",
+      "reproduction_status": "full_subset_measured_historical_exact_equivalence_unproven"
     },
     {
       "n": "GLM-TTS",

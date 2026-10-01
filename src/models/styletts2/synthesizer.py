@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -9,6 +10,20 @@ import numpy as np
 import torch
 
 from src.models.model import BaseModel
+
+
+@contextmanager
+def legacy_checkpoint_loading():
+    """Scope trusted upstream pickle loading to serial model preparation."""
+    original = torch.load
+    def load(*args, **kwargs):
+        kwargs.setdefault('weights_only', False)
+        return original(*args, **kwargs)
+    torch.load = load
+    try:
+        yield
+    finally:
+        torch.load = original
 
 
 @dataclass
@@ -93,17 +108,6 @@ class StyleTTS2Synthesizer(BaseModel):
         code_path = self.config.code_path
         if str(code_path) not in sys.path:
             sys.path.insert(0, str(code_path))
-
-        # StyleTTS2 checkpoints rely on pickled state dicts; Torch 2.6+ defaults to weights_only=True.
-        if not getattr(torch.load, "_styletts2_patched", False):
-            _orig_torch_load = torch.load
-
-            def _patched_load(*args, **kwargs):
-                kwargs.setdefault("weights_only", False)
-                return _orig_torch_load(*args, **kwargs)
-
-            _patched_load._styletts2_patched = True  # type: ignore[attr-defined]
-            torch.load = _patched_load  # type: ignore[assignment]
 
         # Some installations of monotonic_align miss mask_from_lens; add a safe fallback
         try:
@@ -191,13 +195,14 @@ class StyleTTS2Synthesizer(BaseModel):
             if not plbert_dir or not plbert_dir.exists():
                 raise FileNotFoundError("StyleTTS2 PL-BERT directory not found. Update the adversary config paths.")
 
-            text_aligner = load_ASR_models(str(asr_path), str(asr_config))
-            pitch_extractor = load_F0_models(str(f0_path))
-            plbert = load_plbert(str(plbert_dir))
+            with legacy_checkpoint_loading():
+                text_aligner = load_ASR_models(str(asr_path), str(asr_config))
+                pitch_extractor = load_F0_models(str(f0_path))
+                plbert = load_plbert(str(plbert_dir))
 
             model_params = recursive_munch(raw_config["model_params"])
             model = build_model(model_params, text_aligner, pitch_extractor, plbert)
-            params_whole = torch.load(self.config.checkpoint_path, map_location="cpu")
+            params_whole = torch.load(self.config.checkpoint_path, map_location="cpu", weights_only=False)
             params = params_whole["net"]
             for key in model:
                 if key in params:
