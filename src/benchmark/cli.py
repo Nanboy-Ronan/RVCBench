@@ -12,7 +12,7 @@ def main():
     parser = argparse.ArgumentParser(prog='rvcbench')
     commands = parser.add_subparsers(dest='command', required=True)
     doctor = commands.add_parser('doctor', help='Check dependencies without loading models or downloading weights')
-    doctor.add_argument('--model', choices=['qwen3'], default=None)
+    doctor.add_argument('--model', choices=['qwen3', 'qwen3_omni'], default=None)
     doctor.add_argument('--eval', action='store_true')
     doctor.add_argument('--imports', action='store_true', help='Also import dependencies in an isolated subprocess to detect binary/version conflicts')
     status = commands.add_parser('status', help='Show run status and recovered sample coverage')
@@ -38,8 +38,10 @@ def main():
         raise SystemExit(result['status'] != 'comparable')
     if args.command == 'doctor':
         names = ['torch', 'hydra', 'pandas', 'pyarrow', 'soundfile']
-        if args.model:
+        if args.model == 'qwen3':
             names += ['qwen_tts']
+        elif args.model == 'qwen3_omni':
+            names += ['transformers', 'qwen_omni_utils', 'accelerate']
         if args.eval:
             names += ['torchaudio', 'whisper', 'speechbrain', 'pymcd', 'jiwer', 'torch_stoi']
         missing = [n for n in names if importlib.util.find_spec(n) is None]
@@ -51,6 +53,12 @@ def main():
                 proc = subprocess.run([sys.executable, '-c', 'import ' + name], capture_output=True, text=True, timeout=120)
                 if proc.returncode:
                     import_errors[name] = proc.stderr[-2000:]
+            if args.model == 'qwen3_omni' and 'transformers' not in missing and 'transformers' not in import_errors:
+                proc = subprocess.run([sys.executable, '-c',
+                    'from transformers import Qwen3OmniMoeForConditionalGeneration, Qwen3OmniMoeProcessor'],
+                    capture_output=True, text=True, timeout=120)
+                if proc.returncode:
+                    import_errors['qwen3_omni_symbols'] = proc.stderr[-2000:]
         print(json.dumps({'missing': missing, 'import_errors': import_errors, 'status': 'failed' if missing or import_errors else 'dependencies_present',
                           'note': 'Import availability only; does not validate GPU memory, weights, or inference.'}, indent=2))
         raise SystemExit(bool(missing or import_errors))

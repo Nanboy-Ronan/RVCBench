@@ -134,6 +134,50 @@ def test_worker_environment_probe_uses_actual_interpreter():
     assert set(result) == {'python', 'executable', 'packages'}
 
 
+@pytest.mark.parametrize('settings,imports', [
+    ({'attn_implementation': 'flash_attention_2'}, ''),
+    ({'use_flash_attn': True}, ''),
+    ({'use_flash_attn2': True}, ''),
+    ({}, 'import flash_attn\n'),
+    ({}, 'import transformers\n'),
+])
+def test_optional_attention_absence_and_installation_change_runtime_fingerprint(tmp_path, settings, imports):
+    from src.benchmark.fingerprints import generation_runtime
+    adapter = tmp_path / 'src/adversary/fixture.py'
+    adapter.parent.mkdir(parents=True)
+    adapter.write_text(imports)
+    conf = OmegaConf.create({'vc': {'mode': 'ots', 'model': 'fixture'}, 'adversary': settings})
+    with patch.dict('src.benchmark.fingerprints._ADVERSARY_REGISTRY',
+                    {'ots': {'fixture': 'src.adversary.fixture:Adapter'}}), \
+            patch('importlib.metadata.packages_distributions', return_value={'transformers': ['transformers']}), \
+            patch('importlib.metadata.requires', return_value=[]):
+        absent = generation_runtime(tmp_path, conf, {'transformers': 'fixture'})
+        installed = generation_runtime(tmp_path, conf, {'transformers': 'fixture', 'flash_attn': '2.7.4'})
+        upgraded = generation_runtime(tmp_path, conf, {'transformers': 'fixture', 'flash-attn': '2.8.0'})
+        assert absent['packages']['flash-attn'] is None
+        assert installed['packages']['flash-attn'] == '2.7.4'
+        assert absent != installed != upgraded
+
+
+def test_transitive_transformers_attention_dependency_closure(tmp_path):
+    from src.benchmark.fingerprints import generation_runtime
+    adapter = tmp_path / 'src/adversary/fixture.py'
+    adapter.parent.mkdir(parents=True)
+    adapter.write_text('import qwen_tts\n')
+    conf = OmegaConf.create({'vc': {'mode': 'ots', 'model': 'fixture'}, 'adversary': {}})
+    requirements = {'qwen-tts': ['transformers'], 'transformers': [], 'flash-attn': ['einops'], 'einops': []}
+    with patch.dict('src.benchmark.fingerprints._ADVERSARY_REGISTRY',
+                    {'ots': {'fixture': 'src.adversary.fixture:Adapter'}}), \
+            patch('importlib.metadata.packages_distributions', return_value={'qwen_tts': ['qwen-tts']}), \
+            patch('importlib.metadata.requires', side_effect=requirements.__getitem__):
+        first = generation_runtime(tmp_path, conf, {'qwen-tts': 'fixture', 'transformers': 'fixture',
+                                                  'flash-attn': 'fixture', 'einops': '0.7'})
+        second = generation_runtime(tmp_path, conf, {'qwen-tts': 'fixture', 'transformers': 'fixture',
+                                                   'flash-attn': 'fixture', 'einops': '0.8'})
+    assert first['packages']['einops'] == '0.7'
+    assert first != second
+
+
 def test_model_fingerprint_tracks_converter_config_and_speaker_embedding(tmp_path):
     from src.benchmark.model_assets import resolve_model_assets
     config_path = tmp_path / 'converter.json'

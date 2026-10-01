@@ -3,13 +3,19 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3.10
+  - python=3.11
   - pip
   - ffmpeg
   - libsndfile
   - espeak-ng
   - pip:
-      - --extra-index-url https://download.pytorch.org/whl/cu121
+      - --extra-index-url https://download.pytorch.org/whl/cu126
       - -e ..
-      - qwen-omni-utils
-      - git+https://github.com/huggingface/transformers
+      # API imports verified locally; full inference and clean install pending.
+      - torch==2.8.0
+      - torchaudio==2.8.0
+      - numpy==1.26.4
+      - transformers==4.57.3
+      - tokenizers==0.22.2
+      - qwen-omni-utils==0.0.8
+      - accelerate==1.12.0

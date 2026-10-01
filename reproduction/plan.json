@@ -35,9 +35,12 @@
       "status": "experimental_adapter",
       "config": "configs/ots_vc/clean/libritts/qwen3_omni_ots.yaml",
       "subset": "subsets/libritts16_v1/selection.json",
-      "generation_status": "pending",
+      "generation_status": "pending_incomplete_local_checkpoint",
       "scoring_status": "pending",
-      "historical_comparison_status": "historical_reference_not_established"
+      "historical_comparison_status": "historical_reference_not_established",
+      "runtime_audit": "comparisons/qwen3_omni_runtime_audit.json",
+      "adapter_status": "wrapper_restored_API_import_verified_inference_pending",
+      "provenance_limit": "Local HF cache has 1 of 15 required shards; no model inference. Interface tests and live API imports do not establish reference speaker cloning or subset reproduction."
     },
     {
       "n": "FireRedTTS-2",

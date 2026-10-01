@@ -8,6 +8,27 @@ the matching upstream runtime; they are not tested dependency lock files.
 
 ## Generate, evaluate, recover
 
+Generation dependency scope v3 records `flash-attn` even when absent if a
+FlashAttention option is selected, an upstream source imports it, or Transformers
+is in the dependency closure. Installing or changing this optional dependency
+therefore changes the generation fingerprint and prevents silent resume across
+an attention-backend change. This records package availability, not proof that
+a particular CUDA kernel actually ran.
+
+Qwen3-Omni's missing model wrapper has been restored with independent loading,
+cleanup on initialization failure, sample-index seeding, and validation of each
+output waveform. Output defaults to 24 kHz, independently of the processor's
+input feature-extractor rate. Its configured system prompt and requested voice
+remain explicit experiment settings; reference conditioning alone does not prove
+speaker cloning. The local checkpoint is incomplete (1/15 weight shards), so
+this integration remains experimental and its fixed-subset generation is pending.
+See `reproduction/comparisons/qwen3_omni_runtime_audit.json` and the
+[official Transformers API](https://huggingface.co/docs/transformers/v4.57.3/en/model_doc/qwen3_omni_moe).
+`rvcbench doctor --model qwen3_omni --imports` checks dependencies and the exact
+model/processor exports without loading weights. The environment recipe records
+the local API-import combination rather than an unpinned Transformers Git branch;
+it is not yet a validated clean installation or an inference recipe.
+
 The dots.tts subset check uses dots.tts 0.2.1, Torch 2.8.0, Transformers
 5.14.1 and NumPy 2.4.6 for generation, with evaluation in a separate environment.
 `envs/dots-tts.yml` records those key pins; a clean installation is not yet

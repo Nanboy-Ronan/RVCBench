@@ -85,6 +85,14 @@ def generation_runtime(root, conf, packages):
                                 external.add(node.module.split('.')[0])
     distributions = importlib.metadata.packages_distributions()
     requested = {name for module in external for name in distributions.get(module, [])}
+    # Optional attention imports have no distribution mapping when absent.
+    # Record absence too: installing flash-attn can change a fallback to FA2.
+    attention = str(conf.adversary.get('attn_implementation') or '').lower()
+    flash_selected = (attention in ('flash_attention_2', 'flash_attention_3')
+                      or bool(conf.adversary.get('use_flash_attn', False))
+                      or bool(conf.adversary.get('use_flash_attn2', False)))
+    if flash_selected or 'flash_attn' in external:
+        requested.add('flash-attn')
     # Include installed transitive requirements (e.g. transformers behind qwen-tts).
     # Checking only the directly imported distribution would permit silent runtime drift.
     from packaging.requirements import Requirement
@@ -95,6 +103,11 @@ def generation_runtime(root, conf, packages):
         if canonical in visited:
             continue
         visited.add(canonical)
+        # Transformers dynamically loads attention implementations, including
+        # when it is itself a transitive dependency of the model package.
+        if canonical == 'transformers':
+            requested.add('flash-attn')
+            queue.append('flash-attn')
         try:
             requirements = importlib.metadata.requires(name) or []
         except importlib.metadata.PackageNotFoundError:
@@ -112,6 +125,6 @@ def generation_runtime(root, conf, packages):
     worker = worker_environment(worker_python or sys.executable) if worker_python or conf.adversary.get('worker_script_path') else None
     return {'source_files': source_files, 'source_sha256': digest(source_files), 'packages': versions,
             'worker_environment': worker,
-            'dependency_scope': 'static_local_and_upstream_imports_and_distribution_dependency_closure_v2',
+            'dependency_scope': 'static_local_and_upstream_imports_and_distribution_dependency_closure_v3',
             'limitations': ['Unresolved dynamic upstream imports remain in full run provenance.',
                            'Worker packages are captured conservatively in full; dynamically downloaded assets need runtime capture.']}
