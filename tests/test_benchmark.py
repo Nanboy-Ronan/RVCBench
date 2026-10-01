@@ -69,6 +69,25 @@ def test_speaker_and_limits(setup_run):
         dataset.get_zero_shot_samples(max_samples=0)
 
 
+def test_public_runner_saves_summary_without_optional_output_paths(setup_run, tmp_path):
+    import subprocess
+    import sys
+    conf, _, _, _ = setup_run
+    conf.base_dir = str(tmp_path)
+    conf.device = 'cpu'
+    conf.run_name = 'no-output-paths'
+    path = tmp_path / 'public.yaml'
+    OmegaConf.save(conf, path)
+    script = Path(__file__).resolve().parents[1] / 'run_vc.py'
+    result = subprocess.run([sys.executable, str(script), '--config-dir', str(tmp_path),
+                             '--config-name', 'public'], capture_output=True, text=True, timeout=90)
+    assert result.returncode == 0, result.stderr[-3000:]
+    files = list((tmp_path / 'results/no-output-paths').glob('*/metrics.json'))
+    assert len(files) == 1
+    summary = json.loads(files[0].read_text())
+    assert summary['generation_evaluation']['coverage']['generated'] == 2
+
+
 def test_identity_and_duplicate_detection(setup_run):
     _, dataset, _, _ = setup_run
     a, b = dataset.get_zero_shot_samples()

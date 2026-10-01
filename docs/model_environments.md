@@ -70,6 +70,7 @@ cd ..
 | Spark-TTS | `envs/sparktts.yml` | `sparktts` |
 | StyleTTS2 | `envs/styletts2.yml` | `styletts2` |
 | VALL-E | `envs/vall-e.yml` | `vall-e` |
+| Bark Voice Clone | `envs/bark-native.yml` (native LibriTTS16 generated/scored; base recipe; [setup](bark_native.md)) | `bark-native` |
 | Amphion VALL-E (separate implementation) | `envs/amphion-valle.yml` (native LibriTTS16 generated/scored; base recipe) | `amphion-valle` |
 | VibeVoice | `envs/vibevoice.yml` | `vibevoice` |
 | XTTS-v2 | `envs/xtts-v2.yml` | `xtts-v2` |

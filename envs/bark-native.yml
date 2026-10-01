@@ -1,0 +1,30 @@
+# Base recipe for the measured Python 3.10 native runtime; not a clean-install lock.
+# Fairseq 0.12.2 declares older Hydra/OmegaConf dependencies. Install Fairseq
+# with --no-deps after its prerequisites; native imports and HuBERT factories
+# were validated with the versions below without shared-module patches.
+name: bark-native
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  - ffmpeg
+  - libsndfile
+  - pip:
+      - -e ..
+      - torch==2.4.1
+      - torchaudio==2.4.1
+      - numpy==1.26.4
+      - hydra-core==1.3.2
+      - omegaconf==2.3.0
+      - transformers==4.57.3
+      - encodec==0.1.1
+      - einops==0.8.2
+      - funcy==2.0
+      - scipy
+      - tqdm
+      - bitarray
+      - cython
+      - cffi
+      - regex
+      - sacrebleu

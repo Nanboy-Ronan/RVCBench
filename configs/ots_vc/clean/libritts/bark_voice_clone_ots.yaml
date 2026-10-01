@@ -10,11 +10,13 @@ vc:
   model: bark_voice_clone
 adversary:
   code_path: checkpoints/bark-with-voice-clone
-  models_dir: null
+  models_dir: checkpoints/bark-models
   cache_dir: null
   prompt_cache_dir: null
-  hubert_checkpoint: null
-  hubert_tokenizer: null
+  hubert_checkpoint: checkpoints/bark-assets/hubert_base_ls960.pt
+  hubert_tokenizer: checkpoints/bark-assets/hubert_tokenizer.pth
+  hubert_layer: 9
+  text_tokenizer_path: checkpoints/bark-assets/bert-tokenizer
   max_samples: null
   seed: null
 batch_size: 1

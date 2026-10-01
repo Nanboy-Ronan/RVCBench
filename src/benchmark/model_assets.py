@@ -12,7 +12,7 @@ def resolve_model_assets(conf, logger=None):
     suffixes = {'.safetensors', '.bin', '.pt', '.pth', '.ckpt', '.onnx', '.json', '.yaml', '.yml',
                 '.txt', '.tiktoken', '.model', '.vocab', '.py', '.t7', '.jsonl', '.fst', '.jinja'}
     fields = {'checkpoint', 'checkpoint_path', 'model_path', 'model_dir', 'models_dir', 'checkpoint_dir',
-              'config_path', 'pretrained_dir', 'text_tokens_path', 'hubert_checkpoint', 'hubert_tokenizer', 'vocoder_path',
+              'config_path', 'pretrained_dir', 'text_tokens_path', 'text_tokenizer_path', 'hubert_checkpoint', 'hubert_tokenizer', 'vocoder_path',
               'ckpt_file', 'vocab_file', 'vocab_path', 'speaker_file_path', 'base_speaker_dir',
               'vocoder_local_path', 'spt_config_path', 'spt_checkpoint_path', 'codec_path',
               'audio_tokenizer_path', 'scene_prompt_path', 'ckpt_dir', 'frontend_dir', 'reference_asr_model',
@@ -64,6 +64,10 @@ def resolve_model_assets(conf, logger=None):
         import torch
         references['valle.encodec_cache'] = str(Path(torch.hub.get_dir()) / 'checkpoints' /
                                                'encodec_24khz-d7cc33bc.th')
+    if model == 'bark_voice_clone':
+        import torch
+        references['bark.encodec_cache'] = str(Path(torch.hub.get_dir()) / 'checkpoints' /
+                                              'encodec_24khz-d7cc33bc.th')
     if model == 'styletts2' and resolved.adversary.get('config_path'):
         configuration = OmegaConf.load(resolved.adversary.config_path)
         for name in ('ASR_config', 'ASR_path', 'F0_path', 'PLBERT_dir'):

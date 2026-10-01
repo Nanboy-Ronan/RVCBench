@@ -55,7 +55,7 @@ def main(conf: DictConfig):
         },
         "generation_evaluation": generation_metrics,
     }
-    metrics_filename = Path(conf.output_paths.metrics_file).name
+    metrics_filename = Path(OmegaConf.select(conf, 'output_paths.metrics_file') or 'metrics.json').name
     metrics_file = exp_dir / metrics_filename
     metrics_file.parent.mkdir(parents=True, exist_ok=True)
     with open(metrics_file, "w", encoding="utf-8") as f:

@@ -651,9 +651,13 @@
       "status": "experimental_adapter",
       "config": "configs/ots_vc/clean/libritts/bark_voice_clone_ots.yaml",
       "subset": "subsets/libritts16_v1/selection.json",
-      "generation_status": "pending",
-      "scoring_status": "pending",
-      "historical_comparison_status": "historical_reference_not_established"
+      "generation_status": "complete",
+      "scoring_status": "complete",
+      "historical_comparison_status": "historical_reference_not_established",
+      "generation_run": "results/reproduce_v2_bark_native_libritts16/20261001-065408-6ccc49b1",
+      "scoring_run": "results/reproduce_v2_bark_native_libritts16_score/20261001-070646-0d142414",
+      "runtime_audit": "comparisons/bark_runtime_audit.json",
+      "provenance_limit": "Native frozen subset measured; no historical Bark matched reference established. Environment recipe is not a clean install lock."
     },
     {
       "n": "OZSpeech",

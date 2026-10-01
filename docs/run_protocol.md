@@ -666,3 +666,12 @@ fallback because flash-attn is absent. Historical effective attention backend,
 weights and environment equivalence remain unproven. Initial canary scoring uses
 the modern WER rule; the matched historical subset uses `lowercase_v1`, confirmed
 against all 2,000 historical rows.
+
+## Native Bark subset validation
+
+Bark completes all 16 frozen LibriTTS pairs with independent MCD/WER/SIM
+scoring. The first two waveforms exactly repeat the canary hashes. Mean MCD is
+5.915845, WER 0.101474, and SIM 0.404699. This establishes native runtime validation;
+no matched historical Bark reference has been established. See
+[`bark_runtime_audit.json`](../reproduction/comparisons/bark_runtime_audit.json)
+and the [asset and environment setup](bark_native.md).

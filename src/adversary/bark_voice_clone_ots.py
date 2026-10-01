@@ -74,6 +74,7 @@ class BarkVoiceCloneZeroShotAdversary(BaseAdversary):
             prompt_cache_dir=self.prompt_cache_dir,
             hubert_checkpoint=self.hubert_checkpoint,
             hubert_tokenizer=self.hubert_tokenizer,
+            text_tokenizer_path=self._resolve_optional_path(self.config.get('text_tokenizer_path')),
             text_temperature=float(self.config.get("text_temperature", 0.7)),
             text_top_k=self._coerce_optional("text_top_k", int),
             text_top_p=self._coerce_optional("text_top_p", float),
@@ -86,12 +87,7 @@ class BarkVoiceCloneZeroShotAdversary(BaseAdversary):
             silent=bool(self.config.get("silent", True)),
             force_reload_models=bool(self.config.get("force_reload_models", False)),
             max_prompt_seconds=self._coerce_optional("max_prompt_seconds", float),
-            torchaudio_hubert_bundle=str(
-                self.config.get("torchaudio_hubert_bundle", "HUBERT_BASE")
-            ),
-            torchaudio_hubert_layer=int(
-                self.config.get("torchaudio_hubert_layer", -1)
-            ),
+            hubert_layer=int(self.config.get('hubert_layer', 9)),
         )
         self._generator = BarkVoiceCloneGenerator(generator_config, self.device, self.logger)
 
@@ -146,9 +142,7 @@ class BarkVoiceCloneZeroShotAdversary(BaseAdversary):
             prompt_transcript = sample_prompt_texts.get(lookup_key, "") or self.default_prompt_text
             utterance_text = (sample.target_text or "").strip()
             if not utterance_text:
-                utterance_text = (sample.prompt_text or "").strip()
-            if not utterance_text:
-                utterance_text = prompt_transcript
+                raise ValueError('Bark requires nonempty target text')
 
             synth_start = time.perf_counter()
             audio_np, sample_rate = self._generator.generate(
