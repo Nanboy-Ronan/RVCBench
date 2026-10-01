@@ -28,6 +28,7 @@ adversary:
   seed: null
   default_prompt_text: "Here is a short sample of the desired voice."
   use_prompt_transcript: false
+  reference_asr_model: base.en
 
 defaults:
   - _self_

@@ -36,6 +36,8 @@ class ZeroShotDataset:
         frame = load_dataset_manifest(self._dataset_root, dataset_name=dataset_config.get('name', root.name),
                                       manifest_filename=dataset_config.get('manifest_filename'),
                                       manifest_variant=dataset_config.get('manifest_variant'))
+        if frame.empty:
+            raise ValueError(f'No samples found in {root}; check the dataset root and manifest_filename')
         self.variant_selection = frame.attrs['variant_selection']
         if 'source_index' not in frame.columns:
             frame['source_index'] = range(len(frame))

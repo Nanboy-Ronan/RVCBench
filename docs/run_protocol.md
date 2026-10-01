@@ -266,3 +266,31 @@ requested runtime. Model fingerprints include `ckpt_dir`, `frontend_dir` and ups
 inside installed third-party packages remain outside this configured asset coverage.
 The historical January 2026 checkpoint directory is no longer present locally;
 matching its current replacement to those historical weights is unproven.
+
+MOSS-TTSD inspects the local checkpoint's `auto_map` and uses its declared
+`AutoModel` class when present. The legacy Asteroid loader remains available for
+older checkpoints without that declaration. Missing or mismatched model parameters
+are rejected; explicitly declared tied weights must refer to the loaded source
+parameter. The validated native checkpoint runtime uses Transformers 5.0.0:
+4.53.2 lacks its `tie_weights` interface, and 5.14.1 removed a cache helper used
+by its custom generation code. `envs/moss-ttsd.yml` records the key runtime pins;
+the isolated overlay has been tested, but a clean installation is unverified.
+The wrapper supplies the tokenizer's actual padding ID to the native config and
+requests a full generated sequence, because the upstream batch helper already
+slices off the reference prefix.
+
+MOSS-TTSD preserves historical reference-ASR behavior by default
+(`use_prompt_transcript=false`). Set `reference_asr_model` to an explicit local
+Whisper checkpoint for asset hashing, or select `use_prompt_transcript=true` to
+use the manifest's reference text. These are distinct generation protocols.
+ASR loads during preparation and is released with the generator; an unused ASR
+asset is excluded when manifest text is selected. The current native checkpoint
+differs from the legacy loader's architecture, and immutable historical weights
+are absent, so a matched-input comparison does not establish historical weight
+equivalence.
+
+Fatal CUDA device assertions and illegal memory accesses terminate a run after
+journaling the failed sample. Subsequent samples stay pending, and scorers are
+not launched in the invalid context. Ordinary per-sample errors continue to use
+the configured retry policy. An empty dataset now reports the dataset root and
+asks the caller to check `manifest_filename`, before accessing variant metadata.

@@ -58,7 +58,8 @@ cd ..
 | MaskGCT | `envs/maskgct.yml` | `maskgct` |
 | MGM-Omni | `envs/mgm-omni.yml` | `mgm-omni` |
 | MOSS-TTS | `envs/moss-tts.yml` | `moss-tts` |
-| MOSS-TTSD | `envs/moss.yml` | `moss` |
+| MOSS-TTSD (native MossTTSD checkpoint) | `envs/moss-ttsd.yml` | `moss-ttsd` |
+| MOSS-TTSD (legacy Asteroid checkpoint) | `envs/moss.yml` | `moss` |
 | OpenVoice | `envs/openvoice.yml` | `openvoice` |
 | OZSpeech | `envs/ozspeech.yml` | `ozspeech` |
 | PlayDiffusion | `envs/playdiffusion.yml` | `playdiffusion` |

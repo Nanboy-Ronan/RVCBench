@@ -423,9 +423,20 @@
       "status": "historical_results",
       "config": "configs/ots_vc/clean/libritts/moss_ttsd_ots.yaml",
       "subset": "subsets/libritts16_v1/selection.json",
-      "generation_status": "pending",
-      "scoring_status": "pending",
-      "historical_comparison_status": "pending"
+      "generation_status": "complete",
+      "scoring_status": "complete",
+      "historical_comparison_status": "matched_subset_measured",
+      "failed_attempts": [
+        {
+          "evidence": "comparisons/moss_ttsd_runtime_initial_failures.json"
+        }
+      ],
+      "provenance_limit": "Current native MossTTSD checkpoint differs from the legacy Asteroid loader architecture. Historical immutable weights/runtime absent; weight equivalence unproven. Validated Transformers 5.0.0 overlay and key-pin recipe are not a clean environment lock. Reference ASR uses a hashed local base.en checkpoint; historical ASR weight equivalence unproven.",
+      "generation_run": "results/reproduce_v2_moss_ttsd_native_tf500_libritts16/20261001-014556-9961dcc0",
+      "scoring_run": "results/reproduce_v2_moss_ttsd_native_tf500_libritts16_score/20261001-014807-2bb92151",
+      "comparison": "comparisons/moss_ttsd_libritts16_v1.json",
+      "historical_metric_replay": "comparisons/moss_ttsd_metric_replay_v1.json",
+      "canary": "comparisons/moss_ttsd_canary.json"
     },
     {
       "n": "MOSS-TTS",

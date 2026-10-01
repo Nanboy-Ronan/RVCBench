@@ -1,0 +1,22 @@
+# Native MossTTSD checkpoint runtime validated in an isolated overlay.
+# Clean installation remains unverified; XY_Tokenizer dependencies must also be
+# installed from the configured MOSS-TTSD checkout. Score in a separate eval env.
+name: moss-ttsd
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - ffmpeg
+  - libsndfile
+  - pip:
+      - --extra-index-url https://download.pytorch.org/whl/cu126
+      - -e ..
+      - torch==2.8.0
+      - torchaudio==2.8.0
+      - transformers==5.0.0
+      - tokenizers==0.22.2
+      - numpy==1.26.4
+      - einops
+      - openai-whisper

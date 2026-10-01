@@ -74,6 +74,8 @@ class MossTTSDZeroShotAdversary(BaseAdversary):
             use_normalize=self.use_normalize,
             silence_duration=self.silence_duration,
             seed=self.seed,
+            use_prompt_transcript=self.use_prompt_transcript,
+            reference_asr_model=str(self.config.get('reference_asr_model', 'base.en')),
         )
         self._generator = MossTTSDGenerator(generator_config, self.device, self.logger)
 

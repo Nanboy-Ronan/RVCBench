@@ -139,6 +139,39 @@ def fake_evaluate(pairs, directory, *args, **kwargs):
     return {'sample_metrics_csv': str(path), 'avg_sim': .5}
 
 
+@pytest.mark.parametrize('message', ['CUDA error: device-side assert triggered',
+                                   'CUDA error: an illegal memory access was encountered'])
+def test_fatal_cuda_error_stops_retries_and_preserves_pending_samples(setup_run, message):
+    conf, _, run, root = setup_run
+    conf.vc.retries = 2
+    conf.vc.generate_only = False
+    class Fatal(SmokeAdversary):
+        calls = 0
+        def attack(self, **kwargs):
+            self.calls += 1
+            raise RuntimeError(message)
+    adapter = Fatal(conf, conf.dataset, 'cpu', logging.getLogger())
+    with patch('src.benchmark.backends.select_adversary', return_value=adapter), \
+            patch('src.evaluation.pipeline.evaluate_run') as scorer:
+        with pytest.raises(RuntimeError, match='CUDA error'):
+            run('fatal')
+    manifest = json.loads((root / 'fatal/run_manifest.json').read_text())
+    assert adapter.calls == 1
+    scorer.assert_not_called()
+    assert manifest['status'] == 'failed'
+    assert manifest['samples'][0]['fatal_runtime_error']
+    assert manifest['samples'][0]['attempts'] == 1
+    assert manifest['samples'][1]['status'] == 'pending'
+    assert manifest['coverage']['generation_failed'] == 1
+    assert manifest['coverage']['pending'] == 1
+
+
+def test_missing_dataset_has_actionable_error(tmp_path):
+    conf = OmegaConf.create({'dataset': {'root_path': str(tmp_path), 'use_hf_dataset': False}})
+    with pytest.raises(ValueError, match='manifest_filename'):
+        ZeroShotDataset(conf, conf.dataset, logging.getLogger())
+
+
 def test_eval_separate_and_report_gate(setup_run):
     conf, _, run, _ = setup_run
     first, _, _ = run('first')

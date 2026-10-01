@@ -174,6 +174,16 @@ def run_zero_shot(conf, base_dir, device, dataset, exp_dir, logger, protected_au
                         row.update(status='generation_failed', error=f'{type(exc).__name__}: {exc}',
                                    warnings=list(handler.messages))
                         logger.warning('Sample %s attempt %d failed: %s', row['sample_id'], attempt + 1, exc)
+                        # These CUDA errors invalidate the process's context. Retrying
+                        # or evaluating subsequent samples would produce dependent
+                        # failures rather than independent benchmark observations.
+                        message = str(exc).lower()
+                        if any(marker in message for marker in (
+                                'device-side assert', 'illegal memory access',
+                                'cuda_error_assert', 'cuda_error_illegal_address')):
+                            row['fatal_runtime_error'] = True
+                            append_sample_event(events, row)
+                            raise
             generated_count += bool(row.get('generated_sha256'))
             failed_count += row['status'] in ('input_failed', 'generation_failed')
             append_sample_event(events, row)

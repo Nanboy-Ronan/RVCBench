@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
 from pathlib import Path
 from typing import Optional, Tuple, Union
 
@@ -27,6 +28,8 @@ class MossTTSDGeneratorConfig:
     use_normalize: bool = True
     silence_duration: float = 0.0
     seed: Optional[int] = None
+    use_prompt_transcript: bool = False
+    reference_asr_model: str = 'base.en'
 
 
 class MossTTSDGenerator(BaseModel):
@@ -52,8 +55,8 @@ class MossTTSDGenerator(BaseModel):
         self._spt = None
 
         self._validate_paths()
-        import whisper
-        self.whisper_model = whisper.load_model("base.en", device=device)
+        self.whisper_model = None
+        self._checkpoint_native_class = False
 
     # ------------------------------------------------------------------
     # Public API
@@ -70,13 +73,19 @@ class MossTTSDGenerator(BaseModel):
         self.ensure_model()
         self._set_seed(sample_index)
 
-        with torch.no_grad():
-            result = self.whisper_model.transcribe(
-                str(prompt_audio),
-                language="en",
-                fp16=self.whisper_model.device.type != "cpu",
-            )
-        original_text = result.get("text", "").strip()
+        if self.config.use_prompt_transcript:
+            original_text = (prompt_text or '').strip()
+            if not original_text:
+                raise ValueError('MOSS-TTSD requires reference text when use_prompt_transcript=True')
+        else:
+            assert self.whisper_model is not None
+            with torch.no_grad():
+                result = self.whisper_model.transcribe(
+                    str(prompt_audio),
+                    language="en",
+                    fp16=self.whisper_model.device.type != "cpu",
+                )
+            original_text = result.get("text", "").strip()
 
         item = {"text": f"[S1]{text} "}
         item["prompt_audio_speaker1"] = str(prompt_audio)
@@ -85,10 +94,15 @@ class MossTTSDGenerator(BaseModel):
         item["prompt_text_speaker2"] = original_text
 
         process_batch = getattr(self._generation_utils, "process_batch")
+        generation_model = self._model
+        if self._checkpoint_native_class:
+            # Legacy batch processing slices off the prompt itself; request the
+            # complete sequence from the checkpoint's newer generation API.
+            generation_model = _FullSequenceModel(self._model)
         actual_texts, audio_results = process_batch(
             batch_items=[item],
             tokenizer=self._tokenizer,
-            model=self._model,
+            model=generation_model,
             spt=self._spt,
             device=self.device,
             system_prompt=self.config.system_prompt,
@@ -160,24 +174,56 @@ class MossTTSDGenerator(BaseModel):
 
     def load_model(self) -> None:
         if self._model is not None and self._spt is not None:
+            self._load_reference_asr()
             return
 
         self._ensure_imports()
 
-        load_model_fn = getattr(self._generation_utils, "load_model")
-        tokenizer, model, spt = load_model_fn(
-            self.config.model_path,
-            str(self.config.spt_config_path),
-            str(self.config.spt_checkpoint_path),
-            torch_dtype=self._torch_dtype,
-            attn_implementation=self.config.attn_implementation,
-        )
+        metadata = Path(self.config.model_path) / 'config.json'
+        declared = json.loads(metadata.read_text()) if metadata.is_file() else {}
+        self._checkpoint_native_class = bool(declared.get('auto_map', {}).get('AutoModel'))
+        if self._checkpoint_native_class:
+            from transformers import AutoTokenizer, AutoModel, AutoConfig
+            _check_native_runtime()
+            from XY_Tokenizer.xy_tokenizer.model import XY_Tokenizer
+            tokenizer = AutoTokenizer.from_pretrained(self.config.model_path, trust_remote_code=True)
+            native_config = AutoConfig.from_pretrained(self.config.model_path, trust_remote_code=True,
+                                                       pad_token_id=tokenizer.pad_token_id)
+            # Transformers 5 removes generation-only fields during config loading,
+            # but this checkpoint implementation still reads this embedding index.
+            native_config.pad_token_id = tokenizer.pad_token_id
+            model, loading = AutoModel.from_pretrained(
+                self.config.model_path, trust_remote_code=True, torch_dtype=self._torch_dtype,
+                config=native_config, attn_implementation=self.config.attn_implementation, output_loading_info=True)
+            _restore_declared_ties(model, loading)
+            _validate_loaded_parameters(model, loading)
+            spt = XY_Tokenizer.load_from_checkpoint(config_path=str(self.config.spt_config_path),
+                                                   ckpt_path=str(self.config.spt_checkpoint_path))
+        else:
+            load_model_fn = getattr(self._generation_utils, "load_model")
+            tokenizer, model, spt = load_model_fn(
+                self.config.model_path,
+                str(self.config.spt_config_path),
+                str(self.config.spt_checkpoint_path),
+                torch_dtype=self._torch_dtype,
+                attn_implementation=self.config.attn_implementation,
+            )
 
         self._tokenizer = tokenizer
         self._model = model.to(self.device)
         self._spt = spt.to(self.device)
         self._model.eval()
         self._spt.eval()
+        self._load_reference_asr()
+
+    def _load_reference_asr(self):
+        if not self.config.use_prompt_transcript and self.whisper_model is None:
+            import whisper
+            self.whisper_model = whisper.load_model(self.config.reference_asr_model, device=self.device)
+
+    def close(self):
+        self._model = self._spt = self._tokenizer = self.whisper_model = None
+        self._model_ready = False
 
 
     def _resolve_dtype(self, dtype: Union[str, torch.dtype]) -> torch.dtype:
@@ -208,3 +254,57 @@ class MossTTSDGenerator(BaseModel):
             torch.manual_seed(seed)
             if torch.cuda.is_available():
                 torch.cuda.manual_seed_all(seed)
+
+
+class _FullSequenceModel:
+    def __init__(self, model):
+        self.model = model
+
+    def generate(self, *args, **kwargs):
+        kwargs['output_only'] = False
+        return self.model.generate(*args, **kwargs)
+
+    def __getattr__(self, name):
+        return getattr(self.model, name)
+
+
+def _validate_loaded_parameters(model, loading):
+    ties = getattr(model, '_tied_weights_keys', {})
+    missing = []
+    for name in loading.get('missing_keys', []):
+        source = ties.get(name) if isinstance(ties, dict) else None
+        if source and model.get_parameter(name) is model.get_parameter(source):
+            continue
+        missing.append(name)
+    if missing or loading.get('mismatched_keys'):
+        raise RuntimeError(f'MOSS-TTSD checkpoint parameters were not loaded: {missing}; '
+                           f'mismatches={loading.get("mismatched_keys", [])}')
+
+
+def _restore_declared_ties(model, loading):
+    """Honor explicit checkpoint aliases on older Transformers loaders."""
+    ties = getattr(model, '_tied_weights_keys', {})
+    if not isinstance(ties, dict):
+        return
+    missing = set(loading.get('missing_keys', []))
+    for target, source in ties.items():
+        if target not in missing or source in missing:
+            continue
+        original, loaded = model.get_parameter(target), model.get_parameter(source)
+        if original.shape != loaded.shape:
+            raise RuntimeError(f'MOSS-TTSD declared weight alias has incompatible shapes: {target} -> {source}')
+        parent, name = target.rsplit('.', 1)
+        setattr(model.get_submodule(parent), name, loaded)
+
+
+def _check_native_runtime():
+    """Check the APIs used by the configured native MOSS-TTSD checkpoint."""
+    import inspect
+    from transformers import PreTrainedModel
+    from transformers.generation.utils import GenerationMixin
+    tie = inspect.signature(PreTrainedModel.tie_weights).parameters
+    cache = getattr(GenerationMixin, '_get_initial_cache_position', None)
+    if not {'missing_keys', 'recompute_mapping'} <= tie.keys() or cache is None:
+        raise RuntimeError('Native MOSS-TTSD checkpoint requires compatible Transformers tie_weights '
+                           'and generation cache APIs; the validated runtime uses transformers==5.0.0 '
+                           '(see envs/moss-ttsd.yml).')
