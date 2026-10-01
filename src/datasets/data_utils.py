@@ -24,6 +24,7 @@ from src.datasets.manifest_utils import (
 )
 from src.datasets.mel_preprocessing import spectrogram_torch, mel_spectrogram_torch
 from src.models.text import cleaned_text_to_sequence
+from src.datasets.text_features import load_text_feature
 from src.utils.commons import load_wav_to_torch
 
 
@@ -88,6 +89,7 @@ class TextAudioSpeakerDataset(torch.utils.data.Dataset):
         self.win_length = data_conf.win_length
         self.hop_length = int(getattr(data_conf, "hop_length", 512))
         self.data_conf = data_conf
+        self.text_feature_policy = getattr(data_conf, "text_feature_policy", "strict_cached")
         self.logger = logger
 
         self.max_wav_value = float(data_conf.max_wav_value)
@@ -290,6 +292,7 @@ class TextAudioSpeakerDataset(torch.utils.data.Dataset):
 
     def get_text(self, text, word2ph, phone, tone, language_str, wav_path):
         phone, tone, language = cleaned_text_to_sequence(phone, tone, language_str)
+        word2ph = list(word2ph)
         if self.add_blank:
             phone = commons.intersperse(phone, 0)
             tone = commons.intersperse(tone, 0)
@@ -300,15 +303,7 @@ class TextAudioSpeakerDataset(torch.utils.data.Dataset):
 
         # 把扩展名从 .wav 改成 .bert.pt（只生成路径，不操作文件）
         bert_path = wav_path.with_name(wav_path.stem + ".bert.pt")
-        try:
-            bert_ori = torch.load(bert_path)
-            assert bert_ori.shape[-1] == len(phone)
-        except Exception as e:
-            if self.logger:
-                self.logger.warning("Bert load Failed")
-                self.logger.warning(e)
-            # fallback to random to avoid crash
-            bert_ori = torch.randn(1024, len(phone))
+        bert_ori = load_text_feature(bert_path, len(phone), self.text_feature_policy, self.logger)
 
         if language_str == "ZH":
             bert = bert_ori

@@ -19,5 +19,6 @@ mel_fmax: null
 add_blank: true
 n_speakers: 40
 cleaned_text: true
+text_feature_policy: strict_cached # Training features; zero-shot loading does not require them.
 # voice cloning defaults
 return_path: true

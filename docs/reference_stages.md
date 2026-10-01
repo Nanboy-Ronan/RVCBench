@@ -59,3 +59,10 @@ rejects missing or differently shaped weights before applying them. An explicit
 fallbacks and records the affected tensors; this is a distinct diagnostic
 protocol and does not establish trained-surrogate equivalence.
 Text symbol imports do not prepare language models or download checkpoints.
+
+The training loader uses `dataset.text_feature_policy=strict_cached` by default:
+current-language `.bert.pt` features must be finite floating tensors with 1024
+channels and the expected phoneme length. Missing or invalid caches fail instead
+of fabricating features. `legacy_random` explicitly restores the old fallback;
+non-current-language random channels retain the historical construction in both
+policies. A shape check does not establish a cache's tokenizer/model provenance.
