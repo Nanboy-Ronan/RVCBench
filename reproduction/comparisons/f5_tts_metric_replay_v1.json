@@ -1,0 +1,38 @@
+{
+  "kind": "historical_audio_metric_replay",
+  "historical_csv": "/tealab-data/rjin02/AudioWatermarkBench/results/f5_tts_ots_on_libratts/20260326-210913/generation_sample_metrics.csv",
+  "historical_csv_sha256": "c76ef1e47949e7fad95642af7c7d3dbd367ad57e4b18a48894fc983f722be971",
+  "differences": {
+    "mcd": {
+      "valid": 16,
+      "requested": 16,
+      "mean_delta": 0.0,
+      "max_absolute_delta": 0.0
+    },
+    "wer": {
+      "valid": 16,
+      "requested": 16,
+      "mean_delta": -0.00625,
+      "max_absolute_delta": 0.1
+    },
+    "sim": {
+      "valid": 16,
+      "requested": 16,
+      "mean_delta": -1.6968697309494019e-06,
+      "max_absolute_delta": 5.7220458984375e-05
+    }
+  },
+  "historical_wer_protocol": {
+    "normalization": "ascii_punctuation_removed_v2",
+    "rows": 2000,
+    "formula_matches": {
+      "lowercase_v1": 841,
+      "ascii_punctuation_removed_v2": 2000
+    }
+  },
+  "interpretation": "Tests scorer reproduction on historical audio; does not prove generation reproducibility.",
+  "source_report": "/tealab-data/rjin02/RVCBench/results/reproduction_metric_replay/f5_tts_libritts16_v1/replay_report.json",
+  "source_sha256": "18a665c5599d8fa93749adc22abf8596de225e3079c4b920ffb94cadd1d7a344",
+  "status": "partial_reproduction",
+  "note": "MCD matches exactly; SIM small numerical differences; WER predictions differ on one of 16 historical waveforms."
+}

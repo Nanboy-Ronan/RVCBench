@@ -7,7 +7,6 @@ from typing import Optional, Tuple, Union
 
 import numpy as np
 import torch
-import whisper
 
 from src.models.model import BaseModel
 
@@ -53,6 +52,7 @@ class MossTTSDGenerator(BaseModel):
         self._spt = None
 
         self._validate_paths()
+        import whisper
         self.whisper_model = whisper.load_model("base.en", device=device)
 
     # ------------------------------------------------------------------

@@ -74,7 +74,8 @@
       "generation_run": "results/reproduce_v2_f5_tts_libritts16/20260930-230725-5da60e6e",
       "scoring_run": "results/reproduce_v2_f5_tts_libritts16_score/20260930-230926-125a36f4",
       "comparison": "comparisons/f5_tts_libritts16_v1.json",
-      "historical_metric_replay_status": "running"
+      "historical_metric_replay_status": "partial_WER_ASR_difference",
+      "historical_metric_replay": "comparisons/f5_tts_metric_replay_v1.json"
     },
     {
       "n": "MaskGCT",
