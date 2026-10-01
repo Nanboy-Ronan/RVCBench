@@ -49,6 +49,37 @@ def infer_english_wer_protocol(historical_csv):
     return {'normalization': matched[0], 'rows': len(rows), 'formula_matches': counts}
 
 
+def historical_manifest_prompt(root, row, old):
+    """Resolve a legacy cohort whose manifest points outside its audio directory.
+
+    A filename alone cannot establish the reference: require one matching source
+    record and hash its target against the historical CSV before using its prompt.
+    """
+    path = root / 'filelists' / f'{row["speaker_id"]}.json'
+    records = json.loads(path.read_text())
+    matches = []
+    for index, record in enumerate(records):
+        prompt = Path(str(record.get('ori_pth') or record.get('prompt_file_name') or ''))
+        target = Path(str(record.get('gt_pth') or record.get('target_file_name') or ''))
+        text = record.get('gt_text', record.get('target_text'))
+        if (prompt.name == Path(row['prompt_path']).name
+                and target.name == Path(row['target_path']).name and text == old['ground_truth_text']):
+            def resolve(value):
+                if value.is_absolute():
+                    return value
+                # Same ordered search as the historical zero-shot loader.
+                choices = [root.parent / value, root / value]
+                return next((p.resolve() for p in choices if p.is_file()), choices[0].resolve())
+            matches.append((index, resolve(prompt), resolve(target)))
+    if len(matches) != 1:
+        raise ValueError('Historical external-audio cohort requires one exact source manifest pair')
+    index, prompt, target = matches[0]
+    if file_hash(target) != file_hash(old['ground_truth_path']):
+        raise ValueError('Historical source manifest target differs from recorded CSV audio')
+    return prompt, {'source': 'speaker_manifest_external_audio', 'source_manifest': str(path.resolve()),
+                    'source_manifest_sha256': file_hash(path), 'source_row': index}
+
+
 def match_historical(run, historical_csv):
     historical_csv = Path(historical_csv).resolve()
     historical = json.loads((historical_csv.parent / 'metrics.json').read_text())
@@ -90,6 +121,9 @@ def match_historical(run, historical_csv):
             raise ValueError(f'Expected one exact historical pair for {row["sample_id"]}; found {len(candidates)}')
         old = candidates[0]
         prompt = root / 'audios' / row['speaker_id'] / Path(row['prompt_path']).name
+        if not prompt.is_file():
+            prompt, evidence = historical_manifest_prompt(root, row, old)
+            old = dict(old, prompt_evidence=evidence)
         if (old['speaker_id'] != row['speaker_id'] or old['ground_truth_text'] != row['target_text']
                 or file_hash(old['ground_truth_path']) != row['target_sha256']
                 or file_hash(prompt) != row['prompt_sha256']):

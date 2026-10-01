@@ -1,0 +1,13 @@
+# @package _global_
+# Separate version and historical population; never substitutes for VoxCPM2.
+defaults:
+  - voxcpm_ots
+  - _self_
+
+run_name: voxcpm05_legacy_short10
+adversary:
+  model_path: openbmb/VoxCPM-0.5B
+  include_reference_audio: false
+dataset:
+  use_hf_dataset: false
+  manifest_filename: ${hydra:runtime.cwd}/reproduction/subsets/libritts_short10_legacy_v1/metadata.json

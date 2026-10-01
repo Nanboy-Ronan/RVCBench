@@ -69,3 +69,32 @@ def test_pair_match_requires_dataset_identity_and_immutable_reference_audio(tmp_
     prompt.write_bytes(b'changed reference')
     with pytest.raises(ValueError, match='input/content mismatch'):
         match_historical(run, csv_path)
+
+
+def test_external_audio_reference_requires_unique_manifest_and_target_hash(tmp_path):
+    import json
+    from src.benchmark.reproduction import historical_manifest_prompt
+    root = tmp_path / 'short10'
+    (root / 'filelists').mkdir(parents=True)
+    audio = tmp_path / 'Libritts' / 'audios' / 'one'
+    audio.mkdir(parents=True)
+    prompt, target = audio / 'prompt.wav', audio / 'target.wav'
+    prompt.write_bytes(b'prompt')
+    target.write_bytes(b'target')
+    path = root / 'filelists' / 'one.json'
+    record = {'ori_pth': 'Libritts/audios/one/prompt.wav',
+              'gt_pth': 'Libritts/audios/one/target.wav', 'gt_text': 'Target.'}
+    path.write_text(json.dumps([record]))
+    row = {'speaker_id': 'one', 'prompt_path': str(prompt), 'target_path': str(target)}
+    old = {'ground_truth_text': 'Target.', 'ground_truth_path': str(target)}
+    resolved, evidence = historical_manifest_prompt(root, row, old)
+    assert resolved == prompt
+    assert evidence['source_row'] == 0 and evidence['source_manifest_sha256']
+    path.write_text(json.dumps([record, record]))
+    with pytest.raises(ValueError, match='one exact'):
+        historical_manifest_prompt(root, row, old)
+    path.write_text(json.dumps([record]))
+    other = tmp_path / 'target.wav'
+    other.write_bytes(b'other target')
+    with pytest.raises(ValueError, match='target differs'):
+        historical_manifest_prompt(root, row, {**old, 'ground_truth_path': str(other)})

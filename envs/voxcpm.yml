@@ -3,6 +3,10 @@
 # git -C checkpoints/VoxCPM checkout f0c787f0937dc1c9a8f4f64d9a332d9c5da2e629
 # pip install -e checkpoints/VoxCPM
 # Main model: openbmb/VoxCPM2 revision 32279effe8c19989596f05d353d1447f51d9e915.
+# Separate historical 0.5B check: openbmb/VoxCPM-0.5B revision
+# b2e656f7524303fdaf84591c75bbb87203d7c98d, same runtime checkout.
+# Use voxcpm_05_legacy_ots for the frozen ten-pair cohort and transcript-only
+# reference conditioning. Historical seed and weight/source revision are unknown.
 # Local imports/inference use torch/torchaudio 2.8.0+cu126, transformers 4.57.3,
 # tokenizers 0.22.2, NumPy 1.26.4, librosa 0.10.0, pydantic 2.11.7.
 # This is a starting environment, not a clean-install dependency lock.

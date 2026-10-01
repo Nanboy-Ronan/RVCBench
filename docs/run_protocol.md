@@ -6,6 +6,37 @@ models are separate dependencies. The initial supported onboarding path is
 are not part of the package. Other environment files are base templates requiring
 the matching upstream runtime; they are not tested dependency lock files.
 
+## VoxCPM 0.5B historical short10 check
+
+VoxCPM2 and the historical VoxCPM-0.5B result use separate configurations and
+populations. The legacy configuration selects all ten pairs from the original
+short10 manifests, preserving their order and source indices 0–9. Its frozen
+selection verifies both audio hashes, target transcripts and pair-encoded
+historical filenames; no rows are selected using metric outcomes.
+
+```bash
+python run_vc.py --config-name ots_vc/clean/libritts/voxcpm_05_legacy_ots \
+  adversary.model_path=/absolute/path/to/VoxCPM-0.5B/snapshot \
+  adversary.code_path=/absolute/path/to/VoxCPM/src \
+  adversary.local_files_only=true +vc.generate_only=true +seed=42
+```
+
+The local snapshot is revision `b2e656f7524303fdaf84591c75bbb87203d7c98d`;
+the runtime checkout is `f0c787f0937dc1c9a8f4f64d9a332d9c5da2e629`.
+The measured ten-pair means are MCD 4.6329, WER 0.0333 and SIM 0.4234, compared
+with historical 4.2660, 0 and 0.4441. Rescoring the historical audio reproduces
+all ten MCD and WER values exactly; SIM's maximum absolute difference is 0.000207.
+Generation differs. The historical seed and immutable weight/source revisions
+are unknown, and its device was CPU rather than the current CUDA runtime.
+This is a matched population check, not exact generation or full-paper reproduction.
+See `reproduction/comparisons/voxcpm05_libritts_short10_v1.json`.
+
+`scripts/freeze_historical_population.py` regenerates this frozen selection from
+the original short10 speaker manifests and CSV in a new output directory. It
+rejects pair, order, transcript and historical audio content mismatches.
+The historical matcher also supports manifests that reference audio outside
+their cohort directory, requiring a unique source record and target hash match.
+
 ## Generate, evaluate, recover
 
 VoxCPM2 now passes seed plus original source index to the native API explicitly.

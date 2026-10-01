@@ -68,7 +68,21 @@
       "subset_validation": "comparisons/voxcpm2_libritts16_validation.json",
       "model_variant": "VoxCPM2",
       "reproduction_status": "full_subset_measured_same_version_historical_reference_not_established",
-      "provenance_limit": "Local main/AudioVAE/tokenizer weights and upstream source hashed. Requested and effective native retry seeds recorded. Existing historical 0.5B short10 CPU run requires a separate protocol/subset; no cross-version substitution."
+      "provenance_limit": "Local main/AudioVAE/tokenizer weights and upstream source hashed. Requested and effective native retry seeds recorded. Existing historical 0.5B short10 CPU run requires a separate protocol/subset; no cross-version substitution.",
+      "legacy_05_variant": {
+        "model_variant": "VoxCPM-0.5B",
+        "config": "configs/ots_vc/clean/libritts/voxcpm_05_legacy_ots.yaml",
+        "subset": "subsets/libritts_short10_legacy_v1/selection.json",
+        "generation_run": "results/reproduce_v2_voxcpm05_libritts_short10/20261001-044933-813dfab2",
+        "scoring_run": "results/reproduce_v2_voxcpm05_libritts_short10_score/20261001-045102-44f98cef",
+        "comparison": "comparisons/voxcpm05_libritts_short10_v1.json",
+        "generation_status": "complete",
+        "scoring_status": "complete",
+        "historical_comparison_status": "matched_10_pairs_generation_difference",
+        "historical_metric_replay_status": "MCD_WER_exact_SIM_max_abs_0_000207",
+        "reproduction_status": "matched_population_measured_not_exact_generation_reproduction",
+        "provenance_limit": "Old seed and immutable weights/source revision absent; historical CPU vs current CUDA. Both versions retained separately."
+      }
     },
     {
       "n": "F5-TTS",
