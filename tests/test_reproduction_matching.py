@@ -15,6 +15,20 @@ def test_robotcall_conditions_share_one_bootstrap_cluster():
         speaker_cluster('Robotcall', 'unverified_alias')
 
 
+@pytest.mark.parametrize('current,historical', [
+    ({'implementation': 'lifeiteng'}, {'code_path': 'checkpoints/Amphion'}),
+    ({'implementation': 'amphion'}, {'code_path': 'checkpoints/unknown'}),
+    ({'implementation': 'unknown'}, {'implementation': 'unknown'}),
+])
+def test_historical_valle_matching_rejects_different_or_unknown_implementation(tmp_path, current, historical):
+    import json
+    from src.benchmark.reproduction import match_historical
+    config = {'vc': {'model': 'vall_e'}, 'dataset': {'name': 'Robotcall'}}
+    (tmp_path / 'metrics.json').write_text(json.dumps({'config': {**config, 'adversary': historical}}))
+    with pytest.raises(ValueError, match='implementation'):
+        match_historical({'config': {**config, 'adversary': current}, 'samples': []}, tmp_path / 'scores.csv')
+
+
 def test_target_only_ledger_requires_complete_ordered_log(tmp_path):
     rows = [dict(speaker_id='one', ground_truth_text='First sentence.', generated_path='first.wav'),
             dict(speaker_id='two', ground_truth_text='Second sentence.', generated_path='second.wav')]

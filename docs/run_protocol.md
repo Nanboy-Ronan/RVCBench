@@ -99,6 +99,10 @@ Historical-audio replay reproduces all 20 MCD values exactly and SIM within
 historical transcripts all match the selected WER formula, but the historical
 ASR runtime and immutable weights are unknown. See
 `reproduction/comparisons/amphion_valle_robotcall20_input_audit.json`.
+Historical VALL-E matching also requires the same recognized implementation.
+Explicit implementation names and narrowly recognized legacy source directories
+provide configuration evidence; unknown or different implementations are rejected.
+This check does not establish immutable historical source or weight identity.
 
 FireRedTTS2 decodes output at 24 kHz; its native `sample_rate=16000` field is
 the reference input rate. The wrapper now saves codec output at 24 kHz and

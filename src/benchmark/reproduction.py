@@ -80,6 +80,22 @@ def historical_manifest_prompt(root, row, old):
                     'source_manifest_sha256': file_hash(path), 'source_row': index}
 
 
+def valle_implementation(config):
+    """Read declared implementation, with narrow legacy source-directory aliases.
+
+    Directory naming is historical configuration evidence, not a verified source
+    revision or checkpoint identity. Unknown directories must remain unknown.
+    """
+    adversary = config.get('adversary', {})
+    explicit = adversary.get('implementation')
+    if explicit is not None:
+        return {'lifeiteng': 'lifeiteng', 'lifeiteng/vall-e': 'lifeiteng',
+                'amphion': 'amphion'}.get(explicit)
+    source = Path(str(adversary.get('code_path') or '')).name.lower()
+    return {'amphion': 'amphion', 'amphion-valle': 'amphion',
+            'vall-e': 'lifeiteng'}.get(source)
+
+
 def match_historical(run, historical_csv):
     historical_csv = Path(historical_csv).resolve()
     historical = json.loads((historical_csv.parent / 'metrics.json').read_text())
@@ -92,6 +108,13 @@ def match_historical(run, historical_csv):
     left, right = str(run['config']['vc']['model']), str(historical['config']['vc']['model'])
     if aliases.get(left, left) != aliases.get(right, right):
         raise ValueError('Historical model identity differs from the current run')
+    if left == 'vall_e':
+        current_impl = valle_implementation(run['config'])
+        historical_impl = valle_implementation(historical['config'])
+        if current_impl is None or historical_impl is None:
+            raise ValueError('VALL-E implementation identity is unknown; establish historical configuration evidence')
+        if current_impl != historical_impl:
+            raise ValueError('Historical VALL-E implementation differs from the current run')
     if historical.get('vc', {}).get('protected_audio_path'):
         raise ValueError('A protected run cannot be used as a clean baseline')
     root = Path(historical['config']['dataset']['root_path'])
@@ -189,6 +212,9 @@ def compare(run_dir, historical_csv, output):
         'historical_wer_protocol': historical_wer_protocol,
         'interpretation': 'Descriptive paired regression check, not an equivalence test or full-table reproduction claim.',
         'historical_provenance_limit': 'Legacy result does not provide modern per-sample generation, weight and scorer fingerprints.'}
+    if run['config']['vc']['model'] == 'vall_e':
+        report['implementation'] = valle_implementation(run['config'])
+        report['implementation_evidence'] = 'Declared implementation or recognized source directory in recorded configuration; immutable historical source and weight identity remain unverified.'
     if str(dataset_name).lower() == 'robotcall':
         report['conditions'] = {}
         for condition in ('robocall', 'vctk'):
