@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from src.datasets.data_utils import AllSpeakerData
 from pathlib import Path
 import torch
 import soundfile as sf
@@ -18,6 +17,7 @@ class BaseProtector(ABC):
 
 
     def get_data(self):
+        from src.datasets.data_utils import AllSpeakerData
         self.speaker_data=AllSpeakerData(self.config, self.dataset_config, self.logger)
 
     @abstractmethod
@@ -35,16 +35,13 @@ class BaseProtector(ABC):
             self.save_protected_audio_by_speaker(sid)
 
     def save_protected_audio_by_speaker(self, speaker_id):
-        """
-        仅写 self.output_dir，并更新 data/libritts/filelists/libritts_train_asr.txt.cleaned
-        只替换 audio_path；其余字段原样保留。
-        """
+        """Write protected waveforms under this run's speaker directory."""
         out_dir= self.output_dir/f"{speaker_id}/"
         out_dir.mkdir(parents=True, exist_ok=True)
 
         if self.noises is None:
-            noise_path = output_dir/f"{self.protect_method}.noise"
-            self.noises = torch.load(noise_path, map_location="cpu")
+            noise_path = self.output_dir/f"{self.protect_method}.noise"
+            self.noises = torch.load(noise_path, map_location="cpu", weights_only=True)
 
         total_saved = 0
         train_loader = self.speaker_data.speaker_dataloaders[speaker_id]

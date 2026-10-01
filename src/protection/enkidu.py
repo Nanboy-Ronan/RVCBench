@@ -1,58 +1,13 @@
-import sys
-import importlib
-from types import SimpleNamespace
-
-from src.trainers import BertVITS2Trainer
-from src.protection.base_protector import BaseProtector
-import torch
-from src.datasets.data_utils import TextAudioSpeakerDataset, TextAudioSpeakerCollate
-from src.utils.commons import latest_checkpoint_path, load_checkpoint
-from transformers import TrainingArguments
-from src.datasets.mel_preprocessing import *
-import torch.nn.functional as F
-import os
-from torch.autograd import Variable
+"""Enkidu universal spectral perturbation with run-scoped noise artifacts."""
 from pathlib import Path
-from torch.utils.data import DataLoader
-import soundfile as sf
-from src.losses.bertvits2_loss import compute_reconstruction_loss, compute_perceptual_loss, compute_kl_divergence
-from tqdm import tqdm
-from hydra.utils import to_absolute_path
-from src import models
-from copy import deepcopy
-from speechbrain.inference import SpeakerRecognition
-from torch import Tensor
 import random
-from src.models.enkidu_model import WienerFilter
+
+import torch
 import torchaudio
-from torch import nn
+from torch import Tensor, nn
 
-# ===================== Filelist 小工具 =====================
-
-def _read_lines(p: Path):
-    if not p.exists():
-        return []
-    with open(p, "r", encoding="utf-8") as f:
-        return [ln.rstrip("\n") for ln in f]
-
-
-def _write_lines(p: Path, lines):
-    p.parent.mkdir(parents=True, exist_ok=True)
-    with open(p, "w", encoding="utf-8") as f:
-        f.write("\n".join(lines) + "\n")
-
-
-def _split_line(ln: str):
-    # audio_path|speaker|language|norm_text|phones|tones|word2ph
-    parts = ln.split("|")
-    if len(parts) != 7:
-        raise ValueError(f"Malformed filelist line (expected 7 fields): {ln}")
-    return parts  # (audio_path, speaker, language, text, phones, tones, word2ph)
-
-
-def _sig(language, text, phones, tones, word2ph):
-    # 用于跨路径匹配（旧命名也能对上）
-    return "|".join([language, text, phones, tones, word2ph])
+from src.protection.base_protector import BaseProtector
+from src.models.enkidu_model import WienerFilter
 
 
 class EnkiduProtector(BaseProtector):
@@ -70,6 +25,11 @@ class EnkiduProtector(BaseProtector):
 
 
         """
+        config = kwargs['config']
+        if config.batch_size != 1:
+            raise ValueError('Enkidu requires batch_size=1; flattening a batch would merge references')
+        if config.sampling_rate != 16000:
+            raise ValueError('Enkidu speaker encoder requires sampling_rate=16000')
         self.model_config = model_config
         super().__init__(**kwargs)
         # remove to class init
@@ -98,12 +58,13 @@ class EnkiduProtector(BaseProtector):
             source= model_config.checkpoint_path
         else:
             source= model_config.source
+        from speechbrain.inference import SpeakerRecognition
         self.model = SpeakerRecognition.from_hparams(source=source, run_opts={"device": self.device},savedir=model_config.checkpoint_path)
         self.model.to(self.device)
 
 
     @staticmethod
-    def extract_embedding(x: Tensor, model: SpeakerRecognition, device: str | torch.device = 'cuda:0') -> Tensor:
+    def extract_embedding(x: Tensor, model, device: str | torch.device = 'cuda:0') -> Tensor:
         """
         Extract the embedding from the input waveform tensor.
         """
@@ -210,9 +171,11 @@ class EnkiduProtector(BaseProtector):
 
         return refined_waveform
 
-    def generate_perturbations(self, save_path= 'enkidu.noise'):
+    def generate_perturbations(self, save_path=None):
 
-        noise_path = self.output_dir / f"{self.protect_method}.noise"
+        noise_path = Path(save_path).expanduser() if save_path is not None else Path(f"{self.protect_method}.noise")
+        if not noise_path.is_absolute():
+            noise_path = self.output_dir / noise_path
         noise_path.parent.mkdir(parents=True, exist_ok=True)
         speaker_ids = [self.dataset_config.speaker_id] if self.dataset_config.speaker_id is not None else []  
         if len(speaker_ids) == 0:
@@ -243,25 +206,21 @@ class EnkiduProtector(BaseProtector):
                 'imag': universal_noise_imag.detach().cpu()
             }
             self.noises[sid] = noise
-        torch.save(self.noises, save_path)
-        self.logger.info(f"Saved noises to {save_path}")
+        torch.save(self.noises, noise_path)
+        self.logger.info(f"Saved noises to {noise_path}")
 
     def save_protected_audio(self):
         for sid in self.speaker_data.speakers_ids:
             self.save_protected_audio_by_speaker(sid)
 
     def save_protected_audio_by_speaker(self, speaker_id):
-        """
-        仅写 self.output_dir，并更新 data/libritts/filelists/libritts_train_asr.txt.cleaned
-        只替换 audio_path；其余字段原样保留。
-        """
+        """Write 16 kHz references without modifying source manifests."""
         out_dir = self.output_dir / f"{speaker_id}/"
         out_dir.mkdir(parents=True, exist_ok=True)
 
         if self.noises is None:
-            noise_path = out_dir / f"{self.protect_method}.noise"
-            self.noises = torch.load(noise_path, map_location="cpu")
-            print(f"The noise path is {noise_path}")
+            noise_path = self.output_dir / f"{self.protect_method}.noise"
+            self.noises = torch.load(noise_path, map_location="cpu", weights_only=True)
 
         noises= self.noises[speaker_id]
         noise_real= noises['real']
@@ -281,7 +240,6 @@ class EnkiduProtector(BaseProtector):
             for i, p_wav_i in enumerate(perturbed_batch):
                 wav_len_i = wav_len[i]
                 p_wav_i = p_wav_i[:wav_len_i]
-                save_sr = self.dataset_config.sampling_rate # change back to 24k for comparing with original audio
 
                 if paths and i < len(paths):
                     orig_path = str(paths[i])
@@ -293,8 +251,7 @@ class EnkiduProtector(BaseProtector):
 
                 new_name = f"{orig_stem}.wav"
                 out_path = out_dir / new_name
-                # sf.write(str(out_path), p_wav_i.numpy(), samplerate=save_sr)
-                torchaudio.save(str(out_path), p_wav_i.unsqueeze(0), 16000)
+                torchaudio.save(str(out_path), p_wav_i.unsqueeze(0), self.sampling_rate)
                 
                 total_saved += 1
 

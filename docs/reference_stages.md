@@ -43,3 +43,10 @@ Use [archived Gaussian-noise replay](gr_noise_replay.md) when the historical
 noise archive is available, or [DNS64 production](dns64_stage.md) to denoise
 an explicit reference directory. Both commands write a stage manifest that
 the cloning runner verifies against the selected inputs and output bytes.
+
+Legacy protectors store their noise archive at the protection run root and
+write WAVs under `<speaker>/<filename>`. Enkidu requires batch size 1 and
+16 kHz processing; its output WAVs retain that rate even when source audio
+is 24 kHz. Its surrogate optimization retains the historical gradient
+accumulation behavior. Validate full production separately from binding
+an existing protected directory.
