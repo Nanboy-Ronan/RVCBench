@@ -15,6 +15,7 @@ import numpy as np
 import torch
 
 from src.models.model import BaseModel
+from .assets import COMMON_FILES, canonical_variant, checkpoint_files, model_directory
 
 
 @dataclass
@@ -38,13 +39,7 @@ class CosyVoiceGeneratorConfig:
 class CosyVoiceGenerator(BaseModel):
     """Thin wrapper around the CosyVoice/CosyVoice2 CLI helpers."""
 
-    _COMMON_REQUIRED_FILES = (
-        "campplus.onnx",
-        "flow.pt",
-        "hift.pt",
-        "llm.pt",
-    )
-    _CONFIG_FILENAMES = ("cosyvoice2.yaml", "cosyvoice.yaml", "configuration.json")
+    _COMMON_REQUIRED_FILES = COMMON_FILES
 
     def __init__(self, config: CosyVoiceGeneratorConfig, device, logger):
         materialised_config = replace(
@@ -70,6 +65,7 @@ class CosyVoiceGenerator(BaseModel):
         self.sample_rate: Optional[int] = None
 
         self._validate_paths()
+        checkpoint_files(self.config.model_dir, self.config.variant)
 
     # ------------------------------------------------------------------
     # Public API
@@ -101,16 +97,21 @@ class CosyVoiceGenerator(BaseModel):
         chunks: List[np.ndarray] = []
         for result in inference_iterator:
             candidate = result.get("tts_speech") if isinstance(result, dict) else None
-            if candidate is None:
-                continue
-            chunk = candidate.squeeze(0).detach().cpu().numpy().astype(np.float32)
+            if not isinstance(candidate, torch.Tensor):
+                raise ValueError("CosyVoice chunk must contain a tts_speech tensor")
+            if candidate.ndim == 2 and candidate.shape[0] == 1:
+                candidate = candidate.squeeze(0)
+            if candidate.ndim != 1 or not candidate.numel() or not torch.isfinite(candidate).all():
+                raise ValueError("CosyVoice chunk must be nonempty finite mono audio")
+            chunk = candidate.detach().to(device="cpu", dtype=torch.float32).numpy()
+            if not np.isfinite(chunk).all():
+                raise ValueError("CosyVoice chunk exceeds finite float32 audio range")
             chunks.append(chunk)
 
         if not chunks:
             raise RuntimeError("CosyVoice returned no audio for the provided prompt.")
 
         waveform = np.concatenate(chunks, axis=-1)
-        waveform = np.nan_to_num(waveform, nan=0.0, posinf=0.0, neginf=0.0)
         waveform = np.clip(waveform, -1.0, 1.0).astype(np.float32)
 
         sample_rate = int(self.sample_rate) if self.sample_rate is not None else 24000
@@ -119,6 +120,11 @@ class CosyVoiceGenerator(BaseModel):
     # ------------------------------------------------------------------
     # Internal helpers
     # ------------------------------------------------------------------
+    def close(self):
+        self._model = self.model = None
+        self._model_ready = False
+        self.sample_rate = None
+
     def _validate_paths(self) -> None:
         if not self.config.code_path.exists():
             raise FileNotFoundError(f"CosyVoice code_path not found: {self.config.code_path}")
@@ -157,6 +163,7 @@ class CosyVoiceGenerator(BaseModel):
         sys.modules.setdefault("modelscope", stub)
 
     def load_model(self) -> None:
+        checkpoint_files(self.config.model_dir, self.config.variant)
         if self._model is not None:
             return
 
@@ -176,24 +183,15 @@ class CosyVoiceGenerator(BaseModel):
         if CosyVoiceClass is None or CosyVoice2Class is None:
             raise RuntimeError("CosyVoice CLI module does not expose expected classes.")
 
-        variant = (self.config.variant or "cosyvoice2").lower().strip()
-        if variant in {"cosyvoice2", "cozyvoice2", "cosy2"}:
-            target_cls = CosyVoice2Class
-        elif variant in {"cosyvoice", "cozyvoice", "cosy1"}:
-            target_cls = CosyVoiceClass
-        else:
-            raise ValueError(
-                f"Unknown CosyVoice variant '{self.config.variant}'. Expected 'cosyvoice' or 'cosyvoice2'."
-            )
-
-        self._model = target_cls(
-            str(self.config.model_dir),
-            load_jit=bool(self.config.load_jit),
-            load_trt=bool(self.config.load_trt),
-            load_vllm=bool(self.config.load_vllm),
-            fp16=bool(self.config.fp16),
-            trt_concurrent=int(self.config.trt_concurrent),
-        )
+        variant = canonical_variant(self.config.variant)
+        target_cls = CosyVoice2Class if variant == "cosyvoice2" else CosyVoiceClass
+        options = dict(load_jit=bool(self.config.load_jit), load_trt=bool(self.config.load_trt),
+                       fp16=bool(self.config.fp16), trt_concurrent=int(self.config.trt_concurrent))
+        if variant == "cosyvoice2":
+            options["load_vllm"] = bool(self.config.load_vllm)
+        elif self.config.load_vllm:
+            raise ValueError("load_vllm is supported only by CosyVoice2")
+        self._model = target_cls(str(self.config.model_dir), **options)
         self.model = self._model
         self.sample_rate = int(getattr(self._model, "sample_rate", 24000))
 
@@ -216,123 +214,10 @@ class CosyVoiceGenerator(BaseModel):
     # Path resolution helpers
     # ------------------------------------------------------------------
     def _resolve_model_dir(self, supplied: Path, code_path: Path, variant: str) -> Path:
-        supplied = supplied.expanduser().resolve() if supplied else supplied
-
-        search_roots = [
-            supplied if supplied else None,
-            supplied.parent if supplied else None,
-            code_path,
-            code_path.parent,
-            Path("checkpoints"),
-            Path.cwd(),
-        ]
-
-        unique_roots = []
-        for root in search_roots:
-            if root is None:
-                continue
-            try:
-                resolved = Path(root).expanduser().resolve()
-            except Exception:
-                continue
-            if resolved not in unique_roots and resolved.exists() and resolved.is_dir():
-                unique_roots.append(resolved)
-
-        target_names = {supplied.name} if supplied else set()
-        if not target_names:
-            target_names = {"CosyVoice2-0.5B", "cosyvoice2", "CosyVoice2"}
-        lower_names = {name.lower() for name in list(target_names)}
-        if "cosyvoice2-0.5b" in lower_names or "cosyvoice2" in lower_names:
-            target_names.update({"cosyvoice2", "CosyVoice2-0.5B"})
-        if "cosyvoice" in lower_names:
-            target_names.add("cosyvoice")
-
-        candidates = []
-        for root in unique_roots:
-            candidate = self._search_for_model_payload(root, target_names, variant)
-            if candidate is None:
-                continue
-            # Only auto-accept when the user did not supply a path or when the
-            # payload lives inside the supplied directory.
-            if supplied:
-                try:
-                    if candidate.samefile(supplied) or supplied in candidate.parents:
-                        if self.logger and candidate != supplied:
-                            self.logger.info(
-                                "Resolved CosyVoice model_dir at %s (requested %s)",
-                                candidate,
-                                supplied,
-                            )
-                        return candidate
-                except Exception:
-                    pass
-                candidates.append(candidate)
-            else:
-                if self.logger:
-                    self.logger.info(
-                        "Resolved CosyVoice model_dir at %s (requested %s)",
-                        candidate,
-                        supplied,
-                    )
-                return candidate
-
-        if supplied:
-            hint = f" Closest match found: {candidates[0]}" if candidates else ""
-            raise FileNotFoundError(
-                f"CosyVoice model_dir not found or incomplete at {supplied}.{hint} "
-                f"Provide a directory that contains {', '.join(self._COMMON_REQUIRED_FILES)}."
-            )
-
-        missing_path = supplied if supplied else Path("<unspecified>")
-        raise FileNotFoundError(
-            f"CosyVoice model_dir not found: {missing_path}. Provide a directory that contains "
-            + ", ".join(self._COMMON_REQUIRED_FILES)
-        )
-
-    def _search_for_model_payload(self, root: Path, target_names, variant: str) -> Optional[Path]:
-        direct_candidates = []
-        for name in target_names:
-            direct_candidates.extend(
-                [
-                    root / name,
-                    root / "pretrained_models" / name,
-                    root / "pretrained_models" / "pretrained_models" / name,
-                ]
-            )
-
-        for candidate in direct_candidates:
-            if candidate.exists() and candidate.is_dir() and self._has_model_payload(candidate, variant):
-                return candidate
-
-        try:
-            for match in root.rglob("cosyvoice2.yaml"):
-                candidate = match.parent
-                if self._has_model_payload(candidate, variant):
-                    return candidate
-        except Exception:
-            pass
-
-        try:
-            for match in root.rglob("cosyvoice.yaml"):
-                candidate = match.parent
-                if self._has_model_payload(candidate, variant):
-                    return candidate
-        except Exception:
-            pass
-        return None
-
-    def _has_model_payload(self, directory: Path, variant: str) -> bool:
-        if not directory.exists() or not directory.is_dir():
-            return False
-        common = all((directory / filename).exists() for filename in self._COMMON_REQUIRED_FILES)
-        has_config = any((directory / filename).exists() for filename in self._CONFIG_FILENAMES)
-        variant_norm = (variant or "cosyvoice2").lower().strip()
-        if variant_norm in {"cosyvoice", "cozyvoice", "cosy1"}:
-            required_tokenizers = ("speech_tokenizer_v1.onnx",)
-        else:
-            required_tokenizers = ("speech_tokenizer_v2.onnx",)
-        has_tokenizer = all((directory / filename).exists() for filename in required_tokenizers)
-        return common and has_config and has_tokenizer
+        directory = model_directory(supplied if supplied else code_path, variant)
+        if self.logger and directory != Path(supplied if supplied else code_path).expanduser().resolve():
+            self.logger.info("Resolved CosyVoice model_dir at %s (requested %s)", directory, supplied)
+        return directory
 
     # ------------------------------------------------------------------
     # Third-party dependency helpers
