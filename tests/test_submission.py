@@ -17,7 +17,8 @@ from rvcbench.datasets.zero_shot import ZeroShotDataset
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PAIRS = [('s1', 'a', 'b', 'hello there'), ('s1', 'b', 'c', 'good morning'), ('s2', 'd', 'e', 'see you soon')]
+PAIRS = [('s1', 'a', 'b', 'hello there'), ('s1', 'b', 'c', 'good morning'), ('s2', 'd', 'e', 'see you soon'),
+         ('s2', 'd', 'd', 'a different sentence')]  # the reference doubles as the target, as in Robotcall
 
 
 def fake_evaluate(rows, required, output, device, logger, **kwargs):
@@ -101,6 +102,8 @@ def test_complete_submission_is_reportable(suite):
     assert result['status'] == 'complete' and result['leaderboard'] is False and result['model'] == 'echo'
     task = result['tasks']['toy']
     assert task['means'] == {'sim': 0.5} and task['failures'] == {}
+    # Echoing a reference that is also the pair's target is allowed: that file was exported.
+    assert task['coverage']['generated'] == len(PAIRS)
     manifest = json.loads((suite[2] / 'scored' / task['run_manifest']).read_text())
     assert manifest['protocol'] == 'rvcbench-submission-v1' and manifest['generation_provenance'] is None
     assert validate_report(manifest)['eligible_for_comparison']

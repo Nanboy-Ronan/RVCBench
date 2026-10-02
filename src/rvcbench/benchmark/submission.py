@@ -140,7 +140,7 @@ Then score the directory:
     rvcbench score --suite {suite} --generated <your output directory> --model <model name> --output <results directory>
 
 A missing or invalid file counts as a failed sample. Do not use the target recordings of
-the dataset; a file identical to a target recording is rejected.
+the dataset; a file identical to a target recording that was not exported is rejected.
 """
 
 
@@ -164,7 +164,9 @@ def _score_task(spec, task, generated, output, label, device, data_root, logger)
                 row.update(status='generation_failed', error=f'Invalid submitted audio: {type(exc).__name__}: {exc}')
             else:
                 sha = file_hash(submitted)
-                if sha == row['target_sha256']:
+                # A target recording is never exported, so submitting it is a leak. Some pairs
+                # use the reference recording as their target; that file is public anyway.
+                if sha == row['target_sha256'] and row['target_sha256'] != row['prompt_sha256']:
                     row.update(status='generation_failed', error='Submitted audio is the target recording')
                 else:
                     stored = audio_dir / submitted.name
