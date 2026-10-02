@@ -17,6 +17,8 @@ adversary:
   temperature: 0.3
   top_k: 50
   top_p: 0.95
+  seed: null
+  retry_without_prompt_text: false
   reference_assignment: "round_robin"
   max_samples: null
 

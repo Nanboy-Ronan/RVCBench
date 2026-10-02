@@ -1,15 +1,16 @@
 """Spark-TTS generator wrapper."""
 from __future__ import annotations
 
-import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, Tuple
 
+import importlib
 import numpy as np
 import torch
 
 from src.models.model import BaseModel
+from .assets import model_directory, checkpoint_files, checked_bicodec_loading
 
 
 @dataclass
@@ -19,6 +20,8 @@ class SparkTTSGeneratorConfig:
     temperature: float = 0.8
     top_k: int = 50
     top_p: float = 0.95
+    seed: Optional[int] = None
+    retry_without_prompt_text: bool = False
 
 
 class SparkTTSGenerator(BaseModel):
@@ -37,6 +40,10 @@ class SparkTTSGenerator(BaseModel):
         )
         self.config = config
 
+        if not isinstance(config.retry_without_prompt_text, bool):
+            raise ValueError("SparkTTS retry_without_prompt_text must be boolean")
+        self.last_conditioning_variant = None
+        self.initialization_metadata = None
         self._imports_loaded = False
         self._sparktts_cls = None
 
@@ -57,9 +64,11 @@ class SparkTTSGenerator(BaseModel):
     ) -> Tuple[np.ndarray, int]:
         """Generate an utterance conditioned on a prompt clip and text."""
 
-        del sample_index  # Spark-TTS does not use a seed offset.
-
+        self.last_conditioning_variant = None
         self.ensure_model()
+        if self.config.seed is not None:
+            from src.utils.seeding import configure_seeds
+            configure_seeds(int(self.config.seed) + int(sample_index), logger=None)
 
         prompt_text_arg = prompt_text or None
 
@@ -73,7 +82,7 @@ class SparkTTSGenerator(BaseModel):
                 top_p=float(self.config.top_p),
             )
         except RuntimeError as exc:
-            if prompt_text_arg is None:
+            if prompt_text_arg is None or not self.config.retry_without_prompt_text:
                 raise
 
             self.logger.warning(
@@ -89,12 +98,19 @@ class SparkTTSGenerator(BaseModel):
                 top_p=float(self.config.top_p),
             )
 
+            self.last_conditioning_variant = "prompt_audio_only_after_transcript_failure"
+
+        if self.last_conditioning_variant is None:
+            self.last_conditioning_variant = "prompt_audio_and_text" if prompt_text_arg else "prompt_audio_only"
+
         if isinstance(wav, torch.Tensor):
             wav_np = wav.detach().cpu().numpy()
         else:
             wav_np = np.asarray(wav)
 
-        wav_np = np.atleast_1d(wav_np).astype(np.float32).flatten()
+        wav_np = np.asarray(wav_np, dtype=np.float32)
+        if wav_np.ndim != 1 or not wav_np.size or not np.isfinite(wav_np).all():
+            raise ValueError("SparkTTS output must be nonempty finite mono audio")
 
         sample_rate = self._sample_rate
         assert sample_rate is not None
@@ -103,6 +119,13 @@ class SparkTTSGenerator(BaseModel):
     # ------------------------------------------------------------------
     # Internal helpers
     # ------------------------------------------------------------------
+    def close(self):
+        self._model = None
+        self._sample_rate = None
+        self.initialization_metadata = None
+        self._model_ready = False
+        self.last_conditioning_variant = None
+
     def _validate_paths(self) -> None:
         if not self.config.code_path.exists():
             raise FileNotFoundError(f"Spark-TTS code path not found: {self.config.code_path}")
@@ -111,17 +134,18 @@ class SparkTTSGenerator(BaseModel):
         if self._model is not None:
             return
 
+        model_dir = model_directory(self.config.code_path, self.config.model_dir)
+        checkpoint_files(model_dir)
         self._ensure_imports()
         assert self._sparktts_cls is not None
-
-        model_dir = Path(self.config.model_dir)
-        if not model_dir.is_absolute():
-            model_dir = (self.config.code_path / model_dir).resolve()
-
-        if not model_dir.exists():
-            raise FileNotFoundError(f"Spark-TTS model directory not found: {model_dir}")
-
-        self._model = self._sparktts_cls(model_dir, device=self.device)
+        codec = importlib.import_module('sparktts.models.bicodec').BiCodec
+        receipts = []
+        with checked_bicodec_loading(codec, receipts):
+            self._model = self._sparktts_cls(model_dir, device=self.device)
+        if not receipts:
+            self._model = None
+            raise RuntimeError('SparkTTS native startup did not validate its BiCodec checkpoint')
+        self.initialization_metadata = {'bicodec': receipts}
         self._sample_rate = int(getattr(self._model, "sample_rate", 16000))
         self.logger.info("[SparkTTS] Loaded model from %s", model_dir)
 
@@ -134,10 +158,6 @@ class SparkTTSGenerator(BaseModel):
         code_path = str(self.config.code_path)
         if code_path not in sys.path:
             sys.path.insert(0, code_path)
-
-        cache_root = self.config.code_path / ".cache" / "huggingface"
-        os.environ.setdefault("HF_HOME", str(cache_root))
-        cache_root.mkdir(parents=True, exist_ok=True)
 
         try:
             sparktts_mod = __import__("cli.SparkTTS", fromlist=["SparkTTS"])

@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from pathlib import Path
 import time
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Optional
 
+import numpy as np
 import soundfile as sf
 from hydra.utils import to_absolute_path
 
@@ -26,6 +27,7 @@ class SparkTTSZeroShotAdversary(BaseAdversary):
         self.top_p = float(self.config.get("top_p", 0.95))
         self.reference_assignment = str(self.config.get("reference_assignment", "round_robin")).lower()
         self.max_samples = self.config.get("max_samples")
+        self.seed = self.config.get("seed")
 
         self._generator: Optional[SparkTTSGenerator] = None
 
@@ -42,87 +44,51 @@ class SparkTTSZeroShotAdversary(BaseAdversary):
             temperature=self.temperature,
             top_k=self.top_k,
             top_p=self.top_p,
+            seed=self.seed,
+            retry_without_prompt_text=self.config.get("retry_without_prompt_text", False),
         )
         self._generator = SparkTTSGenerator(generator_config, self.device, self.logger)
 
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
-    def attack(self, *, output_path, dataset, protected_audio_path=None):
+    def generate_sample(self, sample, *, output_dir):
         self._ensure_generator()
+        reference_path = self._resolve_prompt_path(sample)
+        if reference_path is None:
+            raise FileNotFoundError(f"Missing SparkTTS reference: {sample.prompt_path}")
+        prompt_text = (sample.prompt_text or "").strip() or None
+        target_text = (sample.target_text or "").strip() or (sample.prompt_text or "").strip()
+        if not target_text:
+            raise ValueError("SparkTTS sample has no target or prompt text")
+        self._log_clone_request("SparkTTS", 0, 1, str(sample.speaker_id),
+                                reference_path, target_text, prompt_transcript=prompt_text)
+        started = time.perf_counter()
+        wav, sr = self._generator.generate(text=target_text, prompt_audio=reference_path,
+                                          prompt_text=prompt_text, sample_index=sample.index)
+        elapsed = time.perf_counter() - started
+        wav = np.asarray(wav, dtype=np.float32)
+        if wav.ndim != 1 or not wav.size or not np.isfinite(wav).all():
+            raise ValueError("SparkTTS output must be nonempty finite mono audio")
+        path = self._speaker_output_dir(Path(output_dir).resolve(), str(sample.speaker_id)) / self._cloned_filename(sample, sample.index)
+        sf.write(path, wav, sr)
+        return path, elapsed
 
+    def attack(self, *, output_path, dataset, protected_audio_path=None):
+        del protected_audio_path
+        self._ensure_generator()
         output_dir = Path(output_path).resolve()
         output_dir.mkdir(parents=True, exist_ok=True)
         self._init_synthesis_timings(output_dir)
-
-        max_samples = None
-        if self.max_samples is not None:
-            try:
-                max_samples = int(self.max_samples)
-            except (TypeError, ValueError):
-                self.logger.warning(
-                    "[SparkTTS] Invalid max_samples '%s'; processing full dataset.",
-                    self.max_samples,
-                )
-
-        samples = dataset.get_zero_shot_samples(max_samples=max_samples)
+        samples = dataset.get_zero_shot_samples(max_samples=self.max_samples)
         if not samples:
             raise RuntimeError("No zero-shot samples available for Spark-TTS adversary.")
-
-        sample_prompt_texts: Dict[str, str] = {}
-        for sample in samples:
-            prompt_path = self._resolve_prompt_path(sample)
-            if prompt_path is not None:
-                sample_prompt_texts[str(prompt_path)] = sample.prompt_text or ""
-
-        prompt_count = self._count_available_prompts(samples)
-        self._log_attack_plan("SparkTTS", samples, prompt_count)
-
-        assert self._generator is not None
-        for idx, sample in enumerate(samples):
-            reference_path = self._resolve_prompt_path(sample)
-            if reference_path is None:
-                if self.logger:
-                    self.logger.warning(
-                        "[SparkTTS] Sample %d missing prompt audio; skipping.",
-                        idx,
-                    )
-                continue
-            lookup_key = str(reference_path)
-            prompt_transcript = sample_prompt_texts.get(lookup_key, "").strip() or None
-            desired_text = (sample.target_text or "").strip()
-            if not desired_text:
-                desired_text = (sample.prompt_text or "").strip()
-            if not desired_text:
-                desired_text = prompt_transcript or ""
-
-            speaker_id = str(sample.speaker_id)
-            speaker_dir = self._speaker_output_dir(output_dir, speaker_id)
-
-            self._log_clone_request(
-                "SparkTTS",
-                idx,
-                len(samples),
-                speaker_id,
-                reference_path,
-                desired_text,
-                prompt_transcript=prompt_transcript,
-            )
-
-            synth_start = time.perf_counter()
-            wav, sr = self._generator.generate(
-                text=desired_text,
-                prompt_audio=reference_path,
-                prompt_text=prompt_transcript,
-                sample_index=sample.index,
-            )
-            synth_elapsed = time.perf_counter() - synth_start
-
-            output_name = self._cloned_filename(sample, idx)
-            output_path = speaker_dir / output_name
-            sf.write(output_path, wav, sr)
-            self._record_synthesis_timing(output_path, synth_elapsed)
-
-        self._flush_synthesis_timings()
-        if self.logger is not None:
+        self._log_attack_plan("SparkTTS", samples, self._count_available_prompts(samples))
+        try:
+            for sample in samples:
+                path, elapsed = self.generate_sample(sample, output_dir=output_dir)
+                self._record_synthesis_timing(path, elapsed)
+        finally:
+            self._flush_synthesis_timings()
+        if self.logger:
             self.logger.info("[SparkTTS] Generated %d utterances.", len(samples))
