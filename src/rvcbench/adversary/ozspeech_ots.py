@@ -1,12 +1,15 @@
 import re
 import shutil
 from pathlib import Path
-from typing import List, Optional, Sequence
+from typing import TYPE_CHECKING, List, Optional, Sequence
 
 from hydra.utils import to_absolute_path
 
 from .base_adversary import BaseAdversary
 from rvcbench.models.ozspeech import OzSpeechSynthesizer
+
+if TYPE_CHECKING:
+    from rvcbench.datasets.zero_shot import ZeroShotSample
 
 
 class OzSpeechZeroShotAdversary(BaseAdversary):

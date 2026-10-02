@@ -2,13 +2,16 @@ from __future__ import annotations
 
 from pathlib import Path
 import time
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 import numpy as np
 import soundfile as sf
 from hydra.utils import to_absolute_path
 
 from .base_adversary import BaseAdversary
+
+if TYPE_CHECKING:
+    from rvcbench.models.bark_voice_clone import BarkVoiceCloneGenerator
 
 
 class BarkVoiceCloneZeroShotAdversary(BaseAdversary):

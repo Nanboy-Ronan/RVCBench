@@ -48,6 +48,7 @@ eval = [
   "matplotlib", "jieba", "onnxruntime", "requests"
 ]
 test = ["pytest>=8", "jiwer==3.0.3", "json5>=0.9", "tomli>=2; python_version < '3.11'"]
+dev = ["rvcbench[test]", "ruff>=0.6", "pre-commit>=3.5", "build>=1.2", "twine>=5"]
 
 [project.urls]
 Homepage = "https://nanboy-ronan.github.io/RVCBench/"
@@ -82,3 +83,20 @@ rvcbench = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 120
+extend-exclude = ["src/rvcbench/protection/safespeech/original_code", "checkpoints", "data", "results", "outputs"]
+
+[tool.ruff.lint]
+# Baseline: syntax errors, undefined names and other definite mistakes.
+# Style rules are not enforced yet; widen this set as legacy modules are cleaned up.
+select = ["E9", "F63", "F7", "F82"]
+
+[tool.ruff.lint.per-file-ignores]
+# Undefined names in legacy code paths that are not exercised by the benchmark runner.
+# Each entry is a known defect: fix the module, then remove its line.
+"src/rvcbench/adversary/bertvits2_finetune.py" = ["F821"]
+"src/rvcbench/models/text/japanese.py" = ["F821"]
+"src/rvcbench/protection/attackvc.py" = ["F821"]
