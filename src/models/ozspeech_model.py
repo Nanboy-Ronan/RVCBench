@@ -79,7 +79,6 @@ class OZSpeechWrapper(BaseModel):
     def generate(self, input, **kwargs):
         gen_wav= []
         for idx, in_text in enumerate(input.text_raw):
-            breakpoint()
             output = self.model.synthesize(
                 text=in_text,
                 acoustic_prompt=input.audio_raw[idx][:,:input.wav_len[idx]],
@@ -87,7 +86,6 @@ class OZSpeechWrapper(BaseModel):
                 codec_decoder=self.fa_decoder,
                 temperature=self.temperature,
             )
-            breakpoint()
 
             gen_wav.append(torch.from_numpy(output['synth_wav']))
             # path1= os.path.join('results/tmp',  f'raw_{idx}.wav')
@@ -106,7 +104,6 @@ class OZSpeechWrapper(BaseModel):
             #     samplerate=SR,
             #     format='WAV'
             # )
-        breakpoint()
         gen_wav = pad_sequence(gen_wav)
         gen_wav = gen_wav / self.max_wav_value
         gen_wav = gen_wav.unsqueeze(0)
