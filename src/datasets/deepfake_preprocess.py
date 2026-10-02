@@ -184,15 +184,19 @@ def build_jsonl_per_model(
 
 if __name__ == "__main__":
 
-    AUDIOBENCH_LOGS = Path("/home/xenial/scratch/audiobench_logs")
-    VCTK_ROOT = Path("/home/xenial/scratch/audiobench_logs/VCTK")
-    OUTPUT_DIR = Path("./jsonl_per_model")
+    import argparse
 
-    MAX_VCTK_PER_SPEAKER = 30   # ⭐ 你要的参数
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--logs_root", type=Path, required=True,
+                        help="Root containing <model>_ots_on_vctk/<timestamp>/generated_audio")
+    parser.add_argument("--vctk_root", type=Path, required=True, help="Root of VCTK references")
+    parser.add_argument("--output_dir", type=Path, default=Path("./jsonl_per_model"))
+    parser.add_argument("--max_vctk_per_speaker", type=int, default=30)
+    args = parser.parse_args()
 
     build_jsonl_per_model(
-        audiobench_logs=AUDIOBENCH_LOGS,
-        vctk_root=VCTK_ROOT,
-        output_dir=OUTPUT_DIR,
-        max_vctk_per_speaker=MAX_VCTK_PER_SPEAKER,
+        audiobench_logs=args.logs_root,
+        vctk_root=args.vctk_root,
+        output_dir=args.output_dir,
+        max_vctk_per_speaker=args.max_vctk_per_speaker,
     )

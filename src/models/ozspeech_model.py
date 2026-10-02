@@ -90,8 +90,8 @@ class OZSpeechWrapper(BaseModel):
             breakpoint()
 
             gen_wav.append(torch.from_numpy(output['synth_wav']))
-            # path1= os.path.join('/home/xenial/projects/rpp-xli135/xenial/AudioWatermarkBench/results/tmp',  f'raw_{idx}.wav')
-            # path2= os.path.join('/home/xenial/projects/rpp-xli135/xenial/AudioWatermarkBench/results/tmp',  f'gen_{idx}.wav')
+            # path1= os.path.join('results/tmp',  f'raw_{idx}.wav')
+            # path2= os.path.join('results/tmp',  f'gen_{idx}.wav')
             # SR = 16000
             # sf.write(
             #     file=path1,

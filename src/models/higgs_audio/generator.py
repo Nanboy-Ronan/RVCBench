@@ -105,7 +105,7 @@ class HiggsAudioGenerator(BaseModel):
                 pass
         try:
             concat_wv, sr, _ = self._model_client.generate(
-                messages=messages, # ([Message(role='system', content='Generate audio following instruction.', recipient=None), Message(role='user', content=AudioContent(audio_url='/tealab-data/rjin02/AudioWatermarkBench/results/em_on_libritts/20251216-124950/protected_audio/2300/2300_131720_000016_000008.wav', raw_audio=None, offset=None, duration=None, row_id=None, type='audio'), recipient=None)],)
+                messages=messages,
                 audio_ids=audio_ids,
                 chunked_text=chunked_text, # (["'Our first engine compelled the inventing and making of a suitable engine indicator to indicate it-the Tabor."],)
                 generation_chunk_buffer_size=self.config.generation_chunk_buffer_size,

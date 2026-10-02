@@ -54,9 +54,9 @@ Example
 -------
 python build_vctk_compression_dataset_from_manifest.py \
   --manifest_csv /path/to/top10_longest_by_speaker_manifest.csv \
-  --logs_root /home/xenial/scratch/audiobench_logs \
-  --vctk_root /home/xenial/scratch/audiobench_logs/VCTK \
-  --out_root /home/xenial/scratch \
+  --logs_root /path/to/results \
+  --vctk_root /path/to/VCTK \
+  --out_root /path/to/output \
   --pattern "*_ots_on_vctk" \
   --speakers p363 p283 p316 p288 \
   --dry_run
@@ -251,9 +251,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--manifest_csv", type=Path, required=True,
                     help="top10_longest_by_speaker_manifest.csv generated earlier")
-    ap.add_argument("--logs_root", type=Path, default=Path("/home/xenial/scratch/audiobench_logs"),
+    ap.add_argument("--logs_root", type=Path, required=True,
                     help="Root containing xx_ots_on_vctk/timestamp/generated_audio")
-    ap.add_argument("--vctk_root", type=Path, default=Path("/home/xenial/scratch/audiobench_logs/VCTK"),
+    ap.add_argument("--vctk_root", type=Path, required=True,
                     help="Root of VCTK references")
     ap.add_argument("--out_root", type=Path, default=Path("."), help="Where to write compression/")
     ap.add_argument("--pattern", type=str, default="*_ots_on_vctk",
@@ -315,5 +315,5 @@ if __name__ == "__main__":
     main()
 
     '''
-    python src/datasets/build_vctk_compression_dataset_from_manifest.py   --manifest_csv src/datasets/top10_longest_by_speaker_manifest.csv   --logs_root /home/xenial/scratch/audiobench_logs   --vctk_root /home/xenial/scratch/audiobench_logs/VCTK/audios   --out_root /home/xenial/scratch   --pattern "playdiffusion_ots_on_vctk" 
+    python src/datasets/build_vctk_compression_dataset_from_manifest.py   --manifest_csv src/datasets/top10_longest_by_speaker_manifest.csv   --logs_root /path/to/results   --vctk_root /path/to/VCTK/audios   --out_root /path/to/output   --pattern "playdiffusion_ots_on_vctk" 
     '''
