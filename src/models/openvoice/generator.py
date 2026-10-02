@@ -8,6 +8,8 @@ import sys
 import tempfile
 import traceback
 from dataclasses import dataclass
+from contextlib import nullcontext
+from unittest.mock import patch
 from pathlib import Path
 from typing import Dict, Optional, Tuple
 
@@ -16,6 +18,9 @@ import soundfile as sf
 import torch
 
 from src.models.model import BaseModel
+from .loading import checked_converter_loading
+from .assets import melo_files
+from .text_models import pinned_text_loading, capture_melo_text_modules, release_melo_text_models
 
 
 _LANGUAGE_TO_MELO = {
@@ -54,6 +59,8 @@ class OpenVoiceGeneratorConfig:
     melo_use_hf: bool = True
     default_melo_language: str = "EN"
     source_speaker_key: Optional[str] = None
+    melo_models: Optional[dict] = None
+    text_models: Optional[dict] = None
 
 
 class OpenVoiceGenerator(BaseModel):
@@ -72,6 +79,7 @@ class OpenVoiceGenerator(BaseModel):
         )
         self.config = config
 
+        self._base_cls = None
         self._converter_cls = None
         self._tts_cls = None
 
@@ -79,6 +87,8 @@ class OpenVoiceGenerator(BaseModel):
         self._tts_models: Dict[str, object] = {}
         self._target_se_cache: Dict[Path, torch.Tensor] = {}
         self._sample_rate: Optional[int] = None
+        self.initialization_metadata = None
+        self._text_modules = {}
 
         self._validate_paths()
 
@@ -113,13 +123,11 @@ class OpenVoiceGenerator(BaseModel):
         with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as handle:
             src_path = Path(handle.name)
         try:
-            tts_model.tts_to_file(
-                target_text,
-                speaker_id,
-                str(src_path),
-                speed=float(self.config.speed),
-                quiet=True,
-            )
+            with capture_melo_text_modules(self._text_modules), pinned_text_loading(self.config.text_models):
+                tts_model.tts_to_file(
+                    target_text, speaker_id, str(src_path),
+                    speed=float(self.config.speed), quiet=True,
+                )
             converted = self._converter.convert(
                 audio_src_path=str(src_path),
                 src_se=source_se,
@@ -134,8 +142,9 @@ class OpenVoiceGenerator(BaseModel):
             except Exception:
                 pass
 
-        wav = np.asarray(converted, dtype=np.float32).reshape(-1)
-        wav = np.nan_to_num(wav, nan=0.0, posinf=0.0, neginf=0.0)
+        wav = np.asarray(converted, dtype=np.float32)
+        if wav.ndim != 1 or not wav.size or not np.isfinite(wav).all():
+            raise ValueError("OpenVoice output must be nonempty finite mono audio")
         wav = np.clip(wav, -1.0, 1.0)
         if self.logger:
             self.logger.debug(
@@ -144,6 +153,16 @@ class OpenVoiceGenerator(BaseModel):
                 speaker_key,
             )
         return wav, self.sample_rate
+
+    def close(self):
+        release_melo_text_models(self._text_modules)
+        self._converter = self.model = None
+        self._tts_models.clear()
+        self._target_se_cache.clear()
+        self._sample_rate = None
+        self._model_ready = False
+        self.initialization_metadata = None
+        self._base_cls = self._converter_cls = self._tts_cls = None
 
     @property
     def sample_rate(self) -> int:
@@ -182,17 +201,37 @@ class OpenVoiceGenerator(BaseModel):
         self._ensure_imports()
         assert self._converter_cls is not None
 
-        converter = self._converter_cls(
-            str(self.config.converter_config_path),
-            device=str(self.device),
-            enable_watermark=bool(self.config.enable_watermark),
-        )
-        converter.load_ckpt(str(self.config.converter_checkpoint_path))
+        compatibility = nullcontext()
+        if self._base_cls is not None:
+            parameters = inspect.signature(self._base_cls.__init__).parameters.values()
+            if not any(p.kind == inspect.Parameter.VAR_KEYWORD for p in parameters):
+                original_init = self._base_cls.__init__
+
+                def compatible_init(instance, config_path, device="cuda:0", **_ignored_kwargs):
+                    return original_init(instance, config_path, device=device)
+
+                compatibility = patch.object(self._base_cls, '__init__', compatible_init)
+        with compatibility:
+            converter = self._converter_cls(
+                str(self.config.converter_config_path),
+                device=str(self.device),
+                enable_watermark=bool(self.config.enable_watermark),
+            )
+        receipts = []
+        with checked_converter_loading(converter.model, receipts):
+            converter.load_ckpt(str(self.config.converter_checkpoint_path))
+        if len(receipts) != 1:
+            raise RuntimeError("OpenVoice converter did not perform one checked checkpoint load")
+        self.initialization_metadata = {"converter": receipts[0]}
         self._converter = converter
         self.model = converter
         self._sample_rate = self.sample_rate
 
     def _ensure_imports(self) -> None:
+        with capture_melo_text_modules(self._text_modules), pinned_text_loading(self.config.text_models):
+            self._import_native_modules()
+
+    def _import_native_modules(self) -> None:
         candidate_paths = [self.config.code_path]
         if self.config.melo_code_path is not None:
             candidate_paths.append(self.config.melo_code_path)
@@ -226,21 +265,7 @@ class OpenVoiceGenerator(BaseModel):
                 f"{self.config.melo_code_path}. Underlying error: {details}"
             ) from exc
 
-        base_cls = getattr(openvoice_module, "OpenVoiceBaseClass", None)
-        if base_cls is not None:
-            init_signature = inspect.signature(base_cls.__init__)
-            has_var_kwargs = any(
-                parameter.kind == inspect.Parameter.VAR_KEYWORD
-                for parameter in init_signature.parameters.values()
-            )
-            if not has_var_kwargs:
-                original_init = base_cls.__init__
-
-                def _patched_init(instance, config_path, device="cuda:0", **_ignored_kwargs):
-                    return original_init(instance, config_path, device=device)
-
-                base_cls.__init__ = _patched_init
-
+        self._base_cls = getattr(openvoice_module, "OpenVoiceBaseClass", None)
         self._converter_cls = getattr(openvoice_module, "ToneColorConverter", None)
         self._tts_cls = getattr(melo_module, "TTS", None)
         if self._converter_cls is None:
@@ -262,10 +287,20 @@ class OpenVoiceGenerator(BaseModel):
             return self._tts_models[language]
         self.ensure_model()
         assert self._tts_cls is not None
+        options = {}
+        if self.config.melo_models is not None:
+            entry = self.config.melo_models.get(language)
+            if entry is None:
+                raise ValueError(f"OpenVoice has no configured Melo model for language {language}; "
+                                 "add it to adversary.melo_models")
+            paths = melo_files(entry)
+            options = {'config_path': str(paths['config_path']),
+                       'ckpt_path': str(paths['checkpoint_path'])}
         model = self._tts_cls(
             language=language,
             device=str(self.device),
             use_hf=bool(self.config.melo_use_hf),
+            **options,
         )
         self._tts_models[language] = model
         return model

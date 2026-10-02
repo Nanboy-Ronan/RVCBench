@@ -9,6 +9,7 @@ from typing import Optional
 import numpy as np
 import soundfile as sf
 from hydra.utils import to_absolute_path
+from omegaconf import OmegaConf
 
 from .base_adversary import BaseAdversary
 from src.models.openvoice import OpenVoiceGenerator, OpenVoiceGeneratorConfig
@@ -61,6 +62,7 @@ class OpenVoiceZeroShotAdversary(BaseAdversary):
         self.language_source = str(self.config.get("language_source", "target")).lower()
         self.source_speaker_key = self.config.get("source_speaker_key")
         self.max_samples = self.config.get("max_samples")
+        self.seed = self.config.get("seed")
 
         self._generator: Optional[OpenVoiceGenerator] = None
 
@@ -81,6 +83,12 @@ class OpenVoiceZeroShotAdversary(BaseAdversary):
             melo_use_hf=self.melo_use_hf,
             default_melo_language=self.default_language,
             source_speaker_key=self.source_speaker_key,
+            melo_models=(OmegaConf.to_container(self.config.melo_models, resolve=True)
+                         if OmegaConf.is_config(self.config.get("melo_models"))
+                         else self.config.get("melo_models")),
+            text_models=(OmegaConf.to_container(self.config.text_models, resolve=True)
+                         if OmegaConf.is_config(self.config.get("text_models"))
+                         else self.config.get("text_models")),
         )
         self._generator = OpenVoiceGenerator(generator_config, self.device, self.logger)
 
@@ -93,100 +101,49 @@ class OpenVoiceZeroShotAdversary(BaseAdversary):
             return str(sample.prompt_language)
         return self.default_language
 
+    def generate_sample(self, sample, *, output_dir):
+        self._ensure_generator()
+        reference_path = self._resolve_prompt_path(sample)
+        if reference_path is None:
+            raise FileNotFoundError(f"Missing OpenVoice reference: {sample.prompt_path}")
+        target_text = (sample.target_text or "").strip() or (sample.prompt_text or "").strip()
+        if not target_text:
+            raise ValueError("OpenVoice target text cannot be empty")
+        language = self._select_language(sample)
+        self._log_clone_request(self.MODEL_NAME, 0, 1, str(sample.speaker_id),
+                                reference_path, target_text, prompt_transcript=sample.prompt_text)
+        seed = self._sample_seed(sample)
+        if seed is not None:
+            from src.utils.seeding import configure_seeds
+            configure_seeds(seed, logger=None)
+        started = time.perf_counter()
+        wav, sample_rate = self._generator.generate(
+            text=target_text, reference_audio=reference_path, language=language,
+            source_speaker_key=self.source_speaker_key)
+        elapsed = time.perf_counter() - started
+        wav = np.asarray(wav, dtype=np.float32)
+        if wav.ndim != 1 or not wav.size or not np.isfinite(wav).all():
+            raise ValueError("OpenVoice output must be nonempty finite mono audio")
+        wav = np.clip(wav, -1.0, 1.0)
+        path = self._speaker_output_dir(Path(output_dir).resolve(), str(sample.speaker_id)) / self._cloned_filename(sample, sample.index)
+        sf.write(path, wav, sample_rate)
+        return path, elapsed
+
     def attack(self, *, output_path, dataset, protected_audio_path=None):
         del protected_audio_path
-
         self._ensure_generator()
-        assert self._generator is not None
-
         output_dir = Path(output_path).resolve()
         output_dir.mkdir(parents=True, exist_ok=True)
         self._init_synthesis_timings(output_dir)
-
-        max_samples = None
-        if self.max_samples is not None:
-            try:
-                max_samples = int(self.max_samples)
-            except (TypeError, ValueError):
-                if self.logger:
-                    self.logger.warning(
-                        "[%s] Invalid max_samples '%s'; processing full dataset.",
-                        self.MODEL_NAME,
-                        self.max_samples,
-                    )
-
-        samples = dataset.get_zero_shot_samples(max_samples=max_samples)
+        samples = dataset.get_zero_shot_samples(max_samples=self.max_samples)
         if not samples:
             raise RuntimeError(f"No zero-shot samples available for {self.MODEL_NAME} adversary.")
-
-        prompt_count = self._count_available_prompts(samples)
-        self._log_attack_plan(self.MODEL_NAME, samples, prompt_count)
-
-        completed = 0
-        for idx, sample in enumerate(samples):
-            reference_path = self._resolve_prompt_path(sample)
-            if reference_path is None:
-                if self.logger:
-                    self.logger.warning(
-                        "[%s] Sample %d missing prompt audio; skipping.",
-                        self.MODEL_NAME,
-                        idx,
-                    )
-                continue
-
-            target_text = (sample.target_text or "").strip()
-            if not target_text:
-                target_text = (sample.prompt_text or "").strip()
-            if not target_text:
-                if self.logger:
-                    self.logger.warning("[%s] Sample %d has empty target text; skipping.", self.MODEL_NAME, idx)
-                continue
-
-            speaker_id = str(sample.speaker_id)
-            language = self._select_language(sample)
-            speaker_dir = self._speaker_output_dir(output_dir, speaker_id)
-
-            self._log_clone_request(
-                self.MODEL_NAME,
-                idx,
-                len(samples),
-                speaker_id,
-                reference_path,
-                target_text,
-                prompt_transcript=sample.prompt_text,
-            )
-
-            try:
-                synth_start = time.perf_counter()
-                wav, sample_rate = self._generator.generate(
-                    text=target_text,
-                    reference_audio=reference_path,
-                    language=language,
-                    source_speaker_key=self.source_speaker_key,
-                )
-                synth_elapsed = time.perf_counter() - synth_start
-            except Exception as exc:
-                if self.logger:
-                    self.logger.error(
-                        "[%s] Generation failed for sample %d (%s): %s",
-                        self.MODEL_NAME,
-                        idx,
-                        speaker_id,
-                        exc,
-                    )
-                continue
-
-            wav = np.asarray(wav, dtype=np.float32)
-            if not np.isfinite(wav).all():
-                wav = np.nan_to_num(wav)
-            wav = np.clip(wav, -1.0, 1.0)
-
-            output_filename = self._cloned_filename(sample, idx)
-            output_wav_path = speaker_dir / output_filename
-            sf.write(str(output_wav_path), wav, sample_rate)
-            self._record_synthesis_timing(output_wav_path, synth_elapsed)
-            completed += 1
-
-        self._flush_synthesis_timings()
+        self._log_attack_plan(self.MODEL_NAME, samples, self._count_available_prompts(samples))
+        try:
+            for sample in samples:
+                path, elapsed = self.generate_sample(sample, output_dir=output_dir)
+                self._record_synthesis_timing(path, elapsed)
+        finally:
+            self._flush_synthesis_timings()
         if self.logger:
-            self.logger.info("[%s] Generated %d/%d utterances.", self.MODEL_NAME, completed, len(samples))
+            self.logger.info("[%s] Generated %d/%d utterances.", self.MODEL_NAME, len(samples), len(samples))

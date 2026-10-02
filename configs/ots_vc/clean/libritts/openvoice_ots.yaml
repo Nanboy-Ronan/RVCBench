@@ -21,6 +21,27 @@ adversary:
   tau: 0.3
   enable_watermark: false
   melo_use_hf: true
+  capture_english_text_resources: true
+  # Explicit language assets; add another language entry for multilingual data.
+  melo_models:
+    EN:
+      repo_id: myshell-ai/MeloTTS-English
+      revision: bb4fb7346d566d277ba8c8c7dbfdf6786139b8ef
+  text_models:
+    bert-base-uncased:
+      revision: 86b5e0934494bd15c9632b12f734a8a67f723594
+      load_model: true
+    tohoku-nlp/bert-base-japanese-v3:
+      revision: 65243d6e5629b969c77309f217bd7b1a79d43c7e
+    bert-base-multilingual-uncased:
+      revision: 7cbf9a625e29989f6b9c6c2fa68234c304f7e38f
+    kykim/bert-kor-base:
+      revision: 1779cc0982ada0216dd6de0dd4e86fb78201926d
+    dbmdz/bert-base-french-europeana-cased:
+      revision: b895c3cf291f7bf4c15639078a6bee0b3e272c5b
+    dccuchile/bert-base-spanish-wwm-uncased:
+      revision: d1c9c4565c9d6731e57ed7f027b802697bad861e
+  local_files_only: false
   default_language: "EN"
   language_source: "target"
   source_speaker_key: null
