@@ -50,6 +50,18 @@ def _python_source(path):
         return handle.read()
 
 
+def _literal_dynamic_import(node):
+    if not isinstance(node, ast.Call) or not node.args:
+        return None
+    function = node.func
+    supported = ((isinstance(function, ast.Attribute) and function.attr == 'import_module')
+                 or (isinstance(function, ast.Name) and function.id == '__import__'))
+    value = node.args[0]
+    if supported and isinstance(value, ast.Constant) and isinstance(value.value, str):
+        return value.value
+    return None
+
+
 def generation_runtime(root, conf, packages):
     root = Path(root)
     target = _ADVERSARY_REGISTRY[str(conf.vc.mode)][str(conf.vc.model)].split(':')[0]
@@ -83,10 +95,8 @@ def generation_runtime(root, conf, packages):
                 parent = '.'.join(package[:len(package) - node.level + 1]) if node.level else ''
                 base = '.'.join(p for p in (parent, node.module) if p)
                 imports = [base] + [base + '.' + alias.name for alias in node.names]
-            elif (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
-                  and node.func.attr == 'import_module' and node.args and isinstance(node.args[0], ast.Constant)
-                  and isinstance(node.args[0].value, str)):
-                imports = [node.args[0].value]
+            elif (dynamic := _literal_dynamic_import(node)):
+                imports = [dynamic]
             for imported in imports:
                 if imported.startswith('src.'):
                     # Evaluation is scheduled separately and has its own fingerprint.
@@ -111,8 +121,12 @@ def generation_runtime(root, conf, packages):
                             external.update(alias.name.split('.')[0] for alias in node.names)
                         elif isinstance(node, ast.ImportFrom) and not node.level and node.module:
                             external.add(node.module.split('.')[0])
+                        elif (dynamic := _literal_dynamic_import(node)):
+                            external.add(dynamic.split('.')[0])
     distributions = importlib.metadata.packages_distributions()
     requested = {name for module in external for name in distributions.get(module, [])}
+    unmapped = sorted(module for module in external if module and
+        module not in sys.stdlib_module_names and not distributions.get(module))
     # Optional attention imports have no distribution mapping when absent.
     # Record absence too: installing flash-attn can change a fallback to FA2.
     attention = str(conf.adversary.get('attn_implementation') or '').lower()
@@ -152,8 +166,9 @@ def generation_runtime(root, conf, packages):
     worker_python = conf.adversary.get('runtime_python')
     worker = worker_environment(worker_python or sys.executable) if worker_python or conf.adversary.get('worker_script_path') else None
     return {'source_files': source_files, 'source_sha256': digest(source_files), 'packages': versions,
-            'worker_environment': worker,
-            'dependency_scope': 'static_local_and_upstream_imports_native_sources_and_distribution_dependency_closure_v4',
-            'limitations': ['Unresolved dynamic upstream imports remain in full run provenance.',
+            'worker_environment': worker, 'unmapped_imports': unmapped,
+            'dependency_scope': 'static_local_and_upstream_imports_native_sources_and_distribution_dependency_closure_with_unmapped_import_inventory_v5',
+            'limitations': ['unmapped_imports names have no distribution mapping; they may be authored namespaces, absent modules or packages without metadata, not necessarily missing runtime dependencies.',
+                           'Nonliteral dynamic imports remain unresolved; this static inventory does not establish a clean runtime lock.',
                            'Worker packages are captured conservatively in full; dynamically downloaded assets need runtime capture.',
                            'Native source and authored build definitions are hashed; compiled binaries, compiler flags and effective kernels are not frozen.']}
