@@ -33,6 +33,7 @@ class FireRedTTS2ZeroShotAdversary(BaseAdversary):
         self.min_token_frames = int(self.config.get('min_token_frames', 18))
         self.max_prompt_retries = int(self.config.get('max_prompt_retries', 3))
         self.max_samples = self.config.get("max_samples")
+        self.seed = self.config.get("seed")
         self.default_prompt_text = str(
             self.config.get("default_prompt_text", "Here is a sample of the desired voice.")
         ).strip()
@@ -68,97 +69,50 @@ class FireRedTTS2ZeroShotAdversary(BaseAdversary):
         )
         self._generator = FireRedTTS2Generator(generator_config, self.device, self.logger)
 
+    def generate_sample(self, sample, *, output_dir):
+        reference_path = self._resolve_prompt_path(sample)
+        if reference_path is None:
+            raise ValueError('FireRedTTS2 requires reference audio')
+        target_text = (sample.target_text or "").strip()
+        prompt_text = (sample.prompt_text or "").strip()
+        if not target_text:
+            raise ValueError('FireRedTTS2 requires target text; reference text is not a substitute')
+        if not prompt_text:
+            raise ValueError('FireRedTTS2 requires the actual reference transcript')
+        self._ensure_generator()
+        self._log_clone_request(self.MODEL_NAME, 0, 1, str(sample.speaker_id),
+                                reference_path, target_text, prompt_transcript=prompt_text)
+        seed = self._sample_seed(sample)
+        if seed is not None:
+            from src.utils.seeding import configure_seeds
+            configure_seeds(seed, logger=None)
+        started = time.perf_counter()
+        wav, sample_rate = self._generator.generate(
+            text=target_text, prompt_wav=str(reference_path.resolve()), prompt_text=prompt_text)
+        elapsed = time.perf_counter() - started
+        wav = np.asarray(wav, dtype=np.float32)
+        if wav.ndim != 1 or not np.isfinite(wav).all() or not wav.size:
+            raise ValueError('FireRedTTS2 returned invalid mono audio')
+        path = self._speaker_output_dir(Path(output_dir).resolve(), str(sample.speaker_id)) / self._cloned_filename(sample, sample.index)
+        sf.write(path, wav, sample_rate)
+        return path, elapsed
+
     def attack(self, *, output_path, dataset, protected_audio_path=None):
         del protected_audio_path
-
-        self._ensure_generator()
-        assert self._generator is not None
-
         output_dir = Path(output_path).resolve()
         output_dir.mkdir(parents=True, exist_ok=True)
         self._init_synthesis_timings(output_dir)
-
-        max_samples = None
-        if self.max_samples is not None:
-            try:
-                max_samples = int(self.max_samples)
-            except (TypeError, ValueError):
-                if self.logger:
-                    self.logger.warning(
-                        "[%s] Invalid max_samples '%s'; processing full dataset.",
-                        self.MODEL_NAME,
-                        self.max_samples,
-                    )
-
-        samples = dataset.get_zero_shot_samples(max_samples=max_samples)
+        samples = dataset.get_zero_shot_samples(max_samples=self.max_samples)
         if not samples:
             raise RuntimeError(f"No zero-shot samples available for {self.MODEL_NAME} adversary.")
-
-        prompt_count = self._count_available_prompts(samples)
-        self._log_attack_plan(self.MODEL_NAME, samples, prompt_count)
-
+        self._log_attack_plan(self.MODEL_NAME, samples, self._count_available_prompts(samples))
         completed = 0
-        for idx, sample in enumerate(samples):
-            reference_path = self._resolve_prompt_path(sample)
-            if reference_path is None:
-                if self.logger:
-                    self.logger.warning(
-                        "[%s] Sample %d missing prompt audio; skipping.",
-                        self.MODEL_NAME,
-                        idx,
-                    )
-                raise ValueError('FireRedTTS2 requires reference audio')
-
-            target_text = (sample.target_text or "").strip()
-            prompt_text = (sample.prompt_text or "").strip()
-            if not target_text:
-                raise ValueError('FireRedTTS2 requires target text; reference text is not a substitute')
-
-            if not prompt_text:
-                raise ValueError('FireRedTTS2 requires the actual reference transcript')
-
-            speaker_id = str(sample.speaker_id)
-            speaker_dir = self._speaker_output_dir(output_dir, speaker_id)
-
-            self._log_clone_request(
-                self.MODEL_NAME,
-                idx,
-                len(samples),
-                speaker_id,
-                reference_path,
-                target_text,
-                prompt_transcript=prompt_text,
-            )
-
-            try:
-                synth_start = time.perf_counter()
-                wav, sample_rate = self._generator.generate(
-                    text=target_text,
-                    prompt_wav=str(reference_path.resolve()),
-                    prompt_text=prompt_text,
-                )
-                synth_elapsed = time.perf_counter() - synth_start
-            except Exception as exc:
-                if self.logger:
-                    self.logger.error(
-                        "[%s] Generation failed for sample %d (%s): %s",
-                        self.MODEL_NAME,
-                        idx,
-                        speaker_id,
-                        exc,
-                    )
-                raise
-
-            wav = np.asarray(wav, dtype=np.float32)
-            if not np.isfinite(wav).all() or not wav.size:
-                raise ValueError('FireRedTTS2 returned invalid audio')
-
-            output_filename = self._cloned_filename(sample, idx)
-            output_wav_path = speaker_dir / output_filename
-            sf.write(str(output_wav_path), wav, sample_rate)
-            self._record_synthesis_timing(output_wav_path, synth_elapsed)
-            completed += 1
-
-        self._flush_synthesis_timings()
+        try:
+            for sample in samples:
+                path, elapsed = self.generate_sample(sample, output_dir=output_dir)
+                self._record_synthesis_timing(path, elapsed)
+                completed += 1
+        finally:
+            self._flush_synthesis_timings()
         if self.logger:
             self.logger.info("[%s] Generated %d/%d utterances.", self.MODEL_NAME, completed, len(samples))

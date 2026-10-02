@@ -34,6 +34,7 @@ class VoxCPMZeroShotAdversary(BaseAdversary):
         self.zipenhancer_model_id = str(
             self.config.get("zipenhancer_model_id", "iic/speech_zipenhancer_ans_multiloss_16k_base")
         )
+        self.seed = self.config.get("seed")
         self.max_samples = self.config.get("max_samples")
         self.default_prompt_text = str(
             self.config.get("default_prompt_text", "Here is a sample of the desired voice.")
@@ -83,10 +84,36 @@ class VoxCPMZeroShotAdversary(BaseAdversary):
             retry_badcase=bool(self.config.get("retry_badcase", True)),
             retry_badcase_max_times=int(self.config.get("retry_badcase_max_times", 3)),
             retry_badcase_ratio_threshold=float(self.config.get("retry_badcase_ratio_threshold", 6.0)),
-            seed=self.config.get('seed'),
+            seed=self.seed,
             native_seed_policy=str(self.config.get('native_seed_policy', 'source_index')),
         )
         self._generator = VoxCPMGenerator(generator_config, self.device, self.logger)
+
+    def generate_sample(self, sample, *, output_dir):
+        """Generate an explicit sample, retaining its original source index."""
+        self._ensure_generator()
+        reference_path = self._resolve_prompt_path(sample)
+        if reference_path is None:
+            raise FileNotFoundError(f"Missing VoxCPM reference: {sample.prompt_path}")
+        target_text = (sample.target_text or "").strip()
+        prompt_text = (sample.prompt_text or "").strip()
+        if not target_text:
+            target_text = prompt_text or self.default_prompt_text
+        self._log_clone_request(self.MODEL_NAME, 0, 1, str(sample.speaker_id),
+                                reference_path, target_text, prompt_transcript=prompt_text)
+        kwargs = {
+            "text": target_text,
+            "reference_wav_path": str(reference_path.resolve()) if self.include_reference_audio else None,
+        }
+        if self.use_prompt_text and prompt_text:
+            kwargs["prompt_wav_path"] = str(reference_path.resolve())
+            kwargs["prompt_text"] = prompt_text
+        started = time.perf_counter()
+        wav, sample_rate = self._generator.generate(**kwargs, sample_index=sample.index)
+        elapsed = time.perf_counter() - started
+        path = self._speaker_output_dir(Path(output_dir).resolve(), str(sample.speaker_id)) / self._cloned_filename(sample, sample.index)
+        sf.write(str(path), np.asarray(wav, dtype=np.float32), sample_rate)
+        return path, elapsed
 
     def attack(self, *, output_path, dataset, protected_audio_path=None):
         del protected_audio_path
@@ -118,64 +145,9 @@ class VoxCPMZeroShotAdversary(BaseAdversary):
         self._log_attack_plan(self.MODEL_NAME, samples, prompt_count)
 
         completed = 0
-        for idx, sample in enumerate(samples):
-            reference_path = self._resolve_prompt_path(sample)
-            if reference_path is None:
-                if self.logger:
-                    self.logger.warning(
-                        "[%s] Sample %d missing prompt audio; skipping.",
-                        self.MODEL_NAME,
-                        idx,
-                    )
-                continue
-
-            target_text = (sample.target_text or "").strip()
-            prompt_text = (sample.prompt_text or "").strip()
-            if not target_text:
-                target_text = prompt_text or self.default_prompt_text
-
-            speaker_id = str(sample.speaker_id)
-            speaker_dir = self._speaker_output_dir(output_dir, speaker_id)
-
-            self._log_clone_request(
-                self.MODEL_NAME,
-                idx,
-                len(samples),
-                speaker_id,
-                reference_path,
-                target_text,
-                prompt_transcript=prompt_text,
-            )
-
-            generation_kwargs = {
-                "text": target_text,
-                "reference_wav_path": str(reference_path.resolve()) if self.include_reference_audio else None,
-            }
-            if self.use_prompt_text and prompt_text:
-                generation_kwargs["prompt_wav_path"] = str(reference_path.resolve())
-                generation_kwargs["prompt_text"] = prompt_text
-
-            try:
-                synth_start = time.perf_counter()
-                wav, sample_rate = self._generator.generate(**generation_kwargs, sample_index=sample.index)
-                synth_elapsed = time.perf_counter() - synth_start
-            except Exception as exc:
-                if self.logger:
-                    self.logger.error(
-                        "[%s] Generation failed for sample %d (%s): %s",
-                        self.MODEL_NAME,
-                        idx,
-                        speaker_id,
-                        exc,
-                    )
-                raise
-
-            wav = np.asarray(wav, dtype=np.float32)
-
-            output_filename = self._cloned_filename(sample, idx)
-            output_wav_path = speaker_dir / output_filename
-            sf.write(str(output_wav_path), wav, sample_rate)
-            self._record_synthesis_timing(output_wav_path, synth_elapsed)
+        for sample in samples:
+            path, elapsed = self.generate_sample(sample, output_dir=output_dir)
+            self._record_synthesis_timing(path, elapsed)
             completed += 1
 
         self._flush_synthesis_timings()
