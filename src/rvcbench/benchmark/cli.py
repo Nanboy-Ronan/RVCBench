@@ -1,5 +1,6 @@
 """Small user-facing commands for preflight, smoke checks and validated reports."""
 import argparse
+import importlib
 import importlib.util
 import json
 import logging
@@ -8,9 +9,25 @@ import sys
 from pathlib import Path
 
 
+# Commands implemented as Hydra applications: everything after the command name
+# (--config-name, key=value overrides, --help) is parsed by Hydra.
+HYDRA_COMMANDS = {
+    'run': ('rvcbench.entrypoints.vc', 'Run voice cloning and evaluation from a config'),
+    'run-protected': ('rvcbench.entrypoints.vc_protect', 'Run voice cloning from protected reference audio'),
+    'protect': ('rvcbench.entrypoints.protect', 'Protect source audio and measure fidelity'),
+    'denoise': ('rvcbench.entrypoints.denoise', 'Denoise protected audio before cloning'),
+}
+
+
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] in HYDRA_COMMANDS:
+        module = importlib.import_module(HYDRA_COMMANDS[sys.argv[1]][0])
+        sys.argv = [f'rvcbench {sys.argv[1]}', *sys.argv[2:]]
+        return module.main()
     parser = argparse.ArgumentParser(prog='rvcbench')
     commands = parser.add_subparsers(dest='command', required=True)
+    for name, (_, description) in HYDRA_COMMANDS.items():
+        commands.add_parser(name, help=description + ' (Hydra: --config-name NAME key=value ...)', add_help=False)
     doctor = commands.add_parser('doctor', help='Check dependencies without loading models or downloading weights')
     doctor.add_argument('--model', choices=['qwen3', 'qwen3_omni', 'sparktts'], default=None)
     doctor.add_argument('--eval', action='store_true')
@@ -19,7 +36,7 @@ def main():
     status.add_argument('run_dir', type=Path)
     audit = commands.add_parser('audit-source', help='Compare recorded generation source hashes with local files')
     audit.add_argument('run_dir', type=Path)
-    audit.add_argument('--root', type=Path, default=Path(__file__).resolve().parents[3])
+    audit.add_argument('--root', type=Path, default=None, help='Checkout or install root (default: this installation)')
     audit.add_argument('--output', type=Path)
     smoke = commands.add_parser('smoke', help='Run a synthetic CPU pipeline check (no model download)')
     smoke.add_argument('--output', type=Path, default=Path('results/smoke'))
@@ -63,7 +80,8 @@ def main():
     if args.command == 'audit-source':
         from .source_audit import audit_recorded_sources
         from .artifacts import atomic_json
-        result = audit_recorded_sources(args.run_dir, args.root)
+        from .artifacts import runtime_root
+        result = audit_recorded_sources(args.run_dir, args.root or runtime_root())
         if args.output:
             atomic_json(args.output, result)
         print(json.dumps(result, indent=2))

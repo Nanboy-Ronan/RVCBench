@@ -5,7 +5,7 @@ from pathlib import Path
 
 from omegaconf import OmegaConf
 
-from .artifacts import atomic_json, file_hash, sample_id, provenance
+from .artifacts import atomic_json, file_hash, sample_id, provenance, runtime_root
 from rvcbench.datasets.zero_shot import ZeroShotDataset
 
 
@@ -104,8 +104,8 @@ def replay_gr_noise(dataset_root, subset_manifest, noise_archive, historical_dir
         'batch_size': batch_size, 'sample_rate': sample_rate, 'hop_length': hop_length,
         'pcm_divisor': 32768, 'torch': torch.__version__, 'soundfile': sf.__version__,
         'source_sha256': file_hash(Path(__file__)),
-        'runtime': provenance(Path(__file__).resolve().parents[3]),
-        'source_files': {str(p.relative_to(Path(__file__).resolve().parents[3])): file_hash(p)
+        'runtime': provenance(runtime_root()),
+        'source_files': {str(p.resolve().relative_to(runtime_root())): file_hash(p)
                          for p in (Path(__file__).resolve(), Path(__file__).with_name('artifacts.py'),
                                    Path(__file__).parents[1] / 'datasets/zero_shot.py',
                                    Path(__file__).parents[1] / 'datasets/manifest_utils.py')},

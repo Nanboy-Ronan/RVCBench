@@ -11,7 +11,7 @@ from numbers import Integral
 
 from omegaconf import OmegaConf
 from rvcbench.utils.runtime_errors import invalid_cuda_context
-from .artifacts import (SCHEMA_VERSION, METRIC_COLUMNS, atomic_json, append_sample_event, load_run, coverage, digest,
+from .artifacts import (SCHEMA_VERSION, METRIC_COLUMNS, runtime_root, atomic_json, append_sample_event, load_run, coverage, digest,
                         file_hash, input_fingerprint, input_records, output_path, provenance)
 
 
@@ -79,10 +79,10 @@ def run_zero_shot(conf, base_dir, device, dataset, exp_dir, logger, protected_au
                          'seed': seed, 'sample_seed_policy': 'seed_plus_source_index_v2', 'device': str(device)}
     if reference_stage:
         generation_config['reference_stage_fingerprint'] = reference_stage['fingerprint']
-    runtime_provenance = provenance(Path(__file__).resolve().parents[3])
+    runtime_provenance = provenance(runtime_root())
     from .fingerprints import generation_runtime
     generation_provenance = (None if evaluate_only else
-        generation_runtime(Path(__file__).resolve().parents[3], conf, runtime_provenance['packages']))
+        generation_runtime(runtime_root(), conf, runtime_provenance['packages']))
     manifest = {'schema_version': SCHEMA_VERSION, 'protocol': 'rvcbench-zero-shot-v2',
                 'status': 'running', 'evaluated': False, 'config': effective_config,
                 'provenance': runtime_provenance, 'generation_config': generation_config,

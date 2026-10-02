@@ -27,10 +27,10 @@ def _iter_dataset_configs(config_dir: Path) -> Iterable[Tuple[Path, dict]]:
 def _resolve_root(config_path: Path, config_data: dict) -> Path:
     root = config_data.get("root_path")
     if root:
-        return (config_path.parents[2] / root).resolve()
+        return (REPO_ROOT / root).resolve()
     path_value = config_data.get("path")
     if path_value:
-        return (config_path.parents[2] / path_value).resolve()
+        return (REPO_ROOT / path_value).resolve()
     return Path()
 
 
@@ -58,7 +58,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Build canonical metadata.parquet manifests for benchmark datasets.")
     parser.add_argument(
         "--config-dir",
-        default="configs/dataset",
+        default=str(Path(__file__).resolve().parents[1] / "configs" / "dataset"),
         help="Directory containing dataset yaml configs.",
     )
     parser.add_argument(

@@ -8,7 +8,7 @@ from pathlib import Path
 
 from omegaconf import OmegaConf
 
-from .artifacts import atomic_json, file_hash, provenance, sample_id
+from .artifacts import atomic_json, file_hash, provenance, runtime_root, sample_id
 from .reference_stages import bind_reference_stage
 from rvcbench.datasets.zero_shot import ZeroShotDataset
 
@@ -110,7 +110,7 @@ def denoise_dns64(dataset_root, subset_manifest, reference_directory, weights, o
         'weights_path': str(weights), 'weights_sha256': file_hash(weights),
         'subset_manifest': str(subset_manifest), 'subset_manifest_sha256': file_hash(subset_manifest),
         'input_stage': lineage, 'dataset_rate': dataset_rate, 'model_rate': 16000,
-        'dry': dry, 'device': str(device), 'runtime': provenance(Path(__file__).resolve().parents[3]),
+        'dry': dry, 'device': str(device), 'runtime': provenance(runtime_root()),
         'writer': 'torchaudio.save_default_wav', 'source_sha256': file_hash(Path(__file__)),
         'reference_reuse_policy': 'enhance_unique_reference_once_preserve_all_pair_rows',
         'limits': ['Historical numeric equivalence must be checked separately.',

@@ -64,6 +64,23 @@ def atomic_json(path, value):
             os.unlink(tmp)
 
 
+PACKAGE_DIR = Path(__file__).resolve().parents[1]
+
+
+def runtime_root():
+    """Repository root in a source checkout, else the directory holding the installed package."""
+    checkout = PACKAGE_DIR.parents[1]
+    if PACKAGE_DIR.parent.name == 'src' and (checkout / 'pyproject.toml').is_file():
+        return checkout
+    return PACKAGE_DIR.parent
+
+
+def package_parent(root):
+    """Directory under ``root`` that contains the ``rvcbench`` package."""
+    root = Path(root)
+    return root / 'src' if (root / 'src' / 'rvcbench').is_dir() else root
+
+
 def provenance(root):
     def git(*args):
         result = subprocess.run(['git', '-C', str(root), *args], capture_output=True, text=True)
@@ -84,7 +101,7 @@ def provenance(root):
                                     'total_memory': props.total_memory,
                                     'compute_capability': [props.major, props.minor]})
     return {'git_commit': git('rev-parse', 'HEAD'), 'git_dirty': bool(git('status', '--porcelain')),
-            'source_sha256': digest({str(p.relative_to(root)): file_hash(p) for p in sorted((Path(root) / 'src').rglob('*.py'))}),
+            'source_sha256': digest({str(p.relative_to(root)): file_hash(p) for p in sorted((package_parent(root) / 'rvcbench').rglob('*.py'))}),
             'python': platform.python_version(), 'platform': platform.platform(), 'packages': packages,
             'hardware': hardware}
 

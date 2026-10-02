@@ -224,7 +224,7 @@ To freeze a new subset before examining model outcomes:
 
 ```bash
 python scripts/freeze_reproduction_subset.py \
-  --dataset-config configs/dataset/libritts.yaml \
+  --dataset-config src/rvcbench/configs/dataset/libritts.yaml \
   --speakers 8 --pairs-per-speaker 2 \
   --output results/my_subset
 ```

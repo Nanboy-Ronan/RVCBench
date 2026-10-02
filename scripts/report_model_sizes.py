@@ -111,7 +111,7 @@ def setup_logging() -> None:
 
 
 def compose_config(repo_root: Path, config_name: str) -> DictConfig:
-    config_dir = str((repo_root / "configs").resolve())
+    config_dir = str((repo_root / "src/rvcbench/configs").resolve())
     hydra.core.global_hydra.GlobalHydra.instance().clear()
     with initialize_config_dir(version_base="1.3", config_dir=config_dir):
         conf = compose(config_name=config_name)

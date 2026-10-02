@@ -8,7 +8,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from .artifacts import digest, file_hash
+from .artifacts import digest, file_hash, package_parent
 from .registry import _ADVERSARY_REGISTRY
 
 
@@ -70,7 +70,7 @@ def generation_runtime(root, conf, packages):
     files, external = {}, set()
 
     def locate(module):
-        path = root.joinpath('src', *module.split('.'))
+        path = package_parent(root).joinpath(*module.split('.'))
         return path.with_suffix('.py') if path.with_suffix('.py').is_file() else path / '__init__.py'
 
     def walk(node):

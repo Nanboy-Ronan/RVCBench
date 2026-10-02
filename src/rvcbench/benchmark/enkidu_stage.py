@@ -7,7 +7,7 @@ from types import SimpleNamespace
 
 from omegaconf import OmegaConf
 
-from .artifacts import atomic_json, file_hash, input_records, sample_id, provenance
+from .artifacts import atomic_json, file_hash, input_records, sample_id, provenance, runtime_root
 from rvcbench.datasets.zero_shot import ZeroShotDataset
 
 
@@ -79,7 +79,7 @@ def protect_enkidu(dataset_root, subset_manifest, model_directory, output,
     destinations = [output / 'protected_audio' / s.speaker_id / s.prompt_path.name for s in selected]
     if len(set(destinations)) != len(destinations):
         raise ValueError('Selected references collide at an Enkidu output path')
-    settings = OmegaConf.load(Path(__file__).parents[3] / 'configs/enkidu_on_libritts.yaml').protection
+    settings = OmegaConf.load(Path(__file__).parents[1] / 'configs/enkidu_on_libritts.yaml').protection
     settings.perturbation_epochs = epochs
     output.mkdir(parents=True, exist_ok=False)
     started = time.perf_counter()
@@ -93,10 +93,10 @@ def protect_enkidu(dataset_root, subset_manifest, model_directory, output,
         'training_references': [{'sample_id': sample_id(s), 'path': str(s.prompt_path),
                                  'sha256': file_hash(s.prompt_path)} for g in groups.values() for s in g],
         'model_assets': {name: file_hash(model_root / name) for name in required},
-        'source_hashes': {str(p.relative_to(Path(__file__).parents[3])): file_hash(p) for p in
+        'source_hashes': {str(p.resolve().relative_to(runtime_root())): file_hash(p) for p in
             (Path(__file__), Path(__file__).parents[1] / 'protection/enkidu.py',
              Path(__file__).parents[1] / 'protection/base_protector.py')},
-        'runtime': provenance(Path(__file__).parents[3]),
+        'runtime': provenance(runtime_root()),
         'limits': ['Audio-only input bypasses historical random text-feature fallbacks; RNG equivalence is unproven.',
                    'Historical cumulative-gradient optimization is preserved. Historical output equivalence requires separate comparison.']}
     path = output / 'stage_manifest.json'

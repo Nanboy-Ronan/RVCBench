@@ -455,7 +455,7 @@ python run_denoiser.py --config-name denoise/denoiser_dns64_on_protected_libritt
 
 ## Running Specific VC Models
 
-The zero-shot VC configs are under `configs/ots_vc/clean/`. All LibriTTS model integrations now use the canonical `configs/ots_vc/clean/libritts/` directory.
+The zero-shot VC configs are under `src/rvcbench/configs/ots_vc/clean/`. All LibriTTS model integrations now use the canonical `src/rvcbench/configs/ots_vc/clean/libritts/` directory.
 
 Before launching a model, activate the matching environment from
 [`envs/`](envs/). See [docs/model_environments.md](docs/model_environments.md) for the full map.
@@ -464,7 +464,7 @@ Before launching a model, activate the matching environment from
 
 You do not need to download every checkpoint bundle. For a single model, the workflow is:
 
-1. Pick the Hydra config for that model under `configs/ots_vc/clean/...`.
+1. Pick the Hydra config for that model under `src/rvcbench/configs/ots_vc/clean/...`.
 2. Create and activate that model's environment from `envs/`.
 3. Download or install only that model's runtime and checkpoints.
 4. Point any local paths with Hydra overrides such as `adversary.code_path=...` or `adversary.checkpoint_path=...`.
@@ -671,7 +671,7 @@ To rebuild canonical manifests from legacy per-speaker JSON files:
 python src/rvcbench/datasets/build_canonical_manifests.py --force
 ```
 
-Dataset selection and `speaker_id` filtering continue to work through `configs/dataset/` as before.
+Dataset selection and `speaker_id` filtering continue to work through `src/rvcbench/configs/dataset/` as before.
 
 ---
 
@@ -683,12 +683,13 @@ RVCBench/
 ├── run_protect.py             # apply protection + fidelity evaluation
 ├── run_vc_protect.py          # voice cloning on protected prompts
 ├── run_denoiser.py            # denoise protected audio + re-evaluate
-├── configs/
-│   ├── dataset/               # dataset configs (root_path, sampling_rate, …)
-│   ├── model/                 # surrogate model configs for protection
-│   ├── ots_vc/                # zero-shot VC configs (clean / protected)
-│   └── denoise/               # denoiser configs
 ├── src/rvcbench/              # the installable `rvcbench` package
+│   ├── configs/               # Hydra configs shipped with the package
+│   │   ├── dataset/           # dataset configs (root_path, sampling_rate, …)
+│   │   ├── model/             # surrogate model configs for protection
+│   │   ├── ots_vc/            # zero-shot VC configs (clean / protected)
+│   │   └── denoise/           # denoiser configs
+│   ├── entrypoints/           # Hydra applications behind `rvcbench run|protect|denoise`
 │   ├── benchmark/             # runner, run records, provenance and the `rvcbench` CLI
 │   ├── adversary/             # VC adversary wrappers
 │   ├── protection/            # protection algorithm implementations
@@ -737,10 +738,10 @@ Key config locations:
 
 | Path | Controls |
 |---|---|
-| `configs/dataset/` | Dataset root, sampling rate, speaker selection |
-| `configs/ots_vc/` | VC model, generation hyperparameters, evaluation settings |
-| `configs/model/` | Surrogate model used during protection |
-| `configs/denoise/` | Denoiser model and paths |
+| `src/rvcbench/configs/dataset/` | Dataset root, sampling rate, speaker selection |
+| `src/rvcbench/configs/ots_vc/` | VC model, generation hyperparameters, evaluation settings |
+| `src/rvcbench/configs/model/` | Surrogate model used during protection |
+| `src/rvcbench/configs/denoise/` | Denoiser model and paths |
 
 ---
 

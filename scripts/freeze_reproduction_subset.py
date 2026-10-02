@@ -16,7 +16,7 @@ from rvcbench.benchmark.subsets import freeze
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--dataset-config', type=Path, default=Path('configs/dataset/libritts.yaml'))
+    parser.add_argument('--dataset-config', type=Path, default=Path('src/rvcbench/configs/dataset/libritts.yaml'))
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--speakers', type=int, default=8)
     parser.add_argument('--pairs-per-speaker', type=int, default=2)
