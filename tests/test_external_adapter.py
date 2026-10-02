@@ -138,3 +138,21 @@ def test_template_config_requires_an_adapter_before_touching_the_dataset(setup_r
                   'dataset.use_hf_dataset=false', f'hydra.run.dir={root}/hydra'], plugins, root)
     assert result.returncode != 0
     assert 'Set vc.adapter=package.module:ClassName' in result.stderr
+
+
+def test_documented_example_adapter_runs(setup_run):
+    conf, _, _, root = setup_run
+    examples = Path(__file__).resolve().parents[1] / 'examples'
+    result = cli(['vc.adapter=echo_adapter:EchoAdapter', 'vc.model=echo', 'run_name=echo_on_fixture',
+                  '+vc.generate_only=true', '+adversary.gain=0.5', 'device=cpu', f'base_dir={root}',
+                  f'dataset.root_path={conf.dataset.root_path}', 'dataset.use_hf_dataset=false',
+                  'dataset.speaker_id=one', 'dataset.manifest_variant=null',
+                  '+dataset.manifest_filename=metadata.json', f'hydra.run.dir={root}/hydra'],
+                 examples / 'echo_adapter.py', root)
+    assert result.returncode == 0, result.stderr
+    manifest, = root.glob('results/echo_on_fixture/*/run_manifest.json')
+    recorded = json.loads(manifest.read_text())
+    assert recorded['status'] == 'generated' and recorded['coverage']['generated'] == 2
+    reference, _ = sf.read(Path(conf.dataset.root_path) / 'a.wav')
+    generated, _ = sf.read(recorded['samples'][0]['generated_path'])
+    assert abs(float(abs(generated).max()) - 0.5 * float(abs(reference).max())) < 1e-3

@@ -223,6 +223,7 @@ logs/
 /outputs/
 /docs/*
 !/docs/model_environments.md
+!/docs/adding_a_model.md
 !/docs/index.html
 !/docs/README.md
 !/docs/robots.txt
