@@ -16,7 +16,13 @@ adversary:
   config_path: "checkpoints/Amphion-maskgct/models/tts/maskgct/config/maskgct.json"
   runtime_python: "${oc.env:MASKGCT_RUNTIME_PYTHON,null}"
   worker_script_path: "scripts/maskgct_worker.py"
+  startup_timeout_sec: 600
+  request_timeout_sec: 900
   repo_id: "amphion/MaskGCT"
+  checkpoint_dir: null
+  revision: null
+  semantic_model_path: null
+  semantic_revision: null
   default_language: "en"
   default_prompt_text: "Here is a sample of the desired voice."
   n_timesteps: 25

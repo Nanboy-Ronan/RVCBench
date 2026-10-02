@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import atexit
 import json
+import math
+import uuid
 import subprocess
 import sys
 import tempfile
@@ -12,10 +14,12 @@ from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any, Dict, Optional
 
+import numpy as np
 import soundfile as sf
 import torch
 
 from src.models.model import BaseModel
+from src.models.worker_protocol import WorkerResponseReader
 
 
 @dataclass
@@ -32,6 +36,8 @@ class IndexTTSGeneratorConfig:
     use_torch_compile: bool = False
     interval_silence: int = 200
     max_text_tokens_per_segment: int = 120
+    startup_timeout_sec: float = 600.0
+    request_timeout_sec: float = 900.0
     output_wait_timeout_sec: float = 5.0
     output_wait_poll_interval_sec: float = 0.1
     verbose: bool = False
@@ -70,6 +76,13 @@ class IndexTTSGenerator(BaseModel):
         self.sample_rate: Optional[int] = None
         self.last_output_wait_sec: float = 0.0
         self.parameter_count: Optional[int] = None
+        self.last_native_seed = None
+        self.last_native_requested_seed = None
+        self._response_reader = WorkerResponseReader('IndexTTS')
+        for name in ('startup_timeout_sec', 'request_timeout_sec'):
+            value = float(getattr(self.config, name))
+            if not math.isfinite(value) or value <= 0:
+                raise ValueError(f'IndexTTS {name} must be finite and positive')
 
         self._validate_paths()
         atexit.register(self.close)
@@ -114,21 +127,26 @@ class IndexTTSGenerator(BaseModel):
         if self.config.verbose:
             command.append("--verbose")
 
-        self._process = subprocess.Popen(
-            command,
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=self._open_stderr_log(),
-            text=True,
-            bufsize=1,
-        )
-        message = self._read_message(expect_event="ready")
-        if not message.get("ok"):
+        self._response_reader.clear()
+        atexit.register(self.close)
+        try:
+            self._process = subprocess.Popen(
+                command,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=self._open_stderr_log(),
+                text=True,
+                bufsize=1,
+            )
+            message = self._read_message(expect_event="ready", timeout_sec=self.config.startup_timeout_sec)
+            if message.get("ok") is not True:
+                raise RuntimeError(f"IndexTTS worker failed to start: {message.get('error', 'unknown error')}")
+            reported_params = message.get("parameter_count")
+            if isinstance(reported_params, int) and reported_params > 0:
+                self.parameter_count = reported_params
+        except BaseException:
             self.close()
-            raise RuntimeError(f"IndexTTS worker failed to start: {message.get('error', 'unknown error')}")
-        reported_params = message.get("parameter_count")
-        if isinstance(reported_params, int) and reported_params > 0:
-            self.parameter_count = reported_params
+            raise
 
     def generate(
         self,
@@ -147,6 +165,7 @@ class IndexTTSGenerator(BaseModel):
 
         request = {
             "action": "generate",
+            "request_id": uuid.uuid4().hex,
             "seed": seed,
             "ref_audio": str(Path(ref_audio).expanduser().resolve()),
             "text": str(text).strip(),
@@ -158,33 +177,49 @@ class IndexTTSGenerator(BaseModel):
             ),
             "emo_alpha": float(emo_alpha),
         }
-        self._send_message(request)
-        response = self._read_message()
-        if not response.get("ok"):
-            raise RuntimeError(response.get("error", "IndexTTS worker returned an unknown error."))
-
-        result_path = Path(str(response.get("output_path") or request["output_path"])).resolve()
-        output_ready, output_wait_sec = self._wait_for_output_file(result_path)
-        self.last_output_wait_sec = output_wait_sec
-        if not output_ready:
-            stderr_tail = self._read_stderr_tail()
-            detail = f"IndexTTS worker reported success but no audio was written: {result_path}"
-            if stderr_tail:
-                detail += f"\nWorker stderr tail:\n{stderr_tail}"
-            raise FileNotFoundError(detail)
-
-        if self.sample_rate is None:
-            try:
-                _audio, sample_rate = sf.read(str(result_path), dtype="float32", always_2d=False)
-                self.sample_rate = int(sample_rate)
-            except Exception:
-                self.sample_rate = 24000
-        return result_path
+        self.last_native_seed = self.last_native_requested_seed = None
+        if not Path(request['ref_audio']).is_file():
+            raise FileNotFoundError(f"Missing IndexTTS reference: {request['ref_audio']}")
+        if seed is not None and type(seed) is not int:
+            raise ValueError('IndexTTS seed must be an integer or None')
+        dest = Path(request['output_path'])
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.unlink(missing_ok=True)
+        try:
+            self._send_message(request)
+            response = self._read_message(expect_event="response", timeout_sec=self.config.request_timeout_sec)
+            if response.get("request_id") != request["request_id"]:
+                raise RuntimeError('IndexTTS worker response does not match the request')
+            if response.get("ok") is not True:
+                raise RuntimeError(response.get("error", "IndexTTS worker returned an unknown error."))
+            if 'seed' not in response or type(response['seed']) is not type(seed) or response['seed'] != seed:
+                raise RuntimeError('IndexTTS worker did not acknowledge the requested seed')
+            result_path = Path(str(response.get("output_path") or '')).resolve()
+            if result_path != Path(request['output_path']):
+                raise RuntimeError('IndexTTS worker returned an unexpected output path')
+            output_ready, output_wait_sec = self._wait_for_output_file(result_path)
+            self.last_output_wait_sec = output_wait_sec
+            if not output_ready:
+                raise FileNotFoundError(f"IndexTTS worker reported success but no audio was written: {result_path}")
+            audio, sample_rate = sf.read(str(result_path), dtype="float32", always_2d=False)
+            if audio.ndim != 1 or not audio.size or not np.isfinite(audio).all() or sample_rate <= 0:
+                raise RuntimeError('IndexTTS worker output must be nonempty finite mono audio')
+            self.sample_rate = int(sample_rate)
+            self.last_native_requested_seed = self.last_native_seed = seed
+            return result_path
+        except BaseException:
+            self.close()
+            raise
 
     def close(self) -> None:
         atexit.unregister(self.close)
         process = self._process
         self._process = None
+        self._model_ready = False
+        self.model = None
+        self.sample_rate = self.parameter_count = None
+        self.last_native_seed = self.last_native_requested_seed = None
+        self._response_reader = WorkerResponseReader('IndexTTS')
         if process is None:
             self._close_stderr_log()
             return
@@ -282,38 +317,6 @@ class IndexTTSGenerator(BaseModel):
         proc.stdin.write(json.dumps(payload) + "\n")
         proc.stdin.flush()
 
-    def _read_message(
-        self,
-        *,
-        expect_event: Optional[str] = None,
-        process: Optional[subprocess.Popen[str]] = None,
-    ) -> Dict[str, Any]:
-        proc = process or self._process
-        if proc is None or proc.stdout is None:
-            raise RuntimeError("IndexTTS worker is not running.")
-
-        while True:
-            line = proc.stdout.readline()
-            if line:
-                payload = line.strip()
-                if not payload:
-                    continue
-                try:
-                    message = json.loads(payload)
-                except json.JSONDecodeError:
-                    if self.logger:
-                        self.logger.debug("[IndexTTS] Ignoring non-JSON worker stdout: %s", payload[:500])
-                    continue
-                event = message.get("event")
-                if event == "startup_error":
-                    return message
-                if expect_event is None or event == expect_event:
-                    return message
-                continue
-
-            returncode = proc.poll()
-            stderr_text = self._read_stderr_tail()
-            if returncode is not None:
-                raise RuntimeError(
-                    f"IndexTTS worker exited unexpectedly with code {returncode}. {stderr_text}".strip()
-                )
+    def _read_message(self, *, expect_event, timeout_sec):
+        return self._response_reader.read(self._process, expect_event=expect_event,
+            timeout_sec=timeout_sec, logger=self.logger, stderr_tail=self._read_stderr_tail)

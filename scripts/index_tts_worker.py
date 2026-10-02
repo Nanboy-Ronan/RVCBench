@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+from contextlib import redirect_stdout
 import json
 import os
 import sys
@@ -87,19 +88,20 @@ def main() -> int:
             sys.path.insert(0, str(code_path))
         os.chdir(str(code_path))
 
-        from indextts.infer_v2 import IndexTTS2
+        with redirect_stdout(sys.stderr):
+            from indextts.infer_v2 import IndexTTS2
 
-        device = _resolve_device(args.device)
-        tts = IndexTTS2(
-            cfg_path=str(config_path),
-            model_dir=str(model_dir),
-            use_fp16=bool(args.use_fp16),
-            device=device,
-            use_cuda_kernel=bool(args.use_cuda_kernel),
-            use_deepspeed=bool(args.use_deepspeed),
-            use_accel=bool(args.use_accel),
-            use_torch_compile=bool(args.use_torch_compile),
-        )
+            device = _resolve_device(args.device)
+            tts = IndexTTS2(
+                cfg_path=str(config_path),
+                model_dir=str(model_dir),
+                use_fp16=bool(args.use_fp16),
+                device=device,
+                use_cuda_kernel=bool(args.use_cuda_kernel),
+                use_deepspeed=bool(args.use_deepspeed),
+                use_accel=bool(args.use_accel),
+                use_torch_compile=bool(args.use_torch_compile),
+            )
 
         parameter_count = _maybe_count_parameters(getattr(tts, "gpt", None))
         _emit(
@@ -126,6 +128,10 @@ def main() -> int:
             _emit({"event": "response", "ok": False, "error": f"Invalid JSON request: {exc}"})
             continue
 
+        if not isinstance(request, dict):
+            _emit({"event": "response", "ok": False, "error": "Request must be a JSON object"})
+            continue
+        request_id = request.get('request_id')
         action = request.get("action")
         if action == "close":
             _emit({"event": "response", "ok": True})
@@ -161,28 +167,31 @@ def main() -> int:
             if output_path.exists():
                 output_path.unlink()
 
-            tts.infer(
-                spk_audio_prompt=str(ref_audio),
-                text=text,
-                output_path=str(output_path),
-                emo_audio_prompt=str(emo_audio_prompt) if emo_audio_prompt is not None else None,
-                emo_alpha=emo_alpha,
-                interval_silence=int(args.interval_silence),
-                verbose=bool(args.verbose),
-                max_text_tokens_per_segment=int(args.max_text_tokens_per_segment),
-                **generation_kwargs,
-            )
+            with redirect_stdout(sys.stderr):
+                tts.infer(
+                    spk_audio_prompt=str(ref_audio),
+                    text=text,
+                    output_path=str(output_path),
+                    emo_audio_prompt=str(emo_audio_prompt) if emo_audio_prompt is not None else None,
+                    emo_alpha=emo_alpha,
+                    interval_silence=int(args.interval_silence),
+                    verbose=bool(args.verbose),
+                    max_text_tokens_per_segment=int(args.max_text_tokens_per_segment),
+                    **generation_kwargs,
+                )
 
             _emit(
                 {
                     "event": "response",
                     "ok": True,
                     "output_path": str(output_path),
+                    "request_id": request_id,
+                    "seed": request.get("seed"),
                 }
             )
         except Exception as exc:
             traceback.print_exc(file=sys.stderr)
-            _emit({"event": "response", "ok": False, "error": str(exc)})
+            _emit({"event": "response", "ok": False, "request_id": request_id, "error": str(exc)})
 
     return 0
 

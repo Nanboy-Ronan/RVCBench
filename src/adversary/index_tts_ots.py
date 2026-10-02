@@ -49,6 +49,7 @@ class IndexTTSZeroShotAdversary(BaseAdversary):
         self.default_prompt_text = str(
             self.config.get("default_prompt_text", "Here is a sample of the desired voice.")
         ).strip()
+        self.seed = self.config.get("seed")
         self.max_samples = self.config.get("max_samples")
 
         self.emo_alpha = float(self.config.get("emo_alpha", 1.0))
@@ -91,6 +92,8 @@ class IndexTTSZeroShotAdversary(BaseAdversary):
             interval_silence=self.interval_silence,
             max_text_tokens_per_segment=self.max_text_tokens_per_segment,
             verbose=self.verbose,
+            startup_timeout_sec=float(self.config.get("startup_timeout_sec", 600.0)),
+            request_timeout_sec=float(self.config.get("request_timeout_sec", 900.0)),
             generation_kwargs=dict(self._generation_kwargs),
         )
         self._generator = IndexTTSGenerator(generator_config, self.device, self.logger)
@@ -101,6 +104,24 @@ class IndexTTSZeroShotAdversary(BaseAdversary):
         if self.use_prompt_as_emo_audio:
             return reference_path
         return None
+
+    def generate_sample(self, sample, *, output_dir):
+        self._ensure_generator()
+        reference_path = self._resolve_prompt_path(sample)
+        if reference_path is None:
+            raise FileNotFoundError(f"Missing IndexTTS reference: {sample.prompt_path}")
+        target_text = (sample.target_text or "").strip() or (sample.prompt_text or "").strip() or self.default_prompt_text
+        path = self._speaker_output_dir(Path(output_dir).resolve(), str(sample.speaker_id)) / self._cloned_filename(sample, sample.index)
+        emo_prompt = self._resolve_emo_prompt(reference_path)
+        if emo_prompt is not None and not emo_prompt.is_file():
+            raise FileNotFoundError(f"Missing IndexTTS emotion reference: {emo_prompt}")
+        self._log_clone_request(self.MODEL_NAME, 0, 1, str(sample.speaker_id),
+                                reference_path, target_text, prompt_transcript=sample.prompt_text)
+        started = time.perf_counter()
+        self._generator.generate(ref_audio=reference_path, text=target_text, output_path=path,
+                                 seed=self._sample_seed(sample), emo_audio_prompt=emo_prompt,
+                                 emo_alpha=self.emo_alpha)
+        return path, time.perf_counter() - started
 
     def attack(self, *, output_path, dataset, protected_audio_path=None):
         del protected_audio_path
@@ -132,68 +153,10 @@ class IndexTTSZeroShotAdversary(BaseAdversary):
         self._log_attack_plan(self.MODEL_NAME, samples, prompt_count)
 
         completed = 0
-        for idx, sample in enumerate(samples):
-            reference_path = self._resolve_prompt_path(sample)
-            if reference_path is None:
-                if self.logger:
-                    self.logger.warning(
-                        "[%s] Sample %d missing prompt audio; skipping.",
-                        self.MODEL_NAME,
-                        idx,
-                    )
-                continue
-
-            target_text = (sample.target_text or "").strip()
-            if not target_text:
-                target_text = (sample.prompt_text or "").strip()
-            if not target_text:
-                target_text = self.default_prompt_text
-
-            speaker_id = str(sample.speaker_id)
-            speaker_dir = self._speaker_output_dir(output_dir, speaker_id)
-            output_filename = self._cloned_filename(sample, idx)
-            output_wav_path = speaker_dir / output_filename
-            emo_prompt = self._resolve_emo_prompt(reference_path)
-
-            self._log_clone_request(
-                self.MODEL_NAME,
-                idx,
-                len(samples),
-                speaker_id,
-                reference_path,
-                target_text,
-                prompt_transcript=sample.prompt_text,
-            )
-
-            try:
-                synth_start = time.perf_counter()
-                self._generator.generate(
-                    ref_audio=reference_path,
-                    text=target_text,
-                    output_path=output_wav_path,
-                    seed=self._sample_seed(sample),
-                    emo_audio_prompt=emo_prompt,
-                    emo_alpha=self.emo_alpha,
-                )
-                synth_elapsed = time.perf_counter() - synth_start
-                synth_elapsed = max(
-                    0.0,
-                    synth_elapsed - float(getattr(self._generator, "last_output_wait_sec", 0.0)),
-                )
-            except Exception as exc:
-                if self.logger:
-                    self.logger.error(
-                        "[%s] Generation failed for sample %d (%s): %s",
-                        self.MODEL_NAME,
-                        idx,
-                        speaker_id,
-                        exc,
-                    )
-                continue
-
-            self._record_synthesis_timing(output_wav_path, synth_elapsed)
+        for sample in samples:
+            path, elapsed = self.generate_sample(sample, output_dir=output_dir)
+            self._record_synthesis_timing(path, elapsed)
             completed += 1
-
         self._flush_synthesis_timings()
         if self.logger:
             self.logger.info("[%s] Generated %d/%d utterances.", self.MODEL_NAME, completed, len(samples))
