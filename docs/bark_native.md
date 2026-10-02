@@ -41,6 +41,21 @@ run. The audit records actual asset hashes; the three Bark weights were reused
 read-only from existing local assets, without a claimed immutable Hub revision.
 The quantizer filename's `14` does not select HuBERT layer 14: native reference
 encoding uses layer 9. LoRA weights require a separate runtime and are rejected.
+Duplicate compiled prefix keys also fail before native key normalization.
+Text/coarse/fine checkpoints must contain complete finite state with matching
+tensor shapes. Extra or missing `.attn.bias` tensors are accepted only for a
+known native attention module and an exact lower-triangular causal mask of the
+configured size. Each component records strict loading and validated mask hashes
+in its initialization receipt.
+
+The runner uses explicit single-sample requests with original-index seeds.
+Missing reference audio, empty target text and invalid mono audio fail the sample;
+the runner records the error and continues. Reference transcripts are log metadata;
+native conditioning uses HuBERT/quantizer and Encodec reference tokens. Timing
+`bark_reference_encoding_semantic_coarse_fine_and_codec_excluding_output_write_v1`
+includes reference encoding and all synthesis stages, excluding final WAV writing.
+Direct-request/loading contracts are checked. Current native CPU generation and
+core scoring of the frozen subset require separate validation.
 
 Run the frozen subset after placing assets at the default paths:
 

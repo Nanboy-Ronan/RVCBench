@@ -12,6 +12,7 @@ import numpy as np
 import torch
 
 from src.models.model import BaseModel
+from src.models.bark_voice_clone.loading import load_bark_state
 
 
 @dataclass
@@ -49,6 +50,9 @@ class CPULoadTorch:
         state = checkpoint.get('model', checkpoint)
         if any('lora_' in key for key in state):
             raise ValueError('Bark LoRA checkpoints require a distinct runtime; refusing to discard adapters')
+        for key in state:
+            if key.startswith('_orig_mod.') and key.removeprefix('_orig_mod.') in state:
+                raise ValueError('Bark checkpoint contains duplicate normalized keys')
         return checkpoint
 
 
@@ -72,12 +76,7 @@ def private_runtime(module, device, tokenizer_path):
         parent = namespace[name]
         class StrictModel(parent):
             def load_state_dict(self, state, strict=True, **kwargs):
-                result = super().load_state_dict(state, strict=False, **kwargs)
-                missing = [key for key in result.missing_keys if not key.endswith('.attn.bias')]
-                extra = [key for key in result.unexpected_keys if not key.endswith('.attn.bias')]
-                if missing or extra:
-                    raise ValueError(f'Bark checkpoint mismatch: missing={missing}, unexpected={extra}')
-                return result
+                return load_bark_state(self, state, **kwargs)
         namespace[name] = StrictModel
     return namespace
 
@@ -87,6 +86,7 @@ class BarkVoiceCloneGenerator(BaseModel):
         super().__init__(model_name_or_path=str(config.models_dir), device=device, logger=logger)
         self.config, self.device = config, torch.device(device)
         self._runtime = self._hubert = self._quantizer = None
+        self.initialization_metadata = None
         if config.hubert_layer != 9:
             raise ValueError('The released Bark reference tokenizer uses HuBERT layer 9')
         if config.max_prompt_seconds is not None and (not np.isfinite(config.max_prompt_seconds) or config.max_prompt_seconds <= 0):
@@ -151,6 +151,8 @@ class BarkVoiceCloneGenerator(BaseModel):
                 self._quantizer.load_state_dict(torch.load(cfg.hubert_tokenizer, map_location='cpu', weights_only=True), strict=True)
                 self._quantizer.to(self.device).eval()
             self.model = self._runtime['models']
+            self.initialization_metadata = {name: (value['model'] if name == 'text' else value)._rvcbench_checkpoint_receipt
+                                            for name, value in self.model.items() if name in ('text', 'coarse', 'fine')}
         except Exception:
             self.close()
             raise
@@ -196,3 +198,4 @@ class BarkVoiceCloneGenerator(BaseModel):
             self._runtime['models'].clear()
         self._runtime = self._hubert = self._quantizer = self.model = None
         self._model_ready = False
+        self.initialization_metadata = None
