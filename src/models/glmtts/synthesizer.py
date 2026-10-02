@@ -38,14 +38,14 @@ class GLMTTSSynthesizer(BaseModel):
         logger,
     ) -> None:
         materialized = GLMTTSSynthesizerConfig(
-            code_path=Path(config.code_path),
+            code_path=Path(config.code_path).expanduser().resolve(),
             sample_rate=int(config.sample_rate),
             use_cache=bool(config.use_cache),
             use_phoneme=bool(config.use_phoneme),
             sample_method=str(config.sample_method),
             seed=config.seed,
-            ckpt_dir=Path(config.ckpt_dir) if config.ckpt_dir else None,
-            frontend_dir=Path(config.frontend_dir) if config.frontend_dir else None,
+            ckpt_dir=Path(config.ckpt_dir).expanduser().resolve() if config.ckpt_dir else None,
+            frontend_dir=Path(config.frontend_dir).expanduser().resolve() if config.frontend_dir else None,
         )
         if materialized.ckpt_dir is None:
             materialized.ckpt_dir = materialized.code_path / "ckpt"
@@ -83,6 +83,13 @@ class GLMTTSSynthesizer(BaseModel):
         prompt_text: str,
         seed: Optional[int] = None,
     ) -> Tuple[np.ndarray, int]:
+        prompt_path = Path(prompt_audio).resolve()
+        if not prompt_path.is_file():
+            raise FileNotFoundError(f"Prompt audio not found: {prompt_path}")
+        if not (text or '').strip():
+            raise ValueError('GLM-TTS requires nonempty target text')
+        if not (prompt_text or '').strip():
+            raise ValueError('GLM-TTS requires the actual reference transcript')
         with self._in_code_path():
             self.ensure_model()
             assert self._frontend is not None
@@ -90,10 +97,6 @@ class GLMTTSSynthesizer(BaseModel):
             assert self._llm is not None
             assert self._flow is not None
             assert self._generate_long is not None
-
-            prompt_path = Path(prompt_audio)
-            if not prompt_path.exists():
-                raise FileNotFoundError(f"Prompt audio not found: {prompt_path}")
 
             prompt_text_value = (prompt_text or "").strip()
             synth_text_value = (text or "").strip()
@@ -142,6 +145,8 @@ class GLMTTSSynthesizer(BaseModel):
             )
 
             waveform = tts_speech.squeeze().detach().cpu().numpy().astype(np.float32)
+            if waveform.ndim != 1 or not waveform.size or not np.isfinite(waveform).all():
+                raise ValueError('GLM-TTS returned invalid mono audio')
             return waveform, int(self.config.sample_rate)
 
     # ------------------------------------------------------------------
@@ -181,16 +186,25 @@ class GLMTTSSynthesizer(BaseModel):
             raise FileNotFoundError(
                 f"GLM-TTS frontend asset missing: {campplus_path}"
             )
+        if self.config.sample_rate == 24000:
+            hift = self.config.ckpt_dir / 'hift' / 'hift.pt'
+            if not hift.is_file():
+                raise FileNotFoundError(f'GLM-TTS requires the configured HiFT checkpoint: {hift}')
 
     def _ensure_imports(self) -> None:
         if self._imports_loaded:
             return
 
+        for name in ('glmtts_inference', 'cosyvoice', 'utils'):
+            existing = sys.modules.get(name)
+            if existing is not None:
+                self._check_module_origin(name, existing)
         code_path = str(self.config.code_path)
         if code_path not in sys.path:
             sys.path.insert(0, code_path)
 
         self._glmtts_module = importlib.import_module("glmtts_inference")
+        self._check_module_origin('glmtts_inference', self._glmtts_module)
         self._generate_long = getattr(self._glmtts_module, "generate_long", None)
         self._get_special_token_ids = getattr(self._glmtts_module, "get_special_token_ids", None)
 
@@ -198,6 +212,11 @@ class GLMTTSSynthesizer(BaseModel):
             raise ImportError("glmtts_inference missing required helpers for synthesis.")
 
         self._imports_loaded = True
+
+    def _check_module_origin(self, name, module):
+        filename = getattr(module, '__file__', None)
+        if not filename or not Path(filename).resolve().is_relative_to(self.config.code_path.resolve()):
+            raise ImportError(f'GLM-TTS module {name} is outside configured code_path; use an isolated process for this model')
 
     @contextmanager
     def _in_code_path(self):
@@ -216,11 +235,41 @@ class GLMTTSSynthesizer(BaseModel):
     def load_model(self) -> None:
         if self._llm is not None and self._flow is not None:
             return
-        with self._in_code_path():
-            self._load_model_in_code_path()
+        try:
+            with self._in_code_path():
+                self._load_model_in_code_path()
+        except Exception:
+            self.close()
+            raise
+
+    def close(self):
+        self.model = self._llm = self._flow = None
+        self._frontend = self._text_frontend = self._speech_tokenizer = None
+        self._glmtts_module = self._generate_long = self._get_special_token_ids = None
+        self._imports_loaded = self._model_ready = False
+
+    @contextmanager
+    def _hift_checkpoint_scope(self):
+        if int(self.config.sample_rate) != 24000:
+            yield
+            return
+        checkpoint = self.config.ckpt_dir / 'hift' / 'hift.pt'
+        if not checkpoint.is_file():
+            raise FileNotFoundError(f'GLM-TTS requires the configured HiFT checkpoint: {checkpoint}')
+        name = 'GLMTTS_HIFT_CKPT'
+        previous = os.environ.get(name)
+        os.environ[name] = str(checkpoint)
+        try:
+            yield
+        finally:
+            if previous is None:
+                os.environ.pop(name, None)
+            else:
+                os.environ[name] = previous
 
     def _load_model_in_code_path(self) -> None:
-
+        if torch.device(self.device).type != 'cuda':
+            raise RuntimeError('The pinned GLM-TTS native speech tokenizer requires CUDA; select a CUDA device')
         self._ensure_imports()
 
         from cosyvoice.cli.frontend import TTSFrontEnd, SpeechTokenizer, TextFrontEnd
@@ -228,6 +277,10 @@ class GLMTTSSynthesizer(BaseModel):
         from transformers import AutoTokenizer, LlamaForCausalLM
         from utils import tts_model_util, yaml_util
         from utils.audio import mel_spectrogram
+
+        for name in ('cosyvoice.cli.frontend', 'llm.glmtts', 'utils.tts_model_util',
+                     'utils.yaml_util', 'utils.audio'):
+            self._check_module_origin(name, importlib.import_module(name))
 
         device = torch.device(self.device)
         speech_tokenizer_path = self.config.ckpt_dir / "speech_tokenizer"
@@ -283,9 +336,6 @@ class GLMTTSSynthesizer(BaseModel):
         glmtts_configs_dir = self.config.code_path / "configs"
         lora_adapter_config = glmtts_configs_dir / "lora_adapter_configV3.1.json"
         spk_prompt_dict_path = glmtts_configs_dir / "spk_prompt_dict.yaml"
-        hift_ckpt = self.config.ckpt_dir / "hift" / "hift.pt"
-        if hift_ckpt.exists():
-            os.environ["GLMTTS_HIFT_CKPT"] = str(hift_ckpt)
         self._llm = GLMTTS(
             llama_cfg_path=str(llama_path / "config.json"),
             mode="PRETRAIN",
@@ -305,10 +355,11 @@ class GLMTTSSynthesizer(BaseModel):
         flow_ckpt = self.config.ckpt_dir / "flow" / "flow.pt"
         flow_config = self.config.ckpt_dir / "flow" / "config.yaml"
         flow = yaml_util.load_flow_model(str(flow_ckpt), str(flow_config), device)
-        self._flow = tts_model_util.Token2Wav(
-            flow,
-            sample_rate=int(self.config.sample_rate),
-            device=str(device),
-        )
+        with self._hift_checkpoint_scope():
+            self._flow = tts_model_util.Token2Wav(
+                flow,
+                sample_rate=int(self.config.sample_rate),
+                device=str(device),
+            )
 
         self.model = self._llm

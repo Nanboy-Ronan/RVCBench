@@ -21,7 +21,6 @@ adversary:
   sample_method: "ras"
   seed: null
   max_samples: null
-  default_prompt_text: "Here is a sample of the desired voice."
 
 batch_size: 16 # not used in VC
 
