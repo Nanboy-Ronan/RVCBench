@@ -310,10 +310,25 @@ remaining model requirements. Subset validation does not establish full-paper re
 ### Installation
 
 ```bash
-git clone https://github.com/Nanboy-Ronan/RVCBench.git
+git clone --branch v2 https://github.com/Nanboy-Ronan/RVCBench.git
 cd RVCBench
 python -m pip install -e .
 ```
+
+This installs the `rvcbench` package and command. The Hydra configs ship inside the
+package (`src/rvcbench/configs/`), so the run commands work from any directory:
+
+| Command | Source-checkout shortcut | Purpose |
+| --- | --- | --- |
+| `rvcbench run` | `python run_vc.py` | Voice cloning and evaluation |
+| `rvcbench run-protected` | `python run_vc_protect.py` | Voice cloning from protected references |
+| `rvcbench protect` | `python run_protect.py` | Protect source audio and measure fidelity |
+| `rvcbench denoise` | `python run_denoiser.py` | Denoise protected audio |
+
+Both forms take the same Hydra arguments (`--config-name NAME key=value ...`). Add your own
+configs without editing the package by passing `--config-dir /path/to/configs`.
+Model integrations still need their own environment, upstream checkout and checkpoints;
+the worker-backed models (IndexTTS, MaskGCT, DNS64) also need the `scripts/` directory of a source checkout.
 
 For model-specific runs, prefer the checked-in Conda environment files:
 
