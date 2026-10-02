@@ -28,6 +28,10 @@ def main(conf: DictConfig):
     logger = setup_logger("benchmark", exp_dir, conf.run_name, screen=True, tofile=True)
     logger.info(f"Using device: {device}")
     log_config(logger, conf)
+    # Reject an unknown model or malformed adapter before any dataset or model work.
+    if not conf.vc.get("evaluate_only", False):
+        from rvcbench.benchmark.registry import adapter_target
+        adapter_target(conf)
 
     seed_value = OmegaConf.select(conf, "seed", default=None)
     if seed_value is None:

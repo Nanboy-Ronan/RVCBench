@@ -112,6 +112,10 @@ def main(conf: DictConfig):
     logger.info(f"Using device: {device}")
     logger.info(f"Using protected audio from: {protected_audio_dir}")
     log_config(logger, conf)
+    # Reject an unknown model or malformed adapter before any dataset or model work.
+    if not conf.vc.get("evaluate_only", False):
+        from rvcbench.benchmark.registry import adapter_target
+        adapter_target(conf)
 
     seed_value = OmegaConf.select(conf, "seed", default=None)
     if seed_value is None:

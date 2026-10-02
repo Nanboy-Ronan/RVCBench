@@ -1,0 +1,33 @@
+# @package _global_
+
+# Template for a model that lives outside this package. Select your adapter class with
+#   vc.adapter=your_package.your_module:YourAdapter vc.model=your_model_name
+# Everything under `adversary` is passed to the adapter as `self.config`.
+
+run_name: "custom_ots_on_libritts"
+device: "cuda:0"
+base_dir: "."
+
+vc:
+  mode: "ots"
+  model: "custom"
+  adapter: null
+
+output_paths:
+  metrics_file: "results/custom_ots_on_libritts/metrics.json"
+
+adversary:
+  seed: null
+  max_samples: null
+
+batch_size: 16 # not used in VC
+
+defaults:
+  - _self_
+  - /dataset: libritts
+evaluation:
+  bootstrap:
+    enabled: true
+    num_samples: 1000
+    confidence_level: 0.95
+    seed: null

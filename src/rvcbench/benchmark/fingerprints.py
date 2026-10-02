@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 from .artifacts import digest, file_hash, package_parent
-from .registry import _ADVERSARY_REGISTRY
+from .registry import _ADVERSARY_REGISTRY, adapter_target
 
 
 NATIVE_SOURCE_SUFFIXES = {'.c', '.cc', '.cpp', '.cxx', '.h', '.hh', '.hpp', '.hxx',
@@ -62,14 +62,43 @@ def _literal_dynamic_import(node):
     return None
 
 
+def _find_module_source(module):
+    """Locate a module's source file through the import finders without executing it."""
+    search_path, spec = None, None
+    parts = module.split('.')
+    for depth in range(1, len(parts) + 1):
+        name, spec = '.'.join(parts[:depth]), None
+        for finder in sys.meta_path:
+            find_spec = getattr(finder, 'find_spec', None)
+            try:
+                spec = find_spec(name, search_path) if find_spec else None
+            except (ImportError, AttributeError, ValueError):
+                spec = None
+            if spec is not None:
+                break
+        if spec is None:
+            return None
+        search_path = spec.submodule_search_locations
+        if search_path is None and depth < len(parts):
+            return None
+    origin = spec.origin if spec is not None else None
+    return Path(origin) if origin and origin.endswith('.py') else None
+
+
 def generation_runtime(root, conf, packages):
     root = Path(root)
-    target = _ADVERSARY_REGISTRY[str(conf.vc.mode)][str(conf.vc.model)].split(':')[0]
+    target = adapter_target(conf).split(':')[0]
+    # An adapter outside this package is hashed together with its own package's modules.
+    adapter_package = None if target.split('.')[0] == 'rvcbench' else target.split('.')[0]
     pending = [target, 'rvcbench.benchmark.backends', 'rvcbench.benchmark.artifacts',
                'rvcbench.benchmark.runner', 'rvcbench.utils.seeding']
+    if adapter_package is not None:
+        pending.append('rvcbench.adapter')
     files, external = {}, set()
 
     def locate(module):
+        if adapter_package is not None and module.split('.')[0] == adapter_package:
+            return _find_module_source(module) or Path()
         path = package_parent(root).joinpath(*module.split('.'))
         return path.with_suffix('.py') if path.with_suffix('.py').is_file() else path / '__init__.py'
 
@@ -80,6 +109,9 @@ def generation_runtime(root, conf, packages):
         for child in ast.iter_child_nodes(node):
             yield from walk(child)
 
+    if adapter_package is not None and not locate(target).is_file():
+        raise ImportError(f"Cannot locate the source file of vc.adapter module '{target}'. "
+                          'It must be importable from a .py file so the run can record its source.')
     while pending:
         module = pending.pop()
         path = locate(module)
@@ -98,7 +130,9 @@ def generation_runtime(root, conf, packages):
             elif (dynamic := _literal_dynamic_import(node)):
                 imports = [dynamic]
             for imported in imports:
-                if imported.startswith('rvcbench.'):
+                if adapter_package is not None and imported.split('.')[0] == adapter_package:
+                    pending.append(imported)
+                elif imported.startswith('rvcbench.'):
                     # Evaluation is scheduled separately and has its own fingerprint.
                     if not imported.startswith('rvcbench.evaluation'):
                         pending.append(imported)

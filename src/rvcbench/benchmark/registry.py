@@ -57,9 +57,22 @@ _ADVERSARY_REGISTRY: Dict[str, Dict[str, str]] = {
     },
 }
 
-def select_adversary(conf, dataset_conf, device, logger):
+def adapter_target(conf):
+    """Return ``module:ClassName`` for the configured adapter.
+
+    ``vc.adapter`` selects an adapter outside this package; otherwise ``vc.model``
+    names one of the built-in integrations.
+    """
     mode = str(conf.vc.mode).lower()
     model = str(conf.vc.get("model", "bertvits2")).lower()
+
+    external = conf.vc.get("adapter")
+    if external:
+        module_path, _, class_name = str(external).partition(":")
+        if not module_path or not class_name or not all(
+                part.isidentifier() for part in (*module_path.split("."), class_name)):
+            raise ValueError(f"vc.adapter must be 'package.module:ClassName', got '{external}'")
+        return str(external)
 
     mode_registry = _ADVERSARY_REGISTRY.get(mode)
     if mode_registry is None:
@@ -68,8 +81,15 @@ def select_adversary(conf, dataset_conf, device, logger):
     target = mode_registry.get(model)
     if target is None:
         raise ValueError(
-            f"Unsupported adversary model '{model}' for mode '{mode}'. Available models: {', '.join(mode_registry.keys())}"
+            f"Unsupported adversary model '{model}' for mode '{mode}'. Available models: {', '.join(mode_registry.keys())}. "
+            "Set vc.adapter=package.module:ClassName to use an adapter outside this package."
         )
+    return target
+
+
+def select_adversary(conf, dataset_conf, device, logger):
+    model = str(conf.vc.get("model", "bertvits2")).lower()
+    target = adapter_target(conf)
 
     module_path, class_name = target.split(":", 1)
     try:
