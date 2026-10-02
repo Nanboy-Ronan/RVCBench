@@ -20,7 +20,7 @@ def _ensure_numba_cache_dir() -> None:
         except OSError:
             pass
 
-    fallback_dir = Path(gettempdir()) / "audiowatermarkbench_numba_cache"
+    fallback_dir = Path(gettempdir()) / "rvcbench_numba_cache"
     fallback_dir.mkdir(parents=True, exist_ok=True)
     os.environ.setdefault("NUMBA_CACHE_DIR", str(fallback_dir))
     os.environ.setdefault("LIBROSA_CACHE_DIR", str(fallback_dir))

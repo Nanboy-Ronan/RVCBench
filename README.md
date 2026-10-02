@@ -31,7 +31,7 @@ At a glance, this release supports **32 VC/TTS integration entries**, **5 audio 
 
 | Version | Source | Intended use |
 | --- | --- | --- |
-| **v1 — before refactor** | [`main`](https://github.com/Nanboy-Ronan/RVCBench/tree/main), at [`7c5bdbd`](https://github.com/Nanboy-Ronan/RVCBench/tree/7c5bdbd57f8972d179e5b4b609fe828af667fd64) (September 30, 2026) | Inspect or run the original architecture and configurations. This snapshot includes the NeurIPS acceptance announcement, before the first architecture refactor. |
+| **v1 — before refactor** | Branch [`main`](https://github.com/Nanboy-Ronan/RVCBench/tree/main); tagged [`v1.0`](https://github.com/Nanboy-Ronan/RVCBench/tree/v1.0) (September 30, 2026) | Inspect or run the original architecture and configurations. This snapshot includes the NeurIPS acceptance announcement, before the first architecture refactor. |
 | **v2 — current development** | Branch [`v2`](https://github.com/Nanboy-Ronan/RVCBench/tree/v2) | Use the evolving benchmark runner with explicit sample records and validation. Migration is incomplete; v2 has no finalized release tag or immutable release commit yet. |
 
 To obtain each version in a separate directory:
