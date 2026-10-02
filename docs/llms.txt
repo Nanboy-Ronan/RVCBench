@@ -2,7 +2,7 @@
 
 > A benchmark for voice-cloning robustness, speaker privacy, and audio-protection methods, covering 32 TTS/VC models, 5 protection methods, and 10 dataset configurations.
 
-RVCBench applies audio-protection perturbations to source speech, runs zero-shot and fine-tuning voice-cloning models against clean and protected prompts, optionally denoises protected audio, and scores every run on speaker similarity (SIM), word error rate (WER), SpeechMOS (MOS), mel-cepstral distortion (MCD), real-time factor (RTF), speaker-verification accuracy (SVA), and emotion match rate.
+RVCBench applies audio-protection perturbations to source speech, runs zero-shot and fine-tuning voice-cloning models against clean and protected prompts, optionally denoises protected audio, and scores every run on speaker similarity (SIM), word error rate (WER), SpeechMOS (MOS), mel-cepstral distortion (MCD), raw real-time factor (RTF; historical scopes are incomparable and cannot rank speed), speaker-verification accuracy (SVA), and emotion match rate.
 
 ## Key facts
 

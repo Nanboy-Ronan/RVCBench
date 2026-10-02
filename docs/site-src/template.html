@@ -610,7 +610,7 @@
         <div class="section-head">
           <span class="eyebrow"><span class="dim-tag dim-signal">Generation Robustness</span> Leaderboard — LibriTTS, clean prompts</span>
           <h2>Which model clones a voice best?</h2>
-          <p>Ranked by speaker similarity (SIM) on unprotected prompts, averaged across the full LibriTTS speaker set. Click a column to sort.</p>
+          <p>Ranked by speaker similarity (SIM) on unprotected prompts, averaged across the full LibriTTS speaker set. Click a quality column to sort. Historical RTF is raw and incomparable: timing boundaries and execution conditions are unverified. Speed ranking is disabled.</p>
         </div>
         <div class="table-scroll">
           <table id="lbTable">
@@ -622,7 +622,7 @@
                 <th data-key="wer" data-type="num" class="num" scope="col"><span class="sort-btn" role="button" tabindex="0">WER ↓</span></th>
                 <th data-key="mos" data-type="num" class="num" scope="col"><span class="sort-btn" role="button" tabindex="0">MOS ↑</span></th>
                 <th data-key="mcd" data-type="num" class="num" scope="col"><span class="sort-btn" role="button" tabindex="0">MCD ↓</span></th>
-                <th data-key="rtf" data-type="num" class="num" scope="col"><span class="sort-btn" role="button" tabindex="0">RTF ↓</span></th>
+                <th class="num" scope="col">RTF (raw, incomparable)</th>
                 <th data-key="sva" data-type="num" class="num" scope="col"><span class="sort-btn" role="button" tabindex="0">SVA ↑</span></th>
                 <th data-key="emo" data-type="num" class="num" scope="col"><span class="sort-btn" role="button" tabindex="0">Emo ↑</span></th>
               </tr>
@@ -630,7 +630,7 @@
             <tbody id="lbBody">__LEADERBOARD_ROWS__</tbody>
           </table>
         </div>
-        <p class="table-note">SIM: speaker cosine similarity · WER: word error rate · MOS: SpeechMOS perceptual score · MCD: mel-cepstral distortion · RTF: real-time factor (&lt;1 = faster than real time) · SVA: speaker-verification accuracy · Emo: emotion match rate. All values on clean prompts.</p>
+        <p class="table-note">SIM: speaker cosine similarity · WER: word error rate · MOS: SpeechMOS perceptual score · MCD: mel-cepstral distortion · RTF: raw real-time factor; incomparable historical scopes, no speed ranking · SVA: speaker-verification accuracy · Emo: emotion match rate. All values on clean prompts.</p>
       </div>
     </section>
 
@@ -740,7 +740,7 @@
           <div class="metric"><span class="m-name">WER</span><span class="m-dir">↓</span><p class="m-desc">Word error rate — how intelligible the generated speech is.</p></div>
           <div class="metric"><span class="m-name">MOS</span><span class="m-dir">↑</span><p class="m-desc">SpeechMOS perceptual quality score.</p></div>
           <div class="metric"><span class="m-name">MCD</span><span class="m-dir">↓</span><p class="m-desc">Mel-cepstral distortion versus the reference.</p></div>
-          <div class="metric"><span class="m-name">RTF</span><span class="m-dir">↓</span><p class="m-desc">Real-time factor; below 1 is faster than real time.</p></div>
+          <div class="metric"><span class="m-name">RTF</span><span class="m-dir">↓</span><p class="m-desc">Raw real-time factor. Historical timing scopes are unverified; cross-model speed ranking is not supported.</p></div>
           <div class="metric"><span class="m-name">SVA</span><span class="m-dir">↑</span><p class="m-desc">Speaker-verification accuracy against the target identity.</p></div>
           <div class="metric"><span class="m-name">Emo</span><span class="m-dir">↑</span><p class="m-desc">Emotion match rate between clone and target.</p></div>
           <div class="metric"><span class="m-name">SNR / STOI / DNSMOS</span><span class="m-dir"></span><p class="m-desc">Fidelity metrics reported for protection and denoising runs.</p></div>

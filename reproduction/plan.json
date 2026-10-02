@@ -430,5 +430,11 @@
     "Subset checks do not establish full-paper table reproduction.",
     "Historical results lacking weight revisions or seeds cannot establish bitwise generation equivalence.",
     "Historical source data and result artifacts remain preserved."
-  ]
+  ],
+  "timing_evidence": {
+    "status": "comparability_pending",
+    "audit": "docs/timing_comparability.md",
+    "ranking_allowed": false,
+    "note": "Raw seconds and exact scopes are retained. Current scopes have no audited common boundary or matched execution protocol. Guardrails and regression tests do not establish measurement comparability."
+  }
 }

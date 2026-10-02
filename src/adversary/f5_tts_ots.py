@@ -116,6 +116,8 @@ class F5TTSZeroShotAdversary(BaseAdversary):
         self._transcript_cache[cache_key] = transcript
         return transcript
 
+    timing_scope = "f5_sequential_inference_excluding_transcription_and_output_write_v1"
+
     def generate_sample(self, sample, *, output_dir):
         """Generate one reference-conditioned sample with explicit failure reporting."""
         self._ensure_generator()

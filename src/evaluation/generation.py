@@ -64,11 +64,11 @@ def _normalize_device(device) -> torch.device:
     return torch.device("cpu")
 
 
-def _load_synthesis_timings(generated_audio_dir: Path) -> dict[str, float]:
+def _load_synthesis_timings(generated_audio_dir: Path) -> dict[str, dict]:
     timing_path = Path(generated_audio_dir) / "synthesis_timings.csv"
     if not timing_path.is_file():
         return {}
-    timings: dict[str, float] = {}
+    timings: dict[str, dict] = {}
     try:
         with open(timing_path, "r", encoding="utf-8") as csvfile:
             reader = csv.DictReader(csvfile)
@@ -78,7 +78,8 @@ def _load_synthesis_timings(generated_audio_dir: Path) -> dict[str, float]:
                 if not raw_path or raw_time in (None, ""):
                     continue
                 try:
-                    timings[str(Path(raw_path).resolve())] = float(raw_time)
+                    timings[str(Path(raw_path).resolve())] = {"synthesis_time_sec": float(raw_time), "timing_scope": row.get("timing_scope") or None,
+                        "adapter_call_time_sec": row.get("adapter_call_time_sec") or None}
                 except Exception:
                     continue
     except Exception:
@@ -745,7 +746,8 @@ def _evaluate_pairs(
             resolved_gen = str(gen_file.resolve())
         except Exception:
             resolved_gen = str(gen_file)
-        synthesis_time = synthesis_timings.get(resolved_gen)
+        timing = synthesis_timings.get(resolved_gen, {})
+        synthesis_time = timing.get("synthesis_time_sec")
 
         ref_emotion = None
         gen_emotion = None
@@ -786,6 +788,8 @@ def _evaluate_pairs(
                 "sva": sva_decision,
                 "generated_duration_sec": duration_sec,
                 "synthesis_time_sec": synthesis_time,
+                "timing_scope": timing.get("timing_scope"),
+                "adapter_call_time_sec": timing.get("adapter_call_time_sec"),
                 "reference_emotion": ref_emotion,
                 "generated_emotion": gen_emotion,
                 "emotion_match": emotion_match,
@@ -828,6 +832,11 @@ def _evaluate_pairs(
         result["total_audio_duration_sec"] = 0.0
         result["rtf"] = None
         result["synthesis_time_sec"] = synthesis_time_sec
+
+    # Keep the legacy run-level ratio as raw evidence with unknown boundary.
+    result["raw_run_rtf"] = result["rtf"]
+    from src.benchmark.timing import timing_summary
+    result.update(timing_summary(sample_metrics))
 
     if total_sva_samples > 0:
         result["avg_sva"] = total_sva_positive / total_sva_samples
@@ -890,6 +899,8 @@ def _evaluate_pairs(
             "sva",
             "generated_duration_sec",
             "synthesis_time_sec",
+            "timing_scope",
+            "adapter_call_time_sec",
             "reference_emotion",
             "generated_emotion",
             "emotion_match",

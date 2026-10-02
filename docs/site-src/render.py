@@ -55,7 +55,7 @@ def render_leaderboard_rows():
         pct = round(d["sim"] / max_sim * 100, 1)
         out.append(
             '<tr data-model="{m}" data-sim="{sim}" data-wer="{wer}" data-mos="{mos}" '
-            'data-mcd="{mcd}" data-rtf="{rtf}" data-sva="{sva}" data-emo="{emo}">'
+            'data-mcd="{mcd}" data-sva="{sva}" data-emo="{emo}">'
             '<td class="num"><span class="rank{medal}">{rank}</span></td>'
             '<td><span class="model-cell">{mname}</span></td>'
             '<td class="num"><span class="sim-bar-wrap"><span class="tnum">{simf}</span>'
@@ -305,7 +305,7 @@ def render_llms_txt():
         "RVCBench applies audio-protection perturbations to source speech, runs zero-shot and "
         "fine-tuning voice-cloning models against clean and protected prompts, optionally denoises "
         "protected audio, and scores every run on speaker similarity (SIM), word error rate (WER), "
-        "SpeechMOS (MOS), mel-cepstral distortion (MCD), real-time factor (RTF), speaker-verification "
+        "SpeechMOS (MOS), mel-cepstral distortion (MCD), raw real-time factor (RTF; historical scopes are incomparable and cannot rank speed), speaker-verification "
         "accuracy (SVA), and emotion match rate.",
         "",
         "## Key facts",

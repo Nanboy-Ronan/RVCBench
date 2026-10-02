@@ -169,6 +169,8 @@ class Qwen3TTSZeroShotAdversary(BaseAdversary):
         self._prompt_cache[cache_key] = prompt
         return prompt
 
+    timing_scope = "qwen3_generate_excluding_prompt_encoding_and_io_v1"
+
     def generate_sample(self, sample, *, output_dir):
         """Generate one explicit request; failures propagate to the run journal."""
         self._ensure_generator()

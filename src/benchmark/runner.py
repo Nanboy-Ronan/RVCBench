@@ -161,7 +161,8 @@ def run_zero_shot(conf, base_dir, device, dataset, exp_dir, logger, protected_au
                 shutil.copy2(src, dest)
                 row.update(status='generated', generated_sha256=prior['generated_sha256'],
                            synthesis_time_sec=prior.get('synthesis_time_sec'),
-                           timing_scope=prior.get('timing_scope'), reused=True)
+                           timing_scope=prior.get('timing_scope'),
+                           adapter_call_time_sec=prior.get('adapter_call_time_sec'), reused=True)
                 for key in ('native_seed', 'native_seed_policy', 'native_requested_seed'):
                     if key in prior:
                         row[key] = prior[key]
@@ -188,7 +189,8 @@ def run_zero_shot(conf, base_dir, device, dataset, exp_dir, logger, protected_au
                             raise RuntimeError('Adapter produced no audio for this sample')
                         check_audio(dest)
                         row.update(status='generated', generated_sha256=file_hash(dest),
-                                   synthesis_time_sec=result.elapsed_sec, timing_scope=result.timing_scope)
+                                   synthesis_time_sec=result.elapsed_sec, timing_scope=result.timing_scope,
+                                   adapter_call_time_sec=result.adapter_call_time_sec)
                         if result.native_seed_policy is not None:
                             row.update(native_seed=result.native_seed, native_seed_policy=result.native_seed_policy)
                             if result.native_requested_seed is not None:
@@ -218,7 +220,7 @@ def run_zero_shot(conf, base_dir, device, dataset, exp_dir, logger, protected_au
             backend.close()
             backend = None
         with (audio_dir / 'synthesis_timings.csv').open('w') as f:
-            writer = csv.DictWriter(f, fieldnames=['generated_path', 'synthesis_time_sec'])
+            writer = csv.DictWriter(f, fieldnames=['generated_path', 'synthesis_time_sec', 'timing_scope', 'adapter_call_time_sec'])
             writer.writeheader()
             writer.writerows({k: r.get(k) for k in writer.fieldnames} for r in rows if r.get('generated_sha256'))
         if not generate_only and any(row.get('generated_sha256') for row in rows):

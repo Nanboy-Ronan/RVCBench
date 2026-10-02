@@ -44,7 +44,9 @@ def check_comparability(left_dir, right_dir, metrics):
                 reasons.append(f'run {index}: {metric} scorer fingerprint is inconsistent')
         if fingerprints[0] is None or fingerprints[0] != fingerprints[1]:
             reasons.append(f'{metric} scorer code, dependencies, assets or settings differ or are missing')
-    return {'status': 'comparable' if not reasons else 'incompatible', 'reasons': reasons,
+    from .timing import compare_timing
+    timing = compare_timing(left['samples'], right['samples'])
+    return {'timing_comparability': timing, 'status': 'comparable' if not reasons else 'incompatible', 'reasons': reasons,
             'metrics': metrics, 'requested_pairs': [len(r['samples']) for r in runs],
             'models': [r['config']['vc']['model'] for r in runs],
             'sources': [{'manifest': str((p / 'run_manifest.json').resolve()),

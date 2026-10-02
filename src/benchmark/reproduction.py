@@ -202,7 +202,9 @@ def compare(run_dir, historical_csv, output):
                        'historical_prompt_evidence': old.get('prompt_evidence', {'source': 'pair_encoded_filename'}),
                        'current': {m: float(new['metrics'][m]) for m in metrics},
                        'historical': {m: float(old[m]) for m in metrics}})
-    report = {'status': 'matched_subset_comparison', 'model': run['config']['vc']['model'],
+    from .timing import compare_timing
+    timing = compare_timing([r for r, _ in pairs], [r for _, r in pairs])
+    report = {'timing_comparability': timing, 'status': 'matched_subset_comparison', 'model': run['config']['vc']['model'],
         'matched_pairs': len(pairs), 'speakers': len(speakers),
         'speaker_groups': len({r['speaker_id'] for r, _ in pairs}),
         'run_manifest': str(Path(run_dir).resolve() / 'run_manifest.json'),

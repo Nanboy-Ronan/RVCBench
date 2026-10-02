@@ -62,11 +62,13 @@ If you're deciding whether a protection method actually generalises — or wheth
 > [!NOTE]
 > **Metric guide** — SIM: speaker cosine similarity ↑ · WER: word error rate ↓ · MOS: SpeechMOS perceptual score ↑ · MCD: mel cepstral distortion ↓ · RTF: real-time factor (< 1 = faster-than-real-time) ↓ · SVA: speaker verification accuracy ↑ · Emo: emotion match rate ↑
 >
-> **Bold** marks the best value per column. All results on clean (unprotected) prompts, averaged over the full speaker set for each dataset.
+> **Timing warning:** Historical RTF values have unverified measurement boundaries and execution conditions. They are raw records, cannot rank model speed, and must not inherit current backend scopes. Rank is by SIM.
+>
+> **Bold** marks the best value per quality column. All results on clean (unprotected) prompts, averaged over the full speaker set for each dataset.
 
 ### Leaderboard — LibriTTS
 
-| Rank | Model | SIM ↑ | WER ↓ | MOS ↑ | MCD ↓ | RTF ↓ | SVA ↑ | Emo ↑ |
+| Rank | Model | SIM ↑ | WER ↓ | MOS ↑ | MCD ↓ | RTF (raw, incomparable) | SVA ↑ | Emo ↑ |
 |:----:|-------|------:|------:|------:|------:|------:|------:|------:|
 | 1 | **Qwen3-TTS** | **0.614** | 0.052 | **4.39** | **5.79** | 2.02 | **0.974** | **0.731** |
 | 2 | **IndexTTS** | 0.606 | 0.052 | 4.06 | 6.61 | 2.23 | 0.972 | 0.693 |
@@ -84,7 +86,7 @@ If you're deciding whether a protection method actually generalises — or wheth
 | 14 | XTTS-v2 | 0.454 | 0.073 | 3.81 | 8.62 | 0.62 | 0.908 | 0.639 |
 | 15 | SparkTTS | 0.408 | 0.326 | 4.06 | 5.83 | 1.56 | 0.764 | 0.672 |
 | 16 | OZSpeech | 0.388 | 0.060 | 3.21 | 6.87 | 8.75 | 0.840 | 0.636 |
-| 17 | OpenVoice V2 | 0.244 | 0.075 | 4.30 | 7.06 | **0.08** | 0.474 | 0.601 |
+| 17 | OpenVoice V2 | 0.244 | 0.075 | 4.30 | 7.06 | 0.08 | 0.474 | 0.601 |
 | 18 | StyleTTS 2 | 0.228 | **0.049** | 4.30 | 6.81 | 0.11 | 0.388 | 0.589 |
 
 ### Protection Robustness — SIM on LibriTTS

@@ -30,6 +30,7 @@ class GenerationResult:
     native_seed: int | None = None
     native_seed_policy: str | None = None
     native_requested_seed: int | None = None
+    adapter_call_time_sec: float | None = None
 
 
 class Backend(Protocol):
@@ -74,17 +75,19 @@ class LegacyAdversaryBackend:
                 dataset=SampleView(self.dataset, request.sample),
                 protected_audio_path=str(request.protected_audio_dir) if request.protected_audio_dir else None)
             elapsed = time.perf_counter() - started
+            adapter_call_elapsed = elapsed
             scope = 'adapter_call_including_lazy_initialization'
             dest = output_path(request.output_dir, request.sample)
             for timing in getattr(self.adapter, '_synthesis_timing_records', []):
                 if Path(timing['generated_path']).resolve() == dest.resolve():
                     elapsed = timing['synthesis_time_sec']
-                    scope = 'adapter_reported_synthesis'
+                    scope = timing.get('timing_scope') or 'adapter_reported_synthesis'
             generator = getattr(self.adapter, '_generator', None)
             results.append(GenerationResult(sample_id(request.sample), dest, elapsed, scope,
                 native_seed=getattr(generator, 'last_native_seed', None),
                 native_seed_policy=getattr(getattr(generator, 'config', None), 'native_seed_policy', None),
-                native_requested_seed=getattr(generator, 'last_native_requested_seed', None)))
+                native_requested_seed=getattr(generator, 'last_native_requested_seed', None),
+                adapter_call_time_sec=adapter_call_elapsed))
         return results
 
     def close(self):

@@ -9,7 +9,7 @@ import json
 import math
 from pathlib import Path
 
-from src.benchmark.artifacts import METRIC_COLUMNS, atomic_json, digest, file_hash, finite, metric_value_valid as _valid
+from src.benchmark.artifacts import METRIC_COLUMNS, atomic_json, digest, file_hash, metric_value_valid as _valid
 from .scorers import ScoreInput, create_scorer
 from src.utils.runtime_errors import invalid_cuda_context
 
@@ -197,8 +197,8 @@ def _export(rows, required, output, provenance, bootstrap_config):
     csv_path = output / 'generation_sample_metrics.csv'
     fields = ['sample_id', 'speaker_id', 'ground_truth_path', 'generated_path', 'ground_truth_text',
               'predicted_text', 'reference_emotion', 'generated_emotion'] + list(METRIC_COLUMNS.values()) + ['dnsmos_sig', 'dnsmos_bak',
-              'generated_duration_sec', 'synthesis_time_sec', 'timing_scope']
-    timings = {}
+              'generated_duration_sec', 'synthesis_time_sec', 'timing_scope', 'adapter_call_time_sec']
+    timing_rows = []
     with csv_path.open('w', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=fields, extrasaction='ignore')
         writer.writeheader()
@@ -207,28 +207,20 @@ def _export(rows, required, output, provenance, bootstrap_config):
             if row.get('generated_sha256'):
                 info = sf.info(row['generated_path'])
                 duration = info.frames / info.samplerate
-                elapsed = row.get('synthesis_time_sec')
-                if elapsed is not None and finite(elapsed) and float(elapsed) >= 0:
-                    scope = row.get('timing_scope') or 'unspecified'
-                    group = timings.setdefault(scope, {'synthesis_time_sec': 0., 'generated_duration_sec': 0., 'samples': 0})
-                    group['synthesis_time_sec'] += float(elapsed)
-                    group['generated_duration_sec'] += duration
-                    group['samples'] += 1
+            timing_rows.append({**row, 'generated_duration_sec': duration})
             writer.writerow({'sample_id': row['sample_id'], 'speaker_id': row['speaker_id'],
                 'ground_truth_path': row['target_path'], 'generated_path': row.get('generated_path'),
                 'ground_truth_text': row['target_text'], 'generated_duration_sec': duration,
                 'synthesis_time_sec': row.get('synthesis_time_sec'), 'timing_scope': row.get('timing_scope'),
+                'adapter_call_time_sec': row.get('adapter_call_time_sec'),
                 **row.get('metrics', {})})
     aggregation = OmegaConf.to_container(bootstrap_config, resolve=True) if OmegaConf.is_config(bootstrap_config) else bootstrap_config
     result = {'sample_metrics_csv': str(csv_path), 'scorers': provenance,
               'evaluation_fingerprint': digest({'scorers': provenance, 'bootstrap': aggregation,
                                                 'required_metrics': required}),
               'evaluated_pairs': sum(bool(r.get('generated_sha256')) for r in rows)}
-    for group in timings.values():
-        group['rtf'] = group['synthesis_time_sec'] / group['generated_duration_sec'] if group['generated_duration_sec'] else None
-    result['rtf_by_scope'] = timings
-    only = next(iter(timings.values())) if len(timings) == 1 else None
-    result['rtf'] = only['rtf'] if only and only['samples'] == len(rows) and 'unspecified' not in timings else None
+    from src.benchmark.timing import timing_summary
+    result.update(timing_summary(timing_rows))
     for metric in required:
         values = [float(r['metrics'][METRIC_COLUMNS[metric]]) for r in rows
                   if _valid(metric, r.get('metrics', {}).get(METRIC_COLUMNS[metric])) and metric not in r.get('metric_errors', {})]

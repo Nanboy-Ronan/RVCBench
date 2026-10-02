@@ -174,6 +174,7 @@ class BaseAdversary(ABC):
             {
                 "generated_path": str(resolved),
                 "synthesis_time_sec": float(elapsed_sec),
+                "timing_scope": getattr(self, "timing_scope", "adapter_reported_synthesis"),
             }
         )
 
@@ -184,7 +185,7 @@ class BaseAdversary(ABC):
         with open(self._synthesis_timing_path, "w", encoding="utf-8", newline="") as csvfile:
             writer = csv.DictWriter(
                 csvfile,
-                fieldnames=["generated_path", "synthesis_time_sec"],
+                fieldnames=["generated_path", "synthesis_time_sec", "timing_scope"],
             )
             writer.writeheader()
             writer.writerows(self._synthesis_timing_records)
