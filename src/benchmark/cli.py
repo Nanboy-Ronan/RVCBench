@@ -12,11 +12,15 @@ def main():
     parser = argparse.ArgumentParser(prog='rvcbench')
     commands = parser.add_subparsers(dest='command', required=True)
     doctor = commands.add_parser('doctor', help='Check dependencies without loading models or downloading weights')
-    doctor.add_argument('--model', choices=['qwen3', 'qwen3_omni'], default=None)
+    doctor.add_argument('--model', choices=['qwen3', 'qwen3_omni', 'sparktts'], default=None)
     doctor.add_argument('--eval', action='store_true')
     doctor.add_argument('--imports', action='store_true', help='Also import dependencies in an isolated subprocess to detect binary/version conflicts')
     status = commands.add_parser('status', help='Show run status and recovered sample coverage')
     status.add_argument('run_dir', type=Path)
+    audit = commands.add_parser('audit-source', help='Compare recorded generation source hashes with local files')
+    audit.add_argument('run_dir', type=Path)
+    audit.add_argument('--root', type=Path, default=Path(__file__).resolve().parents[2])
+    audit.add_argument('--output', type=Path)
     smoke = commands.add_parser('smoke', help='Run a synthetic CPU pipeline check (no model download)')
     smoke.add_argument('--output', type=Path, default=Path('results/smoke'))
     report = commands.add_parser('report', help='Validate a complete run and export a provenance-bearing JSON report')
@@ -51,7 +55,27 @@ def main():
     compare.add_argument('right', type=Path)
     compare.add_argument('--metrics', nargs='+', default=['mcd', 'wer', 'sim'])
     compare.add_argument('--output', type=Path)
+    timing = commands.add_parser('compare-timing', help='Verify matched fresh request wall timings')
+    timing.add_argument('left', type=Path)
+    timing.add_argument('right', type=Path)
+    timing.add_argument('--output', type=Path)
     args = parser.parse_args()
+    if args.command == 'audit-source':
+        from .source_audit import audit_recorded_sources
+        from .artifacts import atomic_json
+        result = audit_recorded_sources(args.run_dir, args.root)
+        if args.output:
+            atomic_json(args.output, result)
+        print(json.dumps(result, indent=2))
+        raise SystemExit(result['status'] != 'recorded_sources_match')
+    if args.command == 'compare-timing':
+        from .timing import check_timing_comparability
+        from .artifacts import atomic_json
+        result = check_timing_comparability(args.left, args.right)
+        if args.output:
+            atomic_json(args.output, result)
+        print(json.dumps(result, indent=2))
+        raise SystemExit(result['status'] != 'comparable')
     if args.command == 'protect-enkidu':
         from .enkidu_stage import protect_enkidu
         result = protect_enkidu(args.dataset_root, args.subset_manifest, args.model_directory,
@@ -89,6 +113,8 @@ def main():
             names += ['qwen_tts']
         elif args.model == 'qwen3_omni':
             names += ['transformers', 'qwen_omni_utils', 'accelerate']
+        elif args.model == 'sparktts':
+            names += ['numpy', 'torchaudio', 'transformers', 'safetensors', 'einops', 'einx', 'omegaconf', 'librosa', 'yaml']
         if args.eval:
             names += ['torchaudio', 'whisper', 'speechbrain', 'pymcd', 'jiwer', 'torch_stoi']
         missing = [n for n in names if importlib.util.find_spec(n) is None]
@@ -153,3 +179,7 @@ def main():
         metrics, _, _ = run_zero_shot(conf, Path.cwd(), 'cpu', dataset, output, logger)
         print(json.dumps(metrics, indent=2))
         print('Synthetic pipeline check passed; this is not a model evaluation.')
+
+
+if __name__ == '__main__':
+    main()

@@ -15,7 +15,9 @@ Audited base: `e5cfbf5e43b523e7e79aac3b79e42f47bc33cf2c`.
 
 ## Decision rule
 
-All current scopes fail closed for horizontal speed ranking, including identical generic scope strings and identical Qwen/F5 scope strings. There is no approved common measurement protocol in this revision. A scope name is provenance, not proof of equal boundaries.
+All adapter-reported scopes fail closed for horizontal speed ranking, including identical generic scope strings and identical Qwen/F5 scope strings. `synthesis_time_sec` has no approved common measurement protocol. A scope name is provenance, not proof of equal boundaries.
+
+The separate `request_wall_time_sec` measurement is checked pairwise by `rvcbench compare-timing` (see the [run guide](run_protocol.md#compare-request-timing)). It compares host request latency under matched recorded settings and does not lift the refusal above for adapter-reported times or published RTF values.
 
 To authorize a future group, audit actual timed operations (reference preprocessing, model load, warm-up/cache state, inference/decoding, device synchronization, output conversion and I/O), then record and match hardware, device/runtime and execution settings, exact paired workload, timing coverage and denominator. Implement and test that measured protocol before permitting rankings. Equal labels alone must never open the gate.
 
