@@ -13,6 +13,8 @@ output_paths:
 
 adversary:
   checkpoint: "coqui/XTTS-v2"
+  revision: null
+  local_files_only: false
   cache_dir: null
   use_deepspeed: false
   strict_checkpoint: true

@@ -179,6 +179,8 @@ class XttsZeroShotAdversary(BaseAdversary):
 
         generator_config = XttsGeneratorConfig(
             checkpoint=self.checkpoint,
+            revision=self.config.get("revision"),
+            local_files_only=bool(self.config.get("local_files_only", False)),
             cache_dir=self.cache_dir,
             checkpoint_path=self.checkpoint_path,
             config_path=self.config_path,
@@ -232,100 +234,48 @@ class XttsZeroShotAdversary(BaseAdversary):
         self._release_generator()
         super().close()
 
+    def generate_sample(self, sample, *, output_dir):
+        """Generate one explicit sample using its original source index."""
+        self._ensure_generator()
+        reference_path = self._resolve_prompt_path(sample)
+        if reference_path is None:
+            raise FileNotFoundError(f"Missing XTTS reference: {sample.prompt_path}")
+        target_text = (sample.target_text or "").strip()
+        if not target_text:
+            target_text = (sample.prompt_text or "").strip() or self.default_prompt_text
+        language = self._select_language(sample)
+        self._log_clone_request(self.MODEL_NAME, 0, 1, str(sample.speaker_id),
+                                reference_path, target_text, prompt_transcript=sample.prompt_text)
+        self._set_seed(sample.index)
+        started = time.perf_counter()
+        wav, sample_rate = self._generator.generate(
+            text=target_text, reference_audio=reference_path, language=language)
+        elapsed = time.perf_counter() - started
+        wav = np.asarray(wav, dtype=np.float32)
+        if wav.ndim != 1 or not wav.size or not np.isfinite(wav).all():
+            raise ValueError("XTTS output must be nonempty finite mono audio")
+        wav = np.clip(wav, -1.0, 1.0)
+        path = self._speaker_output_dir(Path(output_dir).resolve(), str(sample.speaker_id)) / self._cloned_filename(sample, sample.index)
+        sf.write(str(path), wav, sample_rate)
+        return path, elapsed
+
     def attack(self, *, output_path, dataset, protected_audio_path=None):
         del protected_audio_path
-
         self._ensure_generator()
-        assert self._generator is not None
-
         output_dir = Path(output_path).resolve()
         output_dir.mkdir(parents=True, exist_ok=True)
         self._init_synthesis_timings(output_dir)
-
-        max_samples = None
-        if self.max_samples is not None:
-            try:
-                max_samples = int(self.max_samples)
-            except (TypeError, ValueError):
-                if self.logger:
-                    self.logger.warning(
-                        "[%s] Invalid max_samples '%s'; processing full dataset.",
-                        self.MODEL_NAME,
-                        self.max_samples,
-                    )
-
-        samples = dataset.get_zero_shot_samples(max_samples=max_samples)
+        samples = dataset.get_zero_shot_samples(max_samples=self.max_samples)
         if not samples:
             raise RuntimeError(f"No zero-shot samples available for {self.MODEL_NAME} adversary.")
-
-        prompt_count = self._count_available_prompts(samples)
-        self._log_attack_plan(self.MODEL_NAME, samples, prompt_count)
-
-        completed = 0
-        for idx, sample in enumerate(samples):
-            reference_path = self._resolve_prompt_path(sample)
-            if reference_path is None:
-                if self.logger:
-                    self.logger.warning(
-                        "[%s] Sample %d missing prompt audio; skipping.",
-                        self.MODEL_NAME,
-                        idx,
-                    )
-                continue
-
-            target_text = (sample.target_text or "").strip()
-            if not target_text:
-                target_text = (sample.prompt_text or "").strip()
-            if not target_text:
-                target_text = self.default_prompt_text
-
-            speaker_id = str(sample.speaker_id)
-            language = self._select_language(sample)
-            speaker_dir = self._speaker_output_dir(output_dir, speaker_id)
-
-            self._log_clone_request(
-                self.MODEL_NAME,
-                idx,
-                len(samples),
-                speaker_id,
-                reference_path,
-                target_text,
-                prompt_transcript=sample.prompt_text,
-            )
-
-            try:
-                self._set_seed(sample.index)
-                synth_start = time.perf_counter()
-                wav, sample_rate = self._generator.generate(
-                    text=target_text,
-                    reference_audio=reference_path,
-                    language=language,
-                )
-                synth_elapsed = time.perf_counter() - synth_start
-            except Exception as exc:
-                if self.logger:
-                    self.logger.error(
-                        "[%s] Generation failed for sample %d (%s): %s",
-                        self.MODEL_NAME,
-                        idx,
-                        speaker_id,
-                        exc,
-                    )
-                continue
-
-            wav = np.asarray(wav, dtype=np.float32)
-            if not np.isfinite(wav).all():
-                wav = np.nan_to_num(wav)
-            wav = np.clip(wav, -1.0, 1.0)
-
-            output_filename = self._cloned_filename(sample, idx)
-            output_wav_path = speaker_dir / output_filename
-            sf.write(str(output_wav_path), wav, sample_rate)
-            self._record_synthesis_timing(output_wav_path, synth_elapsed)
-            completed += 1
-
-        self._flush_synthesis_timings()
-        if not self._managed_lifetime:
-            self._release_generator()
+        self._log_attack_plan(self.MODEL_NAME, samples, self._count_available_prompts(samples))
+        try:
+            for sample in samples:
+                path, elapsed = self.generate_sample(sample, output_dir=output_dir)
+                self._record_synthesis_timing(path, elapsed)
+        finally:
+            self._flush_synthesis_timings()
+            if not self._managed_lifetime:
+                self._release_generator()
         if self.logger:
-            self.logger.info("[%s] Generated %d/%d utterances.", self.MODEL_NAME, completed, len(samples))
+            self.logger.info("[%s] Generated %d/%d utterances.", self.MODEL_NAME, len(samples), len(samples))

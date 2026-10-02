@@ -13,6 +13,7 @@ import torch
 from huggingface_hub import snapshot_download
 
 from src.models.model import BaseModel
+from .assets import SNAPSHOT_FILES, checkpoint_files
 
 
 @dataclass
@@ -38,6 +39,8 @@ class XttsGeneratorConfig:
     gpt_cond_chunk_len: int = 6
     max_ref_len: int = 10
     sound_norm_refs: bool = False
+    revision: Optional[str] = None
+    local_files_only: bool = False
 
 
 class XttsGenerator(BaseModel):
@@ -96,8 +99,9 @@ class XttsGenerator(BaseModel):
             max_ref_len=int(self.config.max_ref_len),
             sound_norm_refs=bool(self.config.sound_norm_refs),
         )
-        waveform = np.asarray(outputs["wav"], dtype=np.float32).reshape(-1)
-        waveform = np.nan_to_num(waveform, nan=0.0, posinf=0.0, neginf=0.0)
+        waveform = np.asarray(outputs["wav"], dtype=np.float32)
+        if waveform.ndim != 1 or not waveform.size or not np.isfinite(waveform).all():
+            raise ValueError("XTTS output must be nonempty finite mono audio")
         waveform = np.clip(waveform, -1.0, 1.0)
         return waveform, int(self.sample_rate)
 
@@ -116,10 +120,10 @@ class XttsGenerator(BaseModel):
 
     def load_model(self) -> None:
         xtts_dir = self._resolve_checkpoint_dir()
-        config_path = self.config.config_path or (xtts_dir / "config.json")
-        if not config_path.exists():
-            raise FileNotFoundError(f"XTTS config.json not found: {config_path}")
-
+        files = checkpoint_files(xtts_dir, config_path=self.config.config_path,
+            checkpoint_path=self.config.checkpoint_path, vocab_path=self.config.vocab_path,
+            speaker_file_path=self.config.speaker_file_path)
+        config_path = files["config_path"]
         self._ensure_transformers_compat()
         try:
             xtts_config_module = importlib.import_module("TTS.tts.configs.xtts_config")
@@ -143,14 +147,14 @@ class XttsGenerator(BaseModel):
             model.load_checkpoint(
                 runtime_config,
                 checkpoint_dir=str(xtts_dir),
-                checkpoint_path=str(self.config.checkpoint_path) if self.config.checkpoint_path else None,
-                vocab_path=str(self.config.vocab_path) if self.config.vocab_path else None,
+                checkpoint_path=str(files["checkpoint_path"]),
+                vocab_path=str(files["vocab_path"]),
                 eval=True,
                 strict=bool(self.config.strict_checkpoint),
                 use_deepspeed=bool(self.config.use_deepspeed),
                 speaker_file_path=(
-                    str(self.config.speaker_file_path)
-                    if self.config.speaker_file_path is not None
+                    str(files["speaker_file_path"])
+                    if "speaker_file_path" in files
                     else None
                 ),
             )
@@ -185,7 +189,11 @@ class XttsGenerator(BaseModel):
             return absolute_candidate
 
         cache_dir = self.config.cache_dir
-        snapshot_kwargs = {"repo_id": checkpoint_value}
+        from src.utils.hub import resolve_hub_revision
+        revision = resolve_hub_revision(checkpoint_value, self.config.revision)
+        snapshot_kwargs = {"repo_id": checkpoint_value, "revision": revision,
+                           "allow_patterns": list(SNAPSHOT_FILES),
+                           "local_files_only": self.config.local_files_only}
         if cache_dir is not None:
             snapshot_kwargs["cache_dir"] = str(cache_dir)
 
