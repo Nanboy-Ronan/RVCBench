@@ -6,9 +6,9 @@ from pathlib import Path
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
-from src.benchmark.artifacts import file_hash
-from src.evaluation.scorers.emotion import ASSETS, BASE_REVISION, REVISION
+sys.path.insert(0, str(ROOT / 'src'))
+from rvcbench.benchmark.artifacts import file_hash
+from rvcbench.evaluation.scorers.emotion import ASSETS, BASE_REVISION, REVISION
 
 
 def setup(check_only=False):

@@ -15,8 +15,8 @@ import pandas as pd
 import pytest
 
 from test_benchmark import setup_run, mocked_evaluator, fake_evaluate
-from src.benchmark.artifacts import coverage, input_records, input_fingerprint
-from src.datasets.zero_shot import ZeroShotDataset
+from rvcbench.benchmark.artifacts import coverage, input_records, input_fingerprint
+from rvcbench.datasets.zero_shot import ZeroShotDataset
 
 
 def test_input_fingerprint_includes_prompt_language_and_seed_index(setup_run):
@@ -45,7 +45,7 @@ def test_pending_samples_are_not_failures():
     ('index_tts', 'IndexTTSGenerator'), ('maskgct', 'MaskGCTGenerator')])
 def test_real_worker_cleanup_reaps_owned_process(module_name, class_name):
     import importlib
-    cls = getattr(importlib.import_module(f'src.models.{module_name}.generator'), class_name)
+    cls = getattr(importlib.import_module(f'rvcbench.models.{module_name}.generator'), class_name)
     generator = cls.__new__(cls)
     worker = subprocess.Popen([sys.executable, '-c', 'import sys; sys.stdin.readline()'],
                               stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
@@ -64,7 +64,7 @@ def test_real_worker_cleanup_reaps_owned_process(module_name, class_name):
 
 @pytest.mark.parametrize('interrupt', [False, True])
 def test_runner_closes_resources_on_success_and_interrupt(setup_run, interrupt):
-    from src.adversary.smoke import SmokeAdversary
+    from rvcbench.adversary.smoke import SmokeAdversary
     conf, _, run, _ = setup_run
     state = {'closed': False}
     class Owned(SmokeAdversary):
@@ -78,7 +78,7 @@ def test_runner_closes_resources_on_success_and_interrupt(setup_run, interrupt):
         assert state['closed'], 'Generation resources must close before scoring'
         return fake_evaluate(*args, **kwargs)
     conf.vc.generate_only = False
-    with patch('src.benchmark.backends.select_adversary', return_value=Owned(conf, conf.dataset, 'cpu', logging.getLogger())), mocked_evaluator(evaluate):
+    with patch('rvcbench.benchmark.backends.select_adversary', return_value=Owned(conf, conf.dataset, 'cpu', logging.getLogger())), mocked_evaluator(evaluate):
         if interrupt:
             with pytest.raises(KeyboardInterrupt):
                 run('interrupted-lifetime')
@@ -88,8 +88,8 @@ def test_runner_closes_resources_on_success_and_interrupt(setup_run, interrupt):
 
 
 def test_moss_adapter_propagates_original_index(setup_run, tmp_path):
-    from src.adversary.moss_ttsd_ots import MossTTSDZeroShotAdversary
-    from src.benchmark.backends import SampleView
+    from rvcbench.adversary.moss_ttsd_ots import MossTTSDZeroShotAdversary
+    from rvcbench.benchmark.backends import SampleView
     conf, dataset, _, _ = setup_run
     config = OmegaConf.create({'code_path': '.', 'spt_config_path': '.', 'spt_checkpoint_path': '.', 'seed': 42})
     adapter = MossTTSDZeroShotAdversary(config, conf.dataset, 'cpu', logging.getLogger())
@@ -104,21 +104,21 @@ def test_moss_adapter_propagates_original_index(setup_run, tmp_path):
 
 
 def test_generation_fingerprint_excludes_evaluator_and_includes_worker(tmp_path):
-    from src.benchmark.fingerprints import generation_runtime
+    from rvcbench.benchmark.fingerprints import generation_runtime
     root = tmp_path
-    (root / 'src/adversary').mkdir(parents=True)
-    (root / 'src/evaluation').mkdir()
-    (root / 'src/benchmark').mkdir()
-    adapter = root / 'src/adversary/fixture.py'
+    (root / 'src/rvcbench/adversary').mkdir(parents=True)
+    (root / 'src/rvcbench/evaluation').mkdir()
+    (root / 'src/rvcbench/benchmark').mkdir()
+    adapter = root / 'src/rvcbench/adversary/fixture.py'
     adapter.write_text('import numpy\n')
-    evaluator = root / 'src/evaluation/pipeline.py'
+    evaluator = root / 'src/rvcbench/evaluation/pipeline.py'
     evaluator.write_text('VERSION = 1\n')
-    (root / 'src/benchmark/runner.py').write_text('from src.evaluation.pipeline import evaluate_run\n')
+    (root / 'src/rvcbench/benchmark/runner.py').write_text('from rvcbench.evaluation.pipeline import evaluate_run\n')
     worker = root / 'worker.py'
     worker.write_text('VERSION = 1\n')
     conf = OmegaConf.create({'vc': {'mode': 'ots', 'model': 'fixture'},
                             'adversary': {'worker_script_path': str(worker)}})
-    with patch.dict('src.benchmark.fingerprints._ADVERSARY_REGISTRY', {'ots': {'fixture': 'src.adversary.fixture:Adapter'}}), patch('importlib.metadata.packages_distributions', return_value={'numpy': ['numpy']}), patch('importlib.metadata.requires', return_value=[]):
+    with patch.dict('rvcbench.benchmark.fingerprints._ADVERSARY_REGISTRY', {'ots': {'fixture': 'rvcbench.adversary.fixture:Adapter'}}), patch('importlib.metadata.packages_distributions', return_value={'numpy': ['numpy']}), patch('importlib.metadata.requires', return_value=[]):
         first = generation_runtime(root, conf, {'numpy': '1.26.4', 'whisper': 'unused'})
         evaluator.write_text('VERSION = 2\n')
         assert generation_runtime(root, conf, {'numpy': '1.26.4', 'whisper': 'changed'}) == first
@@ -127,7 +127,7 @@ def test_generation_fingerprint_excludes_evaluator_and_includes_worker(tmp_path)
 
 
 def test_worker_environment_probe_uses_actual_interpreter():
-    from src.benchmark.fingerprints import worker_environment
+    from rvcbench.benchmark.fingerprints import worker_environment
     result = worker_environment(sys.executable)
     assert result['python'] and result['executable']
     assert result['packages']['pytest']
@@ -136,8 +136,8 @@ def test_worker_environment_probe_uses_actual_interpreter():
 
 @pytest.mark.parametrize('suffix', ['.cu', '.cuh', '.cpp', '.h', '.pyx', '.pxd', '.cmake'])
 def test_upstream_native_source_changes_generation_fingerprint(tmp_path, suffix):
-    from src.benchmark.fingerprints import generation_runtime
-    adapter = tmp_path / 'src/adversary/fixture.py'
+    from rvcbench.benchmark.fingerprints import generation_runtime
+    adapter = tmp_path / 'src/rvcbench/adversary/fixture.py'
     adapter.parent.mkdir(parents=True)
     adapter.write_text('')
     upstream = tmp_path / 'upstream'
@@ -146,8 +146,8 @@ def test_upstream_native_source_changes_generation_fingerprint(tmp_path, suffix)
     source.write_text('source version one')
     conf = OmegaConf.create({'vc': {'mode': 'ots', 'model': 'fixture'},
                             'adversary': {'code_path': str(upstream)}})
-    with patch.dict('src.benchmark.fingerprints._ADVERSARY_REGISTRY',
-                    {'ots': {'fixture': 'src.adversary.fixture:Adapter'}}), \
+    with patch.dict('rvcbench.benchmark.fingerprints._ADVERSARY_REGISTRY',
+                    {'ots': {'fixture': 'rvcbench.adversary.fixture:Adapter'}}), \
             patch('importlib.metadata.packages_distributions', return_value={}):
         before = generation_runtime(tmp_path, conf, {})
         assert str(source.relative_to(tmp_path)) in before['source_files']
@@ -161,9 +161,9 @@ def test_upstream_native_source_changes_generation_fingerprint(tmp_path, suffix)
     b'# coding: latin-1\n# caf\xe9\nimport numpy\n',
 ])
 def test_python_encoding_rules_preserve_upstream_hash_and_imports(tmp_path, source):
-    from src.benchmark.fingerprints import generation_runtime
-    from src.benchmark.artifacts import file_hash
-    adapter = tmp_path / 'src/adversary/fixture.py'
+    from rvcbench.benchmark.fingerprints import generation_runtime
+    from rvcbench.benchmark.artifacts import file_hash
+    adapter = tmp_path / 'src/rvcbench/adversary/fixture.py'
     adapter.parent.mkdir(parents=True)
     adapter.write_text('')
     upstream = tmp_path / 'upstream'
@@ -172,8 +172,8 @@ def test_python_encoding_rules_preserve_upstream_hash_and_imports(tmp_path, sour
     path.write_bytes(source)
     conf = OmegaConf.create({'vc': {'mode': 'ots', 'model': 'fixture'},
                             'adversary': {'code_path': str(upstream)}})
-    with patch.dict('src.benchmark.fingerprints._ADVERSARY_REGISTRY',
-                    {'ots': {'fixture': 'src.adversary.fixture:Adapter'}}), \
+    with patch.dict('rvcbench.benchmark.fingerprints._ADVERSARY_REGISTRY',
+                    {'ots': {'fixture': 'rvcbench.adversary.fixture:Adapter'}}), \
             patch('importlib.metadata.packages_distributions', return_value={'numpy': ['numpy']}), \
             patch('importlib.metadata.requires', return_value=[]):
         result = generation_runtime(tmp_path, conf, {'numpy': '1.26.4'})
@@ -182,8 +182,8 @@ def test_python_encoding_rules_preserve_upstream_hash_and_imports(tmp_path, sour
 
 
 def test_authored_build_definition_changes_resume_but_generated_outputs_do_not(tmp_path):
-    from src.benchmark.fingerprints import generation_runtime
-    adapter = tmp_path / 'src/adversary/fixture.py'
+    from rvcbench.benchmark.fingerprints import generation_runtime
+    adapter = tmp_path / 'src/rvcbench/adversary/fixture.py'
     adapter.parent.mkdir(parents=True)
     adapter.write_text('')
     upstream = tmp_path / 'upstream'
@@ -192,8 +192,8 @@ def test_authored_build_definition_changes_resume_but_generated_outputs_do_not(t
     definition.write_text('set(FLAG 1)')
     conf = OmegaConf.create({'vc': {'mode': 'ots', 'model': 'fixture'},
                             'adversary': {'code_path': str(upstream)}})
-    with patch.dict('src.benchmark.fingerprints._ADVERSARY_REGISTRY',
-                    {'ots': {'fixture': 'src.adversary.fixture:Adapter'}}), \
+    with patch.dict('rvcbench.benchmark.fingerprints._ADVERSARY_REGISTRY',
+                    {'ots': {'fixture': 'rvcbench.adversary.fixture:Adapter'}}), \
             patch('importlib.metadata.packages_distributions', return_value={}):
         before = generation_runtime(tmp_path, conf, {})
         for dirname in ('build', 'dist', '.venv', '__pycache__', '.git'):
@@ -208,16 +208,16 @@ def test_authored_build_definition_changes_resume_but_generated_outputs_do_not(t
 
 
 def test_declared_service_source_file_invalidates_generation_resume(tmp_path):
-    from src.benchmark.fingerprints import generation_runtime
-    adapter = tmp_path / 'src/adversary/fixture.py'
+    from rvcbench.benchmark.fingerprints import generation_runtime
+    adapter = tmp_path / 'src/rvcbench/adversary/fixture.py'
     adapter.parent.mkdir(parents=True)
     adapter.write_text('')
     launcher = tmp_path / 'serve.py'
     launcher.write_text('variant = 1\n')
     conf = OmegaConf.create({'vc': {'mode': 'ots', 'model': 'fixture'},
                             'adversary': {'service_launcher_code_path': str(launcher)}})
-    with patch.dict('src.benchmark.fingerprints._ADVERSARY_REGISTRY',
-                    {'ots': {'fixture': 'src.adversary.fixture:Adapter'}}), \
+    with patch.dict('rvcbench.benchmark.fingerprints._ADVERSARY_REGISTRY',
+                    {'ots': {'fixture': 'rvcbench.adversary.fixture:Adapter'}}), \
             patch('importlib.metadata.packages_distributions', return_value={}):
         before = generation_runtime(tmp_path, conf, {})
         assert 'serve.py' in before['source_files']
@@ -237,7 +237,7 @@ def test_runner_rejects_resume_after_native_source_change(setup_run):
     build = upstream / 'build'
     build.mkdir()
     (build / 'temporary.cpp').write_text('generated compiler output')
-    with patch('src.benchmark.backends.select_adversary', side_effect=AssertionError('must reuse')):
+    with patch('rvcbench.benchmark.backends.select_adversary', side_effect=AssertionError('must reuse')):
         _, resumed, _ = run('native-build-reuse')
     assert all(row['reused'] for row in resumed['samples'])
     kernel.write_text('kernel version two')
@@ -253,13 +253,13 @@ def test_runner_rejects_resume_after_native_source_change(setup_run):
     ({}, 'import transformers\n'),
 ])
 def test_optional_attention_absence_and_installation_change_runtime_fingerprint(tmp_path, settings, imports):
-    from src.benchmark.fingerprints import generation_runtime
-    adapter = tmp_path / 'src/adversary/fixture.py'
+    from rvcbench.benchmark.fingerprints import generation_runtime
+    adapter = tmp_path / 'src/rvcbench/adversary/fixture.py'
     adapter.parent.mkdir(parents=True)
     adapter.write_text(imports)
     conf = OmegaConf.create({'vc': {'mode': 'ots', 'model': 'fixture'}, 'adversary': settings})
-    with patch.dict('src.benchmark.fingerprints._ADVERSARY_REGISTRY',
-                    {'ots': {'fixture': 'src.adversary.fixture:Adapter'}}), \
+    with patch.dict('rvcbench.benchmark.fingerprints._ADVERSARY_REGISTRY',
+                    {'ots': {'fixture': 'rvcbench.adversary.fixture:Adapter'}}), \
             patch('importlib.metadata.packages_distributions', return_value={'transformers': ['transformers']}), \
             patch('importlib.metadata.requires', return_value=[]):
         absent = generation_runtime(tmp_path, conf, {'transformers': 'fixture'})
@@ -271,14 +271,14 @@ def test_optional_attention_absence_and_installation_change_runtime_fingerprint(
 
 
 def test_transitive_transformers_attention_dependency_closure(tmp_path):
-    from src.benchmark.fingerprints import generation_runtime
-    adapter = tmp_path / 'src/adversary/fixture.py'
+    from rvcbench.benchmark.fingerprints import generation_runtime
+    adapter = tmp_path / 'src/rvcbench/adversary/fixture.py'
     adapter.parent.mkdir(parents=True)
     adapter.write_text('import qwen_tts\n')
     conf = OmegaConf.create({'vc': {'mode': 'ots', 'model': 'fixture'}, 'adversary': {}})
     requirements = {'qwen-tts': ['transformers'], 'transformers': [], 'flash-attn': ['einops'], 'einops': []}
-    with patch.dict('src.benchmark.fingerprints._ADVERSARY_REGISTRY',
-                    {'ots': {'fixture': 'src.adversary.fixture:Adapter'}}), \
+    with patch.dict('rvcbench.benchmark.fingerprints._ADVERSARY_REGISTRY',
+                    {'ots': {'fixture': 'rvcbench.adversary.fixture:Adapter'}}), \
             patch('importlib.metadata.packages_distributions', return_value={'qwen_tts': ['qwen-tts']}), \
             patch('importlib.metadata.requires', side_effect=requirements.__getitem__):
         first = generation_runtime(tmp_path, conf, {'qwen-tts': 'fixture', 'transformers': 'fixture',
@@ -290,7 +290,7 @@ def test_transitive_transformers_attention_dependency_closure(tmp_path):
 
 
 def test_model_fingerprint_tracks_converter_config_and_speaker_embedding(tmp_path):
-    from src.benchmark.model_assets import resolve_model_assets
+    from rvcbench.benchmark.model_assets import resolve_model_assets
     config_path = tmp_path / 'converter.json'
     config_path.write_text('{"tau": 0.3}')
     speakers = tmp_path / 'speakers'
@@ -311,7 +311,7 @@ def test_model_fingerprint_tracks_converter_config_and_speaker_embedding(tmp_pat
 
 
 def test_model_fingerprint_tracks_checkpoint_code_and_auxiliary_codec(tmp_path):
-    from src.benchmark.model_assets import resolve_model_assets
+    from rvcbench.benchmark.model_assets import resolve_model_assets
     checkpoint, codec = tmp_path / 'tts', tmp_path / 'codec'
     checkpoint.mkdir()
     codec.mkdir()
@@ -332,7 +332,7 @@ def test_model_fingerprint_tracks_checkpoint_code_and_auxiliary_codec(tmp_path):
 
 
 def test_model_fingerprint_tracks_higgs_audio_tokenizer_and_scene_prompt(tmp_path):
-    from src.benchmark.model_assets import resolve_model_assets
+    from rvcbench.benchmark.model_assets import resolve_model_assets
     tokenizer = tmp_path / 'tokenizer'
     tokenizer.mkdir()
     weights = tokenizer / 'model.pth'
@@ -352,7 +352,7 @@ def test_model_fingerprint_tracks_higgs_audio_tokenizer_and_scene_prompt(tmp_pat
 
 
 def test_moss_processor_receives_explicit_codec_path(tmp_path):
-    from src.models.moss_tts.generator import MossTTSGenerator, MossTTSGeneratorConfig
+    from rvcbench.models.moss_tts.generator import MossTTSGenerator, MossTTSGeneratorConfig
     from unittest.mock import Mock
     import torch
     processor = SimpleNamespace(audio_tokenizer=SimpleNamespace(to=lambda device: object()),
@@ -370,7 +370,7 @@ def test_moss_processor_receives_explicit_codec_path(tmp_path):
 
 @pytest.mark.parametrize('model,path_field', [('openvoice', 'melo_code_path'), ('mgm_omni', 'repo_root')])
 def test_generation_fingerprint_tracks_auxiliary_upstream_source(tmp_path, model, path_field):
-    from src.benchmark.fingerprints import generation_runtime
+    from rvcbench.benchmark.fingerprints import generation_runtime
     source = tmp_path / 'melo'
     source.mkdir()
     module = source / 'infer.py'
@@ -394,7 +394,7 @@ def test_generation_fingerprint_tracks_auxiliary_upstream_source(tmp_path, model
 
 
 def test_cosyvoice_explicit_matcha_source_rejects_cached_other_checkout(tmp_path):
-    from src.models.cosyvoice.generator import CosyVoiceGenerator
+    from rvcbench.models.cosyvoice.generator import CosyVoiceGenerator
     root = tmp_path / 'Matcha-TTS'
     (root / 'matcha').mkdir(parents=True)
     generator = CosyVoiceGenerator.__new__(CosyVoiceGenerator)
@@ -414,7 +414,7 @@ def test_cosyvoice_explicit_matcha_source_rejects_cached_other_checkout(tmp_path
 
 
 def test_cosyvoice_rejects_transformers_drift_before_model_loading(tmp_path):
-    from src.models.cosyvoice.generator import CosyVoiceGenerator
+    from rvcbench.models.cosyvoice.generator import CosyVoiceGenerator
     generator = CosyVoiceGenerator.__new__(CosyVoiceGenerator)
     generator.config = SimpleNamespace(code_path=tmp_path)
     (tmp_path / 'requirements.txt').write_text('transformers==4.51.3\n')
@@ -426,8 +426,8 @@ def test_cosyvoice_rejects_transformers_drift_before_model_loading(tmp_path):
 
 
 def test_xtts_managed_lifetime_retains_generator_between_samples(setup_run, tmp_path):
-    from src.adversary.xtts_ots import XttsZeroShotAdversary
-    from src.benchmark.backends import SampleView
+    from rvcbench.adversary.xtts_ots import XttsZeroShotAdversary
+    from rvcbench.benchmark.backends import SampleView
     conf, dataset, _, _ = setup_run
     adapter = XttsZeroShotAdversary(OmegaConf.create({'seed': 42}), conf.dataset,
                                    'cpu', logging.getLogger())
@@ -445,7 +445,7 @@ def test_xtts_managed_lifetime_retains_generator_between_samples(setup_run, tmp_
 
 
 def test_resume_rejects_worker_environment_drift(setup_run):
-    from src.benchmark import fingerprints
+    from rvcbench.benchmark import fingerprints
     conf, _, run, _ = setup_run
     original = fingerprints.generation_runtime
     def runtime(*args):
@@ -453,7 +453,7 @@ def test_resume_rejects_worker_environment_drift(setup_run):
         result['worker_environment'] = {'packages': {'fixture': version[0]}}
         return result
     version = ['1.0']
-    with patch('src.benchmark.fingerprints.generation_runtime', side_effect=runtime):
+    with patch('rvcbench.benchmark.fingerprints.generation_runtime', side_effect=runtime):
         first, _, _ = run('worker-v1')
         conf.vc.resume_from = str(first)
         version[0] = '2.0'

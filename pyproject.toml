@@ -25,13 +25,14 @@ eval = [
 test = ["pytest>=8", "jiwer==3.0.3", "json5>=0.9"]
 
 [project.scripts]
-rvcbench = "src.benchmark.cli:main"
+rvcbench = "rvcbench.benchmark.cli:main"
 
 [tool.setuptools.packages.find]
-include = ["src", "src.*"]
+where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["src"]
 
 [tool.setuptools.package-data]
-"src.benchmark" = ["model_catalog.json"]
+"rvcbench.benchmark" = ["model_catalog.json"]

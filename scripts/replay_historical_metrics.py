@@ -7,10 +7,10 @@ import logging
 from pathlib import Path
 import sys
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from src.benchmark.artifacts import atomic_json, file_hash, load_run
-from src.benchmark.reproduction import match_historical, infer_english_wer_protocol
-from src.evaluation.pipeline import evaluate_run
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
+from rvcbench.benchmark.artifacts import atomic_json, file_hash, load_run
+from rvcbench.benchmark.reproduction import match_historical, infer_english_wer_protocol
+from rvcbench.evaluation.pipeline import evaluate_run
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('run_dir', type=Path, help='Modern subset run defining the exact population')

@@ -5,9 +5,9 @@ import numpy as np
 import pytest
 import soundfile as sf
 
-from src.benchmark.artifacts import file_hash
-from src.evaluation.scorers import ScoreInput, create_scorer
-from src.evaluation.scorers.emotion import EmotionScorer
+from rvcbench.benchmark.artifacts import file_hash
+from rvcbench.evaluation.scorers import ScoreInput, create_scorer
+from rvcbench.evaluation.scorers.emotion import EmotionScorer
 
 
 def test_emotion_rejects_changed_pinned_assets_before_native_loading(tmp_path, monkeypatch):
@@ -15,8 +15,8 @@ def test_emotion_rejects_changed_pinned_assets_before_native_loading(tmp_path, m
     root.mkdir()
     asset = root / 'custom_interface.py'
     asset.write_text('original interface')
-    monkeypatch.setattr('src.evaluation.scorers.emotion.ASSETS', {asset.name: file_hash(asset)})
-    monkeypatch.setattr('src.evaluation.scorers.emotion.to_absolute_path', lambda _: str(root))
+    monkeypatch.setattr('rvcbench.evaluation.scorers.emotion.ASSETS', {asset.name: file_hash(asset)})
+    monkeypatch.setattr('rvcbench.evaluation.scorers.emotion.to_absolute_path', lambda _: str(root))
     asset.write_text('changed interface')
     with pytest.raises(ValueError, match='asset hash differs'):
         create_scorer('emotion', 'cpu', logging.getLogger()).prepare()

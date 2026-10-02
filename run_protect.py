@@ -5,12 +5,17 @@ import hydra
 from hydra.utils import to_absolute_path
 from omegaconf import DictConfig, OmegaConf
 
-from src import datasets
-from src.evaluation import fidelity
-from src.workflows.vc import run_vc_workflow
-from src.utils.logger import log_config, setup_exp, setup_logger
-from src import protection
-from src.utils.seeding import configure_seeds
+import sys
+
+# Use this checkout's package even when it has not been (re)installed.
+sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
+
+from rvcbench import datasets
+from rvcbench.evaluation import fidelity
+from rvcbench.workflows.vc import run_vc_workflow
+from rvcbench.utils.logger import log_config, setup_exp, setup_logger
+from rvcbench import protection
+from rvcbench.utils.seeding import configure_seeds
 
 @hydra.main(version_base="1.3", config_path="configs", config_name=None)
 def main(conf: DictConfig):

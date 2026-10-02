@@ -5,8 +5,8 @@ from omegaconf import OmegaConf
 import pytest
 import torch
 
-from src.benchmark.model_assets import resolve_model_assets
-from src.models.styletts2.synthesizer import legacy_checkpoint_loading
+from rvcbench.benchmark.model_assets import resolve_model_assets
+from rvcbench.models.styletts2.synthesizer import legacy_checkpoint_loading
 
 
 @pytest.mark.parametrize('fail', [False, True])

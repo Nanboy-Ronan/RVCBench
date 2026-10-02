@@ -1,1 +1,0 @@
-from src.trainers.bertvits2_trainer import BertVITS2Trainer

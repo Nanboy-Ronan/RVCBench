@@ -8,17 +8,17 @@ import logging
 from pathlib import Path
 import sys
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
 
 from omegaconf import OmegaConf
 import soundfile as sf
 
-from src.adversary.zonos2_ots import resolve_zonos_language
-from src.benchmark.artifacts import atomic_json, file_hash, load_run
-from src.benchmark.fingerprints import generation_runtime, worker_environment
-from src.benchmark.model_assets import resolve_model_assets
-from src.models.zonos2 import Zonos2Generator, Zonos2GeneratorConfig
-from src.utils.seeding import configure_seeds
+from rvcbench.adversary.zonos2_ots import resolve_zonos_language
+from rvcbench.benchmark.artifacts import atomic_json, file_hash, load_run
+from rvcbench.benchmark.fingerprints import generation_runtime, worker_environment
+from rvcbench.benchmark.model_assets import resolve_model_assets
+from rvcbench.models.zonos2 import Zonos2Generator, Zonos2GeneratorConfig
+from rvcbench.utils.seeding import configure_seeds
 
 
 def main():
@@ -33,7 +33,7 @@ def main():
     if source['config']['vc']['model'] != 'zonos2' or source['status'] not in ('generated', 'complete'):
         raise ValueError('Control requires a successfully generated ZONOS2 source run')
     if args.score_only:
-        from src.evaluation.pipeline import evaluate_run
+        from rvcbench.evaluation.pipeline import evaluate_run
         report = json.loads((args.output / 'control_manifest.json').read_text())
         if (report['source_manifest_sha256'] != file_hash(args.source_run / 'run_manifest.json')
                 or report['status'] != 'generated'):
@@ -60,7 +60,7 @@ def main():
                       control_manifest_sha256=file_hash(args.output / 'control_manifest.json'),
                       metrics=metrics, samples=rows)
         if args.reference_score_run:
-            from src.benchmark.artifacts import validate_report
+            from rvcbench.benchmark.artifacts import validate_report
             baseline = load_run(args.reference_score_run)
             validate_report(baseline)
             baseline_rows = {r['sample_id']: r for r in baseline['samples']}
@@ -72,7 +72,7 @@ def main():
                 if any(row.get(key) != baseline_rows[row['sample_id']].get(key)
                        for key in ('seed', 'prompt_sha256', 'target_sha256', 'prompt_text', 'target_text')):
                     raise ValueError('Reference score sample metadata differs')
-            from src.benchmark.artifacts import digest
+            from rvcbench.benchmark.artifacts import digest
             scoring_paths = (args.output / 'scores' / 'scoring_manifest.json',
                              args.reference_score_run / 'scoring_manifest.json')
             scorers = [json.loads(path.read_text()) for path in scoring_paths]

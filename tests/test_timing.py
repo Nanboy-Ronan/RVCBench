@@ -2,7 +2,7 @@
 from pathlib import Path
 import unittest
 
-from src.benchmark.timing import timing_summary, compare_timing
+from rvcbench.benchmark.timing import timing_summary, compare_timing
 
 ROOT = Path(__file__).resolve().parents[1]
 QWEN = 'qwen3_generate_excluding_prompt_encoding_and_io_v1'
@@ -52,7 +52,7 @@ class TimingTests(unittest.TestCase):
         import ast
         import csv
         import tempfile
-        module = ast.parse((ROOT / 'src/evaluation/generation.py').read_text())
+        module = ast.parse((ROOT / 'src/rvcbench/evaluation/generation.py').read_text())
         function = next(node for node in module.body if isinstance(node, ast.FunctionDef)
                         and node.name == '_load_synthesis_timings')
         namespace = {'Path': Path, 'csv': csv}
@@ -72,7 +72,7 @@ class TimingTests(unittest.TestCase):
         import tempfile
         import numpy as np
         import soundfile as sf
-        from src.evaluation.pipeline import _export
+        from rvcbench.evaluation.pipeline import _export
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory)
             audio = output / 'sample.wav'
@@ -109,8 +109,8 @@ def test_request_timing_profile_records_a_host_digest_instead_of_the_name(monkey
     import json
     import platform
     from omegaconf import OmegaConf
-    from src.benchmark.artifacts import digest
-    from src.benchmark.timing import _valid_profile, timing_profile
+    from rvcbench.benchmark.artifacts import digest
+    from rvcbench.benchmark.timing import _valid_profile, timing_profile
 
     monkeypatch.setattr(platform, 'node', lambda: 'private-node-name')
     conf = OmegaConf.create({'adversary': {}})

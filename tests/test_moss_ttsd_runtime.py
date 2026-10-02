@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 import torch
 
-from src.models.moss_ttsd.generator import (
+from rvcbench.models.moss_ttsd.generator import (
     MossTTSDGenerator, MossTTSDGeneratorConfig, _FullSequenceModel, _validate_loaded_parameters, _restore_declared_ties,
 )
 
@@ -70,7 +70,7 @@ def test_native_checkpoint_dispatches_declared_class_and_restores_pad(tmp_path):
         AutoTokenizer=SimpleNamespace(from_pretrained=Mock(return_value=SimpleNamespace(pad_token_id=152694))),
         AutoConfig=SimpleNamespace(from_pretrained=Mock(return_value=loaded_config)),
         AutoModel=SimpleNamespace(from_pretrained=loader))
-    with patch('src.models.moss_ttsd.generator._check_native_runtime'), \
+    with patch('rvcbench.models.moss_ttsd.generator._check_native_runtime'), \
             patch.dict('sys.modules', {'transformers': transformers,
                                       'XY_Tokenizer.xy_tokenizer.model': xy, 'whisper': None}):
         generator.load_model()
@@ -83,7 +83,7 @@ def test_native_checkpoint_dispatches_declared_class_and_restores_pad(tmp_path):
 
 def test_unused_reference_asr_does_not_change_manifest_text_asset_identity(tmp_path):
     from omegaconf import OmegaConf
-    from src.benchmark.model_assets import resolve_model_assets
+    from rvcbench.benchmark.model_assets import resolve_model_assets
     asr = tmp_path / 'asr.pt'
     asr.write_bytes(b'first')
     config = OmegaConf.create({'vc': {'model': 'moss_ttsd'}, 'adversary': {

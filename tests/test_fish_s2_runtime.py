@@ -5,7 +5,7 @@ from types import SimpleNamespace
 import pytest
 import torch
 
-from src.adversary.fishspeech_s2_ots import SerialSemanticQueue, load_shards, load_codec_state
+from rvcbench.adversary.fishspeech_s2_ots import SerialSemanticQueue, load_shards, load_codec_state
 
 
 def test_s2_shards_must_match_index_without_duplicate_or_escaping_keys(tmp_path):

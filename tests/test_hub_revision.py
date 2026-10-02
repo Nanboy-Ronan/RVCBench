@@ -3,7 +3,7 @@ from unittest.mock import patch
 import pytest
 from omegaconf import OmegaConf
 
-from src.benchmark.model_assets import resolve_hub_revision, resolve_model_assets
+from rvcbench.benchmark.model_assets import resolve_hub_revision, resolve_model_assets
 
 
 PIN = 'fd4b254389122332181a7c3db7f27e918eec64e3'

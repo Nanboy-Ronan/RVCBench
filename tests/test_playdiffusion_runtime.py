@@ -6,10 +6,10 @@ from unittest.mock import Mock, patch
 from omegaconf import OmegaConf
 import pytest
 
-from src.models.playdiffusion.generator import (
+from rvcbench.models.playdiffusion.generator import (
     PlayDiffusionGenerator, PlayDiffusionGeneratorConfig, PRESET_FILES,
 )
-from src.benchmark.model_assets import resolve_model_assets
+from rvcbench.benchmark.model_assets import resolve_model_assets
 
 
 def make_preset(root):

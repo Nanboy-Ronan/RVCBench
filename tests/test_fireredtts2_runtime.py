@@ -6,8 +6,8 @@ import pytest
 import torch
 from omegaconf import OmegaConf
 
-from src.benchmark.model_assets import resolve_model_assets
-from src.models.fireredtts2.generator import FireRedTTS2Generator, FireRedTTS2GeneratorConfig
+from rvcbench.benchmark.model_assets import resolve_model_assets
+from rvcbench.models.fireredtts2.generator import FireRedTTS2Generator, FireRedTTS2GeneratorConfig
 
 
 def generator(audio):
@@ -91,7 +91,7 @@ class NativeGenerator:
 
 
 def test_failed_load_resets_state_and_can_be_retried(monkeypatch):
-    import src.models.fireredtts2.generator as runtime
+    import rvcbench.models.fireredtts2.generator as runtime
     attempts = []
     def native(**kwargs):
         attempts.append(kwargs)

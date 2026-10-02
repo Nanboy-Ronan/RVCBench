@@ -7,8 +7,8 @@ from omegaconf import OmegaConf
 import pytest
 import torch
 
-from src.benchmark.model_assets import resolve_model_assets
-from src.models.glmtts.synthesizer import GLMTTSSynthesizer, GLMTTSSynthesizerConfig
+from rvcbench.benchmark.model_assets import resolve_model_assets
+from rvcbench.models.glmtts.synthesizer import GLMTTSSynthesizer, GLMTTSSynthesizerConfig
 
 
 @pytest.mark.parametrize('fail', [False, True])

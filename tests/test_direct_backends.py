@@ -4,10 +4,10 @@ from types import SimpleNamespace
 from omegaconf import OmegaConf
 import pytest
 
-from src.benchmark import backends
-from src.benchmark.artifacts import sample_id
-from src.benchmark.backends import GenerationRequest, LegacyAdversaryBackend, create_backend
-from src.datasets.zero_shot import ZeroShotSample
+from rvcbench.benchmark import backends
+from rvcbench.benchmark.artifacts import sample_id
+from rvcbench.benchmark.backends import GenerationRequest, LegacyAdversaryBackend, create_backend
+from rvcbench.datasets.zero_shot import ZeroShotSample
 
 
 DIRECT = {

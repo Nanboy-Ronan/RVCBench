@@ -13,7 +13,7 @@ import pytest
 import soundfile as sf
 import torch
 
-from src.models.zipvoice.generator import ZipVoiceGenerator, ZipVoiceGeneratorConfig
+from rvcbench.models.zipvoice.generator import ZipVoiceGenerator, ZipVoiceGeneratorConfig
 
 
 def test_unknown_tokenizer_fails_before_loading_weights(tmp_path):
@@ -84,7 +84,7 @@ def test_runtime_interpreter_preserves_real_venv_prefix(tmp_path, module, name):
     worker.write_text('')
     config_file = tmp_path / 'config.json'
     config_file.write_text('{}')
-    source = importlib.import_module(f'src.models.{module}.generator')
+    source = importlib.import_module(f'rvcbench.models.{module}.generator')
     config_class = getattr(source, name + 'GeneratorConfig')
     kwargs = {'code_path': tmp_path, 'runtime_python': interpreter}
     if module != 'zipvoice':
@@ -96,7 +96,7 @@ def test_runtime_interpreter_preserves_real_venv_prefix(tmp_path, module, name):
         result = subprocess.run([str(generator.config.runtime_python), '-c', 'import sys; print(sys.prefix)'],
                                 check=True, capture_output=True, text=True)
         assert result.stdout.strip() == str(env)
-        from src.benchmark.fingerprints import worker_environment
+        from rvcbench.benchmark.fingerprints import worker_environment
         assert worker_environment(generator.config.runtime_python)['executable'] == str(interpreter)
     finally:
         generator.close()

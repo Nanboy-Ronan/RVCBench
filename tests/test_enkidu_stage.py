@@ -9,7 +9,7 @@ import pytest
 import soundfile as sf
 import torch
 
-from src.benchmark.enkidu_stage import protect_enkidu
+from rvcbench.benchmark.enkidu_stage import protect_enkidu
 
 
 @pytest.mark.parametrize('mutate_source', [False, True])
@@ -51,7 +51,7 @@ def test_enkidu_full_cohort_and_output_lineage(tmp_path, mutate_source):
                              batch.wav.flatten().numpy(), 16000, subtype='PCM_16')
             if mutate_source:
                 sf.write(root / '0.wav', torch.ones(2048).numpy(), 16000, subtype='PCM_16')
-    with patch('src.protection.enkidu.EnkiduProtector', Engine):
+    with patch('rvcbench.protection.enkidu.EnkiduProtector', Engine):
         if mutate_source:
             with pytest.raises(ValueError, match='inputs changed'):
                 protect_enkidu(root, subset, model, output, epochs=1)

@@ -7,8 +7,8 @@ from omegaconf import OmegaConf
 import pytest
 import torch
 
-from src.models.vibevoice.generator import VibeVoiceGenerator, VibeVoiceGeneratorConfig, _check_generation_cache_api
-from src.adversary.vibevoice_ots import VibeVoiceZeroShotAdversary
+from rvcbench.models.vibevoice.generator import VibeVoiceGenerator, VibeVoiceGeneratorConfig, _check_generation_cache_api
+from rvcbench.adversary.vibevoice_ots import VibeVoiceZeroShotAdversary
 from test_benchmark import setup_run
 
 
@@ -67,7 +67,7 @@ def test_attention_fallback_does_not_hide_checkpoint_errors(tmp_path, attention_
     }
     config = VibeVoiceGeneratorConfig(code_path=tmp_path, model_path='fixture', num_inference_steps=None)
     with patch.object(VibeVoiceGenerator, '_ensure_repo_on_path'), \
-            patch('src.models.vibevoice.generator._check_generation_cache_api'), \
+            patch('rvcbench.models.vibevoice.generator._check_generation_cache_api'), \
             patch.dict('sys.modules', modules):
         generator = VibeVoiceGenerator(config, 'cpu', logging.getLogger())
         if attention_failure:

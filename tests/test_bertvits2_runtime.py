@@ -10,8 +10,8 @@ from omegaconf import OmegaConf
 import pytest
 import torch
 
-from src.adversary.bertvit2_ots import BertVits2ZeroShotAdversary
-from src.datasets.zero_shot import ZeroShotSample
+from rvcbench.adversary.bertvit2_ots import BertVits2ZeroShotAdversary
+from rvcbench.datasets.zero_shot import ZeroShotSample
 
 
 def adapter(tmp_path, speakers=850):
@@ -26,7 +26,7 @@ def adapter(tmp_path, speakers=850):
 def test_closed_set_bert_fails_before_native_import_or_global_mutation(tmp_path, monkeypatch):
     model = adapter(tmp_path)
     before = (Path.cwd(), sys.argv[:], sys.path[:])
-    monkeypatch.setattr('src.adversary.bertvit2_ots.importlib.import_module',
+    monkeypatch.setattr('rvcbench.adversary.bertvit2_ots.importlib.import_module',
                         lambda *args: pytest.fail('native import must not occur'))
     with pytest.raises(ValueError, match='closed-set TTS'):
         model.prepare()
@@ -35,7 +35,7 @@ def test_closed_set_bert_fails_before_native_import_or_global_mutation(tmp_path,
 
 
 def test_bert_generator_checkpoint_changes_asset_fingerprint(tmp_path):
-    from src.benchmark.model_assets import resolve_model_assets
+    from rvcbench.benchmark.model_assets import resolve_model_assets
     path = tmp_path / 'G_0.pth'
     path.write_bytes(b'first checkpoint')
     conf = OmegaConf.create({'vc': {'model': 'bertvits2'},

@@ -13,11 +13,11 @@ import pytest
 import soundfile as sf
 from omegaconf import OmegaConf
 
-from src.benchmark.artifacts import (coverage, input_records, output_path, sample_id,
+from rvcbench.benchmark.artifacts import (coverage, input_records, output_path, sample_id,
                                      validate_report)
-from src.benchmark.runner import run_zero_shot
-from src.datasets.zero_shot import ZeroShotDataset
-from src.adversary.smoke import SmokeAdversary
+from rvcbench.benchmark.runner import run_zero_shot
+from rvcbench.datasets.zero_shot import ZeroShotDataset
+from rvcbench.adversary.smoke import SmokeAdversary
 
 
 @contextmanager
@@ -35,7 +35,7 @@ def mocked_evaluator(function):
                 row['status'] = 'complete'
         result['evaluation_fingerprint'] = 'test-only-fingerprint'
         return result
-    with patch('src.evaluation.pipeline.evaluate_run', side_effect=bridge):
+    with patch('rvcbench.evaluation.pipeline.evaluate_run', side_effect=bridge):
         yield
 
 
@@ -122,7 +122,7 @@ def test_generate_and_resume(setup_run):
     assert old['coverage']['generated'] == 2
     assert not old['coverage']['eligible_for_comparison']
     conf.vc.resume_from = str(first)
-    with patch('src.benchmark.backends.select_adversary', side_effect=AssertionError('must not regenerate')):
+    with patch('rvcbench.benchmark.backends.select_adversary', side_effect=AssertionError('must not regenerate')):
         _, new, _ = run('resumed')
     assert all(r['reused'] for r in new['samples'])
     assert (first / 'run_manifest.json').read_text() == json.dumps(old, indent=2, ensure_ascii=False) + '\n'
@@ -150,12 +150,12 @@ def test_native_seed_provenance_survives_resume_and_evaluation(setup_run):
                 last_native_requested_seed=41, config=SimpleNamespace(native_seed_policy='legacy_fixed'))
             return super().attack(**kwargs)
     adapter = NativeSeedAdapter(conf, conf.dataset, 'cpu', logging.getLogger())
-    with patch('src.benchmark.backends.select_adversary', return_value=adapter):
+    with patch('rvcbench.benchmark.backends.select_adversary', return_value=adapter):
         first, old, _ = run('native-seed')
     assert [r['seed'] for r in old['samples']] == [42, 43]
     assert all(r['native_seed'] == 42 and r['native_seed_policy'] == 'legacy_fixed' for r in old['samples'])
     conf.vc.resume_from = str(first)
-    with patch('src.benchmark.backends.select_adversary', side_effect=AssertionError('must not generate')):
+    with patch('rvcbench.benchmark.backends.select_adversary', side_effect=AssertionError('must not generate')):
         _, resumed, _ = run('native-resumed')
         conf.vc.generate_only = False
         with mocked_evaluator(fake_evaluate):
@@ -180,14 +180,14 @@ def test_retry_and_missing_samples(setup_run):
                 raise RuntimeError('temporary failure')
             return super().attack(**kwargs)
     conf.vc.retries = 1
-    with patch('src.benchmark.backends.select_adversary', return_value=Flaky(conf, conf.dataset, 'cpu', logging.getLogger())):
+    with patch('rvcbench.benchmark.backends.select_adversary', return_value=Flaky(conf, conf.dataset, 'cpu', logging.getLogger())):
         _, manifest, _ = run('retry')
     assert manifest['samples'][0]['attempts'] == 2
     assert manifest['coverage']['generated'] == 2
     class Missing(SmokeAdversary):
         def attack(self, **kwargs):
             pass
-    with patch('src.benchmark.backends.select_adversary', return_value=Missing(conf, conf.dataset, 'cpu', logging.getLogger())):
+    with patch('rvcbench.benchmark.backends.select_adversary', return_value=Missing(conf, conf.dataset, 'cpu', logging.getLogger())):
         _, manifest, _ = run('missing')
     assert manifest['status'] == 'partial'
     assert manifest['coverage']['requested'] == 2
@@ -216,8 +216,8 @@ def test_fatal_cuda_error_stops_retries_and_preserves_pending_samples(setup_run,
             self.calls += 1
             raise RuntimeError(message)
     adapter = Fatal(conf, conf.dataset, 'cpu', logging.getLogger())
-    with patch('src.benchmark.backends.select_adversary', return_value=adapter), \
-            patch('src.evaluation.pipeline.evaluate_run') as scorer:
+    with patch('rvcbench.benchmark.backends.select_adversary', return_value=adapter), \
+            patch('rvcbench.evaluation.pipeline.evaluate_run') as scorer:
         with pytest.raises(RuntimeError, match='CUDA error'):
             run('fatal')
     manifest = json.loads((root / 'fatal/run_manifest.json').read_text())
@@ -264,11 +264,11 @@ def test_metric_coverage_is_per_requested_population():
 def test_no_training_or_eval_imports():
     subprocess.run([sys.executable, '-c', '''
 import sys
-from src.datasets.zero_shot import ZeroShotDataset
-from src.adversary.qwen3_tts_ots import Qwen3TTSZeroShotAdversary
-assert 'src.models.text' not in sys.modules
-assert 'src.datasets.data_utils' not in sys.modules
-assert 'src.evaluation.generation' not in sys.modules
+from rvcbench.datasets.zero_shot import ZeroShotDataset
+from rvcbench.adversary.qwen3_tts_ots import Qwen3TTSZeroShotAdversary
+assert 'rvcbench.models.text' not in sys.modules
+assert 'rvcbench.datasets.data_utils' not in sys.modules
+assert 'rvcbench.evaluation.generation' not in sys.modules
 assert 'whisper' not in sys.modules
 '''], check=True)
 
@@ -300,7 +300,7 @@ def test_interruption_retains_progress(setup_run):
     class Interrupted(SmokeAdversary):
         def attack(self, **kwargs):
             raise KeyboardInterrupt()
-    with patch('src.benchmark.backends.select_adversary', return_value=Interrupted(conf, conf.dataset, 'cpu', logging.getLogger())):
+    with patch('rvcbench.benchmark.backends.select_adversary', return_value=Interrupted(conf, conf.dataset, 'cpu', logging.getLogger())):
         with pytest.raises(KeyboardInterrupt):
             run('interrupted')
     manifest = json.loads((root / 'interrupted/run_manifest.json').read_text())
@@ -322,7 +322,7 @@ def test_eval_failure_persists_manifest(setup_run):
 
 def test_model_catalog_and_public_links():
     import re
-    catalog = json.loads(Path('src/benchmark/model_catalog.json').read_text())
+    catalog = json.loads(Path('src/rvcbench/benchmark/model_catalog.json').read_text())
     assert len({r['key'] for r in catalog}) == len(catalog)
     assert sum(r['status'] == 'historical_results' for r in catalog) == 18
     for name in set(re.findall(r'scripts/[\w.-]+\.py', Path('README.md').read_text())):
@@ -339,7 +339,7 @@ def test_report_export_and_site_gate(setup_run, monkeypatch):
     (out / 'run_manifest.json').write_text(json.dumps(manifest))
     reports = root / 'reports'
     result = reports / 'fixture.json'
-    from src.benchmark.cli import main
+    from rvcbench.benchmark.cli import main
     monkeypatch.setattr(sys, 'argv', ['rvcbench', 'report', str(out), '--output', str(result)])
     main()
     payload = json.loads(result.read_text())
@@ -354,7 +354,7 @@ def test_report_export_and_site_gate(setup_run, monkeypatch):
 
 
 def test_journal_recovers_progress_and_ignores_torn_tail(setup_run):
-    from src.benchmark.artifacts import load_run
+    from rvcbench.benchmark.artifacts import load_run
     conf, _, run, _ = setup_run
     out, manifest, _ = run('journal')
     expected = manifest['samples']
@@ -370,7 +370,7 @@ def test_journal_recovers_progress_and_ignores_torn_tail(setup_run):
     assert all(r['status'] == 'generated' for r in recovered['samples'])
     assert recovered['status'] == 'running'  # progress is not process liveness/completion
     conf.vc.resume_from = str(out)
-    with patch('src.benchmark.backends.select_adversary', side_effect=AssertionError('must replay journal')):
+    with patch('rvcbench.benchmark.backends.select_adversary', side_effect=AssertionError('must replay journal')):
         _, resumed, _ = run('journal-resumed')
     assert resumed['coverage']['generated'] == 2
 

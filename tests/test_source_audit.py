@@ -3,8 +3,8 @@ import sys
 
 import pytest
 
-from src.benchmark.artifacts import digest, file_hash
-from src.benchmark.source_audit import audit_recorded_sources
+from rvcbench.benchmark.artifacts import digest, file_hash
+from rvcbench.benchmark.source_audit import audit_recorded_sources
 
 
 @pytest.fixture
@@ -102,7 +102,7 @@ def test_absolute_upstream_path_is_checked_at_its_recorded_location(recorded, tm
 
 @pytest.mark.parametrize('change,expected', [(False, 0), (True, 1)])
 def test_cli_exit_status_and_report(recorded, tmp_path, monkeypatch, capsys, change, expected):
-    from src.benchmark import cli
+    from rvcbench.benchmark import cli
     root, run, write = recorded
     write()
     if change:

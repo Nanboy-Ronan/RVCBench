@@ -3,11 +3,11 @@ from pathlib import Path
 
 import pytest
 
-from src.benchmark.reproduction import historical_prompt_ledger
+from rvcbench.benchmark.reproduction import historical_prompt_ledger
 
 
 def test_robotcall_conditions_share_one_bootstrap_cluster():
-    from src.benchmark.reproduction import speaker_cluster
+    from rvcbench.benchmark.reproduction import speaker_cluster
     assert speaker_cluster('Robotcall', 'p227robocall') == speaker_cluster('Robotcall', 'p227vctk')
     assert speaker_cluster('Robotcall', 'p232vctk') != speaker_cluster('Robotcall', 'p227vctk')
     assert speaker_cluster('VCTK', 'p227') == 'p227'
@@ -22,7 +22,7 @@ def test_robotcall_conditions_share_one_bootstrap_cluster():
 ])
 def test_historical_valle_matching_rejects_different_or_unknown_implementation(tmp_path, current, historical):
     import json
-    from src.benchmark.reproduction import match_historical
+    from rvcbench.benchmark.reproduction import match_historical
     config = {'vc': {'model': 'vall_e'}, 'dataset': {'name': 'Robotcall'}}
     (tmp_path / 'metrics.json').write_text(json.dumps({'config': {**config, 'adversary': historical}}))
     with pytest.raises(ValueError, match='implementation'):
@@ -47,7 +47,7 @@ def test_target_only_ledger_requires_complete_ordered_log(tmp_path):
 
 def test_wer_protocol_inferred_from_all_transcripts(tmp_path):
     import csv
-    from src.benchmark.reproduction import infer_english_wer_protocol
+    from rvcbench.benchmark.reproduction import infer_english_wer_protocol
     path = tmp_path / 'scores.csv'
     with path.open('w') as handle:
         writer = csv.DictWriter(handle, fieldnames=['ground_truth_text', 'predicted_text', 'wer'])
@@ -65,8 +65,8 @@ def test_wer_protocol_inferred_from_all_transcripts(tmp_path):
 def test_pair_match_requires_dataset_identity_and_immutable_reference_audio(tmp_path, dataset):
     import csv
     import json
-    from src.benchmark.artifacts import file_hash
-    from src.benchmark.reproduction import match_historical
+    from rvcbench.benchmark.artifacts import file_hash
+    from rvcbench.benchmark.reproduction import match_historical
     audio = tmp_path / 'audios' / 'one'
     audio.mkdir(parents=True)
     prompt, target = audio / 'prompt.wav', audio / 'target.wav'
@@ -96,7 +96,7 @@ def test_pair_match_requires_dataset_identity_and_immutable_reference_audio(tmp_
 
 def test_external_audio_reference_requires_unique_manifest_and_target_hash(tmp_path):
     import json
-    from src.benchmark.reproduction import historical_manifest_prompt
+    from rvcbench.benchmark.reproduction import historical_manifest_prompt
     root = tmp_path / 'short10'
     (root / 'filelists').mkdir(parents=True)
     audio = tmp_path / 'Libritts' / 'audios' / 'one'

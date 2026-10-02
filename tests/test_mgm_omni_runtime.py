@@ -7,8 +7,8 @@ import pytest
 import torch
 from omegaconf import OmegaConf
 
-from src.benchmark.model_assets import resolve_model_assets
-from src.models.mgm_omni.generator import MGMOmniGenerator, MGMOmniGeneratorConfig
+from rvcbench.benchmark.model_assets import resolve_model_assets
+from rvcbench.models.mgm_omni.generator import MGMOmniGenerator, MGMOmniGeneratorConfig
 
 
 @pytest.mark.parametrize('fail', [False, True])

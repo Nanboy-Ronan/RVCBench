@@ -11,10 +11,15 @@ import torch.nn.functional as F
 from hydra.utils import to_absolute_path
 from omegaconf import DictConfig, OmegaConf
 
-from src.datasets.audio_only import SimpleAllSpeakerData
-from src.evaluation import fidelity
-from src.utils.logger import log_config, setup_exp, setup_logger
-from src.utils.seeding import configure_seeds
+import sys
+
+# Use this checkout's package even when it has not been (re)installed.
+sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
+
+from rvcbench.datasets.audio_only import SimpleAllSpeakerData
+from rvcbench.evaluation import fidelity
+from rvcbench.utils.logger import log_config, setup_exp, setup_logger
+from rvcbench.utils.seeding import configure_seeds
 
 
 def _safe_get(conf, key, default=None):

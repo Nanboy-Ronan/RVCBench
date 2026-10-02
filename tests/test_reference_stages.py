@@ -6,8 +6,8 @@ import pytest
 import soundfile as sf
 
 from test_benchmark import setup_run
-from src.benchmark.artifacts import file_hash
-from src.benchmark.reference_stages import bind_reference_stage
+from rvcbench.benchmark.artifacts import file_hash
+from rvcbench.benchmark.reference_stages import bind_reference_stage
 
 
 def stage_directory(dataset, tmp_path):
@@ -46,7 +46,7 @@ def test_stage_missing_or_ambiguous_reference_prevents_model_loading(setup_run, 
         (root / clean.name).write_bytes(staged.read_bytes())
     else:
         staged.unlink()
-    with patch('src.benchmark.backends.select_adversary', side_effect=AssertionError('must not load')):
+    with patch('rvcbench.benchmark.backends.select_adversary', side_effect=AssertionError('must not load')):
         with pytest.raises((FileNotFoundError, ValueError), match='reference'):
             run('bad-stage')
 
@@ -116,7 +116,7 @@ def test_archived_producer_must_be_complete_and_match_selected_outputs(setup_run
     (root / 'stage_manifest.json').write_text(json.dumps(producer))
     conf.vc.reference_audio_dir = str(root)
     if failure:
-        with patch('src.benchmark.backends.select_adversary', side_effect=AssertionError('must not load')):
+        with patch('rvcbench.benchmark.backends.select_adversary', side_effect=AssertionError('must not load')):
             with pytest.raises(ValueError):
                 run('bad-producer')
     else:

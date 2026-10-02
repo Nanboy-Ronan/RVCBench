@@ -91,7 +91,7 @@ Local debug runs and detailed audit snapshots are excluded from Git. Use
 ## Check the source version of a retained run
 
 ```bash
-python -m src.benchmark.cli audit-source results/my_run/timestamped_directory
+python -m rvcbench.benchmark.cli audit-source results/my_run/timestamped_directory
 ```
 
 This read-only command compares each recorded generation source hash with the

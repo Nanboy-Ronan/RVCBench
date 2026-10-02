@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 import torch
 
-from src.models.valle import VallEGenerator, VallEGeneratorConfig
+from rvcbench.models.valle import VallEGenerator, VallEGeneratorConfig
 
 
 def wrapper(tmp_path, codes=None, audio=None):
@@ -68,7 +68,7 @@ def test_missing_checkpoint_is_actionable_before_native_import(tmp_path):
 
 def test_checkpoint_shape_mismatch_fails_strictly_and_cleans_state(tmp_path, monkeypatch):
     import sys
-    import src.models.valle.generator as runtime
+    import rvcbench.models.valle.generator as runtime
     weights, tokens = tmp_path / 'weights.pt', tmp_path / 'tokens.txt'
     weights.write_bytes(b'fixture')
     tokens.write_text('fixture')

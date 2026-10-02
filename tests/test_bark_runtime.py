@@ -4,7 +4,7 @@ from types import ModuleType
 import pytest
 import torch
 
-from src.models.bark_voice_clone.generator import (
+from rvcbench.models.bark_voice_clone.generator import (
     BarkVoiceCloneGenerator, BarkVoiceCloneGeneratorConfig, CPULoadTorch, private_runtime)
 
 

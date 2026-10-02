@@ -7,8 +7,8 @@ from omegaconf import OmegaConf, DictConfig
 import pytest
 import torch
 
-from src.models.ozspeech.synthesizer import OzSpeechSynthesizer
-from src.benchmark.model_assets import resolve_model_assets
+from rvcbench.models.ozspeech.synthesizer import OzSpeechSynthesizer
+from rvcbench.benchmark.model_assets import resolve_model_assets
 
 
 @pytest.mark.parametrize('fail', [False, True])
@@ -85,7 +85,7 @@ def test_default_codec_downloads_share_a_pinned_revision(tmp_path):
 
 
 def test_codec_alias_is_used_when_primary_yaml_field_is_null(tmp_path):
-    from src.adversary.ozspeech_ots import OzSpeechZeroShotAdversary
+    from rvcbench.adversary.ozspeech_ots import OzSpeechZeroShotAdversary
     config = OmegaConf.create({'code_path': str(tmp_path), 'checkpoint_path': str(tmp_path / 'model.pt'),
         'config_path': str(tmp_path / 'config.yaml'), 'codec_encoder_path': None,
         'facodec_encoder_path': str(tmp_path / 'encoder.bin'), 'codec_decoder_path': None,

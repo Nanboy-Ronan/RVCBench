@@ -9,8 +9,8 @@ from pathlib import Path
 import platform
 import sys
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from src.models.dns64_kernel import enhance_reference, load_dns64, sha256
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
+from rvcbench.models.dns64_kernel import enhance_reference, load_dns64, sha256
 
 
 def write_result(path, result):
@@ -44,7 +44,7 @@ def main():
             'torchaudio': torchaudio.__version__, 'cuda': torch.version.cuda,
             'cpu_threads': torch.get_num_threads(), 'audio_backends': torchaudio.list_audio_backends(),
             'worker_sha256': sha256(__file__),
-            'kernel_sha256': sha256(Path(__file__).parents[1] / 'src/models/dns64_kernel.py'),
+            'kernel_sha256': sha256(Path(__file__).parents[1] / 'src/rvcbench/models/dns64_kernel.py'),
             'denoiser_source_files': sources}
         for item in request['items']:
             if sha256(item['input_path']) != item['input_sha256']:

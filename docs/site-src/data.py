@@ -54,7 +54,7 @@ DIMENSIONS = [
             "Deepfake detectability — ground-truth vs. cloned speech classification",
         ],
         "demo_anchor": None,
-        "demo_label": "In the codebase (data/compression/, src/datasets/deepfake_preprocess.py) — not yet on the public leaderboard",
+        "demo_label": "In the codebase (data/compression/, src/rvcbench/datasets/deepfake_preprocess.py) — not yet on the public leaderboard",
     },
     {
         "key": "perturbation",
@@ -169,7 +169,7 @@ CROSS_DATASET = [
 
 import json as _json
 from pathlib import Path as _Path
-MODELS = _json.loads((_Path(__file__).resolve().parents[2] / "src/benchmark/model_catalog.json").read_text())
+MODELS = _json.loads((_Path(__file__).resolve().parents[2] / "src/rvcbench/benchmark/model_catalog.json").read_text())
 
 PROTECTIONS = [
     {"n": "SafeSpeech", "desc": "Adversarial perturbation optimised against a surrogate VC model."},

@@ -5,9 +5,9 @@ import json
 from pathlib import Path
 import sys
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from src.benchmark.artifacts import atomic_json, file_hash
-from src.benchmark.reproduction import infer_english_wer_protocol
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
+from rvcbench.benchmark.artifacts import atomic_json, file_hash
+from rvcbench.benchmark.reproduction import infer_english_wer_protocol
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('manifest_audit', type=Path)

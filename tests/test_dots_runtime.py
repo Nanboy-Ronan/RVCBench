@@ -9,9 +9,9 @@ import pytest
 import torch
 from omegaconf import OmegaConf
 
-from src.models.dots_tts.generator import DotsTTSGenerator, DotsTTSGeneratorConfig
-from src.benchmark.model_assets import resolve_model_assets
-from src.benchmark.fingerprints import generation_runtime
+from rvcbench.models.dots_tts.generator import DotsTTSGenerator, DotsTTSGeneratorConfig
+from rvcbench.benchmark.model_assets import resolve_model_assets
+from rvcbench.benchmark.fingerprints import generation_runtime
 
 
 @pytest.mark.parametrize('fail', [False, True])

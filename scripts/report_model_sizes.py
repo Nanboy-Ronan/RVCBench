@@ -228,7 +228,7 @@ def materialize_adversary_for_counting(adversary: Any) -> Any:
 
 def load_vc_model(repo_root: Path, model_name: str, config_name: str, device: torch.device, logger) -> Any:
     conf = compose_config(repo_root, config_name)
-    from src.workflows.vc import _ADVERSARY_REGISTRY
+    from rvcbench.workflows.vc import _ADVERSARY_REGISTRY
 
     target = _ADVERSARY_REGISTRY["ots"][str(conf.vc.model).lower()]
     cls = import_symbol(target)
@@ -245,8 +245,8 @@ def load_shared_model(repo_root: Path, model_name: str, config_name: str, device
     conf = compose_config(repo_root, config_name)
     model_conf = conf.model
     if model_name == "BertVits2":
-        from src.models.bertvits2_model import BertVITS2Model, BertVITS2Config
-        from src.models.bertvits2_model import (
+        from rvcbench.models.bertvits2_model import BertVITS2Model, BertVITS2Config
+        from rvcbench.models.bertvits2_model import (
             DurationDiscriminatorConfig,
             MultiPeriodDiscriminatorConfig,
             SynthesizerTrnConfig,
@@ -315,7 +315,7 @@ def load_shared_model(repo_root: Path, model_name: str, config_name: str, device
         return model
 
     if model_name == "OZSpeech":
-        from src.models.ozspeech import OzSpeechSynthesizer
+        from rvcbench.models.ozspeech import OzSpeechSynthesizer
 
         synth = OzSpeechSynthesizer(
             cfg_path=Path(str(model_conf.config_path)),
@@ -345,7 +345,7 @@ def load_protection_model(repo_root: Path, model_name: str, config_name: str, de
     conf = compose_config(repo_root, config_name)
 
     if model_name == "SafeSpeechProtector":
-        from src.models.bertvits2_model import BertVits2Wrapper
+        from rvcbench.models.bertvits2_model import BertVits2Wrapper
 
         wrapper = BertVits2Wrapper(conf.protection, conf.model, conf.dataset, logger)
         wrapper.ensure_model()
@@ -532,5 +532,5 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
     main()

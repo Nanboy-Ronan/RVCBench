@@ -4,7 +4,7 @@ import logging
 import pytest
 import torch
 
-from src.utils.commons import load_checkpoint
+from rvcbench.utils.commons import load_checkpoint
 
 
 @pytest.mark.parametrize('issue', ['missing', 'shape', 'unexpected'])

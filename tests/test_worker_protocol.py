@@ -6,7 +6,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from src.models.worker_protocol import WorkerResponseReader
+from rvcbench.models.worker_protocol import WorkerResponseReader
 
 
 @pytest.fixture
@@ -128,7 +128,7 @@ GENERATORS = {
 @pytest.mark.parametrize('behaviour', sorted(BEHAVIOURS))
 def test_worker_generators_fail_closed_and_reap_the_worker(tmp_path, worker, module_name, behaviour):
     class_name, arguments = GENERATORS[module_name]
-    cls = getattr(importlib.import_module(f'src.models.{module_name}.generator'), class_name)
+    cls = getattr(importlib.import_module(f'rvcbench.models.{module_name}.generator'), class_name)
     action, error, message = BEHAVIOURS[behaviour]
     generator = cls.__new__(cls)
     process = worker(REPLY + action)

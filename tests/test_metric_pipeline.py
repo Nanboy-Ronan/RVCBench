@@ -6,15 +6,15 @@ from unittest.mock import patch
 import pytest
 
 from test_benchmark import setup_run
-from src.evaluation.pipeline import evaluate_run
-from src.benchmark.artifacts import input_fingerprint, input_records, sample_id
-from src.datasets.manifest_utils import select_manifest_variant
+from rvcbench.evaluation.pipeline import evaluate_run
+from rvcbench.benchmark.artifacts import input_fingerprint, input_records, sample_id
+from rvcbench.datasets.manifest_utils import select_manifest_variant
 
 
 def test_mcd_cache_fingerprint_tracks_native_feature_and_alignment_libraries():
-    from src.evaluation.pipeline import _scorer_provenance
-    from src.evaluation.scorers.mcd import MCDScorer
-    from src.benchmark.artifacts import digest
+    from rvcbench.evaluation.pipeline import _scorer_provenance
+    from rvcbench.evaluation.scorers.mcd import MCDScorer
+    from rvcbench.benchmark.artifacts import digest
     scorer = MCDScorer('cpu', logging.getLogger())
     scorer.model_provenance = {'implementation': 'pymcd', 'MCD_mode': 'dtw'}
     versions = {name: 'fixture-1' for name in scorer.dependencies}
@@ -28,9 +28,9 @@ def test_mcd_cache_fingerprint_tracks_native_feature_and_alignment_libraries():
 
 def test_scorer_cache_separates_cpu_and_gpu_execution():
     from types import SimpleNamespace
-    from src.evaluation.pipeline import _scorer_provenance
-    from src.benchmark.artifacts import digest
-    from src.evaluation.scorers.mcd import MCDScorer
+    from rvcbench.evaluation.pipeline import _scorer_provenance
+    from rvcbench.benchmark.artifacts import digest
+    from rvcbench.evaluation.scorers.mcd import MCDScorer
     scorer = MCDScorer('cpu', logging.getLogger())
     scorer.model_provenance = {'implementation': 'pymcd', 'MCD_mode': 'dtw'}
     cpu = _scorer_provenance(scorer, 42, None, 'cpu')
@@ -89,8 +89,8 @@ def test_invalid_cuda_context_stops_all_following_scoring_and_preserves_evidence
             raise RuntimeError('secondary cleanup error')
 
     output = tmp_path / 'fatal'
-    with patch('src.evaluation.pipeline.create_scorer', side_effect=lambda n, *_: FatalScorer(n, calls)), \
-            patch('src.utils.seeding.configure_seeds'), patch('torch.cuda.empty_cache') as empty_cache:
+    with patch('rvcbench.evaluation.pipeline.create_scorer', side_effect=lambda n, *_: FatalScorer(n, calls)), \
+            patch('rvcbench.utils.seeding.configure_seeds'), patch('torch.cuda.empty_cache') as empty_cache:
         with pytest.raises(RuntimeError) as raised:
             evaluate_run(rows, ['sim', 'wer'], output, 'cpu', logging.getLogger(),
                          on_sample=lambda row: events.append(copy.deepcopy(row)))
@@ -117,7 +117,7 @@ def test_metric_resume_after_interruption_and_independent_failures(setup_run, tm
     def interrupt(row):
         raise KeyboardInterrupt()
     output = tmp_path / 'scores'
-    with patch('src.evaluation.pipeline.create_scorer', side_effect=lambda n, *_: FakeScorer(n, calls)):
+    with patch('rvcbench.evaluation.pipeline.create_scorer', side_effect=lambda n, *_: FakeScorer(n, calls)):
         with pytest.raises(KeyboardInterrupt):
             evaluate_run(copy.deepcopy(rows), ['sim', 'wer'], output, 'cpu', logging.getLogger(), on_sample=interrupt)
         assert calls[-1] == ('close', 'sim')
@@ -126,7 +126,7 @@ def test_metric_resume_after_interruption_and_independent_failures(setup_run, tm
     assert sum(c[:2] == ('score', 'sim') for c in calls) == 2  # first successful score was reused
     assert calls.index(('close', 'sim')) < calls.index(('prepare', 'wer'))
     calls.clear()
-    with patch('src.evaluation.pipeline.create_scorer', side_effect=lambda n, *_: FakeScorer(n, calls, n == 'wer')):
+    with patch('rvcbench.evaluation.pipeline.create_scorer', side_effect=lambda n, *_: FakeScorer(n, calls, n == 'wer')):
         fresh = copy.deepcopy(rows)
         result = evaluate_run(fresh, ['sim', 'wer'], tmp_path / 'failed-wer', 'cpu', logging.getLogger())
     assert result['sim_pairs'] == 2 and result['wer_pairs'] == 0
@@ -147,7 +147,7 @@ def test_runner_persists_fatal_scoring_failure(setup_run):
     _, _, run, root = setup_run
     conf, _, _, _ = setup_run
     conf.vc.generate_only = False
-    with patch('src.evaluation.pipeline.create_scorer', side_effect=RuntimeError('CUDA error: device-side assert triggered')):
+    with patch('rvcbench.evaluation.pipeline.create_scorer', side_effect=RuntimeError('CUDA error: device-side assert triggered')):
         with pytest.raises(RuntimeError, match='device-side assert'):
             run('fatal-scoring', config=conf)
     saved = json.loads((root / 'fatal-scoring/run_manifest.json').read_text())
@@ -175,8 +175,8 @@ def test_variants_preserve_both_transcripts_and_disambiguate_identity(setup_run)
 
 
 def test_frozen_subset_roundtrip_keeps_identity_and_input_fingerprint(setup_run, tmp_path):
-    from src.benchmark.subsets import freeze
-    from src.datasets.zero_shot import ZeroShotDataset
+    from rvcbench.benchmark.subsets import freeze
+    from rvcbench.datasets.zero_shot import ZeroShotDataset
     conf, dataset, _, _ = setup_run
     out = freeze(dataset, tmp_path / 'subset', speakers=1, pairs_per_speaker=2)
     conf.dataset.manifest_filename = str(out / 'metadata.json')

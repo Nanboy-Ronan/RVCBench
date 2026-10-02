@@ -6,7 +6,7 @@ from unittest.mock import Mock, patch
 import pytest
 import torch
 
-from src.models.qwen3_omni import Qwen3OmniGenerator, Qwen3OmniGeneratorConfig
+from rvcbench.models.qwen3_omni import Qwen3OmniGenerator, Qwen3OmniGeneratorConfig
 
 
 class Inputs(dict):
@@ -29,7 +29,7 @@ def prepared_generator(audio):
 @pytest.mark.parametrize('audio', [torch.zeros(240), [torch.zeros(240)]])
 def test_output_rate_does_not_use_input_feature_extractor_rate_and_seed_preserves_index(audio):
     generator = prepared_generator(audio)
-    with patch('src.utils.seeding.configure_seeds') as seed:
+    with patch('rvcbench.utils.seeding.configure_seeds') as seed:
         waveform, rate = generator.generate([{'role': 'user', 'content': []}], sample_index=73)
     assert waveform.shape == (240,) and rate == 24000
     assert seed.call_args.args == (115,)

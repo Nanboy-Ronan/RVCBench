@@ -9,14 +9,14 @@ from unittest.mock import patch
 import torch
 import pytest
 
-from src.models.higgs_audio.generator import HiggsAudioGenerator, HiggsAudioGeneratorConfig
+from rvcbench.models.higgs_audio.generator import HiggsAudioGenerator, HiggsAudioGeneratorConfig
 
 
 def test_incompatible_transformers_fails_before_upstream_import(tmp_path):
     (tmp_path / 'requirements.txt').write_text('transformers>=4.45.1,<4.47.0\n')
     generator = HiggsAudioGenerator(HiggsAudioGeneratorConfig(code_path=tmp_path, model_path='fixture'),
                                    torch.device('cpu'), logging.getLogger())
-    with patch('src.models.higgs_audio.generator.version', return_value='4.57.3'):
+    with patch('rvcbench.models.higgs_audio.generator.version', return_value='4.57.3'):
         with pytest.raises(RuntimeError, match='requires transformers'):
             generator._ensure_imports()
     assert generator._generation_mod is None

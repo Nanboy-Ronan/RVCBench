@@ -7,7 +7,7 @@ from unittest.mock import Mock, patch
 import numpy as np
 import pytest
 
-from src.models.zonos2.generator import Zonos2Generator, Zonos2GeneratorConfig
+from rvcbench.models.zonos2.generator import Zonos2Generator, Zonos2GeneratorConfig
 
 
 @pytest.mark.parametrize('fail', [False, True])

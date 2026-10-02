@@ -342,8 +342,8 @@ def render_validated_runs(report_dir=None):
     import sys
     from pathlib import Path
     root = Path(__file__).resolve().parents[2]
-    sys.path.insert(0, str(root))
-    from src.benchmark.artifacts import validate_report, metric_means
+    sys.path.insert(0, str(root / 'src'))
+    from rvcbench.benchmark.artifacts import validate_report, metric_means
     reports = []
     directory = Path(report_dir) if report_dir is not None else root / 'docs' / 'validated_runs'
     for path in sorted(directory.glob('*.json')):

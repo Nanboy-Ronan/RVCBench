@@ -10,8 +10,8 @@ import torch
 
 from test_benchmark import setup_run
 from test_reference_stages import stage_directory
-from src.benchmark.artifacts import file_hash
-from src.benchmark.denoise_stage import denoise_dns64
+from rvcbench.benchmark.artifacts import file_hash
+from rvcbench.benchmark.denoise_stage import denoise_dns64
 
 
 @pytest.fixture
@@ -45,7 +45,7 @@ class Echo(torch.nn.Module):
 def test_stage_preserves_pair_rows_while_enhancing_shared_reference_once(stage_inputs):
     *args, clean, staged = stage_inputs
     model = Echo()
-    with patch('src.benchmark.denoise_stage._load_dns64', return_value=(model, {})):
+    with patch('rvcbench.benchmark.denoise_stage._load_dns64', return_value=(model, {})):
         result = denoise_dns64(*args)
     assert result['status'] == 'complete' and result['verified'] == 2
     assert model.calls == 1
@@ -59,7 +59,7 @@ def test_stage_preserves_pair_rows_while_enhancing_shared_reference_once(stage_i
 def test_missing_reference_fails_before_model_loading(stage_inputs):
     *args, _, staged = stage_inputs
     staged.unlink()
-    with patch('src.benchmark.denoise_stage._load_dns64', side_effect=AssertionError('must not load')):
+    with patch('rvcbench.benchmark.denoise_stage._load_dns64', side_effect=AssertionError('must not load')):
         with pytest.raises(FileNotFoundError):
             denoise_dns64(*args)
     assert not args[-1].exists()
@@ -67,7 +67,7 @@ def test_missing_reference_fails_before_model_loading(stage_inputs):
 
 def test_invalid_model_output_leaves_failed_stage(stage_inputs):
     *args, _, _ = stage_inputs
-    with patch('src.benchmark.denoise_stage._load_dns64', return_value=(Echo(invalid=True), {})):
+    with patch('rvcbench.benchmark.denoise_stage._load_dns64', return_value=(Echo(invalid=True), {})):
         with pytest.raises(ValueError, match='Invalid DNS64 output'):
             denoise_dns64(*args)
     result = json.loads((args[-1] / 'stage_manifest.json').read_text())
@@ -105,7 +105,7 @@ def test_worker_result_validated_against_request_and_actual_files(stage_inputs, 
         result = {'schema_version': 1, 'status': 'complete', 'rows': rows,
                   'request_sha256': file_hash(request_path), 'weights_sha256': request['weights_sha256'],
                   'runtime': {'worker_sha256': file_hash(worker),
-                      'kernel_sha256': file_hash(worker.parent.parent / 'src/models/dns64_kernel.py'),
+                      'kernel_sha256': file_hash(worker.parent.parent / 'src/rvcbench/models/dns64_kernel.py'),
                       'packages': {'test': '1'}, 'executable': command[0]}}
         if corruption == 'content':
             rows[0]['sha256'] = 'wrong'
@@ -120,7 +120,7 @@ def test_worker_result_validated_against_request_and_actual_files(stage_inputs, 
             assert alias.resolve() == Path(command[0]).resolve()
             result['runtime']['executable'] = str(alias)
         result_path.write_text(json.dumps(result))
-    with patch('src.benchmark.denoise_stage.subprocess.run', side_effect=fake_run):
+    with patch('rvcbench.benchmark.denoise_stage.subprocess.run', side_effect=fake_run):
         if corruption:
             with pytest.raises(ValueError, match='worker'):
                 denoise_dns64(*args, runtime_python=sys.executable)

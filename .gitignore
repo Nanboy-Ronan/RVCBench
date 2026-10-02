@@ -208,7 +208,7 @@ __marimo__/
 
 
 /openfst-1.8.2/
-/src/requirements.txt
+/src/rvcbench/requirements.txt
 /openfst-1.8.2.tar.gz
 /download_models.py
 checkpoints/

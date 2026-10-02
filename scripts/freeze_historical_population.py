@@ -12,9 +12,9 @@ from pathlib import Path
 
 from omegaconf import OmegaConf
 
-from src.benchmark.artifacts import atomic_json, file_hash, input_fingerprint, input_records
-from src.datasets.manifest_utils import canonicalize_records
-from src.datasets.zero_shot import ZeroShotDataset
+from rvcbench.benchmark.artifacts import atomic_json, file_hash, input_fingerprint, input_records
+from rvcbench.datasets.manifest_utils import canonicalize_records
+from rvcbench.datasets.zero_shot import ZeroShotDataset
 
 
 def freeze(source_root, audio_root, historical_csv, output, expected_pairs):

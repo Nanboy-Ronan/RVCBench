@@ -2,8 +2,8 @@ import json
 from omegaconf import OmegaConf
 import pytest
 
-from src.models.valle.amphion import read_config
-from src.benchmark.model_assets import resolve_model_assets
+from rvcbench.models.valle.amphion import read_config
+from rvcbench.benchmark.model_assets import resolve_model_assets
 
 
 def merge(base, override):

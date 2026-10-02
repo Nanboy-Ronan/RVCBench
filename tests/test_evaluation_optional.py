@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 import soundfile as sf
 
-generation = pytest.importorskip('src.evaluation.generation', reason='optional evaluation dependencies unavailable')
+generation = pytest.importorskip('rvcbench.evaluation.generation', reason='optional evaluation dependencies unavailable')
 
 
 def test_nonfinite_metric_is_missing_and_csv_keeps_identity(tmp_path, monkeypatch):

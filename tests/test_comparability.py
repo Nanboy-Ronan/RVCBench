@@ -2,8 +2,8 @@ import json
 import pytest
 
 from test_benchmark import setup_run, mocked_evaluator, fake_evaluate
-from src.benchmark.comparability import check_comparability
-from src.benchmark.artifacts import digest
+from rvcbench.benchmark.comparability import check_comparability
+from rvcbench.benchmark.artifacts import digest
 
 
 def test_complete_runs_require_matched_scorer_protocol(setup_run):

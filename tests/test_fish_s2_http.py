@@ -6,7 +6,7 @@ from omegaconf import OmegaConf
 import pytest
 import torch
 
-from src.adversary.fish_audio_s2_server_ots import FishAudioS2ServerZeroShotAdversary
+from rvcbench.adversary.fish_audio_s2_server_ots import FishAudioS2ServerZeroShotAdversary
 
 
 def adapter(**kwargs):
@@ -21,7 +21,7 @@ def test_http_s2_readiness_failure_prevents_generation(monkeypatch):
     def get(url, **kwargs):
         observed.append(url)
         return SimpleNamespace(status_code=404)
-    monkeypatch.setattr('src.adversary.fish_audio_s2_server_ots.requests.get', get)
+    monkeypatch.setattr('rvcbench.adversary.fish_audio_s2_server_ots.requests.get', get)
     with pytest.raises(RuntimeError, match='readiness check failed'):
         adapter().prepare()
     assert observed == ['http://127.0.0.1:18011/v1/health']
@@ -49,7 +49,7 @@ def test_http_s2_permanent_errors_do_not_retry(monkeypatch, status, content, mes
     def post(*args, **kwargs):
         observed.append(kwargs['data'])
         return SimpleNamespace(status_code=status, content=content, text='invalid request')
-    monkeypatch.setattr('src.adversary.fish_audio_s2_server_ots.requests.post', post)
+    monkeypatch.setattr('rvcbench.adversary.fish_audio_s2_server_ots.requests.post', post)
     with pytest.raises(RuntimeError, match=message):
         adapter()._post_generation(b'exact payload')
     assert observed == [b'exact payload']
@@ -63,6 +63,6 @@ def test_http_s2_transient_retry_keeps_identical_payload(monkeypatch):
     def post(*args, **kwargs):
         observed.append(kwargs['data'])
         return next(responses)
-    monkeypatch.setattr('src.adversary.fish_audio_s2_server_ots.requests.post', post)
+    monkeypatch.setattr('rvcbench.adversary.fish_audio_s2_server_ots.requests.post', post)
     assert adapter()._post_generation(b'exact payload') == wav
     assert observed == [b'exact payload', b'exact payload']

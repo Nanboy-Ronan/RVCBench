@@ -7,8 +7,8 @@ import pytest
 import soundfile as sf
 import torch
 
-from src.evaluation.scorers import ScoreInput
-from src.evaluation.scorers.auxiliary import AuxiliaryScorer
+from rvcbench.evaluation.scorers import ScoreInput
+from rvcbench.evaluation.scorers.auxiliary import AuxiliaryScorer
 
 
 def test_speechmos_asset_scope_and_loaded_weights(tmp_path, monkeypatch):
@@ -27,7 +27,7 @@ def test_speechmos_asset_scope_and_loaded_weights(tmp_path, monkeypatch):
             self.weight = torch.nn.Parameter(torch.tensor(0.))
 
     monkeypatch.setattr(torch.hub, 'get_dir', lambda: str(hub))
-    monkeypatch.setattr('src.evaluation.scorers.auxiliary.importlib.import_module',
+    monkeypatch.setattr('rvcbench.evaluation.scorers.auxiliary.importlib.import_module',
                         lambda _: SimpleNamespace(__file__=str(source), UTMOS22Strong=Model))
     scorer = AuxiliaryScorer('speechmos', 'cpu', logging.getLogger())
     scorer.prepare()

@@ -8,8 +8,8 @@ import pytest
 import soundfile as sf
 import torch
 
-from src.protection.base_protector import BaseProtector
-from src.protection.enkidu import EnkiduProtector
+from rvcbench.protection.base_protector import BaseProtector
+from rvcbench.protection.enkidu import EnkiduProtector
 
 
 def protector(tmp_path):

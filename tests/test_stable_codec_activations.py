@@ -1,7 +1,7 @@
 import torch
 import pytest
 from torch import nn
-from src.models.stable_codec_activations import EagerSnake1d, stabilize_codec_snake
+from rvcbench.models.stable_codec_activations import EagerSnake1d, stabilize_codec_snake
 
 
 class SourceSnake(nn.Module):

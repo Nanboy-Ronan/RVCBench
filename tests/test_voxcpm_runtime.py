@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 import torch
 
-from src.models.voxcpm import VoxCPMGenerator, VoxCPMGeneratorConfig
+from rvcbench.models.voxcpm import VoxCPMGenerator, VoxCPMGeneratorConfig
 from test_benchmark import setup_run
 
 
@@ -85,8 +85,8 @@ def test_load_failure_restores_device_and_closes_partial_state():
 
 def test_adapter_propagates_seed_index_and_does_not_swallow_cuda_errors(setup_run, tmp_path):
     from dataclasses import replace
-    from src.adversary.voxcpm_ots import VoxCPMZeroShotAdversary
-    from src.benchmark.backends import SampleView
+    from rvcbench.adversary.voxcpm_ots import VoxCPMZeroShotAdversary
+    from rvcbench.benchmark.backends import SampleView
     conf, dataset, _, _ = setup_run
     adapter = VoxCPMZeroShotAdversary(conf, conf.dataset, 'cpu', logging.getLogger())
     adapter._generator = SimpleNamespace(generate=Mock(side_effect=RuntimeError('CUDA error: illegal memory access')))

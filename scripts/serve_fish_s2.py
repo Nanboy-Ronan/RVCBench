@@ -74,8 +74,8 @@ def main():
                 await super().initialize_app(app)
                 engine = app.state.model_manager.tts_inference_engine
                 if args.stable_codec_activations:
-                    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-                    from src.models.stable_codec_activations import stabilize_codec_snake
+                    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
+                    from rvcbench.models.stable_codec_activations import stabilize_codec_snake
                     count = stabilize_codec_snake(engine.decoder_model)
                     if not count:
                         raise RuntimeError('No DAC Snake activations found; stable variant not applied')

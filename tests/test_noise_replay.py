@@ -6,8 +6,8 @@ import pytest
 import soundfile as sf
 import torch
 
-from src.benchmark.artifacts import file_hash
-from src.benchmark.noise_replay import replay_gr_noise
+from rvcbench.benchmark.artifacts import file_hash
+from rvcbench.benchmark.noise_replay import replay_gr_noise
 
 
 @pytest.fixture

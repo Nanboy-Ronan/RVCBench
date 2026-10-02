@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 import torch
 
-from src.models.kimi_audio import KimiAudioGenerator, KimiAudioGeneratorConfig
+from rvcbench.models.kimi_audio import KimiAudioGenerator, KimiAudioGeneratorConfig
 
 
 def prepared_generator(wave):
@@ -38,7 +38,7 @@ def test_source_index_seed_and_cuda_scope_restore(fail):
             raise RuntimeError('fixture')
         return torch.zeros(1, 24), 'spoken text'
     generator._model.generate.side_effect = generate
-    with patch('torch.cuda.device', side_effect=scope), patch('src.models.kimi_audio.generator.configure_seeds') as seed:
+    with patch('torch.cuda.device', side_effect=scope), patch('rvcbench.models.kimi_audio.generator.configure_seeds') as seed:
         if fail:
             with pytest.raises(RuntimeError, match='fixture'):
                 generator.generate([], sample_index=73)
@@ -55,7 +55,7 @@ def test_source_index_seed_and_cuda_scope_restore(fail):
 @pytest.mark.parametrize('wave,message', [(None, 'no waveform'), (np.array([]), 'empty'),
     (np.array([np.nan]), 'nonfinite'), (np.zeros((2, 3)), 'one mono')])
 def test_invalid_output_is_rejected(wave, message):
-    with patch('torch.cuda.device'), patch('src.models.kimi_audio.generator.configure_seeds'):
+    with patch('torch.cuda.device'), patch('rvcbench.models.kimi_audio.generator.configure_seeds'):
         with pytest.raises(RuntimeError, match=message):
             prepared_generator(wave).generate([])
 

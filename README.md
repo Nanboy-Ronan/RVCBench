@@ -47,12 +47,12 @@ The refactor changes benchmark execution and model integration code. The existin
 
 | Area | Main code | Change and effect |
 | --- | --- | --- |
-| Execution and reporting | [`src/benchmark/`](src/benchmark/), [`src/workflows/vc.py`](src/workflows/vc.py) | Record individual samples, failures, metric coverage and run state; allow generation and scoring in separate runtimes. Completion and comparability are checked separately. |
-| Model adapters | [`src/adversary/`](src/adversary/), [`src/models/`](src/models/) | Migrate models to explicit sample requests, preserve original sample indices for seeds, reject invalid conditioning/audio, and release owned resources. Migration is model by model. |
-| Model workers | [`src/models/worker_protocol.py`](src/models/worker_protocol.py), [`scripts/`](scripts/) | Add bounded waits, request/response matching and process cleanup for migrated workers. |
-| Checkpoints and dependencies | [`src/benchmark/model_assets.py`](src/benchmark/model_assets.py), [`docs/hub_revisions.md`](docs/hub_revisions.md) | Bind supported assets to explicit paths or pinned revisions, record hashes, and add strict learned-state loading to selected integrations. |
-| Data and reproduction | [`src/datasets/`](src/datasets/), [`reproduction/`](reproduction/) | Preserve annotation variants in sample identity, validate source indices, and freeze subsets with input hashes. LibriTTS's two annotation exports remain distinct; they are not blindly deduplicated. |
-| Protection, scoring and timing | [`src/benchmark/`](src/benchmark/), [`docs/run_protocol.md`](docs/run_protocol.md) | Trace reference stages and scorer provenance, and declare timing scopes so incompatible runs are not silently compared. |
+| Execution and reporting | [`src/rvcbench/benchmark/`](src/rvcbench/benchmark/), [`src/rvcbench/workflows/vc.py`](src/rvcbench/workflows/vc.py) | Record individual samples, failures, metric coverage and run state; allow generation and scoring in separate runtimes. Completion and comparability are checked separately. |
+| Model adapters | [`src/rvcbench/adversary/`](src/rvcbench/adversary/), [`src/rvcbench/models/`](src/rvcbench/models/) | Migrate models to explicit sample requests, preserve original sample indices for seeds, reject invalid conditioning/audio, and release owned resources. Migration is model by model. |
+| Model workers | [`src/rvcbench/models/worker_protocol.py`](src/rvcbench/models/worker_protocol.py), [`scripts/`](scripts/) | Add bounded waits, request/response matching and process cleanup for migrated workers. |
+| Checkpoints and dependencies | [`src/rvcbench/benchmark/model_assets.py`](src/rvcbench/benchmark/model_assets.py), [`docs/hub_revisions.md`](docs/hub_revisions.md) | Bind supported assets to explicit paths or pinned revisions, record hashes, and add strict learned-state loading to selected integrations. |
+| Data and reproduction | [`src/rvcbench/datasets/`](src/rvcbench/datasets/), [`reproduction/`](reproduction/) | Preserve annotation variants in sample identity, validate source indices, and freeze subsets with input hashes. LibriTTS's two annotation exports remain distinct; they are not blindly deduplicated. |
+| Protection, scoring and timing | [`src/rvcbench/benchmark/`](src/rvcbench/benchmark/), [`docs/run_protocol.md`](docs/run_protocol.md) | Trace reference stages and scorer provenance, and declare timing scopes so incompatible runs are not silently compared. |
 
 **Behavior changes:** malformed inputs or incomplete checkpoints that previously fell back or were skipped may now fail explicitly. Model versions, seed policies and retry/conditioning variants must be recorded when comparing results across v1 and v2. Existing paper-result tables below remain historical reported results; they are not replaced by refactor subset scores. The v1 code snapshot alone does not guarantee reconstruction of historical weights or environments.
 
@@ -224,7 +224,7 @@ RVCBench currently includes **32 VC/TTS integration entries** (including separat
 
 `historical_results` means the existing release contains reported scores; it does
 not claim that every upstream version has been retested. Other integrations are
-`experimental_adapter`. See the [model catalog](src/benchmark/model_catalog.json)
+`experimental_adapter`. See the [model catalog](src/rvcbench/benchmark/model_catalog.json)
 for the machine-readable status. Fish S2 in-process remains experimental.
 
 ### Protection Methods
@@ -668,7 +668,7 @@ Training-oriented phoneme and alignment annotations (`prompt_phonemes`, `prompt_
 To rebuild canonical manifests from legacy per-speaker JSON files:
 
 ```bash
-python src/datasets/build_canonical_manifests.py --force
+python src/rvcbench/datasets/build_canonical_manifests.py --force
 ```
 
 Dataset selection and `speaker_id` filtering continue to work through `configs/dataset/` as before.
@@ -688,7 +688,8 @@ RVCBench/
 │   ├── model/                 # surrogate model configs for protection
 │   ├── ots_vc/                # zero-shot VC configs (clean / protected)
 │   └── denoise/               # denoiser configs
-├── src/
+├── src/rvcbench/              # the installable `rvcbench` package
+│   ├── benchmark/             # runner, run records, provenance and the `rvcbench` CLI
 │   ├── adversary/             # VC adversary wrappers
 │   ├── protection/            # protection algorithm implementations
 │   ├── datasets/              # dataset loaders and manifest utilities

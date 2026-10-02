@@ -115,7 +115,7 @@ Install `.[eval]` and the protection runtime dependencies before using the
 protection quickstart. These are separate from the minimal Qwen environment.
 
 The upstream helper in
-[`src/protection/safespeech/original_code/download_models.py`](../src/protection/safespeech/original_code/download_models.py)
+[`src/rvcbench/protection/safespeech/original_code/download_models.py`](../src/rvcbench/protection/safespeech/original_code/download_models.py)
 downloads:
 
 - `OedoSoldier/Bert-VITS2-2.3` base model files:
@@ -127,13 +127,13 @@ downloads:
 Install the SafeSpeech dependency stack expected by the upstream code:
 
 ```bash
-python -m pip install -r src/protection/safespeech/original_code/requirements.txt
+python -m pip install -r src/rvcbench/protection/safespeech/original_code/requirements.txt
 ```
 
 Then download the surrogate assets:
 
 ```bash
-python src/protection/safespeech/original_code/download_models.py
+python src/rvcbench/protection/safespeech/original_code/download_models.py
 ```
 
 Launch the SafeSpeech variant:

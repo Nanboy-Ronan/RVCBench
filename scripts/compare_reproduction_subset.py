@@ -4,8 +4,8 @@ import argparse
 from pathlib import Path
 import sys
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from src.benchmark.reproduction import compare
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
+from rvcbench.benchmark.reproduction import compare
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('run_dir', type=Path)

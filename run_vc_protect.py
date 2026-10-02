@@ -3,7 +3,12 @@ from dataclasses import replace
 from pathlib import Path
 from typing import Optional
 
-from src.utils.env import configure_offline_env
+import sys
+
+# Use this checkout's package even when it has not been (re)installed.
+sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
+
+from rvcbench.utils.env import configure_offline_env
 
 configure_offline_env(default=False)
 
@@ -12,10 +17,10 @@ import torch
 from hydra.utils import to_absolute_path
 from omegaconf import DictConfig, OmegaConf
 
-from src import datasets
-from src.workflows.vc import run_vc_workflow
-from src.utils.logger import log_config, setup_exp, setup_logger
-from src.utils.seeding import configure_seeds
+from rvcbench import datasets
+from rvcbench.workflows.vc import run_vc_workflow
+from rvcbench.utils.logger import log_config, setup_exp, setup_logger
+from rvcbench.utils.seeding import configure_seeds
 
 
 def _resolve_protected_audio_dir(conf: DictConfig, base_dir: Path) -> Optional[Path]:
