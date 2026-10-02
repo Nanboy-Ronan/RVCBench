@@ -6,9 +6,11 @@ equality alone (especially the legacy generic label) cannot authorize speed
 rankings. The request wall protocol below records its own boundary, hardware
 and framework profile and is checked independently of quality scores.
 """
+import hashlib
 import math
 import platform
 import os
+import re
 from pathlib import Path
 
 from .artifacts import SCHEMA_VERSION, digest, file_hash, input_fingerprint, load_run
@@ -72,7 +74,8 @@ def synchronize(device):
 def timing_profile(device, conf):
     import torch
     resolved = torch.device(device)
-    hardware = {'host': platform.node(), 'machine': platform.machine(),
+    # The host is recorded as a digest: equal machines still match, the name stays private.
+    hardware = {'host_sha256': hashlib.sha256(platform.node().encode()).hexdigest(), 'machine': platform.machine(),
                 'cpu_affinity': sorted(os.sched_getaffinity(0)) if hasattr(os, 'sched_getaffinity') else None}
     if resolved.type == 'cuda':
         props = torch.cuda.get_device_properties(resolved)
@@ -118,7 +121,8 @@ def _valid_profile(profile):
             ('cudnn_deterministic','cudnn_benchmark','matmul_allow_tf32')) and
         all(isinstance(framework.get(k),int) and not isinstance(framework[k],bool) and framework[k] > 0
             for k in ('cpu_threads','interop_threads')) and
-        isinstance(hardware,dict) and bool(hardware.get('host')) and bool(hardware.get('machine')) and
+        isinstance(hardware,dict) and isinstance(hardware.get('host_sha256'), str) and
+        bool(re.fullmatch(r'[0-9a-f]{64}', hardware['host_sha256'])) and bool(hardware.get('machine')) and
         (profile['device_type'] != 'cuda' or (isinstance(hardware.get('gpu'),dict) and
             set(hardware['gpu']) == {'name','total_memory','compute_capability'} and
             isinstance(hardware['gpu']['name'], str) and bool(hardware['gpu']['name']) and

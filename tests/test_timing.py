@@ -105,5 +105,26 @@ class TimingTests(unittest.TestCase):
         self.assertNotIn('**0.08**', readme)
 
 
+def test_request_timing_profile_records_a_host_digest_instead_of_the_name(monkeypatch):
+    import json
+    import platform
+    from omegaconf import OmegaConf
+    from src.benchmark.artifacts import digest
+    from src.benchmark.timing import _valid_profile, timing_profile
+
+    monkeypatch.setattr(platform, 'node', lambda: 'private-node-name')
+    conf = OmegaConf.create({'adversary': {}})
+    profile = timing_profile('cpu', conf)
+    assert 'private-node-name' not in json.dumps(profile)
+    assert 'host' not in profile['hardware']
+    assert _valid_profile(profile)
+    monkeypatch.setattr(platform, 'node', lambda: 'another-node')
+    assert timing_profile('cpu', conf)['fingerprint'] != profile['fingerprint']
+    named = json.loads(json.dumps(profile))
+    named['hardware']['host_sha256'] = 'private-node-name'
+    named['fingerprint'] = digest({k: v for k, v in named.items() if k != 'fingerprint'})
+    assert not _valid_profile(named)
+
+
 if __name__ == '__main__':
     unittest.main()
