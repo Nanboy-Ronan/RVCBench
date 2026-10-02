@@ -1,6 +1,7 @@
 import json
 from dataclasses import replace
 from pathlib import Path
+from typing import Optional
 
 from src.utils.env import configure_offline_env
 
@@ -17,7 +18,7 @@ from src.utils.logger import log_config, setup_exp, setup_logger
 from src.utils.seeding import configure_seeds
 
 
-def _resolve_protected_audio_dir(conf: DictConfig) -> Path:
+def _resolve_protected_audio_dir(conf: DictConfig, base_dir: Path) -> Optional[Path]:
     """
     Resolve the protected audio directory from a few likely config keys.
     Preference order: protected_audio_dir (top-level), vc.protected_audio_dir,
@@ -25,10 +26,26 @@ def _resolve_protected_audio_dir(conf: DictConfig) -> Path:
     """
     candidates = [
         OmegaConf.select(conf, "protected_audio_dir", default=None),
+        OmegaConf.select(conf, "vc.protected_audio_dir", default=None),
+        OmegaConf.select(conf, "vc.evaluation.protected_audio_dir", default=None),
     ]
     for value in candidates:
         if value:
             return Path(to_absolute_path(str(value))).expanduser().resolve()
+    source_run_name = OmegaConf.select(conf, "protection_run_name", default=None)
+    if not source_run_name:
+        return None
+
+    relative_subdir = str(
+        OmegaConf.select(conf, "protected_audio_subdir", default="protected_audio")
+    )
+    run_root = (base_dir / "results" / str(source_run_name)).resolve()
+    run_dirs = [path for path in run_root.glob("*") if path.is_dir()]
+    run_dirs.sort(key=lambda path: path.stat().st_mtime, reverse=True)
+    for run_dir in run_dirs:
+        candidate = run_dir / relative_subdir
+        if candidate.is_dir():
+            return candidate.resolve()
     return None
 
 
@@ -80,12 +97,11 @@ def main(conf: DictConfig):
     base_dir = Path(to_absolute_path(conf.base_dir))
     device = torch.device(conf.device if torch.cuda.is_available() else "cpu")
 
-    protected_audio_dir = _resolve_protected_audio_dir(conf)
+    protected_audio_dir = _resolve_protected_audio_dir(conf, base_dir)
     if protected_audio_dir is None:
         raise ValueError(
-            "protected_audio_dir is required. "
-            "Set it via `protected_audio_dir=...`, `vc.protected_audio_dir=...`, "
-            "or `vc.evaluation.protected_audio_dir=...`."
+            "Protected audio could not be resolved. Set protected_audio_dir explicitly "
+            "or configure protection_run_name after producing a protection run."
         )
     if not protected_audio_dir.exists():
         raise FileNotFoundError(f"Protected audio directory not found: {protected_audio_dir}")

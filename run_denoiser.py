@@ -11,7 +11,6 @@ import torch.nn.functional as F
 from hydra.utils import to_absolute_path
 from omegaconf import DictConfig, OmegaConf
 
-from denoiser import pretrained
 from src.datasets.audio_only import SimpleAllSpeakerData
 from src.evaluation import fidelity
 from src.utils.logger import log_config, setup_exp, setup_logger
@@ -50,6 +49,14 @@ def _merge_dataset_config(denoiser_conf: DictConfig, dataset_conf: DictConfig) -
 
 
 def _load_denoiser_model(denoiser_conf: DictConfig, device: torch.device):
+    try:
+        from denoiser import pretrained
+    except ImportError as exc:
+        raise ImportError(
+            "The optional 'denoiser' package is required for enhancement runs. "
+            "Install the repository requirements or use denoiser.evaluate_only=true."
+        ) from exc
+
     model_name = str(_safe_get(denoiser_conf, "model", default="dns64")).lower()
     model_path = _safe_get(denoiser_conf, "model_path", default=None)
 
@@ -204,10 +211,43 @@ def _resolve_existing_dir(denoiser_conf: DictConfig) -> Optional[Path]:
     return resolved
 
 
+def _resolve_input_dataset_root(conf: DictConfig, base_dir: Path) -> Path:
+    """Resolve an explicit input root or the latest protection run output."""
+    configured_root = OmegaConf.select(conf, "dataset.root_path", default=None)
+    if configured_root:
+        resolved = Path(to_absolute_path(str(configured_root))).expanduser().resolve()
+        if not resolved.exists():
+            raise FileNotFoundError(f"Configured denoiser dataset root not found: {resolved}")
+        return resolved
+
+    source_run_name = OmegaConf.select(conf, "source_run_name", default=None)
+    if not source_run_name:
+        raise ValueError(
+            "A denoiser input is required. Set dataset.root_path explicitly or "
+            "configure source_run_name."
+        )
+
+    run_root = (base_dir / "results" / str(source_run_name)).resolve()
+    candidates = [
+        path
+        for path in run_root.glob("*")
+        if path.is_dir() and (path / "protected_audio").is_dir()
+    ]
+    if not candidates:
+        raise FileNotFoundError(
+            f"No protection outputs found under {run_root}. Run '{source_run_name}' "
+            "first or override dataset.root_path."
+        )
+    return max(candidates, key=lambda path: path.stat().st_mtime)
+
+
 @hydra.main(version_base="1.3", config_path="configs", config_name=None)
 def main(conf: DictConfig):
     base_dir = Path(to_absolute_path(conf.base_dir))
     device = torch.device(conf.device if torch.cuda.is_available() else "cpu")
+
+    input_dataset_root = _resolve_input_dataset_root(conf, base_dir)
+    conf.dataset.root_path = str(input_dataset_root)
 
     denoiser_conf = _safe_get(conf, "denoiser")
     if denoiser_conf is None:
