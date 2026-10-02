@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib
 import json
+import math
 import subprocess
 import sys
 import tempfile
@@ -16,6 +17,7 @@ import soundfile as sf
 import torch
 
 from src.models.model import BaseModel
+from .assets import model_files, vocoder_files
 
 
 @dataclass
@@ -42,6 +44,7 @@ class ZipVoiceGeneratorConfig:
     runtime_python: Optional[Path] = None
     worker_script_path: Optional[Path] = None
     execution_backend: str = 'auto'
+    request_timeout_sec: float = 900.0
 
 
 class ZipVoiceGenerator(BaseModel):
@@ -85,12 +88,19 @@ class ZipVoiceGenerator(BaseModel):
         if (self.execution_backend == 'native' and materialised.runtime_python and
                 materialised.runtime_python.absolute() != Path(sys.executable).absolute()):
             raise ValueError('Native ZipVoice must run in the current interpreter; use execution_backend=cli for runtime_python')
+        timeout = materialised.request_timeout_sec
+        if isinstance(timeout, bool) or not isinstance(timeout, (int, float)) or not math.isfinite(timeout) or timeout <= 0:
+            raise ValueError("ZipVoice request_timeout_sec must be finite and positive")
         self._previous_num_threads = None
         self.sample_rate: int = 24000
         self.vocoder = None
         self._validate_paths()
 
     def load_model(self) -> None:
+        if self.config.model_dir is not None:
+            model_files(self.config.model_dir, self.config.checkpoint_name)
+        if self.config.vocoder_path is not None:
+            vocoder_files(self.config.vocoder_path)
         if self.execution_backend == 'cli':
             result = subprocess.run([str(self.config.runtime_python or sys.executable), '-c',
                                      'import zipvoice.bin.infer_zipvoice'], cwd=self.config.code_path,
@@ -227,8 +237,7 @@ class ZipVoiceGenerator(BaseModel):
                         feat_scale=self.config.feat_scale, speed=self.config.speed, t_shift=self.config.t_shift,
                         target_rms=self.config.target_rms, sampling_rate=self.sample_rate,
                         max_duration=self.config.max_duration, remove_long_sil=self.config.remove_long_sil)
-                waveform, sample_rate = sf.read(str(output_path), dtype='float32')
-                return np.asarray(waveform, dtype=np.float32).reshape(-1), int(sample_rate)
+                return self._read_output(output_path)
             finally:
                 output_path.unlink(missing_ok=True)
 
@@ -288,22 +297,26 @@ class ZipVoiceGenerator(BaseModel):
                 stderr=subprocess.PIPE,
                 text=True,
                 check=False,
+                timeout=self.config.request_timeout_sec,
             )
             if result.returncode != 0:
                 detail = result.stderr.strip() or result.stdout.strip() or "unknown ZipVoice CLI error"
                 raise RuntimeError(detail)
 
-            waveform, sample_rate = sf.read(str(output_path), dtype="float32", always_2d=False)
+            return self._read_output(output_path, clip=True)
         finally:
             try:
                 output_path.unlink(missing_ok=True)
             except Exception:
                 pass
 
-        audio = np.asarray(waveform, dtype=np.float32).reshape(-1)
-        audio = np.nan_to_num(audio, nan=0.0, posinf=0.0, neginf=0.0)
-        audio = np.clip(audio, -1.0, 1.0)
-        return audio, int(sample_rate)
+    @staticmethod
+    def _read_output(path, *, clip=False):
+        waveform, sample_rate = sf.read(str(path), dtype='float32', always_2d=False)
+        audio = np.asarray(waveform, dtype=np.float32)
+        if audio.ndim != 1 or not audio.size or not np.isfinite(audio).all():
+            raise ValueError("ZipVoice output must be nonempty finite mono audio")
+        return np.clip(audio, -1.0, 1.0) if clip else audio, int(sample_rate)
 
     def _validate_paths(self) -> None:
         if not self.config.code_path.exists():

@@ -14,6 +14,10 @@ output_paths:
 adversary:
   code_path: "checkpoints/ZipVoice"
   model_dir: null
+  revision: null
+  vocoder_revision: null
+  local_files_only: false
+  hf_cache_dir: null
   model_name: zipvoice
   # Tokenizer follows the pretrained checkpoint, not the evaluation corpus.
   tokenizer: emilia
@@ -30,6 +34,7 @@ adversary:
   max_duration: 100.0
   remove_long_sil: false
   num_thread: 1
+  request_timeout_sec: 900.0
   seed: null
   max_samples: null
   default_prompt_text: "Here is a sample of the desired voice."

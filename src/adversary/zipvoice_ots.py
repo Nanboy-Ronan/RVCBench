@@ -6,6 +6,7 @@ from pathlib import Path
 import time
 from typing import Optional
 
+import numpy as np
 import soundfile as sf
 from hydra.utils import to_absolute_path
 
@@ -97,7 +98,8 @@ class ZipVoiceZeroShotAdversary(BaseAdversary):
             remove_long_sil=self.remove_long_sil,
             trt_engine_path=self.trt_engine_path,
             num_thread=self.num_thread,
-            seed=(int(self.seed) if self.seed is not None else None),
+            seed=self.seed,
+            request_timeout_sec=self.config.get("request_timeout_sec", 900.0),
             runtime_python=self.runtime_python,
             execution_backend=str(self.config.get('execution_backend', 'auto')),
         )
@@ -111,98 +113,49 @@ class ZipVoiceZeroShotAdversary(BaseAdversary):
             return str(candidate)
         return self.default_lang
 
+    def generate_sample(self, sample, *, output_dir):
+        """Generate one explicit sample with its original source index."""
+        self._ensure_generator()
+        reference_path = self._resolve_prompt_path(sample)
+        if reference_path is None:
+            raise FileNotFoundError(f"Missing ZipVoice reference: {sample.prompt_path}")
+        target_text = (sample.target_text or "").strip()
+        prompt_text = (sample.prompt_text or "").strip()
+        if not target_text:
+            target_text = prompt_text
+        if not target_text:
+            raise ValueError("ZipVoice sample has no target or prompt text")
+        if not prompt_text:
+            prompt_text = self.default_prompt_text
+        self._log_clone_request(self.MODEL_NAME, 0, 1, str(sample.speaker_id),
+                                reference_path, target_text, prompt_transcript=prompt_text)
+        started = time.perf_counter()
+        waveform, sample_rate = self._generator.generate(
+            text=target_text, prompt_wav=reference_path, prompt_text=prompt_text,
+            lang=self._select_language(sample), sample_index=sample.index)
+        elapsed = time.perf_counter() - started
+        waveform = np.asarray(waveform, dtype=np.float32)
+        if waveform.ndim != 1 or not waveform.size or not np.isfinite(waveform).all():
+            raise ValueError("ZipVoice output must be nonempty finite mono audio")
+        path = self._speaker_output_dir(Path(output_dir).resolve(), str(sample.speaker_id)) / self._cloned_filename(sample, sample.index)
+        sf.write(str(path), waveform, sample_rate)
+        return path, elapsed
+
     def attack(self, *, output_path, dataset, protected_audio_path=None):
         del protected_audio_path
-
         self._ensure_generator()
-        assert self._generator is not None
-
         output_dir = Path(output_path).resolve()
         output_dir.mkdir(parents=True, exist_ok=True)
         self._init_synthesis_timings(output_dir)
-
-        max_samples = None
-        if self.max_samples is not None:
-            try:
-                max_samples = int(self.max_samples)
-            except (TypeError, ValueError):
-                if self.logger:
-                    self.logger.warning(
-                        "[%s] Invalid max_samples '%s'; processing full dataset.",
-                        self.MODEL_NAME,
-                        self.max_samples,
-                    )
-
-        samples = dataset.get_zero_shot_samples(max_samples=max_samples)
+        samples = dataset.get_zero_shot_samples(max_samples=self.max_samples)
         if not samples:
             raise RuntimeError(f"No zero-shot samples available for {self.MODEL_NAME} adversary.")
-
-        prompt_count = self._count_available_prompts(samples)
-        self._log_attack_plan(self.MODEL_NAME, samples, prompt_count)
-
-        completed = 0
-        for idx, sample in enumerate(samples):
-            reference_path = self._resolve_prompt_path(sample)
-            if reference_path is None:
-                self.logger.warning(
-                    "[%s] Sample %d missing prompt audio; skipping.",
-                    self.MODEL_NAME,
-                    idx,
-                )
-                continue
-
-            target_text = (sample.target_text or "").strip()
-            prompt_text = (sample.prompt_text or "").strip()
-            if not target_text:
-                target_text = prompt_text
-            if not target_text:
-                self.logger.warning(
-                    "[%s] Sample %d has no target text; skipping.",
-                    self.MODEL_NAME,
-                    idx,
-                )
-                continue
-            if not prompt_text:
-                prompt_text = self.default_prompt_text
-
-            speaker_id = str(sample.speaker_id)
-            speaker_dir = self._speaker_output_dir(output_dir, speaker_id)
-
-            self._log_clone_request(
-                self.MODEL_NAME,
-                idx,
-                len(samples),
-                speaker_id,
-                reference_path,
-                target_text,
-                prompt_transcript=prompt_text,
-            )
-
-            try:
-                synth_start = time.perf_counter()
-                waveform, sample_rate = self._generator.generate(
-                    text=target_text,
-                    prompt_wav=reference_path,
-                    prompt_text=prompt_text,
-                    lang=self._select_language(sample),
-                    sample_index=sample.index,
-                )
-                synth_elapsed = time.perf_counter() - synth_start
-            except Exception as exc:
-                self.logger.error(
-                    "[%s] Generation failed for sample %d (%s): %s",
-                    self.MODEL_NAME,
-                    idx,
-                    speaker_id,
-                    exc,
-                )
-                continue
-
-            output_name = self._cloned_filename(sample, idx)
-            output_wav_path = speaker_dir / output_name
-            sf.write(str(output_wav_path), waveform, sample_rate)
-            self._record_synthesis_timing(output_wav_path, synth_elapsed)
-            completed += 1
-
-        self._flush_synthesis_timings()
-        self.logger.info("[%s] Generated %d/%d utterances.", self.MODEL_NAME, completed, len(samples))
+        self._log_attack_plan(self.MODEL_NAME, samples, self._count_available_prompts(samples))
+        try:
+            for sample in samples:
+                path, elapsed = self.generate_sample(sample, output_dir=output_dir)
+                self._record_synthesis_timing(path, elapsed)
+        finally:
+            self._flush_synthesis_timings()
+        if self.logger:
+            self.logger.info("[%s] Generated %d/%d utterances.", self.MODEL_NAME, len(samples), len(samples))
