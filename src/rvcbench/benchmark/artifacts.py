@@ -83,6 +83,9 @@ def package_parent(root):
 
 def provenance(root):
     def git(*args):
+        # An installed package may sit inside an unrelated repository; only a checkout has a commit.
+        if not (Path(root) / '.git').exists():
+            return None
         result = subprocess.run(['git', '-C', str(root), *args], capture_output=True, text=True)
         return result.stdout.strip() if result.returncode == 0 else None
     packages = {}
@@ -100,7 +103,8 @@ def provenance(root):
             hardware['gpus'].append({'visible_index': index, 'name': props.name,
                                     'total_memory': props.total_memory,
                                     'compute_capability': [props.major, props.minor]})
-    return {'git_commit': git('rev-parse', 'HEAD'), 'git_dirty': bool(git('status', '--porcelain')),
+    commit, status = git('rev-parse', 'HEAD'), git('status', '--porcelain')
+    return {'git_commit': commit, 'git_dirty': None if status is None else bool(status),
             'source_sha256': digest({str(p.relative_to(root)): file_hash(p) for p in sorted((package_parent(root) / 'rvcbench').rglob('*.py'))}),
             'python': platform.python_version(), 'platform': platform.platform(), 'packages': packages,
             'hardware': hardware}

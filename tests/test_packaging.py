@@ -67,6 +67,8 @@ def test_package_data_patterns_cover_every_tracked_data_file():
 def test_checkout_layout_is_detected():
     assert artifacts.runtime_root() == ROOT
     assert artifacts.package_parent(ROOT) == ROOT / 'src'
+    if (ROOT / '.git').exists():
+        assert artifacts.provenance(ROOT)['git_commit']
 
 
 def test_installed_layout_records_package_relative_sources(tmp_path):
@@ -85,6 +87,8 @@ def test_installed_layout_records_package_relative_sources(tmp_path):
             patch('importlib.metadata.requires', return_value=[]):
         runtime = generation_runtime(site, conf, {'numpy': '1.26.4'})
     assert sorted(runtime['source_files']) == ['rvcbench/adversary/fixture.py', 'rvcbench/benchmark/runner.py']
-    hashed = artifacts.provenance(site)['source_sha256']
+    recorded = artifacts.provenance(site)
+    assert recorded['git_commit'] is None and recorded['git_dirty'] is None
+    hashed = recorded['source_sha256']
     (site / 'rvcbench/benchmark/runner.py').write_text('VERSION = 2\n')
     assert artifacts.provenance(site)['source_sha256'] != hashed
