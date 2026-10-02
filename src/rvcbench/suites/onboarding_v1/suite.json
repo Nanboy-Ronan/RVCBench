@@ -1,0 +1,23 @@
+{
+  "suite": "onboarding-v1",
+  "version": 1,
+  "leaderboard": false,
+  "label": "Onboarding preview for the submission workflow. Scores on this suite are not RVCBench benchmark results.",
+  "hf_dataset_id": "Nanboy/RVCBench",
+  "hf_revision": "be01b27c45d921f121a0edf86da0fd96b069b169",
+  "evaluation": {
+    "required_metrics": ["mcd", "wer", "sim"],
+    "wer_normalization": "ascii_punctuation_removed_v2",
+    "generated_audio_max_seconds": null,
+    "seed": 42,
+    "bootstrap": {"enabled": true, "num_samples": 1000, "confidence_level": 0.95, "seed": null}
+  },
+  "tasks": [
+    {"task": "libritts", "dataset_config": "libritts", "hf_config_name": "Libritts",
+     "manifest": "libritts16_v1.metadata.json", "selection": "libritts16_v1.selection.json"},
+    {"task": "vctk", "dataset_config": "vctk", "hf_config_name": "VCTK",
+     "manifest": "vctk16_v1.metadata.json", "selection": "vctk16_v1.selection.json"},
+    {"task": "robotcall", "dataset_config": "robotcall", "hf_config_name": "robotcall",
+     "manifest": "robotcall20_v1.metadata.json", "selection": "robotcall20_v1.selection.json"}
+  ]
+}

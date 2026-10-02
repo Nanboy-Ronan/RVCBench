@@ -1,13 +1,46 @@
 # Evaluate your own model
 
-There are two ways to run a voice cloning model through RVCBench.
+There are three ways to evaluate a voice cloning model with RVCBench.
 
 | Route | Use it when | You change |
 | --- | --- | --- |
-| [External adapter](#route-1-external-adapter) | You want scores for your own model | One Python file of your own |
+| [Score your own outputs](#route-0-score-audio-you-generated-anywhere) | You can run the model yourself, or only through an API | Nothing; you generate WAV files |
+| [External adapter](#route-1-external-adapter) | You want RVCBench to drive generation | One Python file of your own |
 | [Built-in integration](#route-2-built-in-integration) | You want the model listed in this repository | The package, via a pull request |
 
-Both routes use the same runner, run records and metrics.
+All routes use the same inputs, run records and metrics.
+
+## Route 0: score audio you generated anywhere
+
+Your model runs in its own environment, with your own code. RVCBench only needs the
+resulting WAV files.
+
+```bash
+python -m pip install 'rvcbench[eval] @ git+https://github.com/Nanboy-Ronan/RVCBench@v2'
+rvcbench prompts --suite onboarding-v1 --output prompts/
+```
+
+`prompts/prompts.jsonl` has one line per utterance:
+
+```json
+{"task": "libritts", "pair_id": "LibriTTS-121-000039", "speaker_id": "121",
+ "reference_audio": "references/libritts/LibriTTS-121-000039.wav", "reference_text": "He had for his own town residence ...",
+ "text": "'You'll receive the packet Thursday morning?' I inquired.", "language": "EN",
+ "output_file": "libritts/LibriTTS-121-000039.wav"}
+```
+
+Synthesize each `text` in the voice of `reference_audio` and save a mono WAV at
+`<your directory>/<output_file>`. Then score:
+
+```bash
+rvcbench score --suite onboarding-v1 --generated my_outputs/ --model my-model --output results/my-model/ --device cuda
+```
+
+- `results/my-model/submission.json` holds the per-task metric means, coverage, the hash of every scored file and the suite version. Each task also gets a full run directory, so `rvcbench status` and `rvcbench report` work on `results/my-model/<task>/`.
+- A missing or invalid file fails that sample, and a task with a failed sample is `partial`. A file identical to the dataset's target recording is rejected.
+- The suite pins the dataset revision and the hash of every input. Both commands download only the files the suite uses, and refuse to run if any input differs from the frozen suite. Pass `--data-root` to use a local copy laid out like the Hub dataset.
+- Target recordings are never exported; they are read only while scoring.
+- `onboarding-v1` is a preview built from the frozen validation subsets (LibriTTS, VCTK, Robotcall; 52 utterances). It checks the workflow; its scores are not RVCBench benchmark results.
 
 ## Route 1: external adapter
 

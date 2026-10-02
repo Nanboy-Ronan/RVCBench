@@ -32,6 +32,17 @@ def main():
     doctor.add_argument('--model', choices=['qwen3', 'qwen3_omni', 'sparktts'], default=None)
     doctor.add_argument('--eval', action='store_true')
     doctor.add_argument('--imports', action='store_true', help='Also import dependencies in an isolated subprocess to detect binary/version conflicts')
+    prompts = commands.add_parser('prompts', help='Export the reference audio and texts of a benchmark suite')
+    prompts.add_argument('--suite', default='onboarding-v1')
+    prompts.add_argument('--output', type=Path, required=True)
+    prompts.add_argument('--data-root', type=Path, help='Local dataset copy laid out like the Hub dataset (default: download)')
+    score = commands.add_parser('score', help='Score audio you generated for a suite and write submission.json')
+    score.add_argument('--suite', default='onboarding-v1')
+    score.add_argument('--generated', type=Path, required=True, help='Directory with <task>/<pair_id>.wav files')
+    score.add_argument('--model', required=True, help='Model name recorded in the results')
+    score.add_argument('--output', type=Path, required=True)
+    score.add_argument('--device', default='cpu')
+    score.add_argument('--data-root', type=Path, help='Local dataset copy laid out like the Hub dataset (default: download)')
     status = commands.add_parser('status', help='Show run status and recovered sample coverage')
     status.add_argument('run_dir', type=Path)
     audit = commands.add_parser('audit-source', help='Compare recorded generation source hashes with local files')
@@ -77,6 +88,24 @@ def main():
     timing.add_argument('right', type=Path)
     timing.add_argument('--output', type=Path)
     args = parser.parse_args()
+    if args.command in ('prompts', 'score'):
+        from .submission import export_prompts, score_submission
+        logging.basicConfig(level=logging.INFO, format='%(levelname)s %(message)s')
+        if args.command == 'prompts':
+            result = export_prompts(args.suite, args.output, data_root=args.data_root)
+            print(json.dumps(result, indent=2))
+            print(f"Generate each line of {args.output / 'prompts.jsonl'} and save it at its output_file.")
+            return
+        result = score_submission(args.suite, args.generated, args.output, model=args.model,
+                                  device=args.device, data_root=args.data_root)
+        print(json.dumps({'suite': result['suite'], 'model': result['model'], 'status': result['status'],
+                          'tasks': {name: {'status': task['status'], 'means': task.get('means'),
+                                           'failed': len(task['failures'])}
+                                    for name, task in result['tasks'].items()}}, indent=2))
+        if not result['leaderboard']:
+            print(f"Note: {result['label']}")
+        print(f"Wrote {args.output / 'submission.json'}")
+        raise SystemExit(result['status'] != 'complete')
     if args.command == 'audit-source':
         from .source_audit import audit_recorded_sources
         from .artifacts import atomic_json

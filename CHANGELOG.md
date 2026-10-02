@@ -8,6 +8,7 @@ Notable changes to the RVCBench codebase. Paper results are not affected by entr
 
 - Installable `rvcbench` package under `src/rvcbench/`, with Hydra configs shipped inside the package.
 - Commands `rvcbench run`, `run-protected`, `protect` and `denoise`, next to `doctor`, `smoke`, `status`, `report`, `audit-source`, `compare-check` and `compare-timing`.
+- `rvcbench prompts` and `rvcbench score`: export a versioned suite's references and texts, then score audio generated anywhere into `submission.json`. The `onboarding-v1` preview suite ships with the package.
 - External adapters: `vc.adapter=package.module:ClassName` and the `rvcbench.VoiceCloningAdapter` base class evaluate a model without changing the package.
 - Per-sample run records with input and output hashes, seeds, failures, metric coverage and source provenance; resume and retry.
 - Direct per-sample backends with request seed validation for Qwen3-TTS, F5-TTS, XTTS, ZipVoice, SparkTTS, CosyVoice, OpenVoice, StyleTTS2, Bark, FireRedTTS2, VoxCPM, IndexTTS and MaskGCT.

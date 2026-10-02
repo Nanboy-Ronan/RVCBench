@@ -769,8 +769,9 @@ Contributions are welcome. Areas of particular interest include:
 - Dataset adapters and additional evaluation metrics
 - Reproducibility and documentation improvements
 
-To score your own model, see [Evaluate your own model](docs/adding_a_model.md): an adapter in one
-Python file runs through the benchmark without changing this repository. Development setup,
+To score your own model, see [Evaluate your own model](docs/adding_a_model.md): export the prompts with
+`rvcbench prompts`, generate with your own code, and score the files with `rvcbench score`; or write an
+adapter in one Python file. Neither requires changing this repository. Development setup,
 checks and rules are in [CONTRIBUTING.md](CONTRIBUTING.md); changes are listed in
 [CHANGELOG.md](CHANGELOG.md).
 
