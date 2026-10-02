@@ -11,9 +11,8 @@ Produces two outputs from the same template.html + data.py:
 
   docs/site-src/artifact.html
       A content-only fragment (no <!DOCTYPE>/<html>/<head>/<body>) with
-      fonts and logo inlined as base64 data URIs, for publishing to a
-      Claude Artifact (which requires a single self-contained file and
-      injects its own document shell).
+      fonts and logo inlined as base64 data URIs, for hosts that require
+      a single self-contained file and inject their own document shell.
 
 Usage:
     python3 docs/site-src/build.py
