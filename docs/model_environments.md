@@ -101,3 +101,21 @@ For models requiring a different Torch version, generate with `+vc.generate_only
 in that model's environment and evaluate in a separate environment containing
 `.[eval]`. The Qwen and evaluation extras pin a matched Torch/Torchaudio 2.6 pair;
 other model base templates do not install the evaluation stack automatically.
+
+Generation provenance records statically discovered `unmapped_imports` separately
+from distribution versions. These names may be authored upstream namespaces,
+missing modules or packages without distribution metadata. The inventory
+includes literal `__import__()` and `import_module()` calls; it does not resolve
+nonliteral imports or certify a complete environment lock.
+
+For SparkTTS, run `rvcbench doctor --model sparktts --imports` in the chosen
+runtime before generation. It checks the main native dependencies, including
+`einx`, without loading weights. Dependency availability does not validate the
+upstream source tree, checkpoint compatibility, CUDA or full model inference.
+
+OpenVoice's converter-only CPU check uses native configuration and weights, but
+its full audio API also needs a compatible NumPy/Numba/Librosa combination.
+Import the audio stack in the intended runtime before loading checkpoints.
+Read-only environment installations may require `NUMBA_CACHE_DIR` pointing to a
+writable local directory. This addresses cache placement; it does not repair
+NumPy/Numba version incompatibility or establish a clean OpenVoice/Melo lock.

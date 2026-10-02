@@ -223,6 +223,17 @@ logs/
 /outputs/
 /docs/*
 !/docs/model_environments.md
+!/docs/index.html
+!/docs/README.md
+!/docs/robots.txt
+!/docs/sitemap.xml
+!/docs/llms.txt
+!/docs/assets/
+!/docs/assets/**
+!/docs/site-src/
+!/docs/site-src/**
+/docs/site-src/artifact.html
+/docs/site-src/__pycache__/
 wav2vec2_checkpoints/
 .cache/
 .idea/

@@ -12,7 +12,7 @@
 
 **News:** RVCBench has been accepted to **NeurIPS 2026**!
 
-**RVCBench** is the first large-scale benchmark for **voice cloning robustness**, **voice clone evaluation**, **speaker privacy**, and **audio deepfake protection** — covering **32 TTS/VC integration entries**, **10 datasets**, and **5 audio protection methods**.
+**RVCBench** is the first large-scale benchmark for **voice cloning robustness**, **voice clone evaluation**, **speaker privacy**, and **audio deepfake protection** — covering **32 TTS/VC integration entries** (27 validated on a fixed subset, 5 experimental), **10 datasets**, and **5 audio protection methods**.
 
 RVCBench provides a unified, reproducible pipeline covering the full attack-defense cycle: source-audio protection, zero-shot or fine-tuning voice cloning, optional denoising, and evaluation of speaker similarity, intelligibility, perceptual quality, and runtime.
 
@@ -23,7 +23,44 @@ At a glance, this release supports **32 VC/TTS integration entries**, **5 audio 
 
 **Canonical resources:** [website](https://nanboy-ronan.github.io/RVCBench/) · [paper](https://arxiv.org/abs/2602.00443) · [Hugging Face dataset](https://huggingface.co/datasets/Nanboy/RVCBench) · [interactive demo](https://huggingface.co/spaces/Nanboy/RVCBench) · [quickstart notebooks](notebooks/) · [model environments](docs/model_environments.md) · [citation](#citation)
 
-**Contents:** [Results](#benchmark-results) · [Models](#supported-models) · [Getting Started](#getting-started) · [Quickstart](#quickstart-path) · [Full Pipeline](#full-benchmark-path) · [Data & Checkpoints](#data--checkpoints) · [Citation](#citation)
+**Contents:** [v1 / v2](#codebase-versions-v1-and-v2) · [Results](#benchmark-results) · [Models](#supported-models) · [Getting Started](#getting-started) · [Quickstart](#quickstart-path) · [Full Pipeline](#full-benchmark-path) · [Data & Checkpoints](#data--checkpoints) · [Citation](#citation)
+
+## Codebase versions: v1 and v2
+
+**v1 is the preserved codebase before the architecture refactor. v2 is the current refactor, still under development.** These names describe repository versions and are independent of the paper's arXiv version numbers.
+
+| Version | Source | Intended use |
+| --- | --- | --- |
+| **v1 — before refactor** | [`main`](https://github.com/Nanboy-Ronan/RVCBench/tree/main), at [`7c5bdbd`](https://github.com/Nanboy-Ronan/RVCBench/tree/7c5bdbd57f8972d179e5b4b609fe828af667fd64) (September 30, 2026) | Inspect or run the original architecture and configurations. This snapshot includes the NeurIPS acceptance announcement, before the first architecture refactor. |
+| **v2 — current development** | Branch [`v2`](https://github.com/Nanboy-Ronan/RVCBench/tree/v2) | Use the evolving benchmark runner with explicit sample records and validation. Migration is incomplete; v2 has no finalized release tag or immutable release commit yet. |
+
+To obtain each version in a separate directory:
+
+```bash
+git clone https://github.com/Nanboy-Ronan/RVCBench.git RVCBench-v1
+git clone --branch v2 https://github.com/Nanboy-Ronan/RVCBench.git RVCBench-v2
+```
+
+### What changed in v2
+
+The refactor changes benchmark execution and model integration code. The existing Hydra entrypoints and model-specific configurations remain the user-facing entrypoints.
+
+| Area | Main code | Change and effect |
+| --- | --- | --- |
+| Execution and reporting | [`src/benchmark/`](src/benchmark/), [`src/workflows/vc.py`](src/workflows/vc.py) | Record individual samples, failures, metric coverage and run state; allow generation and scoring in separate runtimes. Completion and comparability are checked separately. |
+| Model adapters | [`src/adversary/`](src/adversary/), [`src/models/`](src/models/) | Migrate models to explicit sample requests, preserve original sample indices for seeds, reject invalid conditioning/audio, and release owned resources. Migration is model by model. |
+| Model workers | [`src/models/worker_protocol.py`](src/models/worker_protocol.py), [`scripts/`](scripts/) | Add bounded waits, request/response matching and process cleanup for migrated workers. |
+| Checkpoints and dependencies | [`src/benchmark/model_assets.py`](src/benchmark/model_assets.py), [`docs/hub_revisions.md`](docs/hub_revisions.md) | Bind supported assets to explicit paths or pinned revisions, record hashes, and add strict learned-state loading to selected integrations. |
+| Data and reproduction | [`src/datasets/`](src/datasets/), [`reproduction/`](reproduction/) | Preserve annotation variants in sample identity, validate source indices, and freeze subsets with input hashes. LibriTTS's two annotation exports remain distinct; they are not blindly deduplicated. |
+| Protection, scoring and timing | [`src/benchmark/`](src/benchmark/), [`docs/run_protocol.md`](docs/run_protocol.md) | Trace reference stages and scorer provenance, and declare timing scopes so incompatible runs are not silently compared. |
+
+**Behavior changes:** malformed inputs or incomplete checkpoints that previously fell back or were skipped may now fail explicitly. Model versions, seed policies and retry/conditioning variants must be recorded when comparing results across v1 and v2. Existing paper-result tables below remain historical reported results; they are not replaced by refactor subset scores. The v1 code snapshot alone does not guarantee reconstruction of historical weights or environments.
+
+### v2 validation status
+
+Real fixed-subset generation and core scoring have been recorded for **27 of 32 integrations**, including the paper's 18 models. These campaigns span different stages of the refactor and do **not** establish reproduction on the final combined source. The explicit request backend currently covers **13 integrations**; other integrations still use compatibility paths. OpenVoice and StyleTTS2 have also passed two fresh CPU generations with identical WAV bytes and complete core scoring; FireRedTTS2 has completed a named short10/retry20 CPU variant.
+
+Remaining work includes migration and native revalidation of other adapters, five integrations with missing assets or unverified protocols, complete environment locks, protection/auxiliary-metric validation, and controlled timing campaigns. Full paper-table equivalence is not established. See [validation coverage](docs/validation.md), the [reproduction plan](reproduction/plan.json), and the [run guide](docs/run_protocol.md) before choosing a model. Local tests, debug runs and generated experiment artifacts are excluded from the public refactor deliverable.
 
 ![RVCBench main figure](figs/main.png)
 

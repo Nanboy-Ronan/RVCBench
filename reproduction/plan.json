@@ -49,7 +49,10 @@
       "scoring_status": "complete",
       "historical_comparison_status": "matched_10_pairs_header_control_measured",
       "reproduction_config": "configs/ots_vc/clean/libritts/fireredtts2_short10_retry20_ots.yaml",
-      "model_variant": "FireRedTTS2-monologue-retry20"
+      "model_variant": "FireRedTTS2-monologue-retry20",
+      "direct_backend_status": "native_cpu_short10_retry20_generation_and_core_scoring_verified",
+      "direct_backend_limits": "Fresh native CPU generation and MCD/WER/SIM scoring complete for all 10 fixed short10 retry20 samples, with original-index seeds, input/audio hashes, source hashes and row/CSV/aggregate checks. All 11 pretrained asset hashes match retained CUDA run. Historical scorer/runtime fingerprints differ; no second native CPU generation, historical GPU/full-paper equivalence or complete runtime-lock claim.",
+      "cpu_inference_status": "native_short10_retry20_generation_and_core_scoring_10_of_10_verified"
     },
     {
       "n": "VoxCPM",
@@ -84,7 +87,8 @@
       "subset": "subsets/libritts16_v1/selection.json",
       "generation_status": "complete",
       "scoring_status": "complete",
-      "historical_comparison_status": "matched_subset_measured"
+      "historical_comparison_status": "matched_subset_measured",
+      "provenance_limit": "Primary and semantic snapshots, local semantic statistics, G2P files and the worker-selected eSpeak binary/data are hashed. Startup checks the eSpeak hashes against asset resolution and validates the worker receipt. Native semantic CPU loading and 16-reference feature checks pass; 32 English texts produce repeatable native G2P tokens. Full direct-worker generation remains pending. Other-language package resources and a clean environment lock remain incomplete; historical weight equivalence is unproven."
     },
     {
       "n": "OpenVoice V2",
@@ -96,7 +100,15 @@
       "generation_status": "complete",
       "scoring_status": "complete",
       "historical_comparison_status": "matched_subset_measured",
-      "provenance_limit": "Initial subset run predates auxiliary source/config/embedding fingerprint repair; implicit Melo/BERT downloads still require runtime asset capture."
+      "provenance_limit": "Initial subset run predates auxiliary source/config/embedding fingerprint repair; implicit Melo/BERT downloads still require runtime asset capture.",
+      "direct_backend_status": "native_cpu_libritts16_generation_repeat_and_core_scoring_verified",
+      "direct_backend_limits": "Two fresh CPU generations agree bitwise for all 16 inputs; MCD/WER/SIM complete for all 16. Historical comparison fails scorer/runtime consistency; historical GPU/full-paper equivalence and clean runtime lock remain unproven.",
+      "converter_validation_status": "actual_native_cpu_strict_loading_and_missing_parameter_rejection_verified",
+      "melo_validation_status": "pinned_english_local_asset_binding_and_native_cpu_weight_load_verified",
+      "english_resource_status": "actual_resource_hashes_and_native_dictionary_cache_equality_verified",
+      "text_model_validation_status": "pinned_six_tokenizers_and_english_bert_cpu_components_verified",
+      "direct_backend_scoring_status": "complete",
+      "native_text_validation_status": "native_english_text16_repeat_and_owned_bert_cache_release_verified"
     },
     {
       "n": "Coqui XTTS-v2",
@@ -107,7 +119,10 @@
       "subset": "subsets/libritts16_v1/selection.json",
       "generation_status": "complete",
       "scoring_status": "complete",
-      "historical_comparison_status": "matched_subset_measured"
+      "historical_comparison_status": "matched_subset_measured",
+      "direct_backend_status": "contract_checks_passed_native_migration_subset_pending_cuda_unavailable",
+      "asset_resolution_status": "offline_pinned_snapshot_consumed_hashes_match_retained_subset",
+      "provenance_limit": "Pinned primary assets verified against retained subset hashes. Migrated native generation and scoring remain pending; clean runtime lock and historical immutable-weight equivalence unproven."
     },
     {
       "n": "IndexTTS",
@@ -130,7 +145,9 @@
       "generation_status": "complete",
       "scoring_status": "complete",
       "historical_comparison_status": "matched_subset_measured",
-      "provenance_limit": "Pinned local model/vocoder snapshots and upstream source fingerprints; historical run lacks immutable weight/runtime records. Corrected generation predates invalid-tokenizer validation guard. Native and CLI are distinct timing protocols."
+      "provenance_limit": "Pinned local model/vocoder snapshots and upstream source fingerprints; historical run lacks immutable weight/runtime records. Corrected generation predates invalid-tokenizer validation guard. Native and CLI are distinct timing protocols.",
+      "direct_backend_status": "contract_checks_passed_native_migration_subset_pending",
+      "asset_resolution_status": "offline_pinned_model_and_vocoder_hashes_match_retained_subset"
     },
     {
       "n": "FishSpeech",
@@ -177,7 +194,9 @@
       "generation_status": "complete",
       "scoring_status": "complete",
       "historical_comparison_status": "matched_subset_measured",
-      "provenance_limit": "Validated isolated overlay, not a clean environment lock. Historical run lacks immutable weight/runtime records. Generation run predates expanded upstream distribution closure capture."
+      "provenance_limit": "Validated isolated overlay, not a clean environment lock. Historical run lacks immutable weight/runtime records. Generation run predates expanded upstream distribution closure capture.",
+      "direct_backend_status": "contract_checks_passed_native_migration_subset_pending",
+      "asset_validation_status": "default_cosyvoice2_local_required_files_and_retained_hashes_verified_native_migration_pending"
     },
     {
       "n": "Higgs Audio",
@@ -211,7 +230,10 @@
       "subset": "subsets/libritts16_v1/selection.json",
       "generation_status": "complete",
       "scoring_status": "complete",
-      "historical_comparison_status": "matched_subset_measured"
+      "historical_comparison_status": "matched_subset_measured",
+      "direct_backend_status": "contract_checks_passed_native_migration_subset_pending",
+      "conditioning_protocol": "strict_prompt_transcript_failure_default_explicit_legacy_retry_with_per_sample_receipt",
+      "asset_resolution_status": "local_bundle_hashes_match_retained_subset_checked_bicodec_native_cpu_loading"
     },
     {
       "n": "VALL-E",
@@ -234,7 +256,9 @@
       "generation_status": "complete",
       "scoring_status": "complete",
       "historical_comparison_status": "matched_subset_measured",
-      "provenance_limit": "Configured primary and YAML-referenced ASR/F0/PL-BERT assets captured. Other implicit Hub assets and historical immutable weight/runtime records remain incomplete. Serial scoped loader compatibility; no thread-safety claim."
+      "provenance_limit": "Configured primary and YAML-referenced ASR/F0/PL-BERT assets captured. Other implicit Hub assets and historical immutable weight/runtime records remain incomplete. Serial scoped loader compatibility; no thread-safety claim.",
+      "direct_backend_status": "native_cpu_libritts16_generation_repeat_and_core_scoring_verified",
+      "direct_backend_limits": "Two fresh native CPU generations produce 16/16 byte-identical WAVs and complete MCD/WER/SIM scoring with matching frozen inputs, audio/input hashes, original-index seeds and source receipts. All 13 constructed modules load complete finite main checkpoint state; corrupted real learned state is rejected. Historical scorer/runtime fingerprints differ, so historical GPU/full-paper equivalence is unproven. Full implicit tokenization/resource and clean-environment locking remain incomplete."
     },
     {
       "n": "GLM-TTS",
@@ -246,7 +270,9 @@
       "generation_status": "complete",
       "scoring_status": "complete",
       "historical_comparison_status": "matched_subset_measured",
-      "provenance_limit": "Historical checkpoint directory the original checkpoint directory is absent; replacement weight equivalence unproven. Configured checkpoint/frontend/config assets hashed. Installed-package normalizer FST caches are not hashed. Campplus ONNX falls back to CPU because CUDA 11 libraries are absent; generation LLM uses CUDA. Shared tested runtime, not a clean environment lock."
+      "provenance_limit": "Historical checkpoint directory the original checkpoint directory is absent; replacement weight equivalence unproven. Configured checkpoint/frontend/config assets hashed. Installed-package normalizer FST caches are not hashed. Campplus ONNX falls back to CPU because CUDA 11 libraries are absent; generation LLM uses CUDA. Shared tested runtime, not a clean environment lock.",
+      "direct_backend_status": "explicit_adapter_contract_checks_passed_direct_backend_registration_pending",
+      "direct_backend_limits": "Native import/path and adapter/cleanup contracts only. Direct backend registration, synthesizer-config seed preflight, migrated native generation, complete learned-state loading and runtime text-resource locking remain pending. Native CUDA is required; current local CUDA is unavailable."
     },
     {
       "n": "GlowTTS",
@@ -353,7 +379,9 @@
       "generation_status": "complete",
       "scoring_status": "complete",
       "historical_comparison_status": "historical_reference_not_established",
-      "provenance_limit": "Native frozen subset measured; no historical Bark matched reference established. Environment recipe is not a clean install lock."
+      "provenance_limit": "Native frozen subset measured; no historical Bark matched reference established. Environment recipe is not a clean install lock.",
+      "direct_backend_status": "direct_backend_contract_checks_passed_native_cpu_libritts16_running",
+      "direct_backend_limits": "Contract fixtures and native small-architecture checks are not complete native speech validation. Full frozen native CPU LibriTTS16 generation is running; scoring and historical equivalence remain unverified."
     },
     {
       "n": "OZSpeech",
@@ -383,11 +411,41 @@
   "requirements": [
     {
       "item": "Explicit backend requests and results with deterministic resource cleanup",
-      "status": "qwen3_and_f5_direct_requests_verified_other_adapters_use_legacy_bridge"
+      "status": "partial",
+      "combined_refactor_validation": {
+        "status": "native_revalidation_pending",
+        "scope": "Retained subset campaigns do not establish native generation equivalence for the final combined source revision.",
+        "source_audit_command": "rvcbench audit-source RUN_DIRECTORY",
+        "limits": "Recorded-source checks do not verify current import completeness, dependencies, weights, audio or metrics."
+      },
+      "direct_contracts": [
+        "qwen3_tts",
+        "f5_tts",
+        "voxcpm",
+        "index_tts",
+        "maskgct",
+        "xtts",
+        "zipvoice",
+        "sparktts",
+        "cosyvoice",
+        "openvoice",
+        "styletts2",
+        "fireredtts2",
+        "bark_voice_clone"
+      ],
+      "current_native_subset_validated": [
+        "openvoice_cpu",
+        "styletts2_cpu",
+        "fireredtts2_cpu"
+      ],
+      "prior_native_direct_campaigns": [
+        "qwen3_tts",
+        "f5_tts"
+      ]
     },
     {
       "item": "Original sample seed propagation including subprocess and HTTP adapters",
-      "status": "implemented_validation_in_progress"
+      "status": "direct_seed_preflight_verified_remaining_subprocess_and_HTTP_reproduction_campaigns_pending"
     },
     {
       "item": "Preserve manifest variants and select historical protocol explicitly",
@@ -403,7 +461,8 @@
     },
     {
       "item": "Dependency-scoped code, weights, worker environments and hardware provenance",
-      "status": "partial"
+      "status": "partial",
+      "unmapped_import_inventory_status": "static_inventory_and_spark_native_dependency_preflight_verified_clean_lock_pending"
     },
     {
       "item": "Protocol and stage plan for protection, denoising, generation and scoring",
@@ -415,7 +474,7 @@
     },
     {
       "item": "Speaker-aware paired comparison and consistent timing provenance",
-      "status": "paired_subset_comparison_implemented_timing_comparability_pending"
+      "status": "paired_subset_comparison_and_request_wall_timing_gate_verified_controlled_campaigns_pending"
     },
     {
       "item": "Every integrated model: real generation, scoring, historical comparison where supported",

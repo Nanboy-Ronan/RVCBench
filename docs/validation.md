@@ -58,10 +58,52 @@ training cohort and Qwen3 generation/core scoring for 16 selected outputs. Its
 audio-only protocol differs from historical protection output and does not
 establish historical equivalence.
 
+The Bark, FireRedTTS2, VoxCPM, IndexTTS, MaskGCT, XTTS, ZipVoice, SparkTTS, CosyVoice,
+OpenVoice and StyleTTS2 direct-backend migrations have contract checks,
+including explicit seed validation and failure propagation. IndexTTS and
+MaskGCT also have worker timeout, request matching and cleanup checks. Native generation
+of the other migrated frozen subsets remains pending. OpenVoice additionally
+completed all 16 current native CPU generation requests with matching frozen
+inputs, valid WAV/hash/seed receipts and matching recorded source hashes. Its MCD/WER/SIM scoring is complete for all 16 pairs, and a second fresh CPU
+generation matches every WAV byte. Historical comparison fails the scorer/runtime
+consistency check; GPU/full-paper equivalence remains unproven. StyleTTS2 also
+completed two fresh CPU generations of all 16 frozen samples with byte-identical
+WAVs and full MCD/WER/SIM scoring. All 13 constructed native modules load complete
+finite checkpoint state, and corrupted learned-weight checks fail explicitly.
+Its historical GPU scorer/runtime fingerprints also differ, so historical/full-paper
+equivalence remains unproven. FireRedTTS2 completed native CPU generation and
+MCD/WER/SIM scoring for all 10 frozen short10/retry20 pairs with row/CSV/aggregate
+checks. This explicit variant preserves its historical input and asset hashes;
+historical GPU scorer/runtime fingerprints differ, and native CPU repeatability
+has not yet been measured. These validations apply to each migration's recorded
+source revision; final combined-source native revalidation remains outstanding.
+The table above retains the earlier generation/scoring campaigns.
+
 Other outstanding work includes remaining protection-method production, historical auxiliary
-metric replay, timing comparability, and final website/Hugging Face integration.
+metric replay, controlled timing campaigns across all runtimes, and final
+website/Hugging Face integration.
 These are retained in [the reproduction plan](../reproduction/plan.json).
 
 Run records store sample hashes, assets, runtime provenance and metric coverage.
 Local debug runs and detailed audit snapshots are excluded from Git. Use
 [the run guide](run_protocol.md) to generate your own reports.
+
+## Check the source version of a retained run
+
+```bash
+python -m src.benchmark.cli audit-source results/my_run/timestamped_directory
+```
+
+This read-only command compares each recorded generation source hash with the
+current file. Use `--root /path/to/checkout` for another checkout and
+`--output results/source_audit.json` to save the report. A changed or missing
+file, unavailable provenance or invalid recorded hash fails the check. Absolute
+upstream paths are checked at their recorded locations.
+
+A match covers only recorded files; it does not verify complete current import
+coverage, dependencies, weights, audio or metrics. A mismatch marks a source
+version difference and does not invalidate historical results. The table above
+records completed subset campaigns, rather than a guarantee for every later
+source revision. Qwen3 and F5 direct campaigns were run before subsequent shared
+runner changes; native revalidation of the final combined refactor remains
+outstanding.
