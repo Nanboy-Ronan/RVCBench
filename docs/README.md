@@ -37,8 +37,8 @@ Source lives in `site-src/`:
   enhancement-only) client-side JS.
 - `site-src/build.py` — assembles everything into `docs/index.html` (+
   `docs/llms.txt`, `docs/assets/`) and a separate
-  `site-src/artifact.html` (fonts/logo inlined as base64, for publishing
-  to a Claude Artifact preview — not committed, rebuilt on demand).
+  `site-src/artifact.html` (fonts/logo inlined as base64, for a
+  single-file preview — not committed, rebuilt on demand).
 - `site-src/assets/` — self-hosted `.woff2` fonts and the logo.
 
 Rebuild after any edit:

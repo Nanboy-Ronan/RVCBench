@@ -12,6 +12,8 @@
 
 **News:** RVCBench has been accepted to **NeurIPS 2026**!
 
+**Branches:** `main` is the v1 codebase, before the architecture refactor (tag [`v1.0`](https://github.com/Nanboy-Ronan/RVCBench/tree/v1.0)). The refactored v2 codebase is under development on the [`v2`](https://github.com/Nanboy-Ronan/RVCBench/tree/v2) branch.
+
 **RVCBench** is the first large-scale benchmark for **voice cloning robustness**, **voice clone evaluation**, **speaker privacy**, and **audio deepfake protection** — covering **27 TTS/VC models**, **10 datasets**, and **5 audio protection methods**.
 
 RVCBench provides a unified, reproducible pipeline covering the full attack-defense cycle: source-audio protection, zero-shot or fine-tuning voice cloning, optional denoising, and evaluation of speaker similarity, intelligibility, perceptual quality, and runtime.
