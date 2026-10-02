@@ -1,10 +1,11 @@
 """Manifest-only zero-shot data access; no training features or model downloads."""
 from dataclasses import dataclass
 from pathlib import Path
+from numbers import Integral
 from typing import Optional
 
 from hydra.utils import to_absolute_path
-from .manifest_utils import load_dataset_manifest, resolve_hf_dataset_root
+from .manifest_utils import load_dataset_manifest, resolve_hf_dataset_root, validate_source_index
 
 
 @dataclass(frozen=True)
@@ -56,15 +57,16 @@ class ZeroShotDataset:
                 candidates = [self._dataset_root / p, self._dataset_root.parent / p]
                 return next((p.resolve() for p in candidates if p.is_file()), candidates[0].resolve())
             self._zero_shot_samples.append(ZeroShotSample(
-                str(row['speaker_id']), int(row['source_index']), resolve(row.get('prompt_file_name')),
+                str(row['speaker_id']), validate_source_index(row['source_index'], location=f'zero-shot row {idx}'), resolve(row.get('prompt_file_name')),
                 row.get('prompt_text') or '', row.get('prompt_language'), resolve(row.get('target_file_name')),
                 row.get('target_text') or '', row.get('target_language'), row))
         if not self._zero_shot_samples:
             raise ValueError(f'No samples found for speaker={selected!r} in {root}')
 
     def get_zero_shot_samples(self, *, speaker_id=None, max_samples=None):
-        if max_samples is not None and int(max_samples) <= 0:
-            raise ValueError('max_samples must be positive')
+        if max_samples is not None and (isinstance(max_samples, bool) or
+                not isinstance(max_samples, Integral) or max_samples <= 0):
+            raise ValueError('max_samples must be a positive integer')
         samples = [s for s in self._zero_shot_samples if speaker_id is None or s.speaker_id == str(speaker_id)]
         return samples[:int(max_samples)] if max_samples is not None else samples
 

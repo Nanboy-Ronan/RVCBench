@@ -7,6 +7,7 @@ import logging
 import shutil
 import time
 from pathlib import Path
+from numbers import Integral
 
 from omegaconf import OmegaConf
 from src.utils.runtime_errors import invalid_cuda_context
@@ -35,6 +36,15 @@ def run_zero_shot(conf, base_dir, device, dataset, exp_dir, logger, protected_au
     from src.utils.seeding import configure_seeds
     from .backends import create_backend, GenerationRequest
 
+    seed = conf.get('seed')
+    if seed is None:
+        seed = conf.adversary.get('seed')
+    seed = 42 if seed is None else seed
+    if isinstance(seed, bool) or not isinstance(seed, Integral):
+        raise ValueError('Run seed must be an integer; booleans, floats and strings are not accepted')
+    seed = int(seed)
+    if not -(2**63) <= seed < 2**64:
+        raise ValueError('Run seed is outside the supported Torch range')
     options = conf.vc
     evaluation = options.get('evaluation') or {}
     evaluate_only = bool(options.get('evaluate_only', False))
@@ -65,10 +75,6 @@ def run_zero_shot(conf, base_dir, device, dataset, exp_dir, logger, protected_au
     audio_dir = Path(exp_dir) / 'generated_audio'
     audio_dir.mkdir(parents=True, exist_ok=True)
     effective_config = OmegaConf.to_container(conf, resolve=True)
-    seed = conf.get('seed')
-    if seed is None:
-        seed = conf.adversary.get('seed')
-    seed = int(seed if seed is not None else 42)
     generation_config = {'model': options.get('model'), 'adversary': effective_config['adversary'],
                          'seed': seed, 'sample_seed_policy': 'seed_plus_source_index_v2', 'device': str(device)}
     if reference_stage:
@@ -97,6 +103,8 @@ def run_zero_shot(conf, base_dir, device, dataset, exp_dir, logger, protected_au
     logger.addHandler(handler)
     started = time.perf_counter()
     backend = None
+    request_attempts = 0
+    manifest['request_timing_profile'] = None
     try:
         resolved_conf = OmegaConf.create(effective_config)
         if not evaluate_only:
@@ -163,7 +171,9 @@ def run_zero_shot(conf, base_dir, device, dataset, exp_dir, logger, protected_au
                            synthesis_time_sec=prior.get('synthesis_time_sec'),
                            timing_scope=prior.get('timing_scope'),
                            adapter_call_time_sec=prior.get('adapter_call_time_sec'), reused=True)
-                for key in ('native_seed', 'native_seed_policy', 'native_requested_seed'):
+                for key in ('native_seed', 'native_seed_policy', 'native_requested_seed', 'conditioning_variant', 'native_initialization',
+                            'request_wall_time_sec', 'request_timing_phase',
+                            'request_timing_profile_fingerprint', 'request_timing_profile_after_fingerprint'):
                     if key in prior:
                         row[key] = prior[key]
             elif evaluate_only:
@@ -173,16 +183,37 @@ def run_zero_shot(conf, base_dir, device, dataset, exp_dir, logger, protected_au
             else:
                 if backend is None:
                     backend = create_backend(resolved_conf, dataset, device, logger)
+                    prepare_started = time.perf_counter()
                     backend.prepare()
+                    from .timing import synchronize
+                    synchronize(device)
+                    manifest['backend_prepare_wall_time_sec'] = time.perf_counter() - prepare_started
                 for attempt in range(retries + 1):
                     row['attempts'] += 1
                     handler.messages.clear()
                     row.update(status='generating', error=None)
                     append_sample_event(events, row)
                     try:
+                        from .timing import timing_profile, synchronize
+                        configure_seeds(row['seed'], logger=None)
+                        profile = timing_profile(device, resolved_conf)
+                        if manifest['request_timing_profile'] is None:
+                            manifest['request_timing_profile'] = profile
+                        synchronize(device)
+                        request_started = time.perf_counter()
+                        phase = 'first_request_after_prepare' if request_attempts == 0 else 'subsequent_request'
+                        request_attempts += 1
                         result, = backend.generate_batch([GenerationRequest(
                             sample=sample, seed=row['seed'], output_dir=audio_dir,
                             protected_audio_dir=protected_audio_dir)])
+                        synchronize(device)
+                        request_elapsed = time.perf_counter() - request_started
+                        after_profile = timing_profile(device, resolved_conf)
+                        row.update(request_wall_time_sec=request_elapsed, request_timing_phase=phase,
+                                   request_timing_profile_fingerprint=profile['fingerprint'],
+                                   request_timing_profile_after_fingerprint=after_profile['fingerprint'])
+                        if after_profile != profile:
+                            row['request_timing_changed_settings'] = after_profile
                         if result.sample_id != row['sample_id'] or result.path.resolve() != dest.resolve():
                             raise RuntimeError('Backend returned a result for the wrong request')
                         if not dest.is_file():
@@ -191,6 +222,10 @@ def run_zero_shot(conf, base_dir, device, dataset, exp_dir, logger, protected_au
                         row.update(status='generated', generated_sha256=file_hash(dest),
                                    synthesis_time_sec=result.elapsed_sec, timing_scope=result.timing_scope,
                                    adapter_call_time_sec=result.adapter_call_time_sec)
+                        if result.native_initialization is not None:
+                            row["native_initialization"] = result.native_initialization
+                        if result.conditioning_variant is not None:
+                            row["conditioning_variant"] = result.conditioning_variant
                         if result.native_seed_policy is not None:
                             row.update(native_seed=result.native_seed, native_seed_policy=result.native_seed_policy)
                             if result.native_requested_seed is not None:
@@ -220,7 +255,8 @@ def run_zero_shot(conf, base_dir, device, dataset, exp_dir, logger, protected_au
             backend.close()
             backend = None
         with (audio_dir / 'synthesis_timings.csv').open('w') as f:
-            writer = csv.DictWriter(f, fieldnames=['generated_path', 'synthesis_time_sec', 'timing_scope', 'adapter_call_time_sec'])
+            writer = csv.DictWriter(f, fieldnames=['generated_path', 'synthesis_time_sec', 'timing_scope', 'adapter_call_time_sec',
+                                                   'request_wall_time_sec', 'request_timing_phase'])
             writer.writeheader()
             writer.writerows({k: r.get(k) for k in writer.fieldnames} for r in rows if r.get('generated_sha256'))
         if not generate_only and any(row.get('generated_sha256') for row in rows):

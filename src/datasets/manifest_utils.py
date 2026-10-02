@@ -1,6 +1,7 @@
 import json
 import logging
 from pathlib import Path
+from numbers import Integral
 from typing import Dict, Iterable, List, Optional, Sequence
 
 import pandas as pd
@@ -137,6 +138,18 @@ def _normalize_record(record: Dict[str, object], dataset_name: str, source_manif
     return result
 
 
+def validate_source_index(value, *, location='manifest'):
+    if isinstance(value, bool) or not isinstance(value, Integral) or value < 0:
+        raise ValueError(f'{location}: source_index must be a nonnegative integer, got {value!r}')
+    return int(value)
+
+
+def _validate_source_indices(frame, *, location):
+    if 'source_index' in frame:
+        for position, value in enumerate(frame['source_index'].tolist()):
+            validate_source_index(value, location=f'{location} row {position}')
+
+
 def canonicalize_records(records: Iterable[Dict[str, object]], *, dataset_name: str, source_manifest: str) -> pd.DataFrame:
     rows = [
         _normalize_record(record, dataset_name=dataset_name, source_manifest=source_manifest, source_row=index)
@@ -144,7 +157,14 @@ def canonicalize_records(records: Iterable[Dict[str, object]], *, dataset_name: 
     ]
     if not rows:
         return pd.DataFrame(columns=list(CANONICAL_COLUMNS))
+    indices = None
+    if any('source_index' in row for row in rows):
+        indices = [validate_source_index(row.get('source_index'),
+            location=f'{source_manifest} row {position}') for position, row in enumerate(rows)]
     df = pd.DataFrame(rows)
+    if indices is not None:
+        # Preserve exact Python integers before pandas can infer a float column.
+        df['source_index'] = pd.Series(indices, dtype=object)
     for column in CANONICAL_COLUMNS:
         if column not in df.columns:
             df[column] = ""
@@ -177,6 +197,7 @@ def load_canonical_manifest(
         df = pd.read_parquet(manifest_path)
         if 'split' not in df and 'data_split' in df:
             df['split'] = df['data_split']
+    _validate_source_indices(df, location=str(manifest_path))
     for column in CANONICAL_COLUMNS:
         if column not in df.columns:
             df[column] = ""
@@ -254,6 +275,7 @@ def load_dataset_manifest(
         if column not in df.columns:
             df[column] = ""
     ordered = list(CANONICAL_COLUMNS) + [column for column in df.columns if column not in CANONICAL_COLUMNS]
+    _validate_source_indices(df, location=str(root_path))
     return select_manifest_variant(df.loc[:, ordered].reset_index(drop=True), manifest_variant)
 
 def to_internal_manifest(df: pd.DataFrame) -> pd.DataFrame:
