@@ -10,6 +10,7 @@ import numpy as np
 import torch
 
 from src.models.model import BaseModel
+from src.models.styletts2.loading import load_model_state
 
 
 @contextmanager
@@ -68,6 +69,7 @@ class StyleTTS2Synthesizer(BaseModel):
         self._mel_transform = None
         self._mean = None
         self._std = None
+        self.initialization_metadata = None
 
         self._validate_paths()
 
@@ -79,8 +81,9 @@ class StyleTTS2Synthesizer(BaseModel):
         self.ensure_model()
         ref_features = self._compute_style(reference_path)
         wav = self._run_diffusion(text, ref_features)
-        if wav.size == 0:
-            return wav
+        wav = np.asarray(wav, dtype=np.float32)
+        if wav.ndim != 1 or not wav.size or not np.isfinite(wav).all():
+            raise ValueError("StyleTTS2 output must be nonempty finite mono audio")
         if self.config.tail_trim > 0 and wav.shape[-1] > self.config.tail_trim:
             wav = wav[..., :-self.config.tail_trim]
         return wav.astype(np.float32)
@@ -88,6 +91,16 @@ class StyleTTS2Synthesizer(BaseModel):
     # ------------------------------------------------------------------
     # Internal helpers
     # ------------------------------------------------------------------
+    def close(self):
+        self._style_cache.clear()
+        self._model = self.model = None
+        self._model_params = self._sampler = None
+        self._text_cleaner = self._phonemizer = None
+        self._length_to_mask = self._word_tokenize = None
+        self._mel_transform = self._mean = self._std = None
+        self._imports_loaded = self._model_ready = False
+        self.initialization_metadata = None
+
     def _validate_paths(self) -> None:
         if not self.config.code_path.exists():
             raise FileNotFoundError(f"StyleTTS2 code path not found: {self.config.code_path}")
@@ -204,19 +217,7 @@ class StyleTTS2Synthesizer(BaseModel):
             model = build_model(model_params, text_aligner, pitch_extractor, plbert)
             params_whole = torch.load(self.config.checkpoint_path, map_location="cpu", weights_only=False)
             params = params_whole["net"]
-            for key in model:
-                if key in params:
-                    try:
-                        model[key].load_state_dict(params[key])
-                    except RuntimeError:
-                        from collections import OrderedDict
-
-                        state_dict = params[key]
-                        new_state_dict = OrderedDict()
-                        for k, value in state_dict.items():
-                            new_key = k[7:] if k.startswith("module.") else k
-                            new_state_dict[new_key] = value
-                        model[key].load_state_dict(new_state_dict, strict=False)
+            initialization_metadata = load_model_state(model, params)
             for key in model:
                 model[key].eval()
                 model[key].to(self.device)
@@ -231,6 +232,7 @@ class StyleTTS2Synthesizer(BaseModel):
             os.chdir(prev_cwd)
 
         self._model = model
+        self.initialization_metadata = initialization_metadata
         self._model_params = model_params
         self._sampler = sampler
         self._text_cleaner = TextCleaner()

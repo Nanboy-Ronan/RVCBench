@@ -1,6 +1,8 @@
 from pathlib import Path
 import time
-from typing import List, Optional, Sequence
+from typing import Optional
+
+import numpy as np
 
 import soundfile as sf
 from hydra.utils import to_absolute_path
@@ -29,6 +31,7 @@ class StyleTTS2ZeroShotAdversary(BaseAdversary):
         self.tail_trim = int(self.config.get("tail_trim", 50))
         self.reference_assignment = str(self.config.get("reference_assignment", "round_robin")).lower()
         self.max_samples = self.config.get("max_samples")
+        self.seed = self.config.get("seed")
 
         self._synthesizer: Optional[StyleTTS2Synthesizer] = None
 
@@ -55,75 +58,44 @@ class StyleTTS2ZeroShotAdversary(BaseAdversary):
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
-    def attack(self, *, output_path, dataset, protected_audio_path=None):
+    def generate_sample(self, sample, *, output_dir):
         self._ensure_synthesizer()
+        reference_path = self._resolve_prompt_path(sample)
+        if reference_path is None:
+            raise FileNotFoundError(f"Missing StyleTTS2 reference: {sample.prompt_path}")
+        text = (sample.target_text or "").strip() or (sample.prompt_text or "").strip()
+        if not text:
+            raise ValueError("StyleTTS2 target text cannot be empty")
+        self._log_clone_request("StyleTTS2", 0, 1, str(sample.speaker_id), reference_path, text)
+        seed = self._sample_seed(sample)
+        if seed is not None:
+            from src.utils.seeding import configure_seeds
+            configure_seeds(seed, logger=None)
+        started = time.perf_counter()
+        wav = self._synthesizer.synthesize(text, reference_path)
+        elapsed = time.perf_counter() - started
+        wav = np.asarray(wav, dtype=np.float32)
+        if wav.ndim != 1 or not wav.size or not np.isfinite(wav).all():
+            raise ValueError("StyleTTS2 output must be nonempty finite mono audio")
+        path = self._speaker_output_dir(Path(output_dir).resolve(), str(sample.speaker_id)) / self._cloned_filename(sample, sample.index)
+        sf.write(path, wav, self.sample_rate)
+        return path, elapsed
 
+    def attack(self, *, output_path, dataset, protected_audio_path=None):
+        del protected_audio_path
+        self._ensure_synthesizer()
         output_dir = Path(output_path).resolve()
         output_dir.mkdir(parents=True, exist_ok=True)
         self._init_synthesis_timings(output_dir)
-
-        max_samples = None
-        if self.max_samples is not None:
-            try:
-                max_samples = int(self.max_samples)
-            except (TypeError, ValueError):
-                self.logger.warning(
-                    "[StyleTTS2] Invalid max_samples '%s'; processing full dataset.",
-                    self.max_samples,
-                )
-
-        samples = dataset.get_zero_shot_samples(max_samples=max_samples)
+        samples = dataset.get_zero_shot_samples(max_samples=self.max_samples)
         if not samples:
             raise RuntimeError("No zero-shot samples available for StyleTTS2 adversary.")
-
-        prompt_count = self._count_available_prompts(samples)
-
-        self._log_attack_plan("StyleTTS2", samples, prompt_count)
-
-        assert self._synthesizer is not None
-        for idx, sample in enumerate(samples):
-            reference_path = self._resolve_prompt_path(sample)
-            if reference_path is None:
-                if self.logger:
-                    self.logger.warning(
-                        "[StyleTTS2] Sample %d missing prompt audio; skipping.",
-                        idx,
-                    )
-                continue
-            self.logger.debug(
-                "[StyleTTS2] Generating sample %d using reference %s for speaker %s",
-                idx,
-                reference_path.name,
-                sample.speaker_id,
-            )
-
-            # Prefer the target transcript for generation; fall back to prompt text if missing.
-            text = (sample.target_text or "").strip()
-            if not text:
-                text = (sample.prompt_text or "").strip()
-            synth_start = time.perf_counter()
-            wav = self._synthesizer.synthesize(text, reference_path)
-            synth_elapsed = time.perf_counter() - synth_start
-            if wav.size == 0:
-                self.logger.warning(
-                    "[StyleTTS2] Empty waveform for entry %s; skipping.", text[:30]
-                )
-                continue
-
-            speaker_id = str(sample.speaker_id)
-            speaker_dir = self._speaker_output_dir(output_dir, speaker_id)
-            self._log_clone_request(
-                "StyleTTS2",
-                idx,
-                len(samples),
-                speaker_id,
-                reference_path,
-                text,
-            )
-            output_name = self._cloned_filename(sample, idx)
-            output_path = speaker_dir / output_name
-            sf.write(output_path, wav, self.sample_rate)
-            self._record_synthesis_timing(output_path, synth_elapsed)
-
-        self._flush_synthesis_timings()
-        self.logger.info("[StyleTTS2] Generated %d utterances.", len(samples))
+        self._log_attack_plan("StyleTTS2", samples, self._count_available_prompts(samples))
+        try:
+            for sample in samples:
+                path, elapsed = self.generate_sample(sample, output_dir=output_dir)
+                self._record_synthesis_timing(path, elapsed)
+        finally:
+            self._flush_synthesis_timings()
+        if self.logger:
+            self.logger.info("[StyleTTS2] Generated %d/%d utterances.", len(samples), len(samples))
