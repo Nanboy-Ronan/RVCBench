@@ -64,7 +64,7 @@ PYTHONPATH=. rvcbench run --config-name ots_vc/clean/libritts/custom_ots \
 ```
 
 - `vc.adapter` is `package.module:ClassName`. The module has to be importable: install your package, or put its directory on `PYTHONPATH` as above.
-- `vc.model` is the name recorded in the run and shown in reports.
+- `vc.model` is the name recorded in the run and shown in reports. It must differ from the built-in model names (for example `xtts`), which select model-specific backends and checks.
 - `custom_ots` is a template config. Keys under `adversary` reach your adapter as `self.config`; prefix a key with `+` when the template does not define it.
 - Add `+vc.generate_only=true` to generate without scoring.
 - The first run downloads the selected dataset from the Hugging Face Hub. To use a local copy, pass `dataset.use_hf_dataset=false dataset.root_path=/path/to/dataset`.

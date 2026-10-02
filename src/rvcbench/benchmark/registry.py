@@ -72,6 +72,10 @@ def adapter_target(conf):
         if not module_path or not class_name or not all(
                 part.isidentifier() for part in (*module_path.split("."), class_name)):
             raise ValueError(f"vc.adapter must be 'package.module:ClassName', got '{external}'")
+        if any(model in registry for registry in _ADVERSARY_REGISTRY.values()):
+            # Built-in names select model-specific backends, assets and checks.
+            raise ValueError(f"vc.model '{model}' names a built-in integration; "
+                             "choose another vc.model for an adapter selected with vc.adapter")
         return str(external)
 
     mode_registry = _ADVERSARY_REGISTRY.get(mode)

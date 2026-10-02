@@ -101,6 +101,19 @@ def test_malformed_adapter_targets_are_rejected(value):
         adapter_target(conf)
 
 
+@pytest.mark.parametrize('model', ['xtts', 'qwen3_tts', 'cozyvoice2', 'smoke', 'XTTS'])
+def test_external_adapters_cannot_reuse_a_builtin_model_name(model):
+    conf = OmegaConf.create({'vc': {'mode': 'ots', 'model': model, 'adapter': TARGET}})
+    with pytest.raises(ValueError, match='names a built-in integration'):
+        adapter_target(conf)
+
+
+def test_external_adapters_use_the_generic_backend():
+    from rvcbench.benchmark.backends import LegacyAdversaryBackend, create_backend
+    conf = OmegaConf.create({'vc': {'mode': 'ots', 'model': 'tone', 'adapter': TARGET}})
+    assert type(create_backend(conf, None, 'cpu', None)) is LegacyAdversaryBackend
+
+
 def test_builtin_models_do_not_need_an_adapter_target():
     conf = OmegaConf.create({'vc': {'mode': 'ots', 'model': 'smoke'}})
     assert adapter_target(conf) == 'rvcbench.adversary.smoke:SmokeAdversary'
