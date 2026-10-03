@@ -4,7 +4,7 @@ The repository exposes 32 model integrations. Currently, 27 have completed
 real generation and scoring on a fixed subset. This is integration validation;
 full paper-table and bitwise generation reproduction remain unestablished.
 
-Paper membership refers to the 18-model arXiv v2 evaluation. Experimental
+Paper membership refers to the 18 models of the paper's main results (arXiv v3). Experimental
 integrations remain in scope even when assets or compatible protocols are missing.
 
 | Model | Paper | Subset | Generation / scoring |

@@ -208,8 +208,8 @@ FAQ = [
     },
     {
         "q": "How many voice-cloning models does RVCBench evaluate?",
-        "a": "The RVCBench codebase includes 32 TTS/VC integration entries. The arXiv v2 paper reports "
-             "results for 18 of those models across 18 robustness evaluations, 225 speakers, and 14,370 utterances.",
+        "a": "The RVCBench codebase includes 32 TTS/VC integration entries. The paper (arXiv v3) reports "
+             "results for 18 of those models across 18 robustness evaluations, 204 speakers, and 14,370 utterances.",
     },
     {
         "q": "What audio-protection methods does RVCBench compare?",

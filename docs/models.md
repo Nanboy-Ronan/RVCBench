@@ -5,6 +5,78 @@ environment, the upstream inference code and the model checkpoints; none of thes
 the package. If you only want scores for a model you can already run, you do not need any of this:
 [score your own outputs](adding_a_model.md#route-0-score-audio-you-generated-anywhere) instead.
 
+## Installation
+
+Python 3.10 or newer on Linux. A GPU is recommended for scoring.
+
+```bash
+# package only
+pip install "rvcbench[eval] @ git+https://github.com/Nanboy-Ronan/RVCBench@main"
+
+# or a source checkout, needed to run the built-in models
+git clone https://github.com/Nanboy-Ronan/RVCBench.git
+cd RVCBench
+python -m pip install -e '.[eval]'
+rvcbench doctor                               # check dependencies
+rvcbench smoke --output results/smoke         # synthetic CPU pipeline check, no downloads
+```
+
+| Extra | Adds |
+| --- | --- |
+| *(none)* | Runner, run records, suites and the `rvcbench` command |
+| `eval` | Metrics: Whisper, SpeechBrain ECAPA and emotion, SpeechMOS, MCD, STOI |
+| `qwen3` | Qwen3-TTS runtime for the quickstart |
+| `http` | Clients for server-backed models |
+| `enkidu` | Enkidu protection |
+| `dev` | Tests, lint, pre-commit and build tools |
+
+- **FFmpeg** is needed for the compression tasks and by several models.
+- **Hugging Face login** (`hf auth login`) is recommended: anonymous downloads are rate-limited.
+- **Scorer models** are stored in `$RVCBENCH_ASSET_DIR`, else `./checkpoints/` when it exists, else
+  `~/.cache/rvcbench/`; see [model environments](model_environments.md).
+- If installing `[eval]` reports that no `pysptk` version matches, see
+  [building the evaluation extras](model_environments.md#building-the-evaluation-extras-from-source).
+
+## Supported models
+
+"Paper" marks the 18 models of the paper's main results and the four reported in its appendix (arXiv v3). "v2 subset run" means real generation and core scoring were
+recorded on a fixed subset during the v2 refactor; see [validation coverage](validation.md).
+
+| Model | `vc.model` | Paper | v2 subset run |
+| --- | --- | :---: | :---: |
+| BertVITS2 | `bertvits2` |  | pending |
+| Qwen3-TTS | `qwen3_tts` | main | ✓ |
+| Qwen3-Omni | `qwen3_omni` |  | pending |
+| FireRedTTS-2 | `fireredtts2` |  | ✓ |
+| VoxCPM | `voxcpm` |  | ✓ |
+| F5-TTS | `f5_tts` | main | ✓ |
+| MaskGCT | `maskgct` | main | ✓ |
+| OpenVoice V2 | `openvoice` | main | ✓ |
+| Coqui XTTS-v2 | `xtts` | main | ✓ |
+| IndexTTS | `index_tts` | main | ✓ |
+| ZipVoice | `zipvoice` | main | ✓ |
+| FishSpeech | `fishspeech` | main | ✓ |
+| Fish Audio S2 (in-proc) | `fishspeech_s2` | appendix | ✓ |
+| Fish Audio S2 (server) | `fish_audio_s2` | appendix | ✓ |
+| CosyVoice / 2 | `cosyvoice` | main | ✓ |
+| Higgs Audio | `higgs_audio` | main | ✓ |
+| Higgs TTS 3 | `higgs_tts_3` | appendix | pending |
+| SparkTTS | `sparktts` | main | ✓ |
+| VALL-E | `vall_e` |  | pending |
+| StyleTTS 2 | `styletts2` | main | ✓ |
+| GLM-TTS | `glm_tts` | main | ✓ |
+| GlowTTS | `glowtts` |  | pending |
+| Kimi Audio | `kimi_audio` |  | ✓ |
+| MGM-Omni | `mgm_omni` | main | ✓ |
+| MOSS TTSD | `moss_ttsd` | main | ✓ |
+| MOSS-TTS | `moss_tts` | appendix | ✓ |
+| dots.tts | `dots_tts` | appendix | ✓ |
+| ZONOS2 | `zonos2` |  | ✓ |
+| PlayDiffusion | `playdiffusion` | main | ✓ |
+| Bark Voice Clone | `bark_voice_clone` |  | ✓ |
+| OZSpeech | `ozspeech` | main | ✓ |
+| VibeVoice | `vibevoice` | main | ✓ |
+
 ## One model, step by step
 
 1. Pick the model's config under [`src/rvcbench/configs/ots_vc/clean/`](../src/rvcbench/configs/ots_vc/clean/),

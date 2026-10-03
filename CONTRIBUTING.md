@@ -48,3 +48,20 @@ See [docs/adding_a_model.md](docs/adding_a_model.md). You can evaluate a model w
 ## Reporting a problem
 
 Open an issue with the command you ran, the config name and overrides, the last lines of the log, and the output of `rvcbench doctor`. For a failed run, attach `run_manifest.json`; it records per-sample errors and the environment.
+
+## Repository layout
+
+```text
+src/rvcbench/
+├── benchmark/     runner, run records, suites, provenance and the rvcbench command
+├── suites/        versioned suites (onboarding-v1, core-v1, full-v1)
+├── configs/       Hydra configs: datasets, models, protection, denoising
+├── adversary/     voice cloning adapters
+├── models/        model wrappers
+├── protection/    protection methods
+├── evaluation/    metrics
+└── datasets/      dataset loading and manifests
+envs/              one environment file per model
+scripts/           quickstarts, model workers and maintenance tools
+docs/              guides and the project website
+```
