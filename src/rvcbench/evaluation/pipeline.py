@@ -17,7 +17,7 @@ from rvcbench.utils.runtime_errors import invalid_cuda_context
 def _scorer_provenance(scorer, seed, cap, device=None):
     from .scorers import text
     implementation = Path(inspect.getfile(type(scorer)))
-    paths = [implementation, Path(__file__), Path(text.__file__),
+    paths = [implementation, Path(__file__), Path(text.__file__), Path(__file__).with_name('audio_io.py'),
              Path(__file__).parents[1] / 'utils/runtime_errors.py']
     if implementation.stem == 'auxiliary':
         paths += [Path(__file__).with_name('generation.py'), Path(__file__).with_name('fidelity.py')]

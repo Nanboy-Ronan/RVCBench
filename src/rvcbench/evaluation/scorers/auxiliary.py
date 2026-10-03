@@ -62,7 +62,8 @@ class AuxiliaryScorer:
             return {f'dnsmos_{k}': v for k, v in (values or {}).items()}
         import torchaudio
         import torch
-        audio, rate = torchaudio.load(str(request.generated))
+        from ..audio_io import load_audio
+        audio, rate = load_audio(request.generated)
         audio = torchaudio.functional.resample(audio, rate, 24000).mean(dim=0)
         with torch.inference_mode():
             score = self.model(audio.unsqueeze(0).to(self.device), 24000)

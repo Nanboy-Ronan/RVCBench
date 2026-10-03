@@ -25,6 +25,8 @@ def main():
         sys.argv = [f'rvcbench {sys.argv[1]}', *sys.argv[2:]]
         return module.main()
     parser = argparse.ArgumentParser(prog='rvcbench')
+    from rvcbench import __version__
+    parser.add_argument('--version', action='version', version=f'rvcbench {__version__}')
     commands = parser.add_subparsers(dest='command', required=True)
     for name, (_, description) in HYDRA_COMMANDS.items():
         commands.add_parser(name, help=description + ' (Hydra: --config-name NAME key=value ...)', add_help=False)

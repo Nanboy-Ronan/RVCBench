@@ -42,12 +42,16 @@ dependencies = [
 http = ["requests>=2.31,<3", "ormsgpack>=1.7,<2"]
 enkidu = ["numpy==1.26.4", "torch==2.6.0", "torchaudio==2.6.0", "speechbrain==1.0.3"]
 qwen3 = ["numpy==1.26.4", "qwen-tts==0.1.1", "torch==2.6.0", "torchaudio==2.6.0"]
+# Scoring is tested with torch 2.6 and 2.9 and numpy 1.26 and 2.2 (identical scores up to float rounding).
+# Newer torch wheels on PyPI target CUDA 13 and need a newer GPU driver. pysptk imports pkg_resources,
+# which setuptools 81 removed.
 eval = [
-  "numpy==1.26.4", "numba>=0.59,<0.62", "torch==2.6.0", "torchaudio==2.6.0", "jiwer==3.0.3", "librosa>=0.10,<0.12", "openai-whisper",
-  "pymcd==0.2.1", "pysptk>=1.0", "speechbrain>=1.0.3,<2", "torch-stoi>=0.2", "scipy",
-  "matplotlib", "jieba", "onnxruntime", "requests", "transformers>=4.40,<5"
+  "numpy>=1.24,<2.3", "numba>=0.59", "torch>=2.3,<2.10", "torchaudio>=2.3,<2.10", "jiwer>=3.0.3,<4",
+  "librosa>=0.10,<0.12", "openai-whisper", "pymcd>=0.2.1,<0.3", "pysptk>=1.0", "setuptools<81",
+  "speechbrain>=1.0.3,<2", "torch-stoi>=0.2", "scipy", "matplotlib", "jieba", "onnxruntime", "requests",
+  "transformers>=4.40,<5"
 ]
-test = ["pytest>=8", "jiwer==3.0.3", "json5>=0.9", "tomli>=2; python_version < '3.11'"]
+test = ["pytest>=8", "jiwer>=3.0.3,<4", "json5>=0.9", "tomli>=2; python_version < '3.11'"]
 dev = ["rvcbench[test]", "ruff>=0.6", "pre-commit>=3.5", "build>=1.2", "twine>=5"]
 
 [project.urls]

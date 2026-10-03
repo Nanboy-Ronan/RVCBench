@@ -92,3 +92,9 @@ def test_installed_layout_records_package_relative_sources(tmp_path):
     hashed = recorded['source_sha256']
     (site / 'rvcbench/benchmark/runner.py').write_text('VERSION = 2\n')
     assert artifacts.provenance(site)['source_sha256'] != hashed
+
+
+def test_version_flag_prints_the_package_version(tmp_path):
+    result = run_cli('--version', cwd=tmp_path)
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.strip() == f'rvcbench {rvcbench.__version__}'

@@ -17,6 +17,7 @@ from tqdm import tqdm
 import torch.nn.functional as F
 
 from . import bootstrap as bootstrap_utils
+from .audio_io import load_audio
 from pymcd.mcd import Calculate_MCD
 
 # UTMOS is optional; we lazily load it if available
@@ -112,8 +113,8 @@ def _transcribe_audio(audio_path: Path, whisper_model, cache: dict, logger):
 
 def _load_and_align(orig_path: Path, prot_path: Path, target_sr: int, logger):
     try:
-        original_wav, sr_orig = torchaudio.load(orig_path)
-        protected_wav, sr_prot = torchaudio.load(prot_path)
+        original_wav, sr_orig = load_audio(orig_path)
+        protected_wav, sr_prot = load_audio(prot_path)
     except Exception as e:
         logger.warning(f"Could not load {orig_path} or {prot_path}. Error: {e}")
         return None, None

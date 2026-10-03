@@ -66,7 +66,8 @@ class EmotionScorer:
     def _label(self, path):
         import torch
         import torchaudio
-        audio, rate = torchaudio.load(str(path))
+        from ..audio_io import load_audio
+        audio, rate = load_audio(path)
         if not audio.numel() or not torch.isfinite(audio).all():
             raise ValueError('Emotion input is empty or nonfinite')
         audio = torchaudio.functional.resample(audio, rate, 16000).mean(dim=0, keepdim=True)

@@ -23,6 +23,7 @@ except ImportError:  # pragma: no cover - fallback when HF Hub unavailable
     RemoteEntryNotFoundError = RuntimeError
 
 from . import bootstrap as bootstrap_utils
+from .audio_io import audio_info, load_audio, save_audio
 from .fidelity import (
     _load_dnsmos_predictor,
     _load_speechmos_predictor,
@@ -119,14 +120,14 @@ def _maybe_cap_generated_audio(
         return cache[cache_key]
 
     try:
-        info = torchaudio.info(str(gen_file))
+        sample_rate, num_frames = audio_info(gen_file)
     except Exception as exc:
         logger.warning("Failed to inspect %s for duration cap: %s", gen_file, exc)
         cache[cache_key] = gen_file
         return gen_file
 
-    sample_rate = info.sample_rate or 0
-    num_frames = info.num_frames or 0
+    sample_rate = sample_rate or 0
+    num_frames = num_frames or 0
     if sample_rate <= 0 or num_frames <= 0:
         cache[cache_key] = gen_file
         return gen_file
@@ -147,7 +148,7 @@ def _maybe_cap_generated_audio(
         return trimmed_path
 
     try:
-        waveform, sr = torchaudio.load(str(gen_file), frame_offset=0, num_frames=max_frames)
+        waveform, sr = load_audio(gen_file, frame_offset=0, num_frames=max_frames)
     except Exception as exc:
         logger.warning("Failed to load %s for duration cap: %s", gen_file, exc)
         cache[cache_key] = gen_file
@@ -159,7 +160,7 @@ def _maybe_cap_generated_audio(
         return gen_file
 
     try:
-        torchaudio.save(str(trimmed_path), waveform.cpu(), sample_rate=sr)
+        save_audio(trimmed_path, waveform, sr)
     except Exception as exc:
         logger.warning("Failed to save capped audio for %s: %s", gen_file, exc)
         cache[cache_key] = gen_file
@@ -371,7 +372,7 @@ def _predict_emotion_label(emotion_model, audio_path: Path, logger):
     if emotion_model is None:
         return None
     try:
-        waveform, sr = torchaudio.load(str(audio_path))
+        waveform, sr = load_audio(audio_path)
     except Exception as exc:
         logger.warning("Failed to load %s for emotion prediction: %s", audio_path, exc)
         return None
@@ -671,7 +672,7 @@ def _evaluate_pairs(
         speechmos_score = None
         if speechmos_model is not None:
             try:
-                gen_wav, gen_sr = torchaudio.load(str(gen_file_for_metrics))
+                gen_wav, gen_sr = load_audio(gen_file_for_metrics)
             except Exception as exc:
                 logger.warning(f"Failed to load {gen_file_for_metrics} for SpeechMOS calculation: {exc}")
             else:

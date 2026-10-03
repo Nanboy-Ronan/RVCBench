@@ -20,6 +20,7 @@ Notable changes to the RVCBench codebase. Paper results are not affected by entr
 - Per-sample run records with input and output hashes, seeds, failures, metric coverage and source provenance; resume and retry.
 - Direct per-sample backends with request seed validation for Qwen3-TTS, F5-TTS, XTTS, ZipVoice, SparkTTS, CosyVoice, OpenVoice, StyleTTS2, Bark, FireRedTTS2, VoxCPM, IndexTTS and MaskGCT.
 - Frozen reproduction subsets, pinned Hub revisions and model asset hashing.
+- `rvcbench --version`, and a release workflow that publishes to PyPI through trusted publishing when a version tag is pushed.
 - Lint baseline, pre-commit hooks, CI on Python 3.10 and 3.12 with a wheel build and install check.
 
 ### Changed
@@ -34,7 +35,9 @@ Notable changes to the RVCBench codebase. Paper results are not affected by entr
 - `rvcbench score` loads each metric model once per call instead of once per task, and fails before writing results when the directory holds none of the suite's files. `--model` is optional and defaults to the directory name.
 - Scorer model files live in `$RVCBENCH_ASSET_DIR/<name>`, else `./checkpoints/<name>` when present, else `~/.cache/rvcbench/<name>`; a speaker model fetched from the Hub is copied there.
 - Maintainer files moved out of the repository root: `upload_data.py` to `scripts/upload_hf_dataset.py`, `README_HF_DATASET.md` to `docs/hf_dataset_card.md`, and `data/dataset.md` to `docs/dataset_preprocessing.md`.
-- The evaluation extras require `pysptk>=1.0`, `speechbrain>=1.0.3` and `transformers` (for the emotion metric).
+- The evaluation extras use version ranges instead of exact pins: scores were checked to be identical up to float rounding with torch 2.6 and 2.9 and numpy 1.26 and 2.2. They require `pysptk>=1.0`, `speechbrain>=1.0.3`, `transformers` (for the emotion metric) and `setuptools<81` (pysptk imports `pkg_resources`).
+- Scorers read audio with soundfile instead of `torchaudio.load`, which needs `torchcodec` from torchaudio 2.9; the samples, and therefore the scores, are unchanged.
+- README links and images are absolute, so the page also renders on PyPI.
 
 ### Removed
 

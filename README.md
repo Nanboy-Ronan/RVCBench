@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="figs/logo.png" alt="RVCBench logo" width="110">
+<img src="https://raw.githubusercontent.com/Nanboy-Ronan/RVCBench/main/figs/logo.png" alt="RVCBench logo" width="110">
 
 # RVCBench
 
@@ -11,15 +11,16 @@
 [![Dataset](https://img.shields.io/badge/Hugging%20Face-Dataset-ffcc00.svg)](https://huggingface.co/datasets/Nanboy/RVCBench)
 [![Website](https://img.shields.io/badge/Website-RVCBench-0d6ea8.svg)](https://nanboy-ronan.github.io/RVCBench/)
 [![CI](https://github.com/Nanboy-Ronan/RVCBench/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Nanboy-Ronan/RVCBench/actions/workflows/ci.yml)
-[![License: CC0-1.0](https://img.shields.io/badge/License-CC0--1.0-lightgrey.svg)](LICENSE)
+[![License: CC0-1.0](https://img.shields.io/badge/License-CC0--1.0-lightgrey.svg)](https://github.com/Nanboy-Ronan/RVCBench/blob/main/LICENSE)
 
 [**Paper**](https://arxiv.org/abs/2602.00443) · [**Website**](https://nanboy-ronan.github.io/RVCBench/) · [**Dataset**](https://huggingface.co/datasets/Nanboy/RVCBench) · [**Demo**](https://huggingface.co/spaces/Nanboy/RVCBench) · [**Evaluate your model**](#evaluate-your-model) · [**Reproduce the paper**](#reproduce-the-paper)
 
 </div>
 
-> [!NOTE]
-> **2026-10** · Score your own model straight from ZipVoice- or Seed-TTS-style batch lists, and compare several models in one table.<br>
-> **2026-09** · RVCBench is accepted to **NeurIPS 2026**.
+> **News**
+>
+> - **2026-10** · Score your own model straight from ZipVoice- or Seed-TTS-style batch lists, and compare several models in one table.
+> - **2026-09** · RVCBench is accepted to **NeurIPS 2026**.
 
 Voice cloning models sound convincing in clean demos. RVCBench measures how they hold up in deployment:
 noisy, accented or overlapping reference audio; irregular or scam text; long-form and multilingual speech;
@@ -27,7 +28,7 @@ compression; and anti-cloning protection, with and without denoising. The
 [paper](https://arxiv.org/abs/2602.00443) defines **18 robustness evaluations** over **14,370 utterances**
 from **204 speakers** and evaluates **18 open-source models**.
 
-<p align="center"><img src="figs/main.png" alt="RVCBench overview" width="100%"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/Nanboy-Ronan/RVCBench/main/figs/main.png" alt="RVCBench overview" width="100%"></p>
 
 ## Evaluate your model
 
@@ -55,7 +56,7 @@ rvcbench score --suite core-v1 --generated outputs/zipvoice --output results/zip
 | `full-v1` | 12,724 | every pair of the paper's datasets, without the protection tasks for now (about a day of scoring) |
 
 Requires Linux, Python 3.10+ and FFmpeg; a GPU is recommended for scoring. More in
-[Evaluate your own model](docs/adding_a_model.md) and the [Core suite](docs/core_suite.md) guide.
+[Evaluate your own model](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/adding_a_model.md) and the [Core suite](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/core_suite.md) guide.
 
 ## What it measures
 
@@ -159,7 +160,7 @@ git clone --branch v1 https://github.com/Nanboy-Ronan/RVCBench.git RVCBench-v1
 ## Run the built-in models
 
 RVCBench includes adapters for 32 voice cloning models, 5 protection methods and a denoising stage.
-Each model runs in its own environment from [`envs/`](envs/).
+Each model runs in its own environment from [`envs/`](https://github.com/Nanboy-Ronan/RVCBench/tree/main/envs).
 
 ```bash
 git clone https://github.com/Nanboy-Ronan/RVCBench.git && cd RVCBench
@@ -168,19 +169,19 @@ rvcbench run --config-name ots_vc/clean/libritts/qwen3_tts_ots dataset.speaker_i
 ```
 
 Every run writes a per-sample `run_manifest.json` with input and output hashes, seeds, failures and metric
-coverage. See [Running the built-in models](docs/models.md) and the [run guide](docs/run_protocol.md).
+coverage. See [Running the built-in models](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/models.md) and the [run guide](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/run_protocol.md).
 
 ## Documentation
 
 | Guide | Covers |
 | --- | --- |
-| [Evaluate your own model](docs/adding_a_model.md) | Prompt and output formats, batch lists, several models, adapters |
-| [Core and full suites](docs/core_suite.md) | Tasks, data, metrics and scoring time |
-| [Running the built-in models](docs/models.md) | Installation options, supported models, protection and denoising |
-| [Datasets](docs/datasets.md) | Hub folders, manifest format, preprocessing |
-| [Run guide](docs/run_protocol.md) | Run records, resuming, scoring saved audio, timing |
-| [Codebase versions](docs/versions.md) | What changed between v1 and v2 |
-| [Contributing](CONTRIBUTING.md) | Development setup, checks and repository layout |
+| [Evaluate your own model](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/adding_a_model.md) | Prompt and output formats, batch lists, several models, adapters |
+| [Core and full suites](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/core_suite.md) | Tasks, data, metrics and scoring time |
+| [Running the built-in models](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/models.md) | Installation options, supported models, protection and denoising |
+| [Datasets](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/datasets.md) | Hub folders, manifest format, preprocessing |
+| [Run guide](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/run_protocol.md) | Run records, resuming, scoring saved audio, timing |
+| [Codebase versions](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/versions.md) | What changed between v1 and v2 |
+| [Contributing](https://github.com/Nanboy-Ronan/RVCBench/blob/main/CONTRIBUTING.md) | Development setup, checks and repository layout |
 
 ## Citation
 
@@ -196,5 +197,5 @@ coverage. See [Running the built-in models](docs/models.md) and the [run guide](
 
 ## License
 
-[CC0-1.0](LICENSE). Model checkpoints, upstream code and source corpora keep their own licenses. Questions and
+[CC0-1.0](https://github.com/Nanboy-Ronan/RVCBench/blob/main/LICENSE). Model checkpoints, upstream code and source corpora keep their own licenses. Questions and
 contributions are welcome through issues and pull requests, or at **ruinanjin@alumni.ubc.ca**.
