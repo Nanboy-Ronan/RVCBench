@@ -36,13 +36,21 @@ def main():
     prompts.add_argument('--suite', default='onboarding-v1')
     prompts.add_argument('--output', type=Path, required=True)
     prompts.add_argument('--data-root', type=Path, help='Local dataset copy laid out like the Hub dataset (default: download)')
-    score = commands.add_parser('score', help='Score audio you generated for a suite and write submission.json')
+    score = commands.add_parser('score', help='Score audio you generated for a suite and write submission.json',
+                                description='Score one model, or several models at once: with several --generated '
+                                            'directories each model is written to OUTPUT/<model>/ and all of them '
+                                            'are compared in OUTPUT/comparison.md.')
     score.add_argument('--suite', default='onboarding-v1')
-    score.add_argument('--generated', type=Path, required=True, help='Directory with <task>/<pair_id>.wav files')
-    score.add_argument('--model', required=True, help='Model name recorded in the results')
-    score.add_argument('--output', type=Path, required=True)
+    score.add_argument('--generated', type=Path, nargs='+', required=True,
+                       help='Directory of <id>.wav (or <task>/<pair_id>.wav) files; several directories score several models')
+    score.add_argument('--model', nargs='+', help='Model name per --generated directory (default: the directory name)')
+    score.add_argument('--output', type=Path, required=True,
+                       help='Results directory of one model; with several models, the parent of one directory per model')
     score.add_argument('--device', default='cpu')
     score.add_argument('--data-root', type=Path, help='Local dataset copy laid out like the Hub dataset (default: download)')
+    compare = commands.add_parser('compare', help='Compare several models scored on the same suite in one table')
+    compare.add_argument('submissions', nargs='+', type=Path, help='submission.json files or results directories')
+    compare.add_argument('--output', type=Path, help='Write comparison.md, .csv and .json here')
     setup = commands.add_parser('setup-scorers', help='Download and verify the model files of the scoring metrics')
     setup.add_argument('--metrics', nargs='+', default=['sim', 'speechmos', 'wer', 'mcd', 'emotion', 'stoi'])
     setup.add_argument('--check-only', action='store_true', help='Verify files that are present; download nothing')
@@ -95,15 +103,34 @@ def main():
         from rvcbench.evaluation.setup import setup_scorers
         print(json.dumps(setup_scorers(args.metrics, check_only=args.check_only), indent=2))
         return
+    if args.command == 'compare':
+        from .comparison import compare_submissions
+        result = compare_submissions(args.submissions, args.output)
+        print(result['markdown'])
+        if args.output:
+            print(f"Wrote {args.output / 'comparison.md'}, .csv and .json")
+        return
     if args.command in ('prompts', 'score'):
-        from .submission import export_prompts, score_submission
+        from .submission import export_prompts, score_submission, score_submissions
         logging.basicConfig(level=logging.INFO, format='%(levelname)s %(message)s')
         if args.command == 'prompts':
             result = export_prompts(args.suite, args.output, data_root=args.data_root)
             print(json.dumps(result, indent=2))
-            print(f"Generate each line of {args.output / 'prompts.jsonl'} and save it at its output_file.")
+            print(f"Generate the {result['prompts']} utterances listed in {args.output / 'prompts.jsonl'} "
+                  f"(or prompts.tsv / prompts.lst for batch scripts); see {args.output / 'README.md'}.")
             return
-        result = score_submission(args.suite, args.generated, args.output, model=args.model,
+        if len(args.generated) > 1:
+            result = score_submissions(args.suite, args.generated, args.output, models=args.model,
+                                       device=args.device, data_root=args.data_root)
+            print(result['markdown'])
+            if not result['leaderboard']:
+                print(f"Note: {result['label']}")
+            print(f"Wrote {args.output / 'comparison.md'} and one directory per model under {args.output}")
+            raise SystemExit(any(m['status'] != 'complete' for m in result['models']))
+        if args.model and len(args.model) != 1:
+            parser.error('--model takes one name per --generated directory')
+        model = args.model[0] if args.model else args.generated[0].resolve().name
+        result = score_submission(args.suite, args.generated[0], args.output, model=model,
                                   device=args.device, data_root=args.data_root)
         print(json.dumps({'suite': result['suite'], 'model': result['model'], 'status': result['status'],
                           'tasks': {name: {'status': task['status'], 'means': task.get('means'),

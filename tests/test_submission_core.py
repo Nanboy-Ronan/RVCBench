@@ -159,9 +159,35 @@ def test_hub_rate_limit_is_retried_then_explained(monkeypatch):
     monkeypatch.setattr(huggingface_hub, 'snapshot_download', limited)
     spec = {'hf_dataset_id': 'x/y', 'hf_revision': 'r'}
     task = {'task': 't', 'hf_config_name': 'Libritts'}
-    with pytest.raises(RuntimeError, match='huggingface-cli login'):
+    with pytest.raises(RuntimeError, match='hf auth login'):
         submission._fetch_from_hub(spec, task, [{'prompt_file_name': 'a.wav', 'target_file_name': 'b.wav'}],
                                    attempts=3, wait_seconds=0)
     assert len(calls) == 3 and calls[0]['max_workers'] == 4
     assert calls[0]['allow_patterns'] == ['Libritts/a.wav', 'Libritts/b.wav']
 
+
+
+def test_an_incomplete_cached_snapshot_is_not_accepted(monkeypatch, tmp_path):
+    import huggingface_hub
+    (tmp_path / 'Libritts').mkdir()
+    (tmp_path / 'Libritts' / 'a.wav').write_bytes(b'a')
+    calls = []
+
+    def partial_then_complete(**kwargs):
+        calls.append(kwargs)
+        if len(calls) == 2:
+            (tmp_path / 'Libritts' / 'b.wav').write_bytes(b'b')
+        return str(tmp_path)
+
+    monkeypatch.setattr(huggingface_hub, 'snapshot_download', partial_then_complete)
+    spec = {'hf_dataset_id': 'x/y', 'hf_revision': 'r'}
+    task = {'task': 't', 'hf_config_name': 'Libritts'}
+    rows = [{'prompt_file_name': 'a.wav', 'target_file_name': 'b.wav'}]
+    assert submission._fetch_from_hub(spec, task, rows, attempts=3, wait_seconds=0) == tmp_path / 'Libritts'
+    assert len(calls) == 2
+    (tmp_path / 'Libritts' / 'b.wav').unlink()
+    calls.clear()
+    monkeypatch.setattr(huggingface_hub, 'snapshot_download', lambda **kwargs: calls.append(kwargs) or str(tmp_path))
+    with pytest.raises(RuntimeError, match='--data-root'):
+        submission._fetch_from_hub(spec, task, rows, attempts=2, wait_seconds=0)
+    assert len(calls) == 2

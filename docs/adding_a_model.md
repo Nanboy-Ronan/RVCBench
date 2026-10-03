@@ -20,21 +20,65 @@ python -m pip install 'rvcbench[eval] @ git+https://github.com/Nanboy-Ronan/RVCB
 rvcbench prompts --suite core-v1 --output prompts/
 ```
 
-`prompts/prompts.jsonl` has one line per utterance:
+`prompts/` lists each utterance in three files; use the one your code already reads.
+
+| File | Line format | Read by |
+| --- | --- | --- |
+| `prompts.tsv` | `id<TAB>reference_text<TAB>reference_audio<TAB>text` | ZipVoice `--test-list` |
+| `prompts.lst` | `id\|reference_text\|reference_audio\|text` | Seed-TTS-eval scripts (F5-TTS, CosyVoice, ...) |
+| `prompts.jsonl` | one JSON object per line (below) | your own script |
 
 ```json
-{"task": "libritts", "pair_id": "LibriTTS-121-000039", "speaker_id": "121",
- "reference_audio": "references/libritts/LibriTTS-121-000039.wav", "reference_text": "He had for his own town residence ...",
- "text": "'You'll receive the packet Thursday morning?' I inquired.", "language": "EN",
- "output_file": "libritts/LibriTTS-121-000039.wav"}
+{"id": "english-libritts__LibriTTS-4992-000033", "task": "english-libritts", "pair_id": "LibriTTS-4992-000033",
+ "speaker_id": "4992", "reference_audio": "references/english-libritts/LibriTTS-4992-000033.wav",
+ "reference_sha256": "3849cd34...", "reference_text": "I wish to prove my friendship to Miss Milner, ...",
+ "text": "The Carey children had only found it by accident.", "language": "EN",
+ "output_file": "english-libritts/LibriTTS-4992-000033.wav"}
 ```
 
-Synthesize each `text` in the voice of `reference_audio` and save a mono WAV at
-`<your directory>/<output_file>`. Then score:
+Synthesize each `text` in the voice of `reference_audio` and save a mono WAV as `<your directory>/<id>.wav`
+(one flat directory, as batch scripts write it) or as `<your directory>/<output_file>`. Reference paths in
+`prompts.tsv` and `prompts.lst` are absolute, so the lists work from any directory; export again if you
+move `prompts/`. Then score:
 
 ```bash
-rvcbench score --suite core-v1 --generated my_outputs/ --model my-model --output results/my-model/ --device cuda
+rvcbench score --suite core-v1 --generated my_outputs/ --output results/my-model/ --device cuda
 ```
+
+The model name defaults to the directory name (`my_outputs` here); set it with `--model`.
+
+### Batch inference scripts
+
+With ZipVoice, for example, the whole loop is its own batch command:
+
+```bash
+python3 -m zipvoice.bin.infer_zipvoice --model-name zipvoice --test-list prompts/prompts.tsv --res-dir outputs/zipvoice
+rvcbench score --suite core-v1 --generated outputs/zipvoice --output results/zipvoice --device cuda
+```
+
+Scripts that read Seed-TTS-eval lists take `prompts/prompts.lst` and write `<utt>.wav`, which is the same
+layout. The lists carry no language column; `language` is in `prompts.jsonl` for models that need it.
+
+### Several models at once
+
+```bash
+rvcbench score --suite core-v1 --generated outputs/zipvoice outputs/zipvoice_distill --output results/ --device cuda
+```
+
+Each directory is scored as one model, named after the directory (or `--model a b`), into
+`results/<model>/`. Each metric model is loaded once for all of them. `results/comparison.md` shows every
+task and metric with one column per model, the best value in bold and each perturbed condition's change
+against its clean counterpart; `comparison.csv` and `comparison.json` hold the same data.
+
+To compare results scored at different times, for example a new checkpoint against earlier ones:
+
+```bash
+rvcbench compare results/*/submission.json --output results/
+```
+
+Only submissions of the same suite version are compared.
+
+### Results
 
 - `results/my-model/submission.json` holds the per-task metric means, coverage, the hash of every scored file and the suite version. Each task also gets a full run directory, so `rvcbench status` and `rvcbench report` work on `results/my-model/<task>/`.
 - A missing or invalid file fails that sample, and a task with a failed sample is `partial`. A file identical to the dataset's target recording is rejected.

@@ -1,0 +1,334 @@
+{
+  "suite": "full-v1",
+  "version": 1,
+  "leaderboard": false,
+  "label": "RVCBench-Full preview: data and protocol under review. Scores are not leaderboard results.",
+  "paper": "https://arxiv.org/abs/2602.00443",
+  "hf_dataset_id": "Nanboy/RVCBench",
+  "hf_revision": "a932bd08d6858f14bdda52356dde5a7b771f0245",
+  "evaluation": {
+    "required_metrics": [
+      "sim",
+      "speechmos",
+      "wer",
+      "mcd"
+    ],
+    "wer_normalization": "ascii_punctuation_removed_v2",
+    "generated_audio_max_seconds": null,
+    "seed": 42,
+    "bootstrap": {
+      "enabled": true,
+      "num_samples": 1000,
+      "confidence_level": 0.95,
+      "seed": null
+    }
+  },
+  "not_included": {
+    "RVC-Detectability/GroundTruth, Deepfake": "deepfake detectors are not yet part of this package (planned for core-v1.1)",
+    "RVC-Expression/Persuasion EmTXT": "the audio-LLM emotion-alignment judge is planned for core-v1.1; EMC is reported",
+    "RVC-AdvNoise, RVC-AntiProtect": "the protected references of every LibriTTS prompt are not yet in the Hub dataset; core-v1 covers these evaluations"
+  },
+  "tasks": [
+    {
+      "task": "audioshift",
+      "dimension": "input",
+      "evaluation": "RVC-AudioShift/Demography",
+      "group_by": [
+        "accent",
+        "gender",
+        "age_group"
+      ],
+      "dataset_config": "vctk",
+      "manifest": "audioshift.metadata.json.gz",
+      "selection": "audioshift.selection.json.gz",
+      "hf_config_name": "VCTK"
+    },
+    {
+      "task": "textshift-standard",
+      "dimension": "input",
+      "evaluation": "RVC-TextShift/Standard prompts (reference for Hallucination)",
+      "dataset_config": "vctk",
+      "manifest": "textshift-standard.metadata.json.gz",
+      "selection": "textshift-standard.selection.json.gz",
+      "hf_config_name": "VCTK"
+    },
+    {
+      "task": "textshift-hallucination",
+      "dimension": "input",
+      "evaluation": "RVC-TextShift/Hallucination",
+      "anchor": "textshift-standard",
+      "dataset_config": "vctk_text_robust",
+      "manifest": "textshift-hallucination.metadata.json.gz",
+      "selection": "textshift-hallucination.selection.json.gz",
+      "hf_config_name": "vctk_text_robust"
+    },
+    {
+      "task": "textshift-scam",
+      "dimension": "input",
+      "evaluation": "RVC-TextShift/Scam; RVC-Expression/Persuasion",
+      "anchor": "textshift-scam-standard",
+      "required_metrics": [
+        "sim",
+        "speechmos",
+        "wer",
+        "sva",
+        "emotion"
+      ],
+      "group_by": [
+        "spam_type"
+      ],
+      "dataset_config": "robotcall",
+      "manifest": "textshift-scam.metadata.json.gz",
+      "selection": "textshift-scam.selection.json.gz",
+      "hf_config_name": "robotcall"
+    },
+    {
+      "task": "textshift-scam-standard",
+      "dimension": "input",
+      "evaluation": "RVC-Expression/Normal VCTK context (reference for Scam)",
+      "required_metrics": [
+        "sim",
+        "speechmos",
+        "wer",
+        "sva",
+        "emotion"
+      ],
+      "dataset_config": "robotcall",
+      "manifest": "textshift-scam-standard.metadata.json.gz",
+      "selection": "textshift-scam-standard.selection.json.gz",
+      "hf_config_name": "robotcall"
+    },
+    {
+      "task": "english-libritts",
+      "dimension": "generation",
+      "evaluation": "RVC-Multilingual/English-VC",
+      "group_by": [
+        "gender"
+      ],
+      "dataset_config": "libritts",
+      "manifest": "english-libritts.metadata.json.gz",
+      "selection": "english-libritts.selection.json.gz",
+      "hf_config_name": "Libritts"
+    },
+    {
+      "task": "chinese",
+      "dimension": "generation",
+      "evaluation": "RVC-Multilingual/Chinese-VC",
+      "dataset_config": "aishell",
+      "manifest": "chinese.metadata.json.gz",
+      "selection": "chinese.selection.json.gz",
+      "hf_config_name": "AISHELL1_dev"
+    },
+    {
+      "task": "crosslingual",
+      "dimension": "generation",
+      "evaluation": "RVC-Multilingual/CrossLingual",
+      "group_by": [
+        "direction"
+      ],
+      "dataset_config": "bilingual_uedin",
+      "manifest": "crosslingual.metadata.json.gz",
+      "selection": "crosslingual.selection.json.gz",
+      "hf_config_name": "Bilingual_uedin"
+    },
+    {
+      "task": "french",
+      "dimension": "generation",
+      "evaluation": "RVC-Multilingual/French (Appendix Table 38)",
+      "dataset_config": "french",
+      "manifest": "french.metadata.json.gz",
+      "selection": "french.selection.json.gz",
+      "hf_config_name": "CommonVoiceFR_dev"
+    },
+    {
+      "task": "longtext",
+      "dimension": "generation",
+      "evaluation": "RVC-LongContext/LongText",
+      "dataset_config": "long_librispeech",
+      "manifest": "longtext.metadata.json.gz",
+      "selection": "longtext.selection.json.gz",
+      "hf_config_name": "Long_context"
+    },
+    {
+      "task": "longaudio",
+      "dimension": "generation",
+      "evaluation": "RVC-LongContext/LongAudio",
+      "group_by": [
+        "reference_duration_bin"
+      ],
+      "dataset_config": "libritts",
+      "manifest": "longaudio.metadata.json.gz",
+      "selection": "longaudio.selection.json.gz",
+      "hf_config_name": "Libritts"
+    },
+    {
+      "task": "background-clean",
+      "dimension": "perturbation",
+      "evaluation": "RVC-PassiveNoise/Background (clean references)",
+      "dataset_config": "background_noise",
+      "manifest": "background-clean.metadata.json.gz",
+      "selection": "background-clean.selection.json.gz",
+      "hf_config_name": "Background_noise"
+    },
+    {
+      "task": "background",
+      "dimension": "perturbation",
+      "evaluation": "RVC-PassiveNoise/Background",
+      "anchor": "background-clean",
+      "group_by": [
+        "noise"
+      ],
+      "dataset_config": "background_noise",
+      "manifest": "background.metadata.json.gz",
+      "selection": "background.selection.json.gz",
+      "hf_config_name": "Background_noise"
+    },
+    {
+      "task": "multispeaker-clean",
+      "dimension": "perturbation",
+      "evaluation": "RVC-PassiveNoise/MultiSpeaker (clean references)",
+      "dataset_config": "multispeaker_libri",
+      "manifest": "multispeaker-clean.metadata.json.gz",
+      "selection": "multispeaker-clean.selection.json.gz",
+      "hf_config_name": "Multispeaker_libri"
+    },
+    {
+      "task": "multispeaker",
+      "dimension": "perturbation",
+      "evaluation": "RVC-PassiveNoise/MultiSpeaker",
+      "anchor": "multispeaker-clean",
+      "group_by": [
+        "snr",
+        "interferer"
+      ],
+      "dataset_config": "multispeaker_libri",
+      "manifest": "multispeaker.metadata.json.gz",
+      "selection": "multispeaker.selection.json.gz",
+      "hf_config_name": "Multispeaker_libri"
+    },
+    {
+      "task": "compression-mp3-64k",
+      "dimension": "output",
+      "evaluation": "RVC-Compression/CodecCompression",
+      "derived_from": "audioshift",
+      "transform": {
+        "kind": "codec",
+        "codec": "mp3",
+        "bitrate": "64k",
+        "sample_rate": 24000
+      },
+      "required_metrics": [
+        "stoi",
+        "mcd",
+        "sim",
+        "wer"
+      ]
+    },
+    {
+      "task": "compression-aac-64k",
+      "dimension": "output",
+      "evaluation": "RVC-Compression/CodecCompression",
+      "derived_from": "audioshift",
+      "transform": {
+        "kind": "codec",
+        "codec": "aac",
+        "bitrate": "64k",
+        "sample_rate": 24000
+      },
+      "required_metrics": [
+        "stoi",
+        "mcd",
+        "sim",
+        "wer"
+      ]
+    },
+    {
+      "task": "compression-opus-24k",
+      "dimension": "output",
+      "evaluation": "RVC-Compression/CodecCompression",
+      "derived_from": "audioshift",
+      "transform": {
+        "kind": "codec",
+        "codec": "opus",
+        "bitrate": "24k",
+        "sample_rate": 24000
+      },
+      "required_metrics": [
+        "stoi",
+        "mcd",
+        "sim",
+        "wer"
+      ]
+    },
+    {
+      "task": "compression-mp3-32k",
+      "dimension": "output",
+      "evaluation": "RVC-Compression/CodecCompression",
+      "derived_from": "audioshift",
+      "transform": {
+        "kind": "codec",
+        "codec": "mp3",
+        "bitrate": "32k",
+        "sample_rate": 24000
+      },
+      "required_metrics": [
+        "stoi",
+        "mcd",
+        "sim",
+        "wer"
+      ]
+    },
+    {
+      "task": "compression-aac-32k",
+      "dimension": "output",
+      "evaluation": "RVC-Compression/CodecCompression",
+      "derived_from": "audioshift",
+      "transform": {
+        "kind": "codec",
+        "codec": "aac",
+        "bitrate": "32k",
+        "sample_rate": 24000
+      },
+      "required_metrics": [
+        "stoi",
+        "mcd",
+        "sim",
+        "wer"
+      ]
+    },
+    {
+      "task": "compression-opus-16k",
+      "dimension": "output",
+      "evaluation": "RVC-Compression/CodecCompression",
+      "derived_from": "audioshift",
+      "transform": {
+        "kind": "codec",
+        "codec": "opus",
+        "bitrate": "16k",
+        "sample_rate": 24000
+      },
+      "required_metrics": [
+        "stoi",
+        "mcd",
+        "sim",
+        "wer"
+      ]
+    },
+    {
+      "task": "compression-narrowband",
+      "dimension": "output",
+      "evaluation": "RVC-Compression/NarrowBand",
+      "derived_from": "audioshift",
+      "transform": {
+        "kind": "narrowband",
+        "sample_rate": 24000
+      },
+      "required_metrics": [
+        "stoi",
+        "mcd",
+        "sim",
+        "wer"
+      ]
+    }
+  ]
+}

@@ -78,3 +78,43 @@ mean of each metric per task; each task's run directory also records 95% bootstr
   (paper Table 25). Returning the reference unchanged scores SIM 1.0 on this task; WER exposes it.
 - Not included in `core-v1`: RVC-Detectability (deepfake detectors) and the audio-LLM emotion-alignment judge
   of RVC-Expression. Both are planned for `core-v1.1`.
+
+## Full suite
+
+`full-v1` has the same tasks, metrics and anchors as `core-v1`, with every pair of each task's dataset
+instead of a sample. Every `core-v1` pair is also in `full-v1`, with the same identifier and inputs.
+
+| Task | Utterances | Task | Utterances |
+| --- | ---: | --- | ---: |
+| `audioshift` | 2,000 | `french` | 2,000 |
+| `textshift-standard` | 200 | `longtext` | 20 |
+| `textshift-hallucination` | 200 | `longaudio` | 156 |
+| `textshift-scam` | 200 | `background-clean` | 800 |
+| `textshift-scam-standard` | 100 | `background` | 800 |
+| `english-libritts` | 2,000 | `multispeaker-clean` | 800 |
+| `chinese` | 1,998 | `multispeaker` | 800 |
+| `crosslingual` | 650 | **Total** | **12,724** |
+
+The seven compression tasks re-encode all 2,000 `audioshift` outputs.
+
+Not yet in `full-v1`: the AdvNoise and AntiProtect tasks. The protected versions of all 2,000 LibriTTS
+references are not yet in the Hub dataset; `core-v1` covers these evaluations.
+
+Download the dataset once (12.6 GB) and pass it to both commands:
+
+```bash
+hf download Nanboy/RVCBench --repo-type dataset --revision a932bd08d6858f14bdda52356dde5a7b771f0245 \
+  --local-dir rvcbench-data
+rvcbench prompts --suite full-v1 --output prompts-full/ --data-root rvcbench-data
+rvcbench score --suite full-v1 --generated outputs/my-model --output results-full/my-model \
+  --data-root rvcbench-data --device cuda
+```
+
+Log in first (`hf auth login`): the Hub rate-limits large anonymous downloads. If the download stops,
+run it again; files already present are kept. Both commands check every input against the frozen
+hashes, so a local copy that differs from the pinned revision is refused.
+
+- `english-libritts` includes the 19 speakers without a gender label in the dataset; they appear as
+  `unknown` in the gender breakdown.
+- 22 `textshift-hallucination` texts span several lines. `prompts.jsonl` keeps them as they are; the batch
+  lists (`prompts.tsv`, `prompts.lst`) write the line breaks as spaces.

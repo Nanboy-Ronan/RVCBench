@@ -35,13 +35,49 @@ Generate speech with your own code, in your own environment, and let RVCBench sc
 pip install "rvcbench[eval] @ git+https://github.com/Nanboy-Ronan/RVCBench@main"
 rvcbench setup-scorers                                    # once: download the metric models
 rvcbench prompts --suite core-v1 --output prompts/        # 480 reference clips and texts
-# synthesize each line of prompts/prompts.jsonl and save it at <outputs>/<output_file>
-rvcbench score --suite core-v1 --generated outputs/ --model my-model --output results/my-model/ --device cuda
+# generate every line of prompts/prompts.tsv into outputs/my-model/<id>.wav
+rvcbench score --suite core-v1 --generated outputs/my-model --output results/my-model --device cuda
 ```
 
-`results/my-model/submission.json` reports SIM, MOS, WER and MCD for every evaluation, and the change of
-each perturbed condition against its clean counterpart. The suite pins the dataset revision and the hash
-of every input, exports only reference audio and texts, and fails a sample whose file is missing or invalid.
+`prompts/` lists the utterances in the formats that batch-inference scripts already read, so you
+usually do not need to write a loop:
+
+| File | Line format | Read by |
+| --- | --- | --- |
+| `prompts.tsv` | `id<TAB>reference_text<TAB>reference_audio<TAB>text` | ZipVoice `--test-list` |
+| `prompts.lst` | `id\|reference_text\|reference_audio\|text` | Seed-TTS-eval scripts (F5-TTS, CosyVoice, ...) |
+| `prompts.jsonl` | JSON, also with language and speaker | your own script |
+
+For example, ZipVoice reads the TSV and writes `<id>.wav` files, which `rvcbench score` reads directly:
+
+```bash
+python3 -m zipvoice.bin.infer_zipvoice --model-name zipvoice --test-list prompts/prompts.tsv --res-dir outputs/zipvoice
+rvcbench score --suite core-v1 --generated outputs/zipvoice --output results/zipvoice --device cuda
+```
+
+To compare several models or checkpoints, pass all their output directories at once. Each metric model
+is loaded once for all of them, and `results/comparison.md` puts them side by side:
+
+```bash
+rvcbench score --suite core-v1 --generated outputs/zipvoice outputs/zipvoice_distill --output results/ --device cuda
+rvcbench compare results/*/submission.json --output results/   # rebuild the table, e.g. after adding a model
+```
+
+Pick a suite by how much you want to generate. `core-v1` is a subset of `full-v1`, with the same tasks:
+
+| Suite | Utterances | Use it to |
+| --- | ---: | --- |
+| `onboarding-v1` | 52 | check the workflow end to end |
+| `core-v1` | 480 | evaluate quickly; 16 of the paper's 18 evaluations |
+| `full-v1` | 12,724 | evaluate on every pair of the paper's datasets; protection tasks still in `core-v1` only |
+
+For `full-v1`, download the dataset once (12.6 GB) and pass it to both commands with `--data-root`; see
+[Full suite](docs/core_suite.md#full-suite).
+
+`submission.json` reports SIM, MOS, WER and MCD for every evaluation, and the change of each perturbed
+condition against its clean counterpart. The suite pins the dataset revision and the hash of every input,
+exports only reference audio and texts, and fails a sample whose file is missing or invalid. A model that
+does not support a language leaves those tasks incomplete; the other tasks are still scored.
 
 - [Core suite](docs/core_suite.md): which paper evaluation each task covers, its data and metrics.
 - [Evaluate your own model](docs/adding_a_model.md): the prompt and output formats, and the alternative of
@@ -197,7 +233,7 @@ rvcbench smoke --output results/smoke         # synthetic CPU pipeline check, no
 | `dev` | Tests, lint, pre-commit and build tools |
 
 - **FFmpeg** is needed for the compression tasks and by several models.
-- **Hugging Face login** (`huggingface-cli login`) is recommended: anonymous downloads are rate-limited.
+- **Hugging Face login** (`hf auth login`) is recommended: anonymous downloads are rate-limited.
 - **Scorer models** are stored in `$RVCBENCH_ASSET_DIR`, else `./checkpoints/` when it exists, else
   `~/.cache/rvcbench/`; see [model environments](docs/model_environments.md).
 - If installing `[eval]` reports that no `pysptk` version matches, see

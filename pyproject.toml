@@ -69,6 +69,7 @@ rvcbench = [
   "configs/**/*.md",
   "benchmark/model_catalog.json",
   "suites/*/*.json",
+  "suites/*/*.json.gz",
   "datasets/*.csv",
   "models/bert/*.json",
   "models/text/*.rep",

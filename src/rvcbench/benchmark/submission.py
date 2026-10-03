@@ -1,9 +1,11 @@
 """Score audio generated outside RVCBench against a fixed, versioned suite.
 
 ``export_prompts`` writes the reference audio, transcripts and expected output file
-names of a suite. Anyone can then generate speech with their own code, and
-``score_submission`` scores the files with the suite's fixed evaluation protocol.
-Target recordings are never exported; they are only read while scoring.
+names of a suite, as JSON lines and as the batch lists that model repositories read.
+Anyone can then generate speech with their own code, and ``score_submission`` scores
+the files with the suite's fixed evaluation protocol; ``score_submissions`` scores
+several models at once. Target recordings are never exported; they are only read
+while scoring.
 """
 from __future__ import annotations
 
@@ -22,6 +24,33 @@ PROTOCOL = 'rvcbench-submission-v1'
 SUITES_DIR = Path(__file__).resolve().parents[1] / 'suites'
 CONFIGS_DIR = Path(__file__).resolve().parents[1] / 'configs'
 _SAFE_NAME = re.compile(r'[A-Za-z0-9][A-Za-z0-9_.-]*')
+ID_SEPARATOR = '__'
+
+
+def _safe(name):
+    return bool(_SAFE_NAME.fullmatch(name)) and ID_SEPARATOR not in name
+
+
+def output_id(task, pair_id):
+    """Flat file stem of one utterance, ``<task>__<pair_id>``, used by the batch lists."""
+    return f'{task}{ID_SEPARATOR}{pair_id}'
+
+
+def submitted_file(generated, task, pair_id):
+    """``<task>/<pair_id>.wav`` under ``generated``, else the flat ``<task>__<pair_id>.wav``."""
+    nested = Path(generated) / task / f'{pair_id}.wav'
+    flat = Path(generated) / f'{output_id(task, pair_id)}.wav'
+    return flat if flat.is_file() and not nested.is_file() else nested
+
+
+def read_json(path):
+    """Read a suite file; ``.json.gz`` files are decompressed."""
+    path = Path(path)
+    if path.name.endswith('.gz'):
+        import gzip
+        with gzip.open(path, 'rt', encoding='utf-8') as handle:
+            return json.load(handle)
+    return json.loads(path.read_text())
 
 
 def available_suites():
@@ -41,8 +70,8 @@ def load_suite(name_or_path):
         if key not in spec:
             raise ValueError(f'Suite {path} is missing {key!r}')
     tasks = [task['task'] for task in spec['tasks']]
-    if not tasks or len(set(tasks)) != len(tasks) or not all(_SAFE_NAME.fullmatch(t) for t in tasks):
-        raise ValueError(f'Suite {path} needs unique, file-name-safe task names')
+    if not tasks or len(set(tasks)) != len(tasks) or not all(_safe(t) for t in tasks):
+        raise ValueError(f'Suite {path} needs unique, file-name-safe task names without {ID_SEPARATOR!r}')
     generated = {task['task'] for task in spec['tasks'] if not task.get('derived_from')}
     for task in spec['tasks']:
         if task.get('derived_from') and (task['derived_from'] not in generated or 'transform' not in task):
@@ -63,7 +92,7 @@ def suite_record(spec):
 
 
 def _frozen_selection(spec, task):
-    selection = json.loads((spec['_directory'] / task['selection']).read_text())
+    selection = read_json(spec['_directory'] / task['selection'])
     return selection, {sample['sample_id']: sample for sample in selection['samples']}
 
 
@@ -73,7 +102,12 @@ def _task_root_name(task):
     return '' if task.get('paths') == 'repo' else task['hf_config_name']
 
 
-def _fetch_from_hub(spec, task, manifest_rows, *, attempts=4, wait_seconds=30):
+_RATE_LIMITED = ('The Hugging Face Hub is rate-limiting the download. Log in with `hf auth login` '
+                 '(or set HF_TOKEN) and rerun; files already downloaded are reused. For a large suite, download '
+                 'the dataset once and pass it with --data-root (see the Core suite guide).')
+
+
+def _fetch_from_hub(spec, task, manifest_rows, *, attempts=6, wait_seconds=60):
     import time
     from huggingface_hub import snapshot_download
     from huggingface_hub.errors import HfHubHTTPError
@@ -81,29 +115,31 @@ def _fetch_from_hub(spec, task, manifest_rows, *, attempts=4, wait_seconds=30):
     names = sorted({row[key] for row in manifest_rows for key in ('prompt_file_name', 'target_file_name')})
     for attempt in range(1, attempts + 1):
         try:
-            local = snapshot_download(repo_id=spec['hf_dataset_id'], repo_type='dataset', revision=spec['hf_revision'],
-                                      allow_patterns=[f'{prefix}/{name}' if prefix else name for name in names],
-                                      max_workers=4)
-            return Path(local) / prefix
+            local = Path(snapshot_download(repo_id=spec['hf_dataset_id'], repo_type='dataset',
+                                           revision=spec['hf_revision'], max_workers=4,
+                                           allow_patterns=[f'{prefix}/{name}' if prefix else name for name in names]))
+            # When rate-limited, the Hub client can fall back to an incomplete cached snapshot.
+            if all((local / prefix / name).is_file() for name in names):
+                return local / prefix
         except HfHubHTTPError as exc:
             status = getattr(getattr(exc, 'response', None), 'status_code', None)
             if status != 429:
                 raise
             if attempt == attempts:
-                raise RuntimeError('The Hugging Face Hub is rate-limiting anonymous downloads. Log in with '
-                                   '`huggingface-cli login` (or set HF_TOKEN) and rerun; files already '
-                                   'downloaded are reused.') from exc
-            time.sleep(wait_seconds * attempt)
+                raise RuntimeError(_RATE_LIMITED) from exc
+        if attempt == attempts:
+            raise RuntimeError(_RATE_LIMITED)
+        time.sleep(min(300, wait_seconds * attempt))
 
 
 def _task_samples(spec, task, data_root, logger):
     """Load one task's frozen samples and verify every input against the frozen hashes."""
     from rvcbench.datasets.zero_shot import ZeroShotDataset
     manifest = (spec['_directory'] / task['manifest']).resolve()
-    rows = json.loads(manifest.read_text())
+    rows = read_json(manifest)
     pair_ids = [str(row.get('pair_id') or '') for row in rows]
-    if len(set(pair_ids)) != len(pair_ids) or not all(_SAFE_NAME.fullmatch(p) for p in pair_ids):
-        raise ValueError(f"Task {task['task']}: pair_id values must be unique and file-name safe")
+    if len(set(pair_ids)) != len(pair_ids) or not all(_safe(p) for p in pair_ids):
+        raise ValueError(f"Task {task['task']}: pair_id values must be unique, file-name safe and free of {ID_SEPARATOR!r}")
     root = (Path(data_root) / _task_root_name(task)) if data_root else _fetch_from_hub(spec, task, rows)
     dataset_config = OmegaConf.load(CONFIGS_DIR / 'dataset' / f"{task['dataset_config']}.yaml")
     dataset_config.root_path = str(root)
@@ -142,7 +178,8 @@ def export_prompts(suite, output, *, data_root=None, logger=None):
             reference = Path('references') / task['task'] / f"{record['pair_id']}{suffix}"
             (output / reference).parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(sample.prompt_path, output / reference)
-            entries.append({'task': task['task'], 'pair_id': record['pair_id'], 'speaker_id': record['speaker_id'],
+            entries.append({'id': output_id(task['task'], record['pair_id']),
+                            'task': task['task'], 'pair_id': record['pair_id'], 'speaker_id': record['speaker_id'],
                             'reference_audio': reference.as_posix(), 'reference_sha256': record['prompt_sha256'],
                             'reference_text': record['prompt_text'], 'text': record['target_text'],
                             'language': record['target_language'],
@@ -150,6 +187,7 @@ def export_prompts(suite, output, *, data_root=None, logger=None):
     with (output / 'prompts.jsonl').open('w', encoding='utf-8') as handle:
         for entry in entries:
             handle.write(json.dumps(entry, ensure_ascii=False) + '\n')
+    write_batch_lists(entries, output)
     atomic_json(output / 'suite.json', {**suite_record(spec), 'tasks': [t['task'] for t in spec['tasks'] if not t.get('derived_from')],
                                         'prompts': len(entries)})
     (output / 'README.md').write_text(_PROMPTS_README.format(
@@ -157,18 +195,57 @@ def export_prompts(suite, output, *, data_root=None, logger=None):
     return {'suite': spec['suite'], 'prompts': len(entries), 'output': str(output.resolve())}
 
 
+BATCH_LISTS = {
+    # ZipVoice --test-list: {wav_name}\t{prompt_transcription}\t{prompt_wav}\t{text}
+    'prompts.tsv': '\t',
+    # Seed-TTS-eval meta list (F5-TTS, CosyVoice and others): utt|prompt_text|prompt_wav|text
+    'prompts.lst': '|',
+}
+
+
+def _one_line(text):
+    return re.sub(r'[ \t]*(?:\r\n|\r|\n)[ \t]*', ' ', text)
+
+
+def write_batch_lists(entries, output):
+    """Write the utterances as batch-inference lists with absolute reference paths.
+
+    Each line names its output ``<id>``; a model that writes ``<id>.wav`` into one directory
+    produces a layout that ``rvcbench score`` reads directly. A line break inside a text (some
+    hallucination prompts span lines) is written as a space; ``prompts.jsonl`` keeps the text as is.
+    """
+    output = Path(output).resolve()
+    for name, separator in BATCH_LISTS.items():
+        lines = []
+        for entry in entries:
+            fields = [entry['id'], _one_line(entry['reference_text']), str(output / entry['reference_audio']),
+                      _one_line(entry['text'])]
+            if any(separator in field for field in fields):
+                raise ValueError(f"{entry['id']}: a field contains {separator!r}; it cannot be written to {name}")
+            lines.append(separator.join(fields))
+        (output / name).write_text('\n'.join(lines) + '\n', encoding='utf-8')
+
+
 _PROMPTS_README = """# {suite} prompts
 
 {label}
 
-`prompts.jsonl` lists {count} utterances. For each line:
+{count} utterances to generate. Each one has a reference recording (`reference_audio`, with its
+transcript `reference_text`) and a `text` to speak in that voice. Use whichever file suits your code:
 
-1. Synthesize `text` in the voice of `reference_audio` (its transcript is `reference_text`).
-2. Save the result as a mono WAV file at `<your output directory>/<output_file>`.
+| File | Format | Read by |
+| --- | --- | --- |
+| `prompts.jsonl` | one JSON object per line, with language and speaker | your own script |
+| `prompts.tsv` | `id<TAB>reference_text<TAB>reference_audio<TAB>text` | ZipVoice `--test-list` |
+| `prompts.lst` | `id|reference_text|reference_audio|text` | Seed-TTS-eval scripts (F5-TTS, CosyVoice, ...) |
 
-Then score the directory:
+Reference paths in the lists are absolute; export again if you move this directory. A line break
+inside a text is written as a space in the lists; `prompts.jsonl` keeps the exact text.
 
-    rvcbench score --suite {suite} --generated <your output directory> --model <model name> --output <results directory>
+Save each result as a mono WAV file, either as `<output directory>/<id>.wav` (one flat
+directory, as batch scripts write it) or as `<output directory>/<output_file>`. Then score:
+
+    rvcbench score --suite {suite} --generated <output directory> --output <results directory>
 
 A missing or invalid file counts as a failed sample. Do not use the target recordings of
 the dataset; a file identical to a target recording that was not exported is rejected.
@@ -183,12 +260,13 @@ def _submitted_rows(spec, task, generated, audio_dir, data_root, logger):
     from .runner import check_audio
     dataset, samples, rows = _task_samples(spec, task, data_root, logger)
     for sample, row in zip(samples, rows):
-        submitted = Path(generated) / task['task'] / f"{row['pair_id']}.wav"
+        submitted = submitted_file(generated, task['task'], row['pair_id'])
         row.update(metrics={}, attempts=0, submitted_path=str(submitted))
         for column in _group_columns(task):
             row.setdefault('groups', {})[column] = str(sample.extra.get(column) or '')
         if not submitted.is_file():
-            row.update(status='generation_failed', error=f"Missing submitted audio: {task['task']}/{row['pair_id']}.wav")
+            row.update(status='generation_failed', error=f"Missing submitted audio: {task['task']}/{row['pair_id']}.wav "
+                                                         f"or {output_id(task['task'], row['pair_id'])}.wav")
             continue
         try:
             check_audio(submitted)
@@ -201,7 +279,7 @@ def _submitted_rows(spec, task, generated, audio_dir, data_root, logger):
         if sha == row['target_sha256'] and row['target_sha256'] != row['prompt_sha256']:
             row.update(status='generation_failed', error='Submitted audio is the target recording')
             continue
-        stored = audio_dir / submitted.name
+        stored = audio_dir / f"{row['pair_id']}.wav"
         shutil.copyfile(submitted, stored)
         row.update(status='generated', error=None, generated_path=str(stored.resolve()), generated_sha256=sha)
     return rows, {'dataset': OmegaConf.to_container(dataset.dataset_config),
@@ -276,7 +354,7 @@ def _group_means(rows, required, column):
     return {group: metric_means(members, required) for group, members in sorted(groups.items())}
 
 
-def _run_task(spec, task, rows, details, task_dir, label, device, logger):
+def _run_task(spec, task, rows, details, task_dir, label, device, logger, scorers=None):
     evaluation = spec['evaluation']
     events = task_dir / 'sample_events.jsonl'
     for row in rows:
@@ -305,7 +383,7 @@ def _run_task(spec, task, rows, details, task_dir, label, device, logger):
                                    cap=evaluation.get('generated_audio_max_seconds'),
                                    bootstrap_config=evaluation.get('bootstrap'),
                                    wer_normalization=evaluation.get('wer_normalization', 'ascii_punctuation_removed_v2'),
-                                   on_sample=lambda row: append_sample_event(events, row))
+                                   on_sample=lambda row: append_sample_event(events, row), scorers=scorers)
             manifest['evaluated'] = True
             manifest['evaluation_fingerprint'] = metrics['evaluation_fingerprint']
         manifest['coverage'] = coverage(rows, required, evaluated=manifest['evaluated'])
@@ -337,29 +415,54 @@ def relative_change(task_means, anchor_means):
             if metric in anchor_means and anchor_means[metric] not in (0, 0.0)}
 
 
-def score_submission(suite, generated, output, *, model, device='cpu', data_root=None, logger=None):
-    """Score externally generated audio; writes one run per task and ``submission.json``."""
+def _expected_outputs(spec):
+    for task in spec['tasks']:
+        if not task.get('derived_from'):
+            for row in read_json(spec['_directory'] / task['manifest']):
+                yield task['task'], str(row['pair_id'])
+
+
+def _check_generated(spec, generated):
+    if not Path(generated).is_dir():
+        raise ValueError(f'Generated audio directory not found: {generated}')
+    if not any(submitted_file(generated, task, pair_id).is_file() for task, pair_id in _expected_outputs(spec)):
+        raise ValueError(f"No audio for suite {spec['suite']} in {generated}. Expected <id>.wav files "
+                         f"(e.g. {output_id(*next(_expected_outputs(spec)))}.wav) or <task>/<pair_id>.wav files, "
+                         f"as listed by `rvcbench prompts`.")
+
+
+def score_submission(suite, generated, output, *, model, device='cpu', data_root=None, logger=None, scorers=None):
+    """Score externally generated audio; writes one run per task and ``submission.json``.
+
+    Each metric model is loaded once for the whole suite; pass a ``ScorerPool`` as
+    ``scorers`` to share the loaded models with other submissions.
+    """
     import rvcbench
+    from rvcbench.evaluation.pipeline import ScorerPool
     logger = logger or logging.getLogger('rvcbench.score')
     spec = load_suite(suite)
     if not str(model).strip():
         raise ValueError('A model name is required')
-    if not Path(generated).is_dir():
-        raise ValueError(f'Generated audio directory not found: {generated}')
+    _check_generated(spec, generated)
     if any(task.get('derived_from') for task in spec['tasks']):
         _ffmpeg()
     output = Path(output)
     output.mkdir(parents=True, exist_ok=False)
+    pool = scorers if scorers is not None else ScorerPool(device, logger, seed=int(spec['evaluation'].get('seed', 42)))
     tasks, task_rows = {}, {}
-    for task in sorted(spec['tasks'], key=lambda t: bool(t.get('derived_from'))):
-        audio_dir = output / task['task'] / 'generated_audio'
-        audio_dir.mkdir(parents=True)
-        if task.get('derived_from'):
-            rows, details = _derived_rows(task, task_rows[task['derived_from']], audio_dir), {}
-        else:
-            rows, details = _submitted_rows(spec, task, generated, audio_dir, data_root, logger)
-        tasks[task['task']], task_rows[task['task']] = _run_task(
-            spec, task, rows, details, output / task['task'], str(model), device, logger)
+    try:
+        for task in sorted(spec['tasks'], key=lambda t: bool(t.get('derived_from'))):
+            audio_dir = output / task['task'] / 'generated_audio'
+            audio_dir.mkdir(parents=True)
+            if task.get('derived_from'):
+                rows, details = _derived_rows(task, task_rows[task['derived_from']], audio_dir), {}
+            else:
+                rows, details = _submitted_rows(spec, task, generated, audio_dir, data_root, logger)
+            tasks[task['task']], task_rows[task['task']] = _run_task(
+                spec, task, rows, details, output / task['task'], str(model), device, logger, scorers=pool)
+    finally:
+        if scorers is None:
+            pool.close()
     for name, result in tasks.items():
         anchor = tasks.get(result.get('anchor'))
         if anchor and 'means' in result and 'means' in anchor:
@@ -371,3 +474,37 @@ def score_submission(suite, generated, output, *, model, device='cpu', data_root
                   'tasks': ordered}
     atomic_json(output / 'submission.json', submission)
     return submission
+
+
+def score_submissions(suite, generated_dirs, output, *, models=None, device='cpu', data_root=None, logger=None):
+    """Score several models' outputs with one load of each metric model.
+
+    Writes ``<output>/<model>/`` per model (as ``score_submission``) and a comparison of
+    all of them as ``<output>/comparison.{md,csv,json}``. Model names default to the
+    directory names.
+    """
+    from rvcbench.evaluation.pipeline import ScorerPool
+    from .comparison import compare_submissions
+    logger = logger or logging.getLogger('rvcbench.score')
+    generated_dirs = [Path(d) for d in generated_dirs]
+    models = [str(m) for m in models] if models else [d.resolve().name for d in generated_dirs]
+    if len(models) != len(generated_dirs):
+        raise ValueError(f'{len(generated_dirs)} output directories but {len(models)} model names')
+    if len(set(models)) != len(models) or not all(_safe(m) for m in models):
+        raise ValueError(f'Model names must be unique and file-name safe: {models}')
+    spec = load_suite(suite)
+    for directory in generated_dirs:
+        _check_generated(spec, directory)  # fail before scoring anything
+    output = Path(output)
+    output.mkdir(parents=True, exist_ok=True)
+    taken = [m for m in models if (output / m).exists()]
+    if taken or (output / 'comparison.json').exists():
+        raise ValueError(f'{output} already holds results for {taken or "a comparison"}; choose a new directory')
+    results = []
+    with ScorerPool(device, logger, seed=int(spec['evaluation'].get('seed', 42))) as pool:
+        for model, directory in zip(models, generated_dirs):
+            logger.info('Scoring %s from %s', model, directory)
+            score_submission(suite, directory, output / model, model=model, device=device, data_root=data_root,
+                             logger=logger, scorers=pool)
+            results.append(output / model / 'submission.json')
+    return compare_submissions(results, output)

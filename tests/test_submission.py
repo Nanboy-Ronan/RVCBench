@@ -140,6 +140,7 @@ def test_changed_inputs_are_rejected(suite, command):
             submission.export_prompts(spec, tmp / 'prompts', data_root=data_root)
         else:
             (tmp / 'generated').mkdir()
+            shutil.copyfile(data_root / 'Toy' / 'audios' / 's1' / 'b.wav', tmp / 'generated' / 'toy__Toy-s1-000000.wav')
             score(suite, tmp / 'generated')
 
 
@@ -154,7 +155,7 @@ def test_output_directories_must_be_new(suite):
 
 
 def test_unknown_suite_lists_the_packaged_ones():
-    with pytest.raises(ValueError, match='Available: core-v1, onboarding-v1'):
+    with pytest.raises(ValueError, match='Available: core-v1, full-v1, onboarding-v1'):
         submission.load_suite('core-v0')
 
 

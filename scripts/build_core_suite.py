@@ -1,15 +1,19 @@
 #!/usr/bin/env python3
-"""Freeze the RVCBench-Core suite: small, stratified, paired subsets of the paper's evaluations.
+"""Freeze an RVCBench suite: paired tasks for the robustness evaluations of the paper.
 
-Selection uses only dataset metadata and SHA-256 ranking with a fixed seed; it never looks
-at model outputs. Run it from the repository root:
+By default it builds Core: small, stratified subsets. With ``--full`` every task takes all
+pairs of its dataset instead, with the same tasks, pair identifiers and anchors, so Core is a
+subset of the full suite. Selection uses only dataset metadata and SHA-256 ranking with a
+fixed seed; it never looks at model outputs. Run it from the repository root:
 
     python scripts/build_core_suite.py --mirror results/.core/mirror --output src/rvcbench/suites/core_v1
+    python scripts/build_core_suite.py --full --compress --suite full-v1 ... --output src/rvcbench/suites/full_v1
 
 ``--mirror`` must contain the Hub dataset folders (``Libritts/``, ``VCTK/``, ...) at the pinned
 revision plus the protected references (``Protected_LibriTTS/<method>/...``).
 """
 import argparse
+import gzip
 import json
 import logging
 from pathlib import Path
@@ -48,6 +52,11 @@ ACCENT_OF = {s: a for a, speakers in ACCENTS.items() for s in speakers}
 AGE_OF = {s: age for age, speakers in AGES.items() for s in speakers}
 TEXTSHIFT_SPEAKERS = ['p283', 'p288', 'p316', 'p363']
 DURATION_BINS = [(0, 3, 'under_3s'), (3, 6, '3_to_6s'), (6, 10, '6_to_10s'), (10, 1e9, 'over_10s')]
+FULL = False  # set by --full: every selection keeps all candidates, in rank order
+
+
+def first(items, count):
+    return list(items) if FULL else list(items)[:count]
 
 
 def rank(*parts):
@@ -77,7 +86,7 @@ def load(mirror, config):
 
 
 def pick(frame, count, *keys):
-    return sorted(frame.to_dict('records'), key=lambda r: rank(*keys, r['pair_id']))[:count]
+    return first(sorted(frame.to_dict('records'), key=lambda r: rank(*keys, r['pair_id'])), count)
 
 
 def per_speaker(frame, speakers, per, key):
@@ -88,7 +97,7 @@ def per_speaker(frame, speakers, per, key):
 
 
 def ranked_speakers(frame, count, key):
-    return sorted(frame.speaker_id.unique(), key=lambda s: rank(key, s))[:count]
+    return first(sorted(frame.speaker_id.unique(), key=lambda s: rank(key, s)), count)
 
 
 # --------------------------------------------------------------------------- tasks
@@ -96,7 +105,9 @@ def ranked_speakers(frame, count, key):
 def audioshift(m):
     vctk = load(m, 'VCTK')
     rows = []
-    for accent, speakers in ACCENTS.items():
+    if FULL:
+        rows = vctk[vctk.source_manifest == vctk.speaker_id + '.json'].to_dict('records')
+    for accent, speakers in ({} if FULL else ACCENTS).items():
         chosen = sorted(speakers, key=lambda s: rank('audioshift', s))
         # Two pairs per accent, from two speakers when the accent has more than one.
         for i in range(2):
@@ -124,7 +135,9 @@ def robocall(m, group):
     rows = []
     for speaker in sorted(frame.speaker_id.unique()):
         own = frame[frame.speaker_id == speaker]
-        if group == 'robocall':
+        if FULL:
+            rows += pick(own, len(own), 'scam', speaker)
+        elif group == 'robocall':
             # Two different scam categories per speaker, rotating through the categories.
             types = sorted(own.spam_type.unique(), key=lambda t: rank('scam', speaker, t))[:2]
             rows += [pick(own[own.spam_type == t], 1, 'scam', speaker, t)[0] for t in types]
@@ -142,10 +155,12 @@ def english(m):
     for sex in ('F', 'M'):
         pool = lib[lib.speaker_id.isin(gender[gender.gender == sex].speaker_id)]
         speakers += ranked_speakers(pool, 6, f'english-{sex}')
+    if FULL:  # every speaker, including those without a gender label
+        speakers += ranked_speakers(lib[~lib.speaker_id.isin(gender.speaker_id)], 0, 'english-unknown')
     rows = per_speaker(lib, speakers, 2, 'english')
     sex_of = dict(zip(gender.speaker_id, gender.gender))
     return [row(r, pair_id=r['pair_id'], prompt=r['prompt_file_name'], target=r['target_file_name'],
-                gender=sex_of[str(r['speaker_id'])]) for r in rows]
+                gender=sex_of.get(str(r['speaker_id']), 'unknown')) for r in rows]
 
 
 def simple(config, key, speakers=12, per=2):
@@ -185,7 +200,7 @@ def longaudio(m, durations):
     eligible = [s for s in lib.speaker_id.unique()
                 if all((prompts[(prompts.speaker_id == s)].bin == label).any() for *_, label in DURATION_BINS)]
     rows = []
-    for speaker in sorted(eligible, key=lambda s: rank('longaudio', s))[:6]:
+    for speaker in first(sorted(eligible, key=lambda s: rank('longaudio', s)), 6):
         target = pick(lib[lib.speaker_id == speaker], 1, 'longaudio-target', speaker)[0]
         for *_, label in DURATION_BINS:
             own = prompts[(prompts.speaker_id == speaker) & (prompts.bin == label) &
@@ -206,7 +221,7 @@ def background(m, noisy):
     rows = []
     for noise in sorted({re.search(r'_10dB_([a-z]+)\.wav$', i['ori_pth']).group(1) for i in items}):
         of_type = [i for i in items if i['ori_pth'].endswith(f'_10dB_{noise}.wav')]
-        for n, item in enumerate(sorted(of_type, key=lambda i: rank('background', noise, i['ori_pth']))[:2]):
+        for n, item in enumerate(first(sorted(of_type, key=lambda i: rank('background', noise, i['ori_pth'])), 2)):
             prompt = item['ori_pth'] if noisy else re.sub(r'_10dB_[a-z]+\.wav$', '_clean.wav', item['ori_pth'])
             source = {**base, 'speaker_id': item['ori_spk'], 'source_manifest': f"{item['ori_spk']}.json",
                       'source_row': n, 'prompt_text': item['ori_text'], 'target_text': item['gt_text'],
@@ -312,12 +327,22 @@ def generated_tasks(m, durations):
     return tasks
 
 
-def freeze_task(mirror, output, name, rows, dataset_config, folder):
+def write_json(path, value, compress):
+    """Plain JSON, or gzip with a fixed timestamp so rebuilds are byte-identical."""
+    if not compress:
+        atomic_json(path, value)
+        return path
+    path = path.with_name(path.name + '.gz')
+    with path.open('wb') as raw, gzip.GzipFile(filename='', mode='wb', fileobj=raw, mtime=0, compresslevel=9) as handle:
+        handle.write(json.dumps(value, indent=2, ensure_ascii=False).encode('utf-8'))
+    return path
+
+
+def freeze_task(mirror, output, name, rows, dataset_config, folder, compress=False):
     pair_ids = [r['pair_id'] for r in rows]
     if len(set(pair_ids)) != len(pair_ids):
         raise ValueError(f'{name}: duplicate pair ids')
-    manifest = output / f'{name}.metadata.json'
-    atomic_json(manifest, rows)
+    manifest = write_json(output / f'{name}.metadata.json', rows, compress)
     config = OmegaConf.load(CONFIGS_DIR / 'dataset' / f'{dataset_config}.yaml')
     root = Path(mirror) / (folder or '')
     config.update({'root_path': str(root), 'use_hf_dataset': False, 'manifest_filename': str(manifest.resolve()),
@@ -327,13 +352,14 @@ def freeze_task(mirror, output, name, rows, dataset_config, folder):
     missing = [r['pair_id'] for r in records if not r['prompt_sha256'] or not r['target_sha256']]
     if missing:
         raise FileNotFoundError(f'{name}: audio missing under {root} for {missing[:5]}')
-    atomic_json(output / f'{name}.selection.json', {
-        'schema_version': 1, 'selection': 'sha256_rank_stratified_core_v1', 'selection_seed': SEED,
+    selection = write_json(output / f'{name}.selection.json', {
+        'schema_version': 1, 'selection': 'all_pairs_v1' if FULL else 'sha256_rank_stratified_core_v1',
+        'selection_seed': SEED,
         'requested': len(records), 'input_fingerprint': input_fingerprint(records),
         'metadata_sha256': file_hash(manifest),
         'samples': [{k: v for k, v in r.items() if k not in ('prompt_path', 'target_path', 'status', 'error')}
-                    for r in records]})
-    return len(records)
+                    for r in records]}, compress)
+    return len(records), manifest.name, selection.name
 
 
 def main():
@@ -344,31 +370,45 @@ def main():
     parser.add_argument('--revision', required=True)
     parser.add_argument('--suite', default='core-v1')
     parser.add_argument('--leaderboard', action='store_true')
+    parser.add_argument('--full', action='store_true', help='Take every pair of each task instead of the Core subset')
+    parser.add_argument('--compress', action='store_true', help='Write the per-task files as .json.gz')
+    parser.add_argument('--skip-protected', action='store_true',
+                        help='Leave out the protected-reference tasks (when their audio is not in the mirror)')
     args = parser.parse_args()
+    global FULL
+    FULL = args.full
     args.output.mkdir(parents=True, exist_ok=False)
     durations = json.loads(args.durations.read_text())
     tasks, counts = [], {}
     for name, build, dataset_config, folder, fields in generated_tasks(args.mirror, durations):
+        if args.skip_protected and (name.startswith('adv-') or name.startswith('antiprotect-')):
+            continue
         rows = build(args.mirror)
-        counts[name] = freeze_task(args.mirror, args.output, name, rows, dataset_config, folder)
-        task = {'task': name, **fields, 'dataset_config': dataset_config,
-                'manifest': f'{name}.metadata.json', 'selection': f'{name}.selection.json'}
+        counts[name], manifest, selection = freeze_task(args.mirror, args.output, name, rows, dataset_config, folder,
+                                                        args.compress)
+        task = {'task': name, **fields, 'dataset_config': dataset_config, 'manifest': manifest, 'selection': selection}
         task.update({'hf_config_name': folder} if folder else {'paths': 'repo'})
         tasks.append(task)
     tasks += compression_tasks()
+    name = 'RVCBench-Full' if FULL else 'RVCBench-Core'
+    scope = 'every pair of the datasets of' if FULL else 'small, paired subsets of'
+    not_included = {
+        'RVC-Detectability/GroundTruth, Deepfake': 'deepfake detectors are not yet part of this package (planned for core-v1.1)',
+        'RVC-Expression/Persuasion EmTXT': 'the audio-LLM emotion-alignment judge is planned for core-v1.1; EMC is reported'}
+    if args.skip_protected:
+        not_included['RVC-AdvNoise, RVC-AntiProtect'] = ('the protected references of every LibriTTS prompt are not yet '
+                                                         'in the Hub dataset; core-v1 covers these evaluations')
     atomic_json(args.output / 'suite.json', {
         'suite': args.suite, 'version': 1, 'leaderboard': args.leaderboard,
-        'label': ('RVCBench-Core: small, paired subsets of the 18 robustness evaluations of the RVCBench paper.'
+        'label': (f'{name}: {scope} the 18 robustness evaluations of the RVCBench paper.'
                   if args.leaderboard else
-                  'RVCBench-Core preview: data and protocol under review. Scores are not leaderboard results.'),
+                  f'{name} preview: data and protocol under review. Scores are not leaderboard results.'),
         'paper': 'https://arxiv.org/abs/2602.00443',
         'hf_dataset_id': 'Nanboy/RVCBench', 'hf_revision': args.revision,
         'evaluation': {'required_metrics': STANDARD, 'wer_normalization': 'ascii_punctuation_removed_v2',
                        'generated_audio_max_seconds': None, 'seed': 42,
                        'bootstrap': {'enabled': True, 'num_samples': 1000, 'confidence_level': 0.95, 'seed': None}},
-        'not_included': {
-            'RVC-Detectability/GroundTruth, Deepfake': 'deepfake detectors are not yet part of this package (planned for core-v1.1)',
-            'RVC-Expression/Persuasion EmTXT': 'the audio-LLM emotion-alignment judge is planned for core-v1.1; EMC is reported'},
+        'not_included': not_included,
         'tasks': tasks})
     print(json.dumps({'tasks': counts, 'generations': sum(counts.values())}, indent=2))
 

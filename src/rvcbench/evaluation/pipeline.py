@@ -44,6 +44,45 @@ def _scorer_provenance(scorer, seed, cap, device=None):
             'execution': execution}
 
 
+class ScorerPool:
+    """Prepared scorers kept across several ``evaluate_run`` calls, so each loads once.
+
+    ``evaluate_run`` without a pool loads and releases every scorer per run. Scoring a suite
+    (one run per task) or several models with one pool loads each metric model once.
+    """
+
+    def __init__(self, device, logger, seed=42):
+        self.device, self.logger, self.seed = device, logger, seed
+        self._scorers = {}
+
+    def get(self, group, wer_normalization='ascii_punctuation_removed_v2'):
+        key = (group, wer_normalization if group == 'wer' else None)
+        if key not in self._scorers:
+            from rvcbench.utils.seeding import configure_seeds
+            configure_seeds(self.seed, logger=None)
+            scorer = create_scorer(group, self.device, self.logger)
+            if group == 'wer' and wer_normalization != 'ascii_punctuation_removed_v2':
+                scorer.set_normalization(wer_normalization)
+            scorer.prepare()
+            self._scorers[key] = scorer
+        return self._scorers[key]
+
+    def close(self):
+        scorers, self._scorers = list(self._scorers.values()), {}
+        for scorer in scorers:
+            scorer.close()
+        gc.collect()
+        import torch
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        self.close()
+
+
 def _request(row, output, cap):
     generated = Path(row['generated_path'])
     if cap is not None:
@@ -63,11 +102,12 @@ def _request(row, output, cap):
 
 def evaluate_run(rows, required, output, device, logger, *, seed=42, cap=None,
                  bootstrap_config=None, cache_sources=(), on_sample=None,
-                 wer_normalization='ascii_punctuation_removed_v2'):
+                 wer_normalization='ascii_punctuation_removed_v2', scorers=None):
     """Mutate only score fields on rows; journal each finished sample/metric.
 
     Successful cached values are reused only after the active scorer's code,
-    dependencies, weights, configuration, and exact input hashes match.
+    dependencies, weights, configuration, and exact input hashes match. With a
+    ``ScorerPool`` as ``scorers``, scorers come from the pool and stay loaded.
     """
     import torch
     from rvcbench.utils.seeding import configure_seeds
@@ -97,11 +137,14 @@ def evaluate_run(rows, required, output, device, logger, *, seed=42, cap=None,
         scorer = None
         fatal_error = False
         try:
-            configure_seeds(seed, logger=None)
-            scorer = create_scorer(group, device, logger)
-            if group == 'wer' and wer_normalization != 'ascii_punctuation_removed_v2':
-                scorer.set_normalization(wer_normalization)
-            scorer.prepare()
+            if scorers is not None:
+                scorer = scorers.get(group, wer_normalization)
+            else:
+                configure_seeds(seed, logger=None)
+                scorer = create_scorer(group, device, logger)
+                if group == 'wer' and wer_normalization != 'ascii_punctuation_removed_v2':
+                    scorer.set_normalization(wer_normalization)
+                scorer.prepare()
             spec = _scorer_provenance(scorer, seed, cap, device)
             fingerprint = digest(spec)
             provenance[group] = {'fingerprint': fingerprint, **spec}
@@ -166,7 +209,7 @@ def evaluate_run(rows, required, output, device, logger, *, seed=42, cap=None,
                 if on_sample:
                     on_sample(row)
         finally:
-            if scorer is not None:
+            if scorer is not None and scorers is None:
                 try:
                     scorer.close()
                 except Exception as exc:

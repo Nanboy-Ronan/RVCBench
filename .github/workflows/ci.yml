@@ -37,3 +37,4 @@ jobs:
           rvcbench doctor
           rvcbench smoke --output wheel-smoke
           rvcbench run --config-name ots_vc/clean/libritts/qwen3_tts_ots --cfg job
+          python -c "from rvcbench.benchmark.submission import load_suite, read_json; s = load_suite('full-v1'); t = s['tasks'][0]; assert read_json(s['_directory'] / t['selection'])['samples']"

@@ -1,3 +1,4 @@
+import gzip
 import json
 import logging
 from pathlib import Path
@@ -172,8 +173,13 @@ def canonicalize_records(records: Iterable[Dict[str, object]], *, dataset_name: 
     return df.loc[:, ordered]
 
 
+def _is_json_manifest(path: Path) -> bool:
+    return path.name.lower().endswith((".json", ".json.gz"))
+
+
 def _load_json_records(path: Path) -> List[Dict[str, object]]:
-    with open(path, "r", encoding="utf-8") as handle:
+    opener = gzip.open if path.name.lower().endswith(".gz") else open
+    with opener(path, "rt", encoding="utf-8") as handle:
         payload = json.load(handle)
     if isinstance(payload, list):
         return [item for item in payload if isinstance(item, dict)]
@@ -186,7 +192,7 @@ def load_canonical_manifest(
     manifest_path = canonical_manifest_path(root_path, manifest_filename)
     if not manifest_path.exists():
         return None
-    if manifest_path.suffix.lower() == ".json":
+    if _is_json_manifest(manifest_path):
         records = _load_json_records(manifest_path)
         df = canonicalize_records(
             records,

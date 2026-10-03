@@ -63,3 +63,33 @@ def test_core_metrics_follow_the_paper(core):
     for task in core['tasks']:
         if task.get('derived_from'):
             assert task['derived_from'] == 'audioshift' and task['required_metrics'] == ['stoi', 'mcd', 'sim', 'wer']
+
+
+@pytest.fixture(scope='module')
+def full():
+    return submission.load_suite('full-v1')
+
+
+def test_full_has_the_core_tasks_with_every_pair(core, full):
+    assert full['suite'] == 'full-v1' and full['leaderboard'] is False
+    assert full['hf_revision'] == core['hf_revision'] and full['evaluation'] == core['evaluation']
+    assert 'RVC-AdvNoise, RVC-AntiProtect' in full['not_included']
+    core_tasks = {task['task']: task for task in core['tasks']}
+    total = 0
+    for task in full['tasks']:
+        reference = core_tasks[task['task']]
+        assert {k: v for k, v in task.items() if k not in ('manifest', 'selection')} == \
+            {k: v for k, v in reference.items() if k not in ('manifest', 'selection')}, task['task']
+        if task.get('derived_from'):
+            continue
+        selection = submission.read_json(full['_directory'] / task['selection'])
+        assert task['manifest'].endswith('.json.gz') and selection['selection'] == 'all_pairs_v1'
+        assert selection['metadata_sha256'] == file_hash(full['_directory'] / task['manifest'])
+        assert input_fingerprint(selection['samples']) == selection['input_fingerprint'], task['task']
+        assert len(submission.read_json(full['_directory'] / task['manifest'])) == len(selection['samples'])
+        inputs = {s['sample_id']: (s['prompt_sha256'], s['target_sha256']) for s in selection['samples']}
+        core_samples = json.loads((core['_directory'] / reference['selection']).read_text())['samples']
+        assert all(inputs.get(s['sample_id']) == (s['prompt_sha256'], s['target_sha256']) for s in core_samples), task['task']
+        total += len(inputs)
+    assert total == 12724
+    assert not [t for t in full['tasks'] if t['task'].startswith(('adv-', 'antiprotect-'))]
