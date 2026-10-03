@@ -2,13 +2,13 @@
 
 ## Branches
 
-- `v2` is the development branch. Open pull requests against `v2`.
-- `main` holds the v1 codebase (tag `v1.0`) and only receives notices.
+- `main` is the development branch (v2). Open pull requests against `main`.
+- `v1` holds the codebase before the refactor (tag `v1.0`) and no longer changes.
 
 ## Development setup
 
 ```bash
-git clone --branch v2 https://github.com/Nanboy-Ronan/RVCBench.git
+git clone https://github.com/Nanboy-Ronan/RVCBench.git
 cd RVCBench
 python -m pip install torch==2.6.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cpu
 python -m pip install -e '.[dev,http]'

@@ -1,17 +1,17 @@
 # Codebase versions
 
-**v1** is the codebase before the architecture refactor. **v2** is the refactor on branch `v2`, still
+**v1** is the codebase before the architecture refactor. **v2** is the refactored codebase on `main`, still
 under development. These names describe repository versions, not the
 paper's arXiv versions.
 
 | Version | Source | Use it to |
 | --- | --- | --- |
-| v1 | Branch [`main`](https://github.com/Nanboy-Ronan/RVCBench/tree/main), tag [`v1.0`](https://github.com/Nanboy-Ronan/RVCBench/tree/v1.0) | Inspect or run the original architecture and configurations |
-| v2 | Branch [`v2`](https://github.com/Nanboy-Ronan/RVCBench/tree/v2) | Use the installable package, suites, run records and validation |
+| v1 | Branch [`v1`](https://github.com/Nanboy-Ronan/RVCBench/tree/v1), tag [`v1.0`](https://github.com/Nanboy-Ronan/RVCBench/tree/v1.0) | Inspect or run the original architecture and configurations |
+| v2 | Branch [`main`](https://github.com/Nanboy-Ronan/RVCBench/tree/main) | Use the installable package, suites, run records and validation |
 
 ```bash
-git clone https://github.com/Nanboy-Ronan/RVCBench.git RVCBench-v1
-git clone --branch v2 https://github.com/Nanboy-Ronan/RVCBench.git RVCBench-v2
+git clone --branch v1 https://github.com/Nanboy-Ronan/RVCBench.git RVCBench-v1
+git clone https://github.com/Nanboy-Ronan/RVCBench.git RVCBench-v2
 ```
 
 ## What changed in v2

@@ -2,7 +2,7 @@
 
 Notable changes to the RVCBench codebase. Paper results are not affected by entries here unless stated.
 
-## Unreleased (2.0.0.dev0, branch `v2`)
+## Unreleased (2.0.0.dev0, branch `main`)
 
 ### Added
 
@@ -21,6 +21,7 @@ Notable changes to the RVCBench codebase. Paper results are not affected by entr
 
 ### Changed
 
+- `main` now holds v2. The code before the refactor is preserved on branch `v1` (tag `v1.0`).
 - The Python package is named `rvcbench`; it was importable as `src`.
 - Configs moved from `configs/` to `src/rvcbench/configs/`. Config names passed to `--config-name` are unchanged.
 - Malformed inputs and incomplete checkpoints raise errors instead of being skipped or patched.
@@ -34,6 +35,6 @@ Notable changes to the RVCBench codebase. Paper results are not affected by entr
 - FireRedTTS2 output was written at the prompt sample rate (16 kHz) instead of the codec rate (24 kHz).
 - Debugger breakpoints removed from the legacy OZSpeech wrapper.
 
-## 1.0 (tag `v1.0`, branch `main`)
+## 1.0 (tag `v1.0`, branch `v1`)
 
 The codebase before the architecture refactor, including the NeurIPS 2026 acceptance announcement.

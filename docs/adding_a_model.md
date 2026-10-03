@@ -16,7 +16,7 @@ Your model runs in its own environment, with your own code. RVCBench only needs 
 resulting WAV files.
 
 ```bash
-python -m pip install 'rvcbench[eval] @ git+https://github.com/Nanboy-Ronan/RVCBench@v2'
+python -m pip install 'rvcbench[eval] @ git+https://github.com/Nanboy-Ronan/RVCBench@main'
 rvcbench prompts --suite core-v1 --output prompts/
 ```
 
@@ -48,7 +48,7 @@ rvcbench score --suite core-v1 --generated my_outputs/ --model my-model --output
 ### 1. Install
 
 ```bash
-git clone --branch v2 https://github.com/Nanboy-Ronan/RVCBench.git
+git clone https://github.com/Nanboy-Ronan/RVCBench.git
 python -m pip install -e RVCBench            # runner and generation
 python -m pip install -e 'RVCBench[eval]'    # add the scoring stack (Whisper, speaker verification, ...)
 rvcbench doctor

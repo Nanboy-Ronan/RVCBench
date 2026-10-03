@@ -21,9 +21,9 @@ utterances and evaluates 18 open-source models.
 [Evaluate your model](#evaluate-your-model) · [What it measures](#what-rvcbench-measures) · [Results](#results-from-the-paper) · [Installation](#installation) · [Built-in models](#built-in-models) · [Website](https://nanboy-ronan.github.io/RVCBench/) · [Dataset](https://huggingface.co/datasets/Nanboy/RVCBench) · [Citation](#citation)
 
 > [!NOTE]
-> This is the `v2` branch: the installable package and the Core suite, under active development. The code
-> before the refactor is on [`main`](https://github.com/Nanboy-Ronan/RVCBench/tree/main) (tag `v1.0`); see
-> [codebase versions](docs/versions.md).
+> `main` holds RVCBench v2: the installable package and the Core suite, under active development. The code
+> before the refactor is preserved on the [`v1`](https://github.com/Nanboy-Ronan/RVCBench/tree/v1) branch (tag
+> `v1.0`); see [codebase versions](docs/versions.md) for the differences.
 
 ![RVCBench main figure](figs/main.png)
 
@@ -32,7 +32,7 @@ utterances and evaluates 18 open-source models.
 Generate speech with your own code, in your own environment, and let RVCBench score it:
 
 ```bash
-pip install "rvcbench[eval] @ git+https://github.com/Nanboy-Ronan/RVCBench@v2"
+pip install "rvcbench[eval] @ git+https://github.com/Nanboy-Ronan/RVCBench@main"
 rvcbench setup-scorers                                    # once: download the metric models
 rvcbench prompts --suite core-v1 --output prompts/        # 480 reference clips and texts
 # synthesize each line of prompts/prompts.jsonl and save it at <outputs>/<output_file>
@@ -152,10 +152,10 @@ Python 3.10 or newer on Linux. A GPU is recommended for scoring.
 
 ```bash
 # package only
-pip install "rvcbench[eval] @ git+https://github.com/Nanboy-Ronan/RVCBench@v2"
+pip install "rvcbench[eval] @ git+https://github.com/Nanboy-Ronan/RVCBench@main"
 
 # or a source checkout, needed to run the built-in models
-git clone --branch v2 https://github.com/Nanboy-Ronan/RVCBench.git
+git clone https://github.com/Nanboy-Ronan/RVCBench.git
 cd RVCBench
 python -m pip install -e '.[eval]'
 rvcbench doctor                               # check dependencies

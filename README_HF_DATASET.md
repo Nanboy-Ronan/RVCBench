@@ -117,7 +117,7 @@ Some subsets include additional task-specific metadata, for example `spam_type` 
 
 ## Getting started
 
-Follow the [public quickstart](https://github.com/Nanboy-Ronan/RVCBench#getting-started).
+Follow the [public quickstart](https://github.com/Nanboy-Ronan/RVCBench#evaluate-your-model).
 The Qwen quickstart downloads the selected speaker audio and generates a small
 sample without loading the full evaluation stack. Use the
 [run protocol](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/run_protocol.md)
