@@ -32,7 +32,8 @@ class AuxiliaryScorer:
             root = hub / 'tarepan_SpeechMOS_main'
             weights = hub / 'checkpoints/utmos22_strong_step7459_v1.pt'
             if not root.is_dir() or not weights.is_file():
-                raise FileNotFoundError('SpeechMOS requires cached tarepan/SpeechMOS source and utmos22_strong_step7459_v1.pt')
+                raise FileNotFoundError('SpeechMOS requires cached tarepan/SpeechMOS source and utmos22_strong_step7459_v1.pt; '
+                                        'run `rvcbench setup-scorers`')
             original_path = list(sys.path)
             try:
                 sys.path.insert(0, str(root))

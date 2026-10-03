@@ -1,8 +1,8 @@
 """Pinned SpeechBrain emotion model with its native custom inference interface."""
 import inspect
+import os
 from pathlib import Path
 
-from hydra.utils import to_absolute_path
 from rvcbench.evaluation.assets import asset_dir
 
 from rvcbench.benchmark.artifacts import file_hash
@@ -18,6 +18,14 @@ ASSETS = {
 }
 
 
+def base_initializer_dir():
+    """wav2vec2-base files: the legacy checkout location when present, else the asset directory."""
+    legacy = Path.cwd() / 'wav2vec2_checkpoints' / 'models--facebook--wav2vec2-base' / 'snapshots' / BASE_REVISION
+    if not os.environ.get('RVCBENCH_ASSET_DIR') and legacy.is_dir():
+        return legacy
+    return asset_dir('wav2vec2-base') / BASE_REVISION
+
+
 class EmotionScorer:
     version = 'speechbrain_native_iemocap_117a9c3_v2'
     dependencies = ('torch', 'torchaudio', 'speechbrain', 'transformers',
@@ -30,10 +38,10 @@ class EmotionScorer:
         root = asset_dir('emotion-native')
         for name, expected in ASSETS.items():
             if not (root / name).is_file():
-                raise FileNotFoundError(f'Pinned emotion asset missing: {root / name}')
+                raise FileNotFoundError(f'Pinned emotion asset missing: {root / name}; run `rvcbench setup-scorers`')
             if file_hash(root / name) != expected:
                 raise ValueError(f'Pinned emotion asset hash differs: {name}')
-        base = Path(to_absolute_path('wav2vec2_checkpoints')) / 'models--facebook--wav2vec2-base/snapshots' / BASE_REVISION
+        base = base_initializer_dir()
         for name in ('config.json', 'preprocessor_config.json', 'pytorch_model.bin'):
             if not (base / name).is_file():
                 raise FileNotFoundError(f'Emotion base initializer asset missing: {base / name}')

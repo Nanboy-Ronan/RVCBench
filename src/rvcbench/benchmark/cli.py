@@ -43,6 +43,9 @@ def main():
     score.add_argument('--output', type=Path, required=True)
     score.add_argument('--device', default='cpu')
     score.add_argument('--data-root', type=Path, help='Local dataset copy laid out like the Hub dataset (default: download)')
+    setup = commands.add_parser('setup-scorers', help='Download and verify the model files of the scoring metrics')
+    setup.add_argument('--metrics', nargs='+', default=['sim', 'speechmos', 'wer', 'mcd', 'emotion', 'stoi'])
+    setup.add_argument('--check-only', action='store_true', help='Verify files that are present; download nothing')
     status = commands.add_parser('status', help='Show run status and recovered sample coverage')
     status.add_argument('run_dir', type=Path)
     audit = commands.add_parser('audit-source', help='Compare recorded generation source hashes with local files')
@@ -88,6 +91,10 @@ def main():
     timing.add_argument('right', type=Path)
     timing.add_argument('--output', type=Path)
     args = parser.parse_args()
+    if args.command == 'setup-scorers':
+        from rvcbench.evaluation.setup import setup_scorers
+        print(json.dumps(setup_scorers(args.metrics, check_only=args.check_only), indent=2))
+        return
     if args.command in ('prompts', 'score'):
         from .submission import export_prompts, score_submission
         logging.basicConfig(level=logging.INFO, format='%(levelname)s %(message)s')
