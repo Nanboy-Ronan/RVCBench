@@ -1,7 +1,8 @@
-# Dataset Setup
-We open-source our preprocessed datasets in the S3 link here. Download it at put them into the `data` directory.
+# Dataset preprocessing
 
-Below are the details of how we preprocessed the dataset.
+The preprocessed datasets are published on Hugging Face at
+[Nanboy/RVCBench](https://huggingface.co/datasets/Nanboy/RVCBench); see [Datasets](datasets.md) for the
+layout and how to use a local copy. This page describes how each dataset was preprocessed.
 
 ## Preprocessing
 ### VCTK (English multi-speaker, multi-accent)

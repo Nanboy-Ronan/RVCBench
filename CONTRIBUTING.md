@@ -1,5 +1,7 @@
 # Contributing to RVCBench
 
+Report security issues privately as described in [SECURITY.md](SECURITY.md).
+
 ## Branches
 
 - `main` is the development branch (v2). Open pull requests against `main`.

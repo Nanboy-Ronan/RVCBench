@@ -81,9 +81,8 @@ cd ..
 
 The Qwen quickstart and CPU smoke path are covered by offline CI. The other
 model families have adapter integrations and base environment templates; they
-have not all been revalidated with current upstream packages. The root
-`requirements.txt` is a legacy aggregate and is not the recommended installation
-path. Follow each model runtime setup before using its adapter.
+have not all been revalidated with current upstream packages. Dependencies are
+declared in `pyproject.toml`; follow each model runtime setup before using its adapter.
 
 Generation-only usage needs the core plus model runtime. Install `.[eval]`
 explicitly for full evaluation; run `rvcbench doctor --model qwen3 --eval --imports` to

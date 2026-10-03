@@ -1,12 +1,17 @@
+"""Upload the staged Hugging Face dataset (maintainers only).
+
+Stage the dataset folders under ``.hf_upload_staging/`` at the repository root, then run
+``python scripts/upload_hf_dataset.py``. The dataset card is copied from ``docs/hf_dataset_card.md``.
+"""
 from pathlib import Path
 import shutil
 
 from huggingface_hub import HfApi
 
 
-repo_root = Path(__file__).resolve().parent
+repo_root = Path(__file__).resolve().parents[1]
 staging_root = repo_root / ".hf_upload_staging"
-readme_src = repo_root / "README_HF_DATASET.md"
+readme_src = repo_root / "docs" / "hf_dataset_card.md"
 readme_dst = staging_root / "README.md"
 cache_dir = staging_root / ".cache"
 

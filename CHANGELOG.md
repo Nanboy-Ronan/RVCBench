@@ -33,7 +33,12 @@ Notable changes to the RVCBench codebase. Paper results are not affected by entr
 - Run records list `stoi` in `coverage.metric_valid`.
 - `rvcbench score` loads each metric model once per call instead of once per task, and fails before writing results when the directory holds none of the suite's files. `--model` is optional and defaults to the directory name.
 - Scorer model files live in `$RVCBENCH_ASSET_DIR/<name>`, else `./checkpoints/<name>` when present, else `~/.cache/rvcbench/<name>`; a speaker model fetched from the Hub is copied there.
+- Maintainer files moved out of the repository root: `upload_data.py` to `scripts/upload_hf_dataset.py`, `README_HF_DATASET.md` to `docs/hf_dataset_card.md`, and `data/dataset.md` to `docs/dataset_preprocessing.md`.
 - The evaluation extras require `pysptk>=1.0`, `speechbrain>=1.0.3` and `transformers` (for the emotion metric).
+
+### Removed
+
+- The root `requirements.txt`, a legacy dependency list that contradicted `pyproject.toml`.
 
 ### Fixed
 

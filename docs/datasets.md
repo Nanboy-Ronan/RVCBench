@@ -5,6 +5,8 @@ The benchmark data is on Hugging Face at
 automatically (`use_hf_dataset: true`, the default); `rvcbench prompts` and `rvcbench score` download only
 the files a suite uses. An offline snapshot is also available on
 [Google Drive](https://drive.google.com/file/d/1ZDOMorDGV8i5oVNtA5BaJLbFj2dVo5AU/view?usp=drive_link).
+How each source corpus was selected and preprocessed is described in
+[dataset preprocessing](dataset_preprocessing.md).
 
 ## Folders and the paper's evaluations
 
