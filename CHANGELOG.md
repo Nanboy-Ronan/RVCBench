@@ -20,6 +20,7 @@ Notable changes to the RVCBench codebase. Paper results are not affected by entr
 - Per-sample run records with input and output hashes, seeds, failures, metric coverage and source provenance; resume and retry.
 - Direct per-sample backends with request seed validation for Qwen3-TTS, F5-TTS, XTTS, ZipVoice, SparkTTS, CosyVoice, OpenVoice, StyleTTS2, Bark, FireRedTTS2, VoxCPM, IndexTTS and MaskGCT.
 - Frozen reproduction subsets, pinned Hub revisions and model asset hashing.
+- `rvcbench.metrics`: the benchmark's metrics (SIM, SVA, WER, SpeechMOS, MCD, STOI, emotion) as a Python API, with one-line functions and an `Evaluator` that loads each metric model once.
 - `rvcbench --version`, and a release workflow that publishes to PyPI through trusted publishing when a version tag is pushed.
 - Lint baseline, pre-commit hooks, CI on Python 3.10 and 3.12 with a wheel build and install check.
 

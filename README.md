@@ -55,6 +55,17 @@ rvcbench score --suite core-v1 --generated outputs/zipvoice --output results/zip
 | `core-v1` | 480 | a quick evaluation covering 16 of the 18 evaluations (about 35 min of scoring) |
 | `full-v1` | 12,724 | every pair of the paper's datasets, without the protection tasks for now (about a day of scoring) |
 
+The same metrics are available in your own code, with the same models and definitions:
+
+```python
+from rvcbench import metrics
+
+with metrics.Evaluator(["sim", "wer", "speechmos"], device="cuda") as evaluator:
+    evaluator.score("generated.wav", reference="reference.wav", text="Hello there.", language="en")
+```
+
+See the [metrics API](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/metrics.md) for every metric and the one-line functions.
+
 Requires Linux, Python 3.10+ and FFmpeg; a GPU is recommended for scoring. More in
 [Evaluate your own model](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/adding_a_model.md) and the [Core suite](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/core_suite.md) guide.
 
@@ -177,6 +188,7 @@ coverage. See [Running the built-in models](https://github.com/Nanboy-Ronan/RVCB
 | --- | --- |
 | [Evaluate your own model](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/adding_a_model.md) | Prompt and output formats, batch lists, several models, adapters |
 | [Core and full suites](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/core_suite.md) | Tasks, data, metrics and scoring time |
+| [Metrics API](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/metrics.md) | Speaker similarity, WER, MOS, MCD, STOI and emotion in your own code |
 | [Running the built-in models](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/models.md) | Installation options, supported models, protection and denoising |
 | [Datasets](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/datasets.md) | Hub folders, manifest format, preprocessing |
 | [Run guide](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/run_protocol.md) | Run records, resuming, scoring saved audio, timing |
