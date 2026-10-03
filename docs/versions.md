@@ -18,7 +18,6 @@ tag v1.0 (2026-09-30): the code released with the paper
 | Evaluate your own model | Add an adapter to the codebase | Score audio generated anywhere (`rvcbench prompts`, `rvcbench score`), or a one-file adapter |
 | Evaluation data | Full datasets | Full datasets, plus the `core-v1` suite: 480 pinned utterances covering 16 of the paper's 18 evaluations |
 | Run output | `metrics.json` per run | Per-sample `run_manifest.json` with input and output hashes, failures and metric coverage |
-| Invalid inputs | Some are skipped or patched | Fail with an error |
 
 ```bash
 git clone --branch v1 https://github.com/Nanboy-Ronan/RVCBench.git RVCBench-v1   # reproduce the paper
