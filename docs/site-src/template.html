@@ -610,7 +610,7 @@
         <div class="section-head">
           <span class="eyebrow"><span class="dim-tag dim-signal">Generation Robustness</span> Leaderboard — LibriTTS, clean prompts</span>
           <h2>Which model clones a voice best?</h2>
-          <p>Ranked by speaker similarity (SIM) on unprotected prompts, averaged across the full LibriTTS speaker set. Click a quality column to sort. Historical RTF is raw and incomparable: timing boundaries and execution conditions are unverified. Speed ranking is disabled.</p>
+          <p>Ranked by speaker similarity (SIM) on unprotected prompts, averaged across the full LibriTTS speaker set, as reported in the paper (arXiv v3); † marks models reported in its appendix. Click a quality column to sort. Historical RTF is raw and incomparable: timing boundaries and execution conditions are unverified. Speed ranking is disabled.</p>
         </div>
         <div class="table-scroll">
           <table id="lbTable">
@@ -669,7 +669,7 @@
         <div class="section-head">
           <span class="eyebrow"><span class="dim-tag dim-judge">Input</span><span class="dim-tag dim-signal">Generation</span> Cross-dataset generalisation — SIM, clean prompts</span>
           <h2>Does it still work outside LibriTTS?</h2>
-          <p>Speaker similarity across 10 dataset conditions, grouped by which dimension they test: <strong style="color:var(--judge);">Input Robustness</strong> shifts the reference audio or speaker mix, <strong style="color:var(--signal);">Generation Robustness</strong> shifts the language or utterance length. Hover a cell for the exact value.</p>
+          <p>Speaker similarity across 9 dataset conditions from the paper (arXiv v3), grouped by which dimension they test: <strong style="color:var(--judge);">Input Robustness</strong> shifts the reference audio or the text, <strong style="color:var(--signal);">Generation Robustness</strong> shifts the language or utterance length. Multi-speaker results are reported per SNR level in the paper. Hover a cell for the exact value.</p>
         </div>
         <div class="heatmap-scroll">
           __HEATMAP_TABLE__

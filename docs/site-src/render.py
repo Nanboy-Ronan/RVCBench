@@ -70,8 +70,8 @@ def render_leaderboard_rows():
                 m=esc(d["m"]), sim=d["sim"], wer=d["wer"], mos=d["mos"], mcd=d["mcd"],
                 rtf=d["rtf"] if d["rtf"] is not None else "", sva=d["sva"], emo=d["emo"],
                 medal=medal, rank=i + 1, mname=esc(d["m"]),
-                simf=fmt(d["sim"]), werf=fmt(d["wer"]), mosf=fmt(d["mos"], 2),
-                mcdf=fmt(d["mcd"], 2), rtff=fmt(d["rtf"], 2), svaf=fmt(d["sva"]), emof=fmt(d["emo"]),
+                simf=fmt(d["sim"], 2), werf=fmt(d["wer"], 2), mosf=fmt(d["mos"], 2),
+                mcdf=fmt(d["mcd"], 2), rtff=fmt(d["rtf"], 2), svaf=fmt(d["sva"], 2), emof=fmt(d["emo"], 2),
                 pct=pct,
             )
         )
@@ -83,10 +83,10 @@ def render_robustness_rows():
     out = []
     for d in D.ROBUSTNESS:
         out.append(
-            f'<tr><td>{esc(d["m"])}</td><td class="num tnum">{fmt(d["clean"])}</td>'
-            f'<td class="num tnum">{fmt(d["ss"])}</td><td class="num tnum">{fmt(d["ek"])}</td>'
-            f'<td class="num tnum">{fmt(d["sp"])}</td><td class="num tnum">{fmt(d["gr"])}</td>'
-            f'<td class="num tnum">{fmt(d["em"])}</td></tr>'
+            f'<tr><td>{esc(d["m"])}</td><td class="num tnum">{fmt(d["clean"], 2)}</td>'
+            f'<td class="num tnum">{fmt(d["ss"], 2)}</td><td class="num tnum">{fmt(d["ek"], 2)}</td>'
+            f'<td class="num tnum">{fmt(d["sp"], 2)}</td><td class="num tnum">{fmt(d["gr"], 2)}</td>'
+            f'<td class="num tnum">{fmt(d["em"], 2)}</td></tr>'
         )
     return "".join(out)
 
@@ -165,10 +165,10 @@ def render_heatmap_table():
             t = max(0.0, min(1.0, v / max_v))
             bg = f"color-mix(in oklab, var(--surface-3), var(--signal) {round(t * 100)}%)"
             fg = "var(--text-on-accent)" if t > 0.52 else "var(--text-primary)"
-            title = f"{row['m']} · {col}: {v:.3f}"
+            title = f"{row['m']} · {col}: {v:.2f}"
             cells.append(
                 f'<td style="background:{bg};color:{fg}" title="{esc(title)}" '
-                f'data-m="{esc(row["m"])}" data-c="{esc(col)}" data-v="{v:.3f}">{v:.2f}</td>'
+                f'data-m="{esc(row["m"])}" data-c="{esc(col)}" data-v="{v:.2f}">{v:.2f}</td>'
             )
         rows.append("<tr>" + "".join(cells) + "</tr>")
     return f'<table class="heatmap" id="hmTable">{head}<tbody>{"".join(rows)}</tbody></table>'

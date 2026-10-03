@@ -75,14 +75,14 @@ DIMENSIONS = [
 # CROSS_DATASET below — just organised to make the taxonomy visible).
 CROSS_DATASET_GROUPS = [
     {"label": "Baseline", "dim": None, "cols": ["LibriTTS"]},
-    {"label": "Input Robustness", "dim": "input", "cols": ["VCTK", "Multi-spk", "BG-clean", "BG-noise", "Halluc."]},
+    {"label": "Input Robustness", "dim": "input", "cols": ["VCTK", "BG-clean", "BG-noise", "Halluc."]},
     {"label": "Generation Robustness", "dim": "generation", "cols": ["Long", "AISHELL", "French", "Bilingual"]},
 ]
 
 # "Why RVCBench" comparison — a real table (not two parallel lists) so each
 # row pairs its two values directly, both visually and when read as plain text.
 WHY_COMPARISON = [
-    {"dim": "Adversary models", "typical": "1–3", "rvcbench": "32 integration entries; 18 models with historical results"},
+    {"dim": "Adversary models", "typical": "1–3", "rvcbench": "32 integration entries; 22 models with paper results"},
     {"dim": "Datasets / languages", "typical": "1", "rvcbench": "10, incl. ZH / FR / bilingual / noisy"},
     {"dim": "Protection methods compared", "typical": "usually own only", "rvcbench": "5, equal footing"},
     {"dim": "Denoising-adaptive attacker", "typical": "rarely modeled", "rvcbench": "built into the pipeline"},
@@ -94,77 +94,91 @@ STATS = [
     {"n": "32", "l": "VC / TTS models"},
     {"n": "5", "l": "protection methods"},
     {"n": "10", "l": "dataset configs"},
-    {"n": "225", "l": "speakers (paper)"},
+    {"n": "204", "l": "speakers (paper)"},
     {"n": "14,370", "l": "utterances (paper)"},
     {"n": "3", "l": "languages — EN / ZH / FR"},
 ]
 
-# Leaderboard — LibriTTS, clean prompts. Pre-sorted by SIM desc (the default view).
+# Results from the paper (arXiv v3), two decimals as published; † marks models in its appendix.
+# Leaderboard — LibriTTS, clean prompts (Table 13). Pre-sorted by SIM desc (the default view).
 LEADERBOARD = [
-    {"m": "Qwen3-TTS",    "sim": .614, "wer": .052, "mos": 4.39, "mcd": 5.79, "rtf": 2.02, "sva": .974, "emo": .731},
-    {"m": "IndexTTS",     "sim": .606, "wer": .052, "mos": 4.06, "mcd": 6.61, "rtf": 2.23, "sva": .972, "emo": .693},
-    {"m": "CosyVoice 2",  "sim": .602, "wer": .175, "mos": 4.39, "mcd": 6.17, "rtf": 4.58, "sva": .974, "emo": .729},
-    {"m": "ZipVoice",     "sim": .579, "wer": .053, "mos": 4.13, "mcd": 7.09, "rtf": 1.46, "sva": .952, "emo": .675},
-    {"m": "MaskGCT",      "sim": .570, "wer": .088, "mos": 3.93, "mcd": 6.91, "rtf": 1.36, "sva": .939, "emo": .682},
-    {"m": "GLM-TTS",      "sim": .570, "wer": .087, "mos": 4.08, "mcd": 6.41, "rtf": 1.74, "sva": .951, "emo": .678},
-    {"m": "F5-TTS",       "sim": .559, "wer": .116, "mos": 3.99, "mcd": 6.96, "rtf": 0.61, "sva": .937, "emo": .676},
-    {"m": "Higgs Audio",  "sim": .559, "wer": .250, "mos": 4.30, "mcd": 6.06, "rtf": 1.42, "sva": .941, "emo": .717},
-    {"m": "MGM-Omni",     "sim": .539, "wer": .095, "mos": 4.28, "mcd": 5.82, "rtf": 0.84, "sva": .933, "emo": .676},
-    {"m": "PlayDiffusion","sim": .506, "wer": .055, "mos": 4.15, "mcd": 8.06, "rtf": 0.73, "sva": .936, "emo": .681},
-    {"m": "MOSS-TTSD",    "sim": .492, "wer": .383, "mos": 4.10, "mcd": 7.09, "rtf": None, "sva": .876, "emo": .667},
-    {"m": "VibeVoice",    "sim": .480, "wer": .228, "mos": 3.83, "mcd": 6.76, "rtf": 1.86, "sva": .852, "emo": .624},
-    {"m": "FishSpeech",   "sim": .472, "wer": .166, "mos": 4.37, "mcd": 6.47, "rtf": 3.61, "sva": .907, "emo": .682},
-    {"m": "XTTS-v2",      "sim": .454, "wer": .073, "mos": 3.81, "mcd": 8.62, "rtf": 0.62, "sva": .908, "emo": .639},
-    {"m": "SparkTTS",     "sim": .408, "wer": .326, "mos": 4.06, "mcd": 5.83, "rtf": 1.56, "sva": .764, "emo": .672},
-    {"m": "OZSpeech",     "sim": .388, "wer": .060, "mos": 3.21, "mcd": 6.87, "rtf": 8.75, "sva": .840, "emo": .636},
-    {"m": "OpenVoice V2", "sim": .244, "wer": .075, "mos": 4.30, "mcd": 7.06, "rtf": 0.08, "sva": .474, "emo": .601},
-    {"m": "StyleTTS 2",   "sim": .228, "wer": .049, "mos": 4.30, "mcd": 6.81, "rtf": 0.11, "sva": .388, "emo": .589},
+    {"m": "Qwen3-TTS", "sim": 0.61, "wer": 0.05, "mos": 4.39, "mcd": 5.79, "rtf": 2.02, "sva": 0.97, "emo": 0.73},
+    {"m": "IndexTTS", "sim": 0.61, "wer": 0.05, "mos": 4.06, "mcd": 6.61, "rtf": 2.23, "sva": 0.97, "emo": 0.69},
+    {"m": "dots.tts \u2020", "sim": 0.6, "wer": 0.06, "mos": 4.17, "mcd": 6.11, "rtf": 0.67, "sva": 0.96, "emo": 0.71},
+    {"m": "CosyVoice 2", "sim": 0.58, "wer": 0.05, "mos": 4.37, "mcd": 6.02, "rtf": 4.81, "sva": 0.97, "emo": 0.7},
+    {"m": "ZipVoice", "sim": 0.58, "wer": 0.05, "mos": 4.13, "mcd": 7.09, "rtf": 1.46, "sva": 0.95, "emo": 0.68},
+    {"m": "MOSS-TTS v1.5 \u2020", "sim": 0.57, "wer": 0.06, "mos": 4.32, "mcd": 6.66, "rtf": 0.76, "sva": 0.95, "emo": 0.7},
+    {"m": "GLM-TTS", "sim": 0.57, "wer": 0.09, "mos": 4.08, "mcd": 6.41, "rtf": 1.74, "sva": 0.95, "emo": 0.68},
+    {"m": "MaskGCT", "sim": 0.57, "wer": 0.09, "mos": 3.93, "mcd": 6.91, "rtf": 1.36, "sva": 0.94, "emo": 0.68},
+    {"m": "Higgs TTS 3 \u2020", "sim": 0.56, "wer": 0.05, "mos": 4.23, "mcd": 6.32, "rtf": 0.64, "sva": 0.96, "emo": 0.71},
+    {"m": "F5-TTS", "sim": 0.56, "wer": 0.12, "mos": 3.99, "mcd": 6.96, "rtf": 0.61, "sva": 0.94, "emo": 0.68},
+    {"m": "Higgs Audio", "sim": 0.56, "wer": 0.25, "mos": 4.3, "mcd": 6.06, "rtf": 1.42, "sva": 0.94, "emo": 0.72},
+    {"m": "Fish Audio S2 \u2020", "sim": 0.54, "wer": 0.04, "mos": 4.37, "mcd": 6.16, "rtf": 4.67, "sva": 0.95, "emo": 0.71},
+    {"m": "MGM-Omni", "sim": 0.54, "wer": 0.09, "mos": 4.28, "mcd": 5.82, "rtf": 0.84, "sva": 0.93, "emo": 0.68},
+    {"m": "PlayDiffusion", "sim": 0.51, "wer": 0.05, "mos": 4.15, "mcd": 8.06, "rtf": 0.73, "sva": 0.94, "emo": 0.68},
+    {"m": "MOSS-TTSD", "sim": 0.49, "wer": 0.38, "mos": 4.1, "mcd": 7.09, "rtf": 0.62, "sva": 0.88, "emo": 0.67},
+    {"m": "VibeVoice", "sim": 0.48, "wer": 0.23, "mos": 3.83, "mcd": 6.76, "rtf": 1.86, "sva": 0.85, "emo": 0.62},
+    {"m": "FishSpeech", "sim": 0.47, "wer": 0.17, "mos": 4.37, "mcd": 6.47, "rtf": 3.61, "sva": 0.91, "emo": 0.68},
+    {"m": "XTTS-v2", "sim": 0.45, "wer": 0.07, "mos": 3.81, "mcd": 8.62, "rtf": 0.62, "sva": 0.91, "emo": 0.64},
+    {"m": "Spark-TTS", "sim": 0.41, "wer": 0.33, "mos": 4.06, "mcd": 5.83, "rtf": 1.56, "sva": 0.76, "emo": 0.67},
+    {"m": "OZSpeech", "sim": 0.39, "wer": 0.06, "mos": 3.21, "mcd": 6.87, "rtf": 8.75, "sva": 0.84, "emo": 0.64},
+    {"m": "OpenVoice V2", "sim": 0.24, "wer": 0.07, "mos": 4.3, "mcd": 7.06, "rtf": 0.08, "sva": 0.47, "emo": 0.6},
+    {"m": "StyleTTS 2", "sim": 0.23, "wer": 0.05, "mos": 4.3, "mcd": 6.81, "rtf": 0.11, "sva": 0.39, "emo": 0.59},
 ]
 
-# Protection robustness — SIM, LibriTTS. ss=SafeSpeech ek=Enkidu sp=Spectral gr=GR-Noise em=EM
+# Protection robustness — SIM, LibriTTS (Tables 35-37). ss=SafeSpeech ek=Enkidu sp=Spectral gr=GR-Noise em=EM (POP)
 ROBUSTNESS = [
-    {"m": "Qwen3-TTS",     "clean": .614, "ss": .384, "ek": .502, "sp": .363, "gr": .408, "em": .582},
-    {"m": "IndexTTS",      "clean": .606, "ss": .346, "ek": .475, "sp": .318, "gr": .392, "em": .572},
-    {"m": "CosyVoice 2",   "clean": .602, "ss": .321, "ek": .447, "sp": .301, "gr": .384, "em": .549},
-    {"m": "ZipVoice",      "clean": .579, "ss": .287, "ek": .435, "sp": .262, "gr": .258, "em": .543},
-    {"m": "MaskGCT",       "clean": .570, "ss": .303, "ek": .407, "sp": .281, "gr": .312, "em": .530},
-    {"m": "GLM-TTS",       "clean": .570, "ss": .330, "ek": .445, "sp": .311, "gr": .388, "em": .532},
-    {"m": "F5-TTS",        "clean": .559, "ss": .207, "ek": .431, "sp": .176, "gr": .137, "em": .520},
-    {"m": "Higgs Audio",   "clean": .559, "ss": .264, "ek": .435, "sp": .236, "gr": .272, "em": .521},
-    {"m": "MGM-Omni",      "clean": .539, "ss": .184, "ek": .316, "sp": .166, "gr": .229, "em": .491},
-    {"m": "PlayDiffusion", "clean": .506, "ss": .173, "ek": None, "sp": .149, "gr": .162, "em": .466},
-    {"m": "MOSS-TTSD",     "clean": .492, "ss": .242, "ek": .335, "sp": .216, "gr": .247, "em": .453},
-    {"m": "VibeVoice",     "clean": .480, "ss": .272, "ek": .367, "sp": .253, "gr": .280, "em": .442},
-    {"m": "FishSpeech",    "clean": .472, "ss": .238, "ek": .334, "sp": .212, "gr": .235, "em": .439},
-    {"m": "XTTS-v2",       "clean": .454, "ss": .260, "ek": .308, "sp": .241, "gr": .237, "em": .414},
-    {"m": "SparkTTS",      "clean": .408, "ss": .129, "ek": .137, "sp": .108, "gr": .062, "em": .359},
-    {"m": "OZSpeech",      "clean": .388, "ss": .156, "ek": .187, "sp": .147, "gr": .148, "em": .337},
-    {"m": "OpenVoice V2",  "clean": .244, "ss": .185, "ek": .188, "sp": .180, "gr": .175, "em": .236},
-    {"m": "StyleTTS 2",    "clean": .228, "ss": .089, "ek": .125, "sp": .081, "gr": .030, "em": .207},
+    {"m": "Qwen3-TTS", "clean": 0.61, "ss": 0.38, "ek": 0.5, "sp": 0.36, "gr": 0.41, "em": 0.58},
+    {"m": "IndexTTS", "clean": 0.61, "ss": 0.35, "ek": 0.47, "sp": 0.32, "gr": 0.39, "em": 0.57},
+    {"m": "dots.tts \u2020", "clean": 0.6, "ss": 0.41, "ek": 0.49, "sp": 0.39, "gr": 0.44, "em": 0.57},
+    {"m": "CosyVoice 2", "clean": 0.58, "ss": 0.32, "ek": 0.45, "sp": 0.3, "gr": 0.38, "em": 0.55},
+    {"m": "ZipVoice", "clean": 0.58, "ss": 0.29, "ek": 0.44, "sp": 0.26, "gr": 0.26, "em": 0.54},
+    {"m": "MOSS-TTS v1.5 \u2020", "clean": 0.57, "ss": 0.33, "ek": 0.43, "sp": 0.31, "gr": 0.33, "em": 0.53},
+    {"m": "GLM-TTS", "clean": 0.57, "ss": 0.33, "ek": 0.44, "sp": 0.31, "gr": 0.39, "em": 0.53},
+    {"m": "MaskGCT", "clean": 0.57, "ss": 0.3, "ek": 0.41, "sp": 0.28, "gr": 0.31, "em": 0.53},
+    {"m": "Higgs TTS 3 \u2020", "clean": 0.56, "ss": 0.48, "ek": 0.49, "sp": 0.48, "gr": 0.34, "em": 0.53},
+    {"m": "F5-TTS", "clean": 0.56, "ss": 0.21, "ek": 0.43, "sp": 0.18, "gr": 0.14, "em": 0.52},
+    {"m": "Higgs Audio", "clean": 0.56, "ss": 0.26, "ek": 0.43, "sp": 0.24, "gr": 0.27, "em": 0.52},
+    {"m": "Fish Audio S2 \u2020", "clean": 0.54, "ss": 0.32, "ek": 0.43, "sp": 0.3, "gr": 0.34, "em": 0.52},
+    {"m": "MGM-Omni", "clean": 0.54, "ss": 0.18, "ek": 0.32, "sp": 0.17, "gr": 0.23, "em": 0.49},
+    {"m": "PlayDiffusion", "clean": 0.51, "ss": 0.17, "ek": 0.34, "sp": 0.15, "gr": 0.16, "em": 0.47},
+    {"m": "MOSS-TTSD", "clean": 0.49, "ss": 0.24, "ek": 0.34, "sp": 0.22, "gr": 0.25, "em": 0.08},
+    {"m": "VibeVoice", "clean": 0.48, "ss": 0.27, "ek": 0.37, "sp": 0.25, "gr": 0.28, "em": 0.45},
+    {"m": "FishSpeech", "clean": 0.47, "ss": 0.24, "ek": 0.33, "sp": 0.21, "gr": 0.23, "em": 0.01},
+    {"m": "XTTS-v2", "clean": 0.45, "ss": 0.26, "ek": 0.31, "sp": 0.24, "gr": 0.24, "em": 0.41},
+    {"m": "Spark-TTS", "clean": 0.41, "ss": 0.13, "ek": 0.14, "sp": 0.11, "gr": 0.06, "em": 0.36},
+    {"m": "OZSpeech", "clean": 0.39, "ss": 0.16, "ek": 0.19, "sp": 0.15, "gr": 0.15, "em": 0.34},
+    {"m": "OpenVoice V2", "clean": 0.24, "ss": 0.18, "ek": 0.19, "sp": 0.18, "gr": 0.18, "em": 0.24},
+    {"m": "StyleTTS 2", "clean": 0.23, "ss": 0.09, "ek": 0.12, "sp": 0.08, "gr": 0.03, "em": 0.21},
 ]
 ROBUSTNESS_METHOD_NAME = {"ss": "SafeSpeech", "ek": "Enkidu", "sp": "Spectral", "gr": "GR-Noise", "em": "EM"}
 
-# Cross-dataset generalisation — SIM, clean prompts.
-CROSS_DATASET_COLUMNS = ["LibriTTS", "VCTK", "Multi-spk", "Long", "AISHELL", "French", "Bilingual", "BG-clean", "BG-noise", "Halluc."]
+# Cross-dataset generalisation — SIM, clean prompts (Tables 11, 13, 33, 38, 39, 41). The paper reports
+# multi-speaker results per SNR level only (Tables 29-32), so they are not a column here.
+CROSS_DATASET_COLUMNS = ["LibriTTS", "VCTK", "Long", "AISHELL", "French", "Bilingual", "BG-clean", "BG-noise", "Halluc."]
 CROSS_DATASET = [
-    {"m": "Qwen3-TTS",    "v": [.614, .618, .495, .561, .721, .536, .673, .689, .572, .515]},
-    {"m": "IndexTTS",     "v": [.606, .567, .473, .775, .721, .397, .673, .589, .528, .529]},
-    {"m": "CosyVoice 2",  "v": [.602, .582, .448, .530, .717, .378, .653, .626, .515, .518]},
-    {"m": "ZipVoice",     "v": [.579, .554, .531, .729, .712, .363, .322, .625, .462, .509]},
-    {"m": "MaskGCT",      "v": [.570, .555, .431, .194, .674, .494, None, .610, .487, .499]},
-    {"m": "GLM-TTS",      "v": [.570, .573, .445, .757, .690, .398, .657, .622, .528, .533]},
-    {"m": "F5-TTS",       "v": [.559, .537, .507, .607, .696, .304, .653, .582, .414, .455]},
-    {"m": "Higgs Audio",  "v": [.559, .516, .418, .520, .581, .349, .543, .592, .421, .425]},
-    {"m": "MGM-Omni",     "v": [.539, .447, .370, .442, .713, .227, .630, .523, .332, .396]},
-    {"m": "PlayDiffusion","v": [.506, .426, .360, .637, .441, .283, .465, .433, .305, .408]},
-    {"m": "MOSS-TTSD",    "v": [.492, .440, .379, .644, .437, .327, .471, .494, .488, .416]},
-    {"m": "VibeVoice",    "v": [.480, .436, .348, .625, .564, .343, .531, .513, .364, .408]},
-    {"m": "FishSpeech",   "v": [.472, .430, .383, .572, .611, .374, .566, .495, .387, .351]},
-    {"m": "XTTS-v2",      "v": [.454, .454, .328, .613, .569, .445, .506, .546, .394, .488]},
-    {"m": "SparkTTS",     "v": [.408, .532, .228, .345, .569, .164, .480, .588, .332, .336]},
-    {"m": "OZSpeech",     "v": [.388, .253, .271, None, None, .109, None, .272, .164, .281]},
-    {"m": "OpenVoice V2", "v": [.244, .392, .192, .278, .431, .271, .298, .484, .358, .365]},
-    {"m": "StyleTTS 2",   "v": [.228, .236, .162, None, None, None, .213, .196, .166, .184]},
+    {"m": "Qwen3-TTS", "v": [0.61, 0.62, 0.56, 0.72, 0.54, 0.67, 0.69, 0.57, 0.51]},
+    {"m": "IndexTTS", "v": [0.61, 0.57, 0.78, 0.72, 0.4, 0.67, 0.59, 0.53, 0.53]},
+    {"m": "dots.tts \u2020", "v": [0.6, 0.57, 0.72, 0.68, 0.46, 0.61, 0.65, 0.56, 0.54]},
+    {"m": "CosyVoice 2", "v": [0.58, 0.58, 0.53, 0.72, 0.38, 0.65, 0.63, 0.51, 0.52]},
+    {"m": "ZipVoice", "v": [0.58, 0.55, 0.73, 0.71, 0.36, 0.63, 0.62, 0.46, 0.51]},
+    {"m": "MOSS-TTS v1.5 \u2020", "v": [0.57, 0.51, 0.66, 0.68, 0.46, 0.65, 0.58, 0.46, 0.46]},
+    {"m": "GLM-TTS", "v": [0.57, 0.57, 0.76, 0.69, 0.4, 0.66, 0.62, 0.53, 0.53]},
+    {"m": "MaskGCT", "v": [0.57, 0.56, 0.76, 0.67, 0.49, 0.63, 0.61, 0.49, 0.5]},
+    {"m": "Higgs TTS 3 \u2020", "v": [0.56, 0.45, 0.74, 0.63, 0.47, 0.3, 0.49, 0.31, 0.4]},
+    {"m": "F5-TTS", "v": [0.56, 0.54, 0.61, 0.7, 0.3, 0.65, 0.58, 0.41, 0.46]},
+    {"m": "Higgs Audio", "v": [0.56, 0.52, 0.52, 0.58, 0.35, 0.54, 0.59, 0.42, 0.42]},
+    {"m": "Fish Audio S2 \u2020", "v": [0.54, 0.51, 0.5, 0.66, 0.46, 0.62, 0.58, 0.48, 0.41]},
+    {"m": "MGM-Omni", "v": [0.54, 0.45, 0.44, 0.71, 0.23, 0.63, 0.52, 0.33, 0.4]},
+    {"m": "PlayDiffusion", "v": [0.51, 0.43, 0.64, 0.44, 0.28, 0.46, 0.43, 0.31, 0.41]},
+    {"m": "MOSS-TTSD", "v": [0.49, 0.44, 0.64, 0.44, 0.33, 0.44, 0.49, 0.04, 0.42]},
+    {"m": "VibeVoice", "v": [0.48, 0.44, 0.62, 0.56, 0.34, 0.53, 0.51, 0.36, 0.41]},
+    {"m": "FishSpeech", "v": [0.47, 0.43, 0.57, 0.61, 0.37, 0.57, 0.5, 0.39, 0.35]},
+    {"m": "XTTS-v2", "v": [0.45, 0.45, 0.61, 0.57, 0.45, 0.51, 0.55, 0.39, 0.49]},
+    {"m": "Spark-TTS", "v": [0.41, 0.53, 0.35, 0.57, 0.16, 0.48, 0.59, 0.33, 0.34]},
+    {"m": "OZSpeech", "v": [0.39, 0.25, 0.42, 0.2, 0.11, 0.17, 0.27, 0.16, 0.28]},
+    {"m": "OpenVoice V2", "v": [0.24, 0.39, 0.28, 0.43, 0.27, 0.3, 0.48, 0.36, 0.36]},
+    {"m": "StyleTTS 2", "v": [0.23, 0.24, 0.2, 0.11, 0.11, 0.21, 0.2, 0.17, 0.18]},
 ]
 
 import json as _json
@@ -203,7 +217,7 @@ FAQ = [
     {
         "q": "What is RVCBench?",
         "a": "RVCBench is a benchmark for voice-cloning robustness, speaker privacy, and audio-protection methods. "
-             "It provides 32 integration entries and historical results for 18 models, with 5 audio-protection methods across "
+             "It provides 32 integration entries and paper results for 22 models (18 in the main results, 4 in the appendix), with 5 audio-protection methods across "
              "10 dataset configurations, scoring speaker similarity, intelligibility, perceptual quality, and runtime.",
     },
     {
@@ -220,7 +234,7 @@ FAQ = [
     {
         "q": "Which model is hardest to clone under protection, according to RVCBench?",
         "a": "Across the LibriTTS leaderboard, StyleTTS 2 and OpenVoice V2 have the lowest clean speaker similarity "
-             "and drop furthest under protection — GR-Noise pushes StyleTTS 2's similarity from 0.228 down to 0.030.",
+             "and drop furthest under protection — GR-Noise pushes StyleTTS 2's similarity from 0.23 down to 0.03.",
     },
     {
         "q": "Is the RVCBench dataset public?",
