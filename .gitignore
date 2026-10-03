@@ -225,6 +225,9 @@ logs/
 !/docs/model_environments.md
 !/docs/adding_a_model.md
 !/docs/core_suite.md
+!/docs/models.md
+!/docs/datasets.md
+!/docs/versions.md
 !/docs/index.html
 !/docs/README.md
 !/docs/robots.txt
