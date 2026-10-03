@@ -16,7 +16,7 @@ def test_emotion_rejects_changed_pinned_assets_before_native_loading(tmp_path, m
     asset = root / 'custom_interface.py'
     asset.write_text('original interface')
     monkeypatch.setattr('rvcbench.evaluation.scorers.emotion.ASSETS', {asset.name: file_hash(asset)})
-    monkeypatch.setattr('rvcbench.evaluation.scorers.emotion.to_absolute_path', lambda _: str(root))
+    monkeypatch.setenv('RVCBENCH_ASSET_DIR', str(tmp_path))
     asset.write_text('changed interface')
     with pytest.raises(ValueError, match='asset hash differs'):
         create_scorer('emotion', 'cpu', logging.getLogger()).prepare()
