@@ -17,23 +17,38 @@ multilingual generation; compression; and anti-cloning protection with and witho
 [paper](https://arxiv.org/abs/2602.00443) defines 18 robustness evaluations over 225 speakers and 14,370
 utterances and evaluates 18 open-source models.
 
-[Evaluate your model](#evaluate-your-model) · [What it measures](#what-rvcbench-measures) · [Results](#results-from-the-paper) · [Run this codebase](#getting-started) · [Website](https://nanboy-ronan.github.io/RVCBench/) · [Dataset](https://huggingface.co/datasets/Nanboy/RVCBench) · [Citation](#citation)
+[v1 and v2](#v1-and-v2) · [Evaluate your model](#evaluate-your-model) · [What it measures](#what-rvcbench-measures) · [Results](#results-from-the-paper) · [Run this codebase](#getting-started) · [Website](https://nanboy-ronan.github.io/RVCBench/) · [Dataset](https://huggingface.co/datasets/Nanboy/RVCBench) · [Citation](#citation)
 
-> [!NOTE]
-> **Two branches.** `main` (this branch, tag [`v1.0`](https://github.com/Nanboy-Ronan/RVCBench/tree/v1.0)) holds the
-> codebase before the architecture refactor. [`v2`](https://github.com/Nanboy-Ronan/RVCBench/tree/v2) holds the
-> installable `rvcbench` package with versioned evaluation suites, under active development. To evaluate a new
-> model, use v2 as shown below; to run this codebase, see [Getting Started](#getting-started).
+> [!IMPORTANT]
+> **This is the `v1` branch.** It preserves the codebase before the architecture refactor (tag
+> [`v1.0`](https://github.com/Nanboy-Ronan/RVCBench/tree/v1.0)) and no longer changes. The current version (v2)
+> is on [`main`](https://github.com/Nanboy-Ronan/RVCBench/tree/main). To evaluate a new model, use v2 as shown
+> below; to run this codebase, see [Getting Started](#getting-started).
+
+### v1 and v2
+
+| | v1 (this branch) | v2 ([`main`](https://github.com/Nanboy-Ronan/RVCBench/tree/main)) |
+| --- | --- | --- |
+| Installation | `pip install` of a package list; code imported from the checkout as `src` | Installable `rvcbench` package (`pip install` from GitHub) |
+| Running a model | `python run_vc.py --config-name ...` | `rvcbench run --config-name ...` (`run_vc.py` still works in a checkout) |
+| Configs | `configs/` | Shipped inside the package, `src/rvcbench/configs/`; same config names |
+| Evaluating your own model | Add an adapter to the codebase | Score audio generated anywhere (`rvcbench prompts`, `rvcbench score`) or a one-file adapter |
+| Evaluation suite | Full datasets | Versioned suites with pinned inputs, including `core-v1` |
+| Run records | `metrics.json` per run | Per-sample `run_manifest.json` with input and output hashes, failures and coverage; `status`, `report` and resume |
+| Failures | Some invalid inputs are skipped or patched | Invalid inputs and incomplete checkpoints fail explicitly |
+
+The results tables below are the paper's results. v2 changes the code, not those results; see
+[codebase versions](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/versions.md) for details.
 
 ![RVCBench main figure](figs/main.png)
 
 ## Evaluate your model
 
 Generate speech with your own code, in your own environment, and let RVCBench score it. These commands
-install the `rvcbench` package from the `v2` branch; they do not use the code on this branch.
+install the current `rvcbench` package from `main`; they do not use the code on this branch.
 
 ```bash
-pip install "rvcbench[eval] @ git+https://github.com/Nanboy-Ronan/RVCBench@v2"
+pip install "rvcbench[eval] @ git+https://github.com/Nanboy-Ronan/RVCBench@main"
 rvcbench setup-scorers                                    # once: download the metric models
 rvcbench prompts --suite core-v1 --output prompts/        # 480 reference clips and texts
 # synthesize each line of prompts/prompts.jsonl and save it at <outputs>/<output_file>
@@ -44,8 +59,8 @@ rvcbench score --suite core-v1 --generated outputs/ --model my-model --output re
 each perturbed condition against its clean counterpart. The suite pins the dataset revision and the hash
 of every input, exports only reference audio and texts, and fails a sample whose file is missing or invalid.
 
-- [Core suite](https://github.com/Nanboy-Ronan/RVCBench/blob/v2/docs/core_suite.md): which paper evaluation each task covers, its data and metrics.
-- [Evaluate your own model](https://github.com/Nanboy-Ronan/RVCBench/blob/v2/docs/adding_a_model.md): the prompt and output formats, and a one-file
+- [Core suite](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/core_suite.md): which paper evaluation each task covers, its data and metrics.
+- [Evaluate your own model](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/adding_a_model.md): the prompt and output formats, and a one-file
   adapter alternative that lets RVCBench drive your model.
 - `core-v1` is not yet a leaderboard suite; baseline results for the paper's models are in progress.
 
@@ -152,6 +167,10 @@ Speaker similarity (SIM) on clean prompts across all benchmark datasets. — ind
 This section runs the code on this branch (v1). It covers 32 model integrations, 5 protection methods
 and 10 dataset configurations.
 
+```bash
+git clone --branch v1 https://github.com/Nanboy-Ronan/RVCBench.git
+```
+
 ### Requirements
 
 - Python 3.9+
@@ -163,7 +182,6 @@ and 10 dataset configurations.
 ### Installation
 
 ```bash
-git clone https://github.com/Nanboy-Ronan/RVCBench.git
 cd RVCBench
 pip install hydra-core omegaconf pandas pyarrow soundfile librosa \
             jiwer openai-whisper pymcd huggingface_hub
@@ -191,7 +209,7 @@ dataset. Outputs are written inside the repository directory.
 
 Model setup for the quickstarts, including gated downloads, is in
 [docs/quickstart_model_setup.md](docs/quickstart_model_setup.md). Command-line versions of these
-quickstarts are on the `v2` branch.
+quickstarts are on `main`.
 
 ## Full Benchmark Path
 
@@ -579,8 +597,8 @@ Key config locations:
 ## Contributing
 
 Contributions are welcome, especially new models, protection methods, datasets and metrics. New work
-happens on the [`v2`](https://github.com/Nanboy-Ronan/RVCBench/tree/v2) branch; see its
-[contributing guide](https://github.com/Nanboy-Ronan/RVCBench/blob/v2/CONTRIBUTING.md). Open an issue or pull request on GitHub, or contact
+happens on [`main`](https://github.com/Nanboy-Ronan/RVCBench/tree/main); see its
+[contributing guide](https://github.com/Nanboy-Ronan/RVCBench/blob/main/CONTRIBUTING.md). Open an issue or pull request on GitHub, or contact
 **ruinanjin@alumni.ubc.ca**.
 
 ## Citation
