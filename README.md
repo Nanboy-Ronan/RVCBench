@@ -18,12 +18,12 @@ multilingual generation; compression; and anti-cloning protection with and witho
 [paper](https://arxiv.org/abs/2602.00443) defines 18 robustness evaluations over 225 speakers and 14,370
 utterances and evaluates 18 open-source models.
 
-[Evaluate your model](#evaluate-your-model) · [What it measures](#what-rvcbench-measures) · [Results](#results-from-the-paper) · [Installation](#installation) · [Built-in models](#built-in-models) · [Website](https://nanboy-ronan.github.io/RVCBench/) · [Dataset](https://huggingface.co/datasets/Nanboy/RVCBench) · [Citation](#citation)
+[Evaluate your model](#evaluate-your-model) · [What it measures](#what-rvcbench-measures) · [Results](#results-from-the-paper) · [v1 and v2](#v1-and-v2) · [Installation](#installation) · [Built-in models](#built-in-models) · [Website](https://nanboy-ronan.github.io/RVCBench/) · [Dataset](https://huggingface.co/datasets/Nanboy/RVCBench) · [Citation](#citation)
 
 > [!NOTE]
-> `main` holds RVCBench v2: the installable package and the Core suite, under active development. The code
-> before the refactor is preserved on the [`v1`](https://github.com/Nanboy-Ronan/RVCBench/tree/v1) branch (tag
-> `v1.0`); see [codebase versions](docs/versions.md) for the differences.
+> **To reproduce the paper, use the [`v1`](https://github.com/Nanboy-Ronan/RVCBench/tree/v1) branch**, the code
+> released with the paper. This branch, `main`, is v2: the same benchmark as an installable package for
+> evaluating new models. See [v1 and v2](#v1-and-v2).
 
 ![RVCBench main figure](figs/main.png)
 
@@ -62,6 +62,8 @@ SpeechMOS), content (WER; Whisper medium), spectral distance (MCD), emotion cons
 intelligibility under compression (STOI). Real-time factor is recorded but not comparable across models.
 
 ## Results from the paper
+
+To reproduce these results, use the [`v1`](https://github.com/Nanboy-Ronan/RVCBench/tree/v1) branch.
 
 > [!NOTE]
 > **Metric guide** — SIM: speaker cosine similarity ↑ · WER: word error rate ↓ · MOS: SpeechMOS perceptual score ↑ · MCD: mel cepstral distortion ↓ · RTF: real-time factor (< 1 = faster-than-real-time) ↓ · SVA: speaker verification accuracy ↑ · Emo: emotion match rate ↑
@@ -145,6 +147,30 @@ Speaker similarity (SIM) on clean prompts across all benchmark datasets. — ind
 | StyleTTS 2 | 0.228 | 0.236 | 0.162 | — | — | — | 0.213 | 0.196 | 0.166 | 0.184 |
 
 </details>
+
+## v1 and v2
+
+v1 and v2 are two versions of the code for the same benchmark: the datasets, metrics and paper results are
+the same. v1 is the code released with the paper; v2 rebuilds it as an installable package for evaluating
+new models.
+
+| | v1 ([`v1`](https://github.com/Nanboy-Ronan/RVCBench/tree/v1) branch) | v2 (this branch, `main`) |
+| --- | --- | --- |
+| Use it to | **Reproduce the paper** | Evaluate a new model |
+| Status | Frozen at the paper release (tag `v1.0`) | Under active development |
+| Install | Clone, then `pip install` a list of packages | `pip install` the `rvcbench` package from GitHub |
+| Run a built-in model | `python run_vc.py --config-name ...` | `rvcbench run --config-name ...` (same config names) |
+| Evaluate your own model | Add an adapter to the codebase | Score audio generated anywhere (`rvcbench prompts`, `rvcbench score`), or a one-file adapter |
+| Evaluation data | Full datasets | Full datasets, plus the `core-v1` suite: 480 pinned utterances covering 16 of the paper's 18 evaluations |
+| Run output | `metrics.json` per run | Per-sample `run_manifest.json` with input and output hashes, failures and metric coverage |
+| Invalid inputs | Some are skipped or patched | Fail with an error |
+
+```bash
+git clone --branch v1 https://github.com/Nanboy-Ronan/RVCBench.git RVCBench-v1   # reproduce the paper
+```
+
+v1 and v2 name versions of this code. They are unrelated to the paper's arXiv versions and to suite names such
+as `core-v1`. [Codebase versions](docs/versions.md) lists what changed in v2.
 
 ## Installation
 

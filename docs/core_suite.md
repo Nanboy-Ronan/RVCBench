@@ -1,4 +1,4 @@
-# RVCBench-Core v1
+# Core suite (`core-v1`)
 
 `core-v1` is a small, fixed version of the robustness evaluations in the
 [RVCBench paper](https://arxiv.org/abs/2602.00443). It has 480 utterances to generate (20 of them
@@ -76,5 +76,5 @@ mean of each metric per task; each task's run directory also records 95% bootstr
 - In `textshift-scam` the target recording is the reference recording itself: the script text has no
   recording of its own. SIM and EMC there measure agreement with the reference, and MCD is not computed
   (paper Table 25). Returning the reference unchanged scores SIM 1.0 on this task; WER exposes it.
-- Not included in v1: RVC-Detectability (deepfake detectors) and the audio-LLM emotion-alignment judge
+- Not included in `core-v1`: RVC-Detectability (deepfake detectors) and the audio-LLM emotion-alignment judge
   of RVC-Expression. Both are planned for `core-v1.1`.

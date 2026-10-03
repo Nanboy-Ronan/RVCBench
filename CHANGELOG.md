@@ -9,7 +9,7 @@ Notable changes to the RVCBench codebase. Paper results are not affected by entr
 - Installable `rvcbench` package under `src/rvcbench/`, with Hydra configs shipped inside the package.
 - Commands `rvcbench run`, `run-protected`, `protect` and `denoise`, next to `doctor`, `smoke`, `status`, `report`, `audit-source`, `compare-check` and `compare-timing`.
 - `rvcbench prompts` and `rvcbench score`: export a versioned suite's references and texts, then score audio generated anywhere into `submission.json`. The `onboarding-v1` preview suite ships with the package.
-- `core-v1` suite: 480 utterances in 22 paired tasks plus 7 post-processing tasks, covering 16 of the paper's 18 robustness evaluations (deepfake detectability is planned for v1.1). Built by `scripts/build_core_suite.py`; its protected references are published under `Protected_LibriTTS/` in the Hub dataset. Not yet a leaderboard suite.
+- `core-v1` suite: 480 utterances in 22 paired tasks plus 7 post-processing tasks, covering 16 of the paper's 18 robustness evaluations (deepfake detectability is planned for `core-v1.1`). Built by `scripts/build_core_suite.py`; its protected references are published under `Protected_LibriTTS/` in the Hub dataset. Not yet a leaderboard suite.
 - Suite features: per-task metrics, clean anchors with relative change, group means, post-processing tasks (MP3, AAC, Opus, telephone band) and a STOI metric.
 - `rvcbench setup-scorers` downloads and verifies the metric models (speaker, Whisper, SpeechMOS, emotion).
 - Documentation: a shorter README organized around evaluating a model, and new pages for the Core suite, running the built-in models, datasets and codebase versions.
@@ -21,7 +21,8 @@ Notable changes to the RVCBench codebase. Paper results are not affected by entr
 
 ### Changed
 
-- `main` now holds v2. The code before the refactor is preserved on branch `v1` (tag `v1.0`).
+- `main` now holds v2. The code released with the paper is preserved on branch `v1` (tag `v1.0`); use it to
+  reproduce the paper.
 - The Python package is named `rvcbench`; it was importable as `src`.
 - Configs moved from `configs/` to `src/rvcbench/configs/`. Config names passed to `--config-name` are unchanged.
 - Malformed inputs and incomplete checkpoints raise errors instead of being skipped or patched.
@@ -37,4 +38,4 @@ Notable changes to the RVCBench codebase. Paper results are not affected by entr
 
 ## 1.0 (tag `v1.0`, branch `v1`)
 
-The codebase before the architecture refactor, including the NeurIPS 2026 acceptance announcement.
+The code released with the paper, before the architecture refactor. Use it to reproduce the paper's results.

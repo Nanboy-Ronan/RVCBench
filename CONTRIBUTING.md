@@ -3,7 +3,8 @@
 ## Branches
 
 - `main` is the development branch (v2). Open pull requests against `main`.
-- `v1` holds the codebase before the refactor (tag `v1.0`) and no longer changes.
+- `v1` holds the code released with the paper (tag `v1.0`). It is used to reproduce the paper and no longer
+  changes.
 
 ## Development setup
 

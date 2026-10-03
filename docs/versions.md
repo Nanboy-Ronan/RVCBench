@@ -1,18 +1,32 @@
 # Codebase versions
 
-**v1** is the codebase before the architecture refactor. **v2** is the refactored codebase on `main`, still
-under development. These names describe repository versions, not the
-paper's arXiv versions.
+v1 and v2 are two versions of the code for the same benchmark: the datasets, metrics and paper results are
+the same. **To reproduce the paper, use v1.** To evaluate a new model, use v2.
 
-| Version | Source | Use it to |
+```text
+tag v1.0 (2026-09-30): the code released with the paper
+├── branch v1    v1.0 plus README changes only; frozen
+└── branch main  v1.0 plus the v2 refactor (2026-09-30 to 2026-10-02); under development
+```
+
+| | v1 (branch [`v1`](https://github.com/Nanboy-Ronan/RVCBench/tree/v1), tag [`v1.0`](https://github.com/Nanboy-Ronan/RVCBench/tree/v1.0)) | v2 (branch [`main`](https://github.com/Nanboy-Ronan/RVCBench/tree/main)) |
 | --- | --- | --- |
-| v1 | Branch [`v1`](https://github.com/Nanboy-Ronan/RVCBench/tree/v1), tag [`v1.0`](https://github.com/Nanboy-Ronan/RVCBench/tree/v1.0) | Inspect or run the original architecture and configurations |
-| v2 | Branch [`main`](https://github.com/Nanboy-Ronan/RVCBench/tree/main) | Use the installable package, suites, run records and validation |
+| Use it to | **Reproduce the paper** | Evaluate a new model |
+| Status | Frozen at the paper release | Under active development |
+| Install | Clone, then `pip install` a list of packages | `pip install` the `rvcbench` package from GitHub |
+| Run a built-in model | `python run_vc.py --config-name ...` | `rvcbench run --config-name ...` (same config names) |
+| Evaluate your own model | Add an adapter to the codebase | Score audio generated anywhere (`rvcbench prompts`, `rvcbench score`), or a one-file adapter |
+| Evaluation data | Full datasets | Full datasets, plus the `core-v1` suite: 480 pinned utterances covering 16 of the paper's 18 evaluations |
+| Run output | `metrics.json` per run | Per-sample `run_manifest.json` with input and output hashes, failures and metric coverage |
+| Invalid inputs | Some are skipped or patched | Fail with an error |
 
 ```bash
-git clone --branch v1 https://github.com/Nanboy-Ronan/RVCBench.git RVCBench-v1
-git clone https://github.com/Nanboy-Ronan/RVCBench.git RVCBench-v2
+git clone --branch v1 https://github.com/Nanboy-Ronan/RVCBench.git RVCBench-v1   # reproduce the paper
+git clone https://github.com/Nanboy-Ronan/RVCBench.git RVCBench                  # v2
 ```
+
+v1 and v2 name versions of this code. They are unrelated to the paper's arXiv versions and to suite names such
+as `core-v1`.
 
 ## What changed in v2
 
@@ -29,8 +43,8 @@ git clone https://github.com/Nanboy-Ronan/RVCBench.git RVCBench-v2
 
 **Behaviour changes.** Malformed inputs or incomplete checkpoints that v1 skipped or patched now fail.
 Model versions, seed policies and retry or conditioning variants must be recorded when comparing v1 and v2
-results. The paper's result tables remain historical results and are not replaced by v2 subset runs; the
-v1 code alone does not reconstruct historical weights or environments.
+results. v2 runs do not replace the paper's tables. To reproduce those, use v1 together with its environment
+files (`envs/`) and the checkpoint bundle linked from its README; the code alone does not pin model weights.
 
 ## Validation status
 
