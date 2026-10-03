@@ -9,6 +9,8 @@ Notable changes to the RVCBench codebase. Paper results are not affected by entr
 - Installable `rvcbench` package under `src/rvcbench/`, with Hydra configs shipped inside the package.
 - Commands `rvcbench run`, `run-protected`, `protect` and `denoise`, next to `doctor`, `smoke`, `status`, `report`, `audit-source`, `compare-check` and `compare-timing`.
 - `rvcbench prompts` and `rvcbench score`: export a versioned suite's references and texts, then score audio generated anywhere into `submission.json`. The `onboarding-v1` preview suite ships with the package.
+- `core-v1` suite: 480 utterances in 22 paired tasks plus 7 post-processing tasks, covering 16 of the paper's 18 robustness evaluations (deepfake detectability is planned for v1.1). Built by `scripts/build_core_suite.py`; its protected references are published under `Protected_LibriTTS/` in the Hub dataset. Not yet a leaderboard suite.
+- Suite features: per-task metrics, clean anchors with relative change, group means, post-processing tasks (MP3, AAC, Opus, telephone band) and a STOI metric.
 - External adapters: `vc.adapter=package.module:ClassName` and the `rvcbench.VoiceCloningAdapter` base class evaluate a model without changing the package.
 - Per-sample run records with input and output hashes, seeds, failures, metric coverage and source provenance; resume and retry.
 - Direct per-sample backends with request seed validation for Qwen3-TTS, F5-TTS, XTTS, ZipVoice, SparkTTS, CosyVoice, OpenVoice, StyleTTS2, Bark, FireRedTTS2, VoxCPM, IndexTTS and MaskGCT.
@@ -21,6 +23,9 @@ Notable changes to the RVCBench codebase. Paper results are not affected by entr
 - Configs moved from `configs/` to `src/rvcbench/configs/`. Config names passed to `--config-name` are unchanged.
 - Malformed inputs and incomplete checkpoints raise errors instead of being skipped or patched.
 - Python 3.10 or newer is required.
+- Run records list `stoi` in `coverage.metric_valid`.
+- Scorer model files live in `$RVCBENCH_ASSET_DIR/<name>`, else `./checkpoints/<name>` when present, else `~/.cache/rvcbench/<name>`; a speaker model fetched from the Hub is copied there.
+- The evaluation extras require `pysptk>=1.0` and `transformers` (for the emotion metric).
 
 ### Fixed
 

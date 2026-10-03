@@ -17,7 +17,7 @@ resulting WAV files.
 
 ```bash
 python -m pip install 'rvcbench[eval] @ git+https://github.com/Nanboy-Ronan/RVCBench@v2'
-rvcbench prompts --suite onboarding-v1 --output prompts/
+rvcbench prompts --suite core-v1 --output prompts/
 ```
 
 `prompts/prompts.jsonl` has one line per utterance:
@@ -33,14 +33,15 @@ Synthesize each `text` in the voice of `reference_audio` and save a mono WAV at
 `<your directory>/<output_file>`. Then score:
 
 ```bash
-rvcbench score --suite onboarding-v1 --generated my_outputs/ --model my-model --output results/my-model/ --device cuda
+rvcbench score --suite core-v1 --generated my_outputs/ --model my-model --output results/my-model/ --device cuda
 ```
 
 - `results/my-model/submission.json` holds the per-task metric means, coverage, the hash of every scored file and the suite version. Each task also gets a full run directory, so `rvcbench status` and `rvcbench report` work on `results/my-model/<task>/`.
 - A missing or invalid file fails that sample, and a task with a failed sample is `partial`. A file identical to the dataset's target recording is rejected.
 - The suite pins the dataset revision and the hash of every input. Both commands download only the files the suite uses, and refuse to run if any input differs from the frozen suite. Pass `--data-root` to use a local copy laid out like the Hub dataset.
 - Target recordings are never exported; they are read only while scoring.
-- `onboarding-v1` is a preview built from the frozen validation subsets (LibriTTS, VCTK, Robotcall; 52 utterances). It checks the workflow; its scores are not RVCBench benchmark results.
+- `core-v1` has 480 utterances across the paper's robustness evaluations; see the [Core suite](core_suite.md). It is not yet a leaderboard suite.
+- `onboarding-v1` (52 utterances) is a smaller suite for checking the workflow.
 
 ## Route 1: external adapter
 
