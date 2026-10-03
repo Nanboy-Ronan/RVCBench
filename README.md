@@ -49,7 +49,6 @@ new models.
 | Evaluate your own model | Add an adapter to the codebase | Score audio generated anywhere (`rvcbench prompts`, `rvcbench score`), or a one-file adapter |
 | Evaluation data | Full datasets | Full datasets, plus the `core-v1` suite: 480 pinned utterances covering 16 of the paper's 18 evaluations |
 | Run output | `metrics.json` per run | Per-sample `run_manifest.json` with input and output hashes, failures and metric coverage |
-| Invalid inputs | Some are skipped or patched | Fail with an error |
 
 v1 and v2 name versions of this code. They are unrelated to the paper's arXiv versions. The full list of
 changes is in [codebase versions](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/versions.md).
