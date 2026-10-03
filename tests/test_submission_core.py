@@ -54,7 +54,8 @@ def test_task_metrics_anchor_and_groups(suite):
     assert result['status'] == 'complete'
     assert clean['required_metrics'] == ['sim', 'wer', 'mcd'] and noisy['required_metrics'] == ['sim', 'wer', 'sva']
     assert clean['dimension'] == 'generation' and noisy['evaluation'] == 'Background'
-    assert set(clean['group_means']) == {'s1', 's2'} and clean['group_means']['s1']['sim'] == pytest.approx(0.5)
+    assert set(clean['group_means']['speaker_id']) == {'s1', 's2'}
+    assert clean['group_means']['speaker_id']['s1']['sim'] == pytest.approx(0.5)
     assert noisy['relative_change_percent'] == {'sim': pytest.approx(-20.0), 'wer': pytest.approx(-20.0)}
     assert 'relative_change_percent' not in clean
 

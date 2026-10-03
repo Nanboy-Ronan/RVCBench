@@ -21,6 +21,9 @@ def create_scorer(name, device, logger):
     if name == 'wer':
         from .wer import WERScorer
         return WERScorer(device, logger)
+    if name == 'stoi':
+        from .stoi import STOIScorer
+        return STOIScorer(device, logger)
     if name in ('sim', 'sva'):
         from .speaker import SpeakerScorer
         return SpeakerScorer(device, logger)

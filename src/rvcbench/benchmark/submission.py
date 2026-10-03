@@ -67,13 +67,19 @@ def _frozen_selection(spec, task):
     return selection, {sample['sample_id']: sample for sample in selection['samples']}
 
 
+def _task_root_name(task):
+    # "paths": "repo" means manifest paths are relative to the dataset repository root,
+    # which lets a task pair files from different folders (e.g. protected references).
+    return '' if task.get('paths') == 'repo' else task['hf_config_name']
+
+
 def _fetch_from_hub(spec, task, manifest_rows):
     from huggingface_hub import snapshot_download
-    config = task['hf_config_name']
+    prefix = _task_root_name(task)
     names = sorted({row[key] for row in manifest_rows for key in ('prompt_file_name', 'target_file_name')})
     local = snapshot_download(repo_id=spec['hf_dataset_id'], repo_type='dataset', revision=spec['hf_revision'],
-                              allow_patterns=[f'{config}/{name}' for name in names])
-    return Path(local) / config
+                              allow_patterns=[f'{prefix}/{name}' if prefix else name for name in names])
+    return Path(local) / prefix
 
 
 def _task_samples(spec, task, data_root, logger):
@@ -84,7 +90,7 @@ def _task_samples(spec, task, data_root, logger):
     pair_ids = [str(row.get('pair_id') or '') for row in rows]
     if len(set(pair_ids)) != len(pair_ids) or not all(_SAFE_NAME.fullmatch(p) for p in pair_ids):
         raise ValueError(f"Task {task['task']}: pair_id values must be unique and file-name safe")
-    root = (Path(data_root) / task['hf_config_name']) if data_root else _fetch_from_hub(spec, task, rows)
+    root = (Path(data_root) / _task_root_name(task)) if data_root else _fetch_from_hub(spec, task, rows)
     dataset_config = OmegaConf.load(CONFIGS_DIR / 'dataset' / f"{task['dataset_config']}.yaml")
     dataset_config.root_path = str(root)
     dataset_config.use_hf_dataset = False
@@ -165,8 +171,8 @@ def _submitted_rows(spec, task, generated, audio_dir, data_root, logger):
     for sample, row in zip(samples, rows):
         submitted = Path(generated) / task['task'] / f"{row['pair_id']}.wav"
         row.update(metrics={}, attempts=0, submitted_path=str(submitted))
-        if task.get('group_by'):
-            row['group'] = str(sample.extra.get(task['group_by']) or '')
+        for column in _group_columns(task):
+            row.setdefault('groups', {})[column] = str(sample.extra.get(column) or '')
         if not submitted.is_file():
             row.update(status='generation_failed', error=f"Missing submitted audio: {task['task']}/{row['pair_id']}.wav")
             continue
@@ -244,11 +250,15 @@ def _derived_rows(task, source_rows, audio_dir):
     return rows
 
 
-def _group_means(rows, required):
+def _group_columns(task):
+    columns = task.get('group_by') or []
+    return [columns] if isinstance(columns, str) else list(columns)
+
+
+def _group_means(rows, required, column):
     groups = {}
     for row in rows:
-        if row.get('group') is not None:
-            groups.setdefault(row['group'], []).append(row)
+        groups.setdefault(row.get('groups', {}).get(column, ''), []).append(row)
     return {group: metric_means(members, required) for group, members in sorted(groups.items())}
 
 
@@ -301,9 +311,8 @@ def _run_task(spec, task, rows, details, task_dir, label, device, logger):
                    'generated_sha256': {row['pair_id']: row.get('generated_sha256') for row in rows}})
     if manifest['status'] == 'complete':
         result['means'] = metric_means(rows, required)
-        if task.get('group_by'):
-            result['group_by'] = task['group_by']
-            result['group_means'] = _group_means(rows, required)
+        if _group_columns(task):
+            result['group_means'] = {column: _group_means(rows, required, column) for column in _group_columns(task)}
     return result, rows
 
 

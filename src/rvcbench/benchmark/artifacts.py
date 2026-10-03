@@ -15,7 +15,7 @@ from pathlib import Path
 SCHEMA_VERSION = 2
 METRIC_COLUMNS = {
     'mcd': 'mcd', 'wer': 'wer', 'sim': 'sim', 'sva': 'sva',
-    'speechmos': 'speechmos_mos', 'dnsmos': 'dnsmos_ovrl', 'emotion': 'emotion_match',
+    'speechmos': 'speechmos_mos', 'dnsmos': 'dnsmos_ovrl', 'emotion': 'emotion_match', 'stoi': 'stoi',
 }
 
 
