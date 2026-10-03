@@ -71,6 +71,8 @@ Pick a suite by how much you want to generate. `core-v1` is a subset of `full-v1
 | `core-v1` | 480 | evaluate quickly; 16 of the paper's 18 evaluations |
 | `full-v1` | 12,724 | evaluate on every pair of the paper's datasets; protection tasks still in `core-v1` only |
 
+Scoring is the slow step. On a shared RTX A6000, `core-v1` took about 35 minutes per model and 4 GB of
+GPU memory. `full-v1` scores about 41 times as many files, so plan for about a day on similar hardware.
 For `full-v1`, download the dataset once (12.6 GB) and pass it to both commands with `--data-root`; see
 [Full suite](docs/core_suite.md#full-suite).
 
@@ -325,7 +327,7 @@ establish reproduction of the paper's tables.
 ```text
 src/rvcbench/
 ├── benchmark/     runner, run records, suites, provenance and the rvcbench command
-├── suites/        versioned suites (core-v1, onboarding-v1)
+├── suites/        versioned suites (onboarding-v1, core-v1, full-v1)
 ├── configs/       Hydra configs: datasets, models, protection, denoising
 ├── adversary/     voice cloning adapters
 ├── models/        model wrappers

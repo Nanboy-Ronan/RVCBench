@@ -95,7 +95,10 @@ instead of a sample. Every `core-v1` pair is also in `full-v1`, with the same id
 | `chinese` | 1,998 | `multispeaker` | 800 |
 | `crosslingual` | 650 | **Total** | **12,724** |
 
-The seven compression tasks re-encode all 2,000 `audioshift` outputs.
+The seven compression tasks re-encode all 2,000 `audioshift` outputs, so `rvcbench score` scores 26,724
+files, about 41 times as many as for `core-v1`. On a shared RTX A6000, `core-v1` took about 35 minutes
+per model with 4 GB of GPU memory; plan for about a day for `full-v1` on similar hardware. The metric
+models stay loaded for the whole call, including across models.
 
 Not yet in `full-v1`: the AdvNoise and AntiProtect tasks. The protected versions of all 2,000 LibriTTS
 references are not yet in the Hub dataset; `core-v1` covers these evaluations.
@@ -110,11 +113,13 @@ rvcbench score --suite full-v1 --generated outputs/my-model --output results-ful
   --data-root rvcbench-data --device cuda
 ```
 
-Log in first (`hf auth login`): the Hub rate-limits large anonymous downloads. If the download stops,
+Log in first (`hf auth login`): the Hub rate-limits large anonymous downloads. With `huggingface_hub`
+older than 0.34, use `huggingface-cli login` and `huggingface-cli download` instead. If the download stops,
 run it again; files already present are kept. Both commands check every input against the frozen
 hashes, so a local copy that differs from the pinned revision is refused.
 
 - `english-libritts` includes the 19 speakers without a gender label in the dataset; they appear as
   `unknown` in the gender breakdown.
 - 22 `textshift-hallucination` texts span several lines. `prompts.jsonl` keeps them as they are; the batch
-  lists (`prompts.tsv`, `prompts.lst`) write the line breaks as spaces.
+  lists (`prompts.tsv`, `prompts.lst`) write the line breaks as spaces. WER treats a line break as a space,
+  so the scores do not depend on which file you used.
