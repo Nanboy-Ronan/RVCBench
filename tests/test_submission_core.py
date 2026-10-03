@@ -140,3 +140,28 @@ def test_complete_derived_task_is_reportable(suite):
 def test_suite_definition_errors(suite, tasks, message):
     with pytest.raises(ValueError, match=message):
         submission.load_suite(rewrite(suite, tasks))
+
+
+def test_hub_rate_limit_is_retried_then_explained(monkeypatch):
+    from huggingface_hub.errors import HfHubHTTPError
+    import huggingface_hub
+
+    import requests
+    response = requests.Response()
+    response.status_code = 429
+    response.request = requests.Request('GET', 'https://huggingface.co/api/datasets/x/y').prepare()
+    calls = []
+
+    def limited(**kwargs):
+        calls.append(kwargs)
+        raise HfHubHTTPError('429 Too Many Requests', response=response)
+
+    monkeypatch.setattr(huggingface_hub, 'snapshot_download', limited)
+    spec = {'hf_dataset_id': 'x/y', 'hf_revision': 'r'}
+    task = {'task': 't', 'hf_config_name': 'Libritts'}
+    with pytest.raises(RuntimeError, match='huggingface-cli login'):
+        submission._fetch_from_hub(spec, task, [{'prompt_file_name': 'a.wav', 'target_file_name': 'b.wav'}],
+                                   attempts=3, wait_seconds=0)
+    assert len(calls) == 3 and calls[0]['max_workers'] == 4
+    assert calls[0]['allow_patterns'] == ['Libritts/a.wav', 'Libritts/b.wav']
+

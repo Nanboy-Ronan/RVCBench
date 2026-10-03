@@ -73,13 +73,27 @@ def _task_root_name(task):
     return '' if task.get('paths') == 'repo' else task['hf_config_name']
 
 
-def _fetch_from_hub(spec, task, manifest_rows):
+def _fetch_from_hub(spec, task, manifest_rows, *, attempts=4, wait_seconds=30):
+    import time
     from huggingface_hub import snapshot_download
+    from huggingface_hub.errors import HfHubHTTPError
     prefix = _task_root_name(task)
     names = sorted({row[key] for row in manifest_rows for key in ('prompt_file_name', 'target_file_name')})
-    local = snapshot_download(repo_id=spec['hf_dataset_id'], repo_type='dataset', revision=spec['hf_revision'],
-                              allow_patterns=[f'{prefix}/{name}' if prefix else name for name in names])
-    return Path(local) / prefix
+    for attempt in range(1, attempts + 1):
+        try:
+            local = snapshot_download(repo_id=spec['hf_dataset_id'], repo_type='dataset', revision=spec['hf_revision'],
+                                      allow_patterns=[f'{prefix}/{name}' if prefix else name for name in names],
+                                      max_workers=4)
+            return Path(local) / prefix
+        except HfHubHTTPError as exc:
+            status = getattr(getattr(exc, 'response', None), 'status_code', None)
+            if status != 429:
+                raise
+            if attempt == attempts:
+                raise RuntimeError('The Hugging Face Hub is rate-limiting anonymous downloads. Log in with '
+                                   '`huggingface-cli login` (or set HF_TOKEN) and rerun; files already '
+                                   'downloaded are reused.') from exc
+            time.sleep(wait_seconds * attempt)
 
 
 def _task_samples(spec, task, data_root, logger):
