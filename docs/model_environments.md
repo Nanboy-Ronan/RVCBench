@@ -131,3 +131,11 @@ matches, build it outside a Git checkout or pin the version explicitly:
 PYSPTK_BUILD_VERSION=1.0.1 python -m pip install 'pysptk==1.0.1'
 ```
 
+### Where scorer models are stored
+
+The speaker, emotion and DNSMOS scorers keep their model files in one directory per scorer:
+`$RVCBENCH_ASSET_DIR/<name>` when that variable is set, otherwise `./checkpoints/<name>` when it
+exists (as in a source checkout), otherwise `~/.cache/rvcbench/<name>`. A speaker model fetched
+from the Hugging Face Hub is copied there rather than linked into the Hub cache, so moving or
+clearing that cache does not break it.
+

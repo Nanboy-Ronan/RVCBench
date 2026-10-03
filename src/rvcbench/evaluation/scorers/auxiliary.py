@@ -2,7 +2,7 @@
 from pathlib import Path
 import importlib
 import sys
-from hydra.utils import to_absolute_path
+from rvcbench.evaluation.assets import asset_dir
 from rvcbench.benchmark.artifacts import file_hash
 
 
@@ -20,7 +20,7 @@ class AuxiliaryScorer:
     def prepare(self):
         if self.name == 'dnsmos':
             from rvcbench.evaluation.fidelity import _DNSMOSPredictor
-            root = Path(to_absolute_path('checkpoints/dnsmos'))
+            root = asset_dir('dnsmos')
             files = [root / 'sig_bak_ovr.onnx', root / 'model_v8.onnx']
             for path in files:
                 if not path.is_file():

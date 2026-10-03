@@ -1,6 +1,5 @@
-from pathlib import Path
-from hydra.utils import to_absolute_path
 from rvcbench.benchmark.artifacts import file_hash
+from rvcbench.evaluation.assets import asset_dir
 
 
 class SpeakerScorer:
@@ -12,13 +11,19 @@ class SpeakerScorer:
 
     def prepare(self):
         from speechbrain.inference.speaker import SpeakerRecognition
-        root = Path(to_absolute_path('checkpoints/spkrec-ecapa-voxceleb'))
+        root = asset_dir('spkrec-ecapa-voxceleb')
         root.mkdir(parents=True, exist_ok=True)
-        # Reuse complete released assets locally; otherwise let SpeechBrain fetch them.
-        source = str(root) if all((root / f).is_file() for f in
-            ('hyperparams.yaml', 'embedding_model.ckpt', 'mean_var_norm_emb.ckpt', 'classifier.ckpt')) else 'speechbrain/spkrec-ecapa-voxceleb'
+        options = {}
+        if all((root / f).is_file() for f in
+               ('hyperparams.yaml', 'embedding_model.ckpt', 'mean_var_norm_emb.ckpt', 'classifier.ckpt')):
+            source = str(root)  # complete released assets
+        else:
+            from speechbrain.utils.fetching import LocalStrategy
+            source = 'speechbrain/spkrec-ecapa-voxceleb'
+            # Copy instead of linking into the Hugging Face cache, which may move or be cleared.
+            options['local_strategy'] = LocalStrategy.COPY
         self.model = SpeakerRecognition.from_hparams(source=source, savedir=str(root),
-                                                     run_opts={'device': str(self.device)})
+                                                     run_opts={'device': str(self.device)}, **options)
         self.model_provenance = {'model': 'speechbrain/spkrec-ecapa-voxceleb',
             'files': {p.name: file_hash(p) for p in sorted(root.iterdir()) if p.is_file()}}
 

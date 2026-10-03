@@ -3,6 +3,7 @@ import inspect
 from pathlib import Path
 
 from hydra.utils import to_absolute_path
+from rvcbench.evaluation.assets import asset_dir
 
 from rvcbench.benchmark.artifacts import file_hash
 
@@ -26,7 +27,7 @@ class EmotionScorer:
         self.device, self.logger, self.model = device, logger, None
 
     def prepare(self):
-        root = Path(to_absolute_path('checkpoints/emotion-native'))
+        root = asset_dir('emotion-native')
         for name, expected in ASSETS.items():
             if not (root / name).is_file():
                 raise FileNotFoundError(f'Pinned emotion asset missing: {root / name}')
