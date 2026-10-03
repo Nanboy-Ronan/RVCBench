@@ -119,3 +119,15 @@ Import the audio stack in the intended runtime before loading checkpoints.
 Read-only environment installations may require `NUMBA_CACHE_DIR` pointing to a
 writable local directory. This addresses cache placement; it does not repair
 NumPy/Numba version incompatibility or establish a clean OpenVoice/Melo lock.
+
+### Building the evaluation extras from source
+
+`pysptk` (needed for MCD) is published only as a source package. Its build appends the
+commit of any Git repository that contains the build directory to its version number, which
+makes pip discard the build. If `pip install -e '.[eval]'` reports that no `pysptk` version
+matches, build it outside a Git checkout or pin the version explicitly:
+
+```bash
+PYSPTK_BUILD_VERSION=1.0.1 python -m pip install 'pysptk==1.0.1'
+```
+

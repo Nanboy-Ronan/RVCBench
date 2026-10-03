@@ -44,7 +44,7 @@ enkidu = ["numpy==1.26.4", "torch==2.6.0", "torchaudio==2.6.0", "speechbrain==1.
 qwen3 = ["numpy==1.26.4", "qwen-tts==0.1.1", "torch==2.6.0", "torchaudio==2.6.0"]
 eval = [
   "numpy==1.26.4", "numba>=0.59,<0.62", "torch==2.6.0", "torchaudio==2.6.0", "jiwer==3.0.3", "librosa>=0.10,<0.12", "openai-whisper",
-  "pymcd==0.2.1", "speechbrain>=1.0,<2", "torch-stoi>=0.2", "scipy",
+  "pymcd==0.2.1", "pysptk>=1.0", "speechbrain>=1.0,<2", "torch-stoi>=0.2", "scipy",
   "matplotlib", "jieba", "onnxruntime", "requests"
 ]
 test = ["pytest>=8", "jiwer==3.0.3", "json5>=0.9", "tomli>=2; python_version < '3.11'"]
