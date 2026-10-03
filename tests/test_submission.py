@@ -154,7 +154,7 @@ def test_output_directories_must_be_new(suite):
 
 
 def test_unknown_suite_lists_the_packaged_ones():
-    with pytest.raises(ValueError, match='Available: onboarding-v1'):
+    with pytest.raises(ValueError, match='Available: core-v1, onboarding-v1'):
         submission.load_suite('core-v0')
 
 
