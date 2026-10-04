@@ -5,7 +5,7 @@ and definitions as `rvcbench score`. Use it when you want RVCBench-comparable nu
 evaluation script, without running a suite.
 
 ```bash
-pip install "rvcbench[eval] @ git+https://github.com/Nanboy-Ronan/RVCBench@main"
+pip install "rvcbench[eval]"
 rvcbench setup-scorers        # once: download the metric models
 ```
 

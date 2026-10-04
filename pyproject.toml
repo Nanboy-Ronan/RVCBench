@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rvcbench"
-version = "2.0.0.dev0"
+version = "2.0.0"
 description = "Voice cloning robustness benchmark with auditable sample-level runs"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -22,7 +22,7 @@ keywords = [
   "adversarial audio", "audio deepfake robustness", "benchmark", "speaker verification",
 ]
 classifiers = [
-  "Development Status :: 3 - Alpha",
+  "Development Status :: 4 - Beta",
   "Intended Audience :: Science/Research",
   "Operating System :: POSIX :: Linux",
   "Programming Language :: Python :: 3",

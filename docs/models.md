@@ -11,7 +11,7 @@ Python 3.10 or newer on Linux. A GPU is recommended for scoring.
 
 ```bash
 # package only
-pip install "rvcbench[eval] @ git+https://github.com/Nanboy-Ronan/RVCBench@main"
+pip install "rvcbench[eval]"
 
 # or a source checkout, needed to run the built-in models
 git clone https://github.com/Nanboy-Ronan/RVCBench.git

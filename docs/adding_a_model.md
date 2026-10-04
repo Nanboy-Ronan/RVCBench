@@ -16,7 +16,7 @@ Your model runs in its own environment, with your own code. RVCBench only needs 
 resulting WAV files.
 
 ```bash
-python -m pip install 'rvcbench[eval] @ git+https://github.com/Nanboy-Ronan/RVCBench@main'
+python -m pip install 'rvcbench[eval]'
 rvcbench prompts --suite core-v1 --output prompts/
 ```
 

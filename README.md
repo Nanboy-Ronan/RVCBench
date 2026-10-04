@@ -8,6 +8,7 @@
 
 [![NeurIPS 2026](https://img.shields.io/badge/NeurIPS-2026-6842c2.svg)](https://arxiv.org/abs/2602.00443)
 [![arXiv](https://img.shields.io/badge/arXiv-2602.00443-b31b1b.svg)](https://arxiv.org/abs/2602.00443)
+[![PyPI](https://img.shields.io/pypi/v/rvcbench.svg)](https://pypi.org/project/rvcbench/)
 [![Dataset](https://img.shields.io/badge/Hugging%20Face-Dataset-ffcc00.svg)](https://huggingface.co/datasets/Nanboy/RVCBench)
 [![Website](https://img.shields.io/badge/Website-RVCBench-0d6ea8.svg)](https://nanboy-ronan.github.io/RVCBench/)
 [![CI](https://github.com/Nanboy-Ronan/RVCBench/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Nanboy-Ronan/RVCBench/actions/workflows/ci.yml)
@@ -19,7 +20,7 @@
 
 > **News**
 >
-> - **2026-10** · Score your own model straight from ZipVoice- or Seed-TTS-style batch lists, and compare several models in one table.
+> - **2026-10** · `pip install rvcbench`: score your own model from ZipVoice- or Seed-TTS-style batch lists, compare models in one table, or use the metrics in your own code.
 > - **2026-09** · RVCBench is accepted to **NeurIPS 2026**.
 
 Voice cloning models sound convincing in clean demos. RVCBench measures how they hold up in deployment:
@@ -35,7 +36,7 @@ from **204 speakers** and evaluates **18 open-source models**.
 Generate speech with your own code, then let RVCBench score it. With ZipVoice, for example:
 
 ```bash
-pip install "rvcbench[eval] @ git+https://github.com/Nanboy-Ronan/RVCBench@main"
+pip install "rvcbench[eval]"
 rvcbench setup-scorers                                # once: download the metric models
 rvcbench prompts --suite core-v1 --output prompts/    # reference clips and texts to synthesize
 python3 -m zipvoice.bin.infer_zipvoice --model-name zipvoice \

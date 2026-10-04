@@ -2,7 +2,9 @@
 
 Notable changes to the RVCBench codebase. Paper results are not affected by entries here unless stated.
 
-## Unreleased (2.0.0.dev0, branch `main`)
+## 2.0.0 (2026-10-03)
+
+First release on PyPI: `pip install rvcbench`.
 
 ### Added
 
