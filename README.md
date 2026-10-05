@@ -35,9 +35,8 @@ and provides ready-to-use datasets for evaluating a model across languages, spea
 Both workflows are included in the pip package. Your model can run in its own environment or through an API;
 RVCBench scores the audio it produces.
 
-**First time here?** Follow the complete [getting started guide](https://nanboy-ronan.github.io/RVCBench/docs/quickstart/)
-or [中文入门指南](https://nanboy-ronan.github.io/RVCBench/docs/quickstart_zh/).
-They walk through installation, required files, both workflows and reading the results.
+**First time here?** Follow the complete [getting started guide](https://nanboy-ronan.github.io/RVCBench/docs/quickstart/).
+It walks through installation, required files, both workflows and reading the results.
 
 ## Install
 
@@ -257,7 +256,7 @@ coverage. See [Running the built-in models](https://nanboy-ronan.github.io/RVCBe
 
 | Guide | Covers |
 | --- | --- |
-| [Getting started](https://nanboy-ronan.github.io/RVCBench/docs/quickstart/) · [中文](https://nanboy-ronan.github.io/RVCBench/docs/quickstart_zh/) | Your first evaluation, from installation to results |
+| [Getting started](https://nanboy-ronan.github.io/RVCBench/docs/quickstart/) | Your first evaluation, from installation to results |
 | [Evaluate your own model](https://nanboy-ronan.github.io/RVCBench/docs/adding_a_model/) | Prompt and output formats, batch lists, several models, adapters |
 | [Core and full suites](https://nanboy-ronan.github.io/RVCBench/docs/core_suite/) | Tasks, data, metrics and scoring time |
 | [Install the package](https://nanboy-ronan.github.io/RVCBench/docs/installation/) | pip installation, CPU/GPU, downloads and troubleshooting |

@@ -39,7 +39,7 @@ theme:
 
 plugins:
   - search:
-      lang: [en, zh]
+      lang: en
 
 markdown_extensions:
   - admonition
@@ -80,7 +80,6 @@ nav:
   - Overview: README.md
   - Get started:
       - Quickstart: quickstart.md
-      - 中文入门: quickstart_zh.md
       - Installation & upgrades: installation.md
   - Evaluate:
       - Score your own audio: metrics.md

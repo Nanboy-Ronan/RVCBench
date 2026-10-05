@@ -1,6 +1,6 @@
 # Getting started with RVCBench
 
-[中文](quickstart_zh.md) · [All documentation](README.md)
+[All documentation](README.md)
 
 RVCBench has two entry points. **Use the Python metrics API** if you already have generated audio and
 your own data. **Use a benchmark suite** if you want us to supply the evaluation inputs and produce
