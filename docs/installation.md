@@ -85,7 +85,7 @@ After preparing the assets and data, scoring can run offline.
 ## Upgrade from 2.0.0
 
 ```bash
-python -m pip install --upgrade "rvcbench[eval]==2.1.1"
+python -m pip install --upgrade "rvcbench[eval]==2.2.0"
 rvcbench setup-scorers
 rvcbench doctor --eval --imports
 ```

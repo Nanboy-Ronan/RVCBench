@@ -91,6 +91,10 @@ No RVCBench dataset or model adapter is needed for this workflow.
 ## Evaluate your model
 
 RVCBench downloads the selected data, prepares reference clips and texts, and scores the audio your model generates.
+To run only selected scenarios, use `rvcbench tasks --suite core-v1` to list them, then pass
+`--tasks chinese` (or several task IDs) to both `prompts` and `score`. See the
+[scenario selection guide](https://nanboy-ronan.github.io/RVCBench/docs/core_suite/#run-specific-scenarios).
+
 Start with the 52-utterance onboarding suite:
 
 ```bash

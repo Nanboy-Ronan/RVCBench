@@ -34,6 +34,9 @@ def main():
     doctor.add_argument('--model', choices=['qwen3', 'qwen3_omni', 'sparktts'], default=None)
     doctor.add_argument('--eval', action='store_true')
     doctor.add_argument('--imports', action='store_true', help='Also import dependencies in an isolated subprocess to detect binary/version conflicts')
+    tasks = commands.add_parser('tasks', help='List task IDs, paper scenarios, metrics and dependencies (no downloads)')
+    tasks.add_argument('--suite', default='core-v1')
+    tasks.add_argument('--json', action='store_true', help='Print machine-readable task definitions')
     prompts = commands.add_parser('prompts', help='Export the reference audio and texts of a benchmark suite')
     prompts.add_argument('--suite', default='onboarding-v1')
     prompts.add_argument('--output', type=Path, required=True)
@@ -51,6 +54,8 @@ def main():
     score.add_argument('--device', default='cpu')
     score.add_argument('--resume', action='store_true', help='Resume this output directory; verify inputs and reuse matching scores')
     score.add_argument('--data-root', type=Path, help='Local dataset copy laid out like the Hub dataset (default: download)')
+    for command in (prompts, score):
+        command.add_argument('--tasks', nargs='+', help='Select task IDs; automatically include clean anchors and source tasks')
     compare = commands.add_parser('compare', help='Compare several models scored on the same suite in one table')
     compare.add_argument('submissions', nargs='+', type=Path, help='submission.json files or results directories')
     compare.add_argument('--output', type=Path, help='Write comparison.md, .csv and .json here')
@@ -103,6 +108,25 @@ def main():
     timing.add_argument('right', type=Path)
     timing.add_argument('--output', type=Path)
     args = parser.parse_args()
+    if args.command == 'tasks':
+        from .submission import load_suite
+        spec = load_suite(args.suite)
+        entries = [{**task, 'required_metrics': task.get('required_metrics') or spec['evaluation']['required_metrics']}
+                   for task in spec['tasks']]
+        if args.json:
+            print(json.dumps({'suite': spec['suite'], 'label': spec['label'], 'tasks': entries,
+                              'not_included': spec.get('not_included', {})}, indent=2))
+        else:
+            print(f"{spec['suite']}: {spec['label']}")
+            print('Task | Paper evaluation | Dataset/source | Metrics | Dependencies')
+            for task in entries:
+                dependencies = ', '.join(task[key] for key in ('anchor', 'derived_from') if task.get(key)) or '-'
+                print(' | '.join((task['task'], task.get('evaluation', '-'),
+                                  task.get('hf_config_name') or task.get('derived_from', '-'),
+                                  ', '.join(task['required_metrics']), dependencies)))
+            for name, reason in spec.get('not_included', {}).items():
+                print(f'Not included: {name}: {reason}')
+        return
     if args.command == 'setup-scorers':
         from rvcbench.evaluation.setup import setup_scorers
         print(json.dumps(setup_scorers(args.metrics, check_only=args.check_only), indent=2))
@@ -118,14 +142,14 @@ def main():
         from .submission import export_prompts, score_submission, score_submissions
         logging.basicConfig(level=logging.INFO, format='%(levelname)s %(message)s')
         if args.command == 'prompts':
-            result = export_prompts(args.suite, args.output, data_root=args.data_root)
+            result = export_prompts(args.suite, args.output, data_root=args.data_root, tasks=args.tasks)
             print(json.dumps(result, indent=2))
             print(f"Generate the {result['prompts']} utterances listed in {args.output / 'prompts.jsonl'} "
                   f"(or prompts.tsv / prompts.lst for batch scripts); see {args.output / 'README.md'}.")
             return
         if len(args.generated) > 1:
             result = score_submissions(args.suite, args.generated, args.output, models=args.model,
-                                       device=args.device, data_root=args.data_root, resume=args.resume)
+                                       device=args.device, data_root=args.data_root, resume=args.resume, tasks=args.tasks)
             print(result['markdown'])
             if not result['leaderboard']:
                 print(f"Note: {result['label']}")
@@ -135,7 +159,7 @@ def main():
             parser.error('--model takes one name per --generated directory')
         model = args.model[0] if args.model else args.generated[0].resolve().name
         result = score_submission(args.suite, args.generated[0], args.output, model=model,
-                                  device=args.device, data_root=args.data_root, resume=args.resume)
+                                  device=args.device, data_root=args.data_root, resume=args.resume, tasks=args.tasks)
         print(json.dumps({'suite': result['suite'], 'model': result['model'], 'status': result['status'],
                           'tasks': {name: {'status': task['status'], 'means': task.get('means'),
                                            'failed': len(task['failures'])}

@@ -65,7 +65,7 @@
     "datePublished": "2026"
   },
   "isBasedOn": "https://huggingface.co/datasets/Nanboy/RVCBench",
-  "softwareVersion": "2.1.1",
+  "softwareVersion": "2.2.0",
   "url": "https://nanboy-ronan.github.io/RVCBench/",
   "softwareHelp": "https://nanboy-ronan.github.io/RVCBench/docs/"
 }

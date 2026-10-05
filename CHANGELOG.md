@@ -2,6 +2,15 @@
 
 Notable changes to the RVCBench codebase. Paper results are not affected by entries here unless stated.
 
+## 2.2.0 (2026-10-05)
+
+- Add `rvcbench tasks --suite ...` with paper scenario mappings, metrics and dependencies, plus JSON output.
+- Add `--tasks` to prompt export and single/multi-model scoring; automatically include clean anchors
+  and source tasks for derived evaluations. Unselected tasks do not download or score data.
+- Record selection provenance and bind resume/comparison to the effective task set. Whole-suite
+  commands retain their existing behavior and identity.
+- Document scenario-specific commands and correct the core/full coverage distinction.
+
 ## 2.1.1 (2026-10-05)
 
 - Publish an English documentation website with searchable guides, Python API and CLI references.

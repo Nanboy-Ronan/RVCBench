@@ -22,6 +22,17 @@ rvcbench setup-scorers --check-only
 `doctor` checks dependencies; `--imports` also imports them in a subprocess. `setup-scorers` downloads
 and verifies scorer models. `--check-only` verifies and loads cached assets without downloading.
 
+## List scenarios
+
+```bash
+rvcbench tasks --suite core-v1
+rvcbench tasks --suite full-v1 --json
+```
+
+Lists task IDs, paper evaluations, data sources, metrics and required anchors/source tasks without
+network access or model loading. Default suite: `core-v1`. See the
+[scenario selection guide](core_suite.md#run-specific-scenarios) for runnable examples and coverage.
+
 ## Export evaluation inputs
 
 ```bash
@@ -31,6 +42,7 @@ rvcbench prompts --suite onboarding-v1 --output prompts/
 | Option | Meaning |
 | --- | --- |
 | `--suite` | Suite name; default `onboarding-v1`. Other packaged options: `core-v1`, `full-v1`. |
+| `--tasks` | One or more task IDs; includes clean anchors and source tasks automatically. Omit for all tasks. |
 | `--output` | Required destination for prompt lists and reference audio. |
 | `--data-root` | Optional existing local dataset copy, laid out like the Hub dataset. |
 
@@ -46,6 +58,7 @@ rvcbench score --suite onboarding-v1 \
 | Option | Meaning |
 | --- | --- |
 | `--suite` | Must match the suite used to export prompts. Default `onboarding-v1`. |
+| `--tasks` | Same task selection as prompt export; also pass it on resume. |
 | `--generated` | One or more directories of generated WAV files. |
 | `--model` | Optional model name per generated directory; defaults to each directory name. |
 | `--output` | Results directory. With several models, one subdirectory is created per model. |
