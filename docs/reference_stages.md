@@ -1,3 +1,8 @@
+---
+title: "Protected and denoised reference lineage"
+description: "Bind replacement reference audio to fixed voice cloning samples. RVCBench records original and replacement hashes for generation, resume and evaluation."
+---
+
 # Binding protected and denoised references
 
 The zero-shot runner accepts `vc.reference_audio_dir` as an explicit directory

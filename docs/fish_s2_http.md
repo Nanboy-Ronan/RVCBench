@@ -1,3 +1,8 @@
+---
+title: "Evaluate Fish Audio S2 over HTTP"
+description: "Use the RVCBench Fish Audio S2 integration with an independently managed HTTP server. Review client setup, inference requirements and validation evidence."
+---
+
 # Fish S2 HTTP validation
 
 The `fish_audio_s2` integration sends requests to an independently managed

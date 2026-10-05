@@ -1,4 +1,6 @@
 ---
+title: "RVCBench dataset card"
+description: "Read the RVCBench dataset card: voice cloning evaluation data, languages, source configurations, licensing and links to the package and benchmark protocols."
 pretty_name: RVCBench
 license: cc0-1.0
 language:

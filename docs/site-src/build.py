@@ -83,8 +83,9 @@ def build_head(canonical: bool = True) -> str:
 <title>{title}</title>
 <meta name="description" content="{desc}">
 <meta name="robots" content="index, follow">
-<meta name="keywords" content="voice cloning benchmark, TTS robustness, speaker privacy, audio deepfake, adversarial audio, speaker verification, voice cloning protection, RVCBench">
 {canonical_tag}
+<link rel="sitemap" type="application/xml" href="{url}sitemap.xml">
+<link rel="alternate" type="text/plain" title="RVCBench documentation summary" href="{url}llms.txt">
 <link rel="icon" href="assets/logo.png" type="image/png">
 <link rel="apple-touch-icon" href="assets/logo.png">
 
@@ -96,6 +97,7 @@ def build_head(canonical: bool = True) -> str:
 <meta property="og:image" content="{og_image}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="RVCBench: automatic speech metrics and ready-to-use benchmark datasets">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{title}">
 <meta name="twitter:description" content="{desc}">

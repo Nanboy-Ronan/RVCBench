@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rvcbench"
-version = "2.1.0"
+version = "2.1.1"
 description = "Comprehensive voice cloning evaluation: automatic speech metrics and ready-to-use benchmark datasets"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -18,8 +18,8 @@ authors = [
   { name = "Xiaoxiao Li" },
 ]
 keywords = [
-  "voice cloning", "text-to-speech", "speaker privacy", "audio protection",
-  "adversarial audio", "audio deepfake robustness", "benchmark", "speaker verification",
+  "voice cloning evaluation", "text-to-speech evaluation", "speech metrics", "speaker similarity",
+  "word error rate", "UTMOS", "benchmark datasets", "speaker verification",
 ]
 classifiers = [
   "Development Status :: 4 - Beta",

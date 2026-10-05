@@ -1,3 +1,8 @@
+---
+title: "Compare voice cloning runtime measurements"
+description: "Review timing scopes, request boundaries and provenance checks needed to compare voice cloning latency in RVCBench without mixing incompatible measurements."
+---
+
 # Timing evidence audit
 
 Audited base: `e5cfbf5e43b523e7e79aac3b79e42f47bc33cf2c`.

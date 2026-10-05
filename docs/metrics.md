@@ -1,3 +1,8 @@
+---
+title: "Automatic voice cloning metrics in Python"
+description: "Score speaker similarity, word error rate, speech quality, intelligibility and emotion with one Python API. Seven metrics for your own generated audio."
+---
+
 # Automatic speech metrics
 
 Use `rvcbench.metrics` to score your own voice-cloning outputs, with your own data. No benchmark suite

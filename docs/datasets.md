@@ -1,3 +1,8 @@
+---
+title: "Voice cloning evaluation datasets"
+description: "Use RVCBench datasets from Hugging Face or a local copy. Find dataset layouts, language coverage, metadata and references for voice cloning evaluation."
+---
+
 # Datasets
 
 The benchmark data is on Hugging Face at

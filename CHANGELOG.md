@@ -2,6 +2,15 @@
 
 Notable changes to the RVCBench codebase. Paper results are not affected by entries here unless stated.
 
+## 2.1.1 (2026-10-05)
+
+- Publish an English documentation website with searchable guides, Python API and CLI references.
+- Align package discovery with automatic speech metrics and dataset-backed voice cloning evaluation.
+- Add page-specific search summaries, social previews, linked software/dataset metadata, complete sitemaps
+  and a plain-text documentation export. Check these artifacts before website deployment.
+- Point PyPI documentation links to the documentation website and remove the Chinese quickstart from
+  current documentation. Scoring behavior is unchanged from 2.1.0.
+
 ## 2.1.0 (2026-10-05)
 
 - Present RVCBench as a general-purpose voice cloning evaluation package, with two documented pip workflows:

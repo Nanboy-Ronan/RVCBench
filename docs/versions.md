@@ -1,3 +1,8 @@
+---
+title: "RVCBench package versions and paper reproduction"
+description: "Choose the v2 pip package to evaluate new models or the frozen v1 codebase to reproduce the paper. Review changes in execution, datasets and reporting."
+---
+
 # Codebase versions
 
 v1 and v2 are two versions of the code for the same benchmark: the datasets, metrics and paper results are

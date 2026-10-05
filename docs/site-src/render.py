@@ -236,61 +236,64 @@ def render_faq():
 # -------------------------------------------------------------- JSON-LD ----
 def render_jsonld():
     authors = [{"@type": "Person", "name": n} for n in D.CITATION["authors"]]
+    base = D.SITE["url"]
+    description = ("Comprehensive voice cloning evaluation with seven automatic speech metrics and "
+                   "ready-to-use benchmark datasets. Score your own audio or evaluate model outputs with provided data.")
     graph = [
         {
-            "@type": "Dataset",
-            "@id": D.SITE["url"] + "#dataset",
-            "name": "RVCBench",
-            "alternateName": "RVCBench: Comprehensive Voice Cloning Evaluation",
-            "description": (
-                "A package for comprehensive voice cloning evaluation, with automatic speech metrics and ready-to-use datasets, "
-                "covering 32 TTS/VC models, 10 dataset configurations, and 5 audio-protection methods."
-            ),
-            "url": D.SITE["url"],
-            "sameAs": [D.SITE["repo"], D.SITE["dataset"], D.SITE["paper"]],
-            "license": "https://creativecommons.org/publicdomain/zero/1.0/",
-            "creator": authors,
-            "keywords": [
-                "voice cloning", "text-to-speech", "speaker privacy", "audio deepfake",
-                "adversarial audio", "speaker verification", "audio protection", "TTS benchmark",
-            ],
-            "distribution": {"@type": "DataDownload", "contentUrl": D.SITE["dataset"], "encodingFormat": "application/x-parquet"},
+            "@type": "WebSite", "@id": base + "#website", "url": base,
+            "name": "RVCBench", "description": description, "inLanguage": "en",
         },
         {
-            "@type": "ScholarlyArticle",
-            "@id": D.SITE["url"] + "#paper",
-            "headline": D.CITATION["title"],
-            "author": authors,
-            "datePublished": D.CITATION["year"],
-            "url": D.SITE["paper"],
+            "@type": "WebPage", "@id": base + "#webpage", "url": base,
+            "name": "RVCBench | Comprehensive Voice Cloning Evaluation",
+            "description": description, "isPartOf": {"@id": base + "#website"},
+            "mainEntity": {"@id": base + "#software"},
+        },
+        {
+            "@type": "SoftwareApplication", "@id": base + "#software", "name": "RVCBench",
+            "description": description, "url": base, "softwareVersion": D.VERSION,
+            "applicationCategory": "DeveloperApplication", "operatingSystem": "Linux",
+            "softwareRequirements": "Python 3.10 or newer; FFmpeg for speech scoring",
+            "installUrl": D.SITE["pypi"], "softwareHelp": D.SITE["docs"],
+            "license": "https://creativecommons.org/publicdomain/zero/1.0/", "author": authors,
+            "isAccessibleForFree": True,
+            "featureList": [
+                "Automatic speech metrics: SIM, SVA, WER, SpeechMOS (UTMOS), MCD, STOI and emotion consistency",
+                "Dataset-backed evaluation: export prompts, generate with your model, score and compare",
+                "CPU or GPU scoring, cached scorer models and resumable dataset evaluations",
+            ],
+            "sameAs": [D.SITE["repo"], D.SITE["pypi"]],
+        },
+        {
+            "@type": "Dataset", "@id": base + "#dataset", "name": "RVCBench evaluation datasets",
+            "description": ("Reference audio, transcripts and evaluation data for voice cloning across languages, "
+                            "speakers and recording conditions. Packaged suites provide fixed input selections."),
+            "url": D.SITE["dataset"], "license": "https://creativecommons.org/publicdomain/zero/1.0/",
+            "creator": authors, "keywords": ["voice cloning evaluation", "speech evaluation", "benchmark datasets"],
+            "includedInDataCatalog": {"@type": "DataCatalog", "name": "Hugging Face Datasets",
+                                      "url": "https://huggingface.co/datasets"},
+        },
+        {
+            "@type": "ScholarlyArticle", "@id": base + "#paper", "headline": D.CITATION["title"],
+            "author": authors, "datePublished": D.CITATION["year"], "url": D.SITE["paper"],
             "identifier": f"arXiv:{D.CITATION['arxiv_id']}",
             "isPartOf": {"@type": "PublicationVolume", "name": D.CITATION["venue"]},
-            "description": "Accepted to NeurIPS 2026.",
-            "about": {"@id": D.SITE["url"] + "#dataset"},
+            "description": "Accepted to NeurIPS 2026.", "about": {"@id": base + "#dataset"},
         },
         {
-            "@type": "SoftwareSourceCode",
-            "@id": D.SITE["url"] + "#code",
-            "name": "RVCBench",
-            "codeRepository": D.SITE["repo"],
-            "programmingLanguage": "Python",
+            "@type": "SoftwareSourceCode", "@id": base + "#code", "name": "RVCBench",
+            "codeRepository": D.SITE["repo"], "programmingLanguage": "Python", "softwareVersion": D.VERSION,
+            "targetProduct": {"@id": base + "#software"},
             "license": "https://creativecommons.org/publicdomain/zero/1.0/",
         },
         {
-            "@type": "FAQPage",
-            "@id": D.SITE["url"] + "#faq",
-            "mainEntity": [
-                {
-                    "@type": "Question",
-                    "name": item["q"],
-                    "acceptedAnswer": {"@type": "Answer", "text": item["a"]},
-                }
-                for item in D.FAQ
-            ],
+            "@type": "FAQPage", "@id": base + "#faq",
+            "mainEntity": [{"@type": "Question", "name": item["q"],
+                            "acceptedAnswer": {"@type": "Answer", "text": item["a"]}} for item in D.FAQ],
         },
     ]
-    doc = {"@context": "https://schema.org", "@graph": graph}
-    return json.dumps(doc, ensure_ascii=False, indent=2)
+    return json.dumps({"@context": "https://schema.org", "@graph": graph}, ensure_ascii=False, indent=2)
 
 
 # ------------------------------------------------------------- llms.txt ----
@@ -312,7 +315,7 @@ def render_llms_txt():
         "",
     ]
     for item in D.FAQ:
-        lines.append(f"- {item['a']}")
+        lines.extend([f"### {item['q']}", "", item["a"], ""])
     lines += [
         "",
         "## Links",
@@ -323,6 +326,12 @@ def render_llms_txt():
         f"- [Code repository]({D.SITE['repo']})",
         f"- [Documentation]({D.SITE['url']}docs/)",
         f"- [Quickstart]({D.SITE['url']}docs/quickstart/)",
+        f"- [Automatic metrics for your audio]({D.SITE['url']}docs/metrics/)",
+        f"- [Evaluate models with benchmark data]({D.SITE['url']}docs/adding_a_model/)",
+        f"- [Evaluation FAQ and coverage]({D.SITE['url']}docs/faq/)",
+        f"- [Python API reference]({D.SITE['url']}docs/api/)",
+        f"- [PyPI package]({D.SITE['pypi']})",
+        f"- [Full documentation text]({D.SITE['url']}llms-full.txt)",
         "",
         "## Citation",
         "",

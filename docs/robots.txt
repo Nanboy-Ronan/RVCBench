@@ -1,8 +1,13 @@
 # RVCBench — https://nanboy-ronan.github.io/RVCBench/
+# Reference policy only on GitHub project Pages: crawlers read robots.txt at the
+# origin root, not /RVCBench/robots.txt. See docs/discoverability.md for deployment notes.
 User-agent: *
 Allow: /
 
 # Explicitly welcome AI answer-engine / research crawlers.
+User-agent: OAI-SearchBot
+Allow: /
+
 User-agent: GPTBot
 Allow: /
 User-agent: ChatGPT-User

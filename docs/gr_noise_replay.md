@@ -1,3 +1,8 @@
+---
+title: "Replay Gaussian voice protection experiments"
+description: "Reconstruct protected voice references from historical frozen Gaussian noise tensors and verify waveform hashes using the RVCBench replay workflow."
+---
+
 # Replaying historical Gaussian protection
 
 The historical GR-Noise run retains `protected_audio/gr.noise`, a frozen

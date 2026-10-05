@@ -14,17 +14,14 @@
     "Benchmark"
   ],
   "keywords": [
-    "voice cloning",
-    "text-to-speech",
-    "TTS",
-    "speaker privacy",
-    "audio protection",
-    "adversarial audio",
-    "audio deepfake robustness",
-    "speaker verification",
-    "speech synthesis",
-    "benchmark",
-    "Hugging Face dataset"
+    "voice cloning evaluation",
+    "text-to-speech evaluation",
+    "speech metrics",
+    "speaker similarity",
+    "word error rate",
+    "UTMOS",
+    "benchmark datasets",
+    "speaker verification"
   ],
   "author": [
     {
@@ -67,5 +64,8 @@
     "description": "Accepted to NeurIPS 2026.",
     "datePublished": "2026"
   },
-  "isBasedOn": "https://huggingface.co/datasets/Nanboy/RVCBench"
+  "isBasedOn": "https://huggingface.co/datasets/Nanboy/RVCBench",
+  "softwareVersion": "2.1.1",
+  "url": "https://nanboy-ronan.github.io/RVCBench/",
+  "softwareHelp": "https://nanboy-ronan.github.io/RVCBench/docs/"
 }

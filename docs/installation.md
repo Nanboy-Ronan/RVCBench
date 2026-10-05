@@ -1,3 +1,8 @@
+---
+title: "Install RVCBench for CPU or GPU scoring"
+description: "Install the RVCBench pip package with speech scoring dependencies. Set up CPU or GPU scoring, download models, configure caches and upgrade existing runs."
+---
+
 # Install RVCBench
 
 The pip package supports two workflows: automatic metrics for your own audio, and dataset-backed
@@ -80,7 +85,7 @@ After preparing the assets and data, scoring can run offline.
 ## Upgrade from 2.0.0
 
 ```bash
-python -m pip install --upgrade "rvcbench[eval]==2.1.0"
+python -m pip install --upgrade "rvcbench[eval]==2.1.1"
 rvcbench setup-scorers
 rvcbench doctor --eval --imports
 ```

@@ -1,3 +1,8 @@
+---
+title: "Evaluate any voice cloning model on benchmark data"
+description: "Export reference audio and text, generate speech with your model or API, and score the outputs with RVCBench. Compare models and resume interrupted evaluations."
+---
+
 # Evaluate your own model
 
 There are three ways to evaluate a voice cloning model with RVCBench.

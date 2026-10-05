@@ -1,3 +1,8 @@
+---
+title: "Prepare voice cloning evaluation datasets"
+description: "Review preprocessing for RVCBench evaluation datasets, including source recordings, metadata and the layout used by Hugging Face and local dataset copies."
+---
+
 # Dataset preprocessing
 
 The preprocessed datasets are published on Hugging Face at

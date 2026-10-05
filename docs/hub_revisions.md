@@ -1,3 +1,8 @@
+---
+title: "Pinned model assets and offline reproduction"
+description: "Resolve fixed Hugging Face revisions and verify model assets for RVCBench. Understand offline behavior and explicit checkpoint validation requirements."
+---
+
 # Fixed Hub revisions and offline reproduction
 
 Revision resolution preserves an explicit full 40-character lowercase Git

@@ -1,3 +1,8 @@
+---
+title: "Evaluation runs, reports and reproducibility"
+description: "Inspect RVCBench run manifests, metric coverage and failures. Resume evaluation, score saved audio and check whether runs share a comparable protocol."
+---
+
 # Running and reproducing RVCBench
 
 Install the benchmark with `python -m pip install -e .`. Use a separate model

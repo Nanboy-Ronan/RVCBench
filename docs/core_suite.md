@@ -1,3 +1,8 @@
+---
+title: "Voice cloning benchmark suites and coverage"
+description: "Compare onboarding, core and full RVCBench suites: 52, 480 and 12,724 generated outputs. Review languages, speaker groups, tasks, metrics and scoring costs."
+---
+
 # Core suite (`core-v1`)
 
 `core-v1` is a small, fixed version of the robustness evaluations in the

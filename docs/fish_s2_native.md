@@ -1,3 +1,8 @@
+---
+title: "Native Fish Audio S2 runtime"
+description: "Set up the pinned native Fish Audio S2 runtime separately from FishSpeech S1, with checkpoint conversion and the runtime contract used by RVCBench."
+---
+
 # Native Fish Audio S2 runtime
 
 The S2 integration uses its own native checkout, separate from the historical
