@@ -1,9 +1,47 @@
 import os
 import random
+from contextlib import contextmanager
 from typing import Optional
 
 import numpy as np
 import torch
+
+
+@contextmanager
+def isolated_seed(seed, *, device='cpu'):
+    """Seed a scoring call, restoring the caller's RNGs and cuDNN flags on every exit.
+
+    Global RNGs are temporarily changed: callers must serialize concurrent scoring
+    and training in the same process, or use separate processes.
+    """
+    python_state, numpy_state = random.getstate(), np.random.get_state()
+    hash_seed = os.environ.get('PYTHONHASHSEED')
+    deterministic, benchmark = torch.backends.cudnn.deterministic, torch.backends.cudnn.benchmark
+    cudnn_tf32, matmul_tf32 = torch.backends.cudnn.allow_tf32, torch.backends.cuda.matmul.allow_tf32
+    target = torch.device(device)
+    devices = [target.index if target.index is not None else torch.cuda.current_device()] if target.type == 'cuda' else []
+    try:
+        with torch.random.fork_rng(devices=devices):
+            if seed is not None:
+                random.seed(seed)
+                np.random.seed(seed % (2**32 - 1))
+                # torch.manual_seed also changes every CUDA generator, including devices
+                # unrelated to this evaluator. Seed only CPU and the requested device.
+                torch.random.default_generator.manual_seed(seed)
+                for index in devices:
+                    torch.cuda.default_generators[index].manual_seed(seed)
+                torch.backends.cudnn.deterministic = True
+                torch.backends.cudnn.benchmark = False
+            yield
+    finally:
+        random.setstate(python_state)
+        np.random.set_state(numpy_state)
+        torch.backends.cudnn.deterministic, torch.backends.cudnn.benchmark = deterministic, benchmark
+        torch.backends.cudnn.allow_tf32, torch.backends.cuda.matmul.allow_tf32 = cudnn_tf32, matmul_tf32
+        if hash_seed is None:
+            os.environ.pop('PYTHONHASHSEED', None)
+        else:
+            os.environ['PYTHONHASHSEED'] = hash_seed
 
 
 def configure_seeds(

@@ -1,4 +1,4 @@
-"""RVCBench: a benchmark for voice cloning robustness and audio protection."""
+"""RVCBench: comprehensive voice cloning metrics and dataset-backed evaluation."""
 from importlib.metadata import PackageNotFoundError, version
 
 try:

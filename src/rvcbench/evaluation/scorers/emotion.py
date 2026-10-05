@@ -42,6 +42,10 @@ class EmotionScorer:
             if file_hash(root / name) != expected:
                 raise ValueError(f'Pinned emotion asset hash differs: {name}')
         base = base_initializer_dir()
+        from ..locked_assets import verify_files, scorer_lock
+        verify_files(base, scorer_lock('emotion_base')['files'])
+        if (root / 'label_encoder.ckpt').exists():
+            verify_files(root, {'label_encoder.ckpt': ASSETS['label_encoder.txt']})
         for name in ('config.json', 'preprocessor_config.json', 'pytorch_model.bin'):
             if not (base / name).is_file():
                 raise FileNotFoundError(f'Emotion base initializer asset missing: {base / name}')
@@ -61,7 +65,7 @@ class EmotionScorer:
             'base_initializer_assets': {p.name: file_hash(p) for p in sorted(base.iterdir()) if p.is_file()},
             'interface': 'CustomEncoderWav2vec2Classifier', 'sample_rate': 16000,
             'labels': ['neu', 'ang', 'hap', 'sad'],
-            'note': 'Base cache content hashed; cache directory revision is not independent upstream hash verification.'}
+            'note': 'Model and base initializer files checked against release-pinned upstream SHA-256 hashes.'}
 
     def _label(self, path):
         import torch

@@ -18,7 +18,9 @@ def _scorer_provenance(scorer, seed, cap, device=None):
     from .scorers import text
     implementation = Path(inspect.getfile(type(scorer)))
     paths = [implementation, Path(__file__), Path(text.__file__), Path(__file__).with_name('audio_io.py'),
-             Path(__file__).parents[1] / 'utils/runtime_errors.py']
+             Path(__file__).parents[1] / 'utils/runtime_errors.py',
+             Path(__file__).parents[1] / 'utils/seeding.py', Path(__file__).with_name('locked_assets.py'),
+             Path(__file__).with_name('scorer_lock.json')]
     if implementation.stem == 'auxiliary':
         paths += [Path(__file__).with_name('generation.py'), Path(__file__).with_name('fidelity.py')]
     packages = {}
@@ -58,12 +60,16 @@ class ScorerPool:
     def get(self, group, wer_normalization='ascii_punctuation_removed_v2'):
         key = (group, wer_normalization if group == 'wer' else None)
         if key not in self._scorers:
-            from rvcbench.utils.seeding import configure_seeds
-            configure_seeds(self.seed, logger=None)
-            scorer = create_scorer(group, self.device, self.logger)
-            if group == 'wer' and wer_normalization != 'ascii_punctuation_removed_v2':
-                scorer.set_normalization(wer_normalization)
-            scorer.prepare()
+            from rvcbench.utils.seeding import isolated_seed
+            with isolated_seed(self.seed, device=self.device):
+                scorer = create_scorer(group, self.device, self.logger)
+                try:
+                    if group == 'wer' and wer_normalization != 'ascii_punctuation_removed_v2':
+                        scorer.set_normalization(wer_normalization)
+                    scorer.prepare()
+                except BaseException:
+                    scorer.close()
+                    raise
             self._scorers[key] = scorer
         return self._scorers[key]
 
@@ -73,8 +79,9 @@ class ScorerPool:
             scorer.close()
         gc.collect()
         import torch
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
+        if torch.device(self.device).type == 'cuda' and torch.cuda.is_initialized():
+            with torch.cuda.device(self.device):
+                torch.cuda.empty_cache()
 
     def __enter__(self):
         return self

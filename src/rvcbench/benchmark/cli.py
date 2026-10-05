@@ -49,10 +49,12 @@ def main():
     score.add_argument('--output', type=Path, required=True,
                        help='Results directory of one model; with several models, the parent of one directory per model')
     score.add_argument('--device', default='cpu')
+    score.add_argument('--resume', action='store_true', help='Resume this output directory; verify inputs and reuse matching scores')
     score.add_argument('--data-root', type=Path, help='Local dataset copy laid out like the Hub dataset (default: download)')
     compare = commands.add_parser('compare', help='Compare several models scored on the same suite in one table')
     compare.add_argument('submissions', nargs='+', type=Path, help='submission.json files or results directories')
     compare.add_argument('--output', type=Path, help='Write comparison.md, .csv and .json here')
+    compare.add_argument('--allow-incompatible', action='store_true', help='Inspect differing scoring protocols without ranking')
     setup = commands.add_parser('setup-scorers', help='Download and verify the model files of the scoring metrics')
     setup.add_argument('--metrics', nargs='+', default=['sim', 'speechmos', 'wer', 'mcd', 'emotion', 'stoi'])
     setup.add_argument('--check-only', action='store_true', help='Verify files that are present; download nothing')
@@ -107,7 +109,7 @@ def main():
         return
     if args.command == 'compare':
         from .comparison import compare_submissions
-        result = compare_submissions(args.submissions, args.output)
+        result = compare_submissions(args.submissions, args.output, allow_incompatible=args.allow_incompatible)
         print(result['markdown'])
         if args.output:
             print(f"Wrote {args.output / 'comparison.md'}, .csv and .json")
@@ -123,7 +125,7 @@ def main():
             return
         if len(args.generated) > 1:
             result = score_submissions(args.suite, args.generated, args.output, models=args.model,
-                                       device=args.device, data_root=args.data_root)
+                                       device=args.device, data_root=args.data_root, resume=args.resume)
             print(result['markdown'])
             if not result['leaderboard']:
                 print(f"Note: {result['label']}")
@@ -133,7 +135,7 @@ def main():
             parser.error('--model takes one name per --generated directory')
         model = args.model[0] if args.model else args.generated[0].resolve().name
         result = score_submission(args.suite, args.generated[0], args.output, model=model,
-                                  device=args.device, data_root=args.data_root)
+                                  device=args.device, data_root=args.data_root, resume=args.resume)
         print(json.dumps({'suite': result['suite'], 'model': result['model'], 'status': result['status'],
                           'tasks': {name: {'status': task['status'], 'means': task.get('means'),
                                            'failed': len(task['failures'])}

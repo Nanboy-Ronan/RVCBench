@@ -49,8 +49,10 @@ def _format(metric, value, change):
 def _markdown(comparison, models, rows):
     lines = [f"# {comparison['suite']}: model comparison", '', f"> {comparison['label']}", '']
     statuses = ', '.join(f"{m['model']} ({m['status']})" for m in comparison['models'])
+    ranking = ('**Bold** marks the best value when two or more models have one;'
+               if comparison.get('protocol_compatible', True) else 'Ranking is disabled;')
     lines += [f'Models: {statuses}. Values are task means; percentages are the change against the',
-              'task\'s clean counterpart. **Bold** marks the best value when two or more models have one;',
+              "task's clean counterpart. " + ranking,
               '— marks a task that is not complete for that model.', '']
     lines += ['| Task | Metric | ' + ' | '.join(models) + ' |', '| --- | --- | ' + ' | '.join('---:' for _ in models) + ' |']
     by_key = {}
@@ -59,7 +61,7 @@ def _markdown(comparison, models, rows):
     for (task, metric), cells in by_key.items():
         values = {m: c['mean'] for m, c in cells.items() if c['mean'] is not None}
         best = None
-        if len(values) >= 2:
+        if len(values) >= 2 and comparison.get('protocol_compatible', True):
             best = (max if HIGHER_IS_BETTER.get(metric, True) else min)(values.values())
         rendered = []
         for model in models:
@@ -70,18 +72,39 @@ def _markdown(comparison, models, rows):
     return '\n'.join(lines) + '\n'
 
 
-def compare_submissions(paths, output=None):
+def compare_submissions(paths, output=None, *, allow_incompatible=False):
     """Build the comparison of several submissions; write it under ``output`` when given."""
     loaded = [load_submission(p) for p in paths]
     if not loaded:
         raise ValueError('No submissions to compare')
     first = loaded[0][1]
     for path, submission in loaded[1:]:
-        for key in ('suite', 'version', 'suite_sha256'):
+        for key in ('protocol', 'suite', 'version', 'suite_sha256'):
             if submission.get(key) != first.get(key):
                 raise ValueError(f"{path} is for {submission.get('suite')} (version {submission.get('version')}, "
                                  f"{key} differs from {first.get('suite')} version {first.get('version')}); "
                                  'only submissions of the same suite can be compared')
+        if set(submission['tasks']) != set(first['tasks']):
+            raise ValueError(f'{path}: task set differs from the other submissions')
+    differences = []
+    for name, reference in first['tasks'].items():
+        fingerprints = set()
+        for path, submission in loaded:
+            task = submission['tasks'][name]
+            if task['required_metrics'] != reference['required_metrics']:
+                raise ValueError(f'{path}: {name} metric selection differs')
+            if task.get('status') != 'complete':
+                continue
+            fingerprint = task.get('evaluation_fingerprint')
+            if not fingerprint:
+                differences.append(f'{submission["model"]}/{name}: scoring fingerprint is missing')
+            else:
+                fingerprints.add(fingerprint)
+        if len(fingerprints) > 1:
+            differences.append(f'{name}: scorer code, dependencies, assets or settings differ')
+    if differences and not allow_incompatible:
+        raise ValueError('Incompatible scoring protocols: ' + '; '.join(differences)
+                         + '. Rescore with one scoring environment, or use --allow-incompatible for an unranked inspection.')
     models = [submission['model'] for _, submission in loaded]
     if len(set(models)) != len(models):
         raise ValueError(f'Duplicate model names: {models}')
@@ -92,7 +115,7 @@ def compare_submissions(paths, output=None):
                 task = submission['tasks'].get(name, {})
                 rows.append({'task': name, 'evaluation': reference.get('evaluation'), 'metric': metric,
                              'model': submission['model'],
-                             'mean': (task.get('means') or {}).get(metric),
+                             'mean': (task.get('means') or {}).get(metric) if task.get('status') == 'complete' else None,
                              'relative_change_percent': (task.get('relative_change_percent') or {}).get(metric),
                              'anchor': reference.get('anchor'), 'task_status': task.get('status', 'missing')})
     comparison = {'schema_version': 1, 'suite': first['suite'], 'version': first['version'],
@@ -101,6 +124,11 @@ def compare_submissions(paths, output=None):
                               'submission_sha256': file_hash(p), 'rvcbench_version': s.get('rvcbench_version')}
                              for p, s in loaded],
                   'rows': rows}
+    comparison['protocol_compatible'] = not differences
+    comparison['protocol_differences'] = differences
+    if differences:
+        comparison['leaderboard'] = False
+        comparison['label'] = 'Incompatible scoring protocols; unranked inspection only. ' + '; '.join(differences)
     markdown = _markdown(comparison, models, rows)
     if output is not None:
         output = Path(output)

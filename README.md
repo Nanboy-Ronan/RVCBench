@@ -4,7 +4,7 @@
 
 # RVCBench
 
-### Benchmarking the Robustness of Voice Cloning
+### Comprehensive Voice Cloning Evaluation
 
 [![NeurIPS 2026](https://img.shields.io/badge/NeurIPS-2026-6842c2.svg)](https://arxiv.org/abs/2602.00443)
 [![arXiv](https://img.shields.io/badge/arXiv-2602.00443-b31b1b.svg)](https://arxiv.org/abs/2602.00443)
@@ -20,67 +20,137 @@
 
 > **News**
 >
-> - **2026-10** · `pip install rvcbench`: score your own model from ZipVoice- or Seed-TTS-style batch lists, compare models in one table, or use the metrics in your own code.
+> - **2026-10** · `pip install "rvcbench[eval]"`: score your own model from ZipVoice- or Seed-TTS-style batch lists, compare models in one table, or use the metrics in your own code.
 > - **2026-09** · RVCBench is accepted to **NeurIPS 2026**.
 
-Voice cloning models sound convincing in clean demos. RVCBench measures how they hold up in deployment:
-noisy, accented or overlapping reference audio; irregular or scam text; long-form and multilingual speech;
-compression; and anti-cloning protection, with and without denoising. The
-[paper](https://arxiv.org/abs/2602.00443) defines **18 robustness evaluations** over **14,370 utterances**
-from **204 speakers** and evaluates **18 open-source models**.
+RVCBench is a general-purpose package for evaluating voice cloning. It brings speaker similarity,
+speech quality, intelligibility, pronunciation accuracy and emotion consistency into one scoring API,
+and provides ready-to-use datasets for evaluating a model across languages, speakers and recording conditions.
 
-<p align="center"><img src="https://raw.githubusercontent.com/Nanboy-Ronan/RVCBench/main/figs/main.png" alt="RVCBench overview" width="100%"></p>
+| What you want to do | Start here |
+| --- | --- |
+| **Score your own audio** with automatic speech metrics | [Python metrics API](#score-your-own-audio) — use your own files and data |
+| **Evaluate your model with our data** and get a complete report | [Dataset evaluation](#evaluate-your-model) — export prompts, generate, score |
 
-## Evaluate your model
+Both workflows are included in the pip package. Your model can run in its own environment or through an API;
+RVCBench scores the audio it produces.
 
-Generate speech with your own code, then let RVCBench score it. With ZipVoice, for example:
+**First time here?** Follow the complete [getting started guide](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/quickstart.md)
+or [中文入门指南](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/quickstart_zh.md).
+They walk through installation, required files, both workflows and reading the results.
+
+## Install
 
 ```bash
-pip install "rvcbench[eval]"
-rvcbench setup-scorers                                # once: download the metric models
-rvcbench prompts --suite core-v1 --output prompts/    # reference clips and texts to synthesize
-python3 -m zipvoice.bin.infer_zipvoice --model-name zipvoice \
-  --test-list prompts/prompts.tsv --res-dir outputs/zipvoice
-rvcbench score --suite core-v1 --generated outputs/zipvoice --output results/zipvoice --device cuda
+python -m pip install "rvcbench[eval]"
+# Linux: install FFmpeg if it is not already available (e.g. sudo apt-get install ffmpeg).
+rvcbench setup-scorers
 ```
 
-- **Works with batch scripts.** `prompts/` has `prompts.tsv` (ZipVoice), `prompts.lst` (Seed-TTS-eval
-  scripts such as F5-TTS and CosyVoice) and `prompts.jsonl`. Save each output as `<id>.wav`.
-- **Compare models in one run.** Pass several output folders to `rvcbench score` and get `comparison.md`.
-- **Pinned inputs.** Every input is checked by hash against a fixed dataset revision, and target recordings
-  are never exported.
+Python 3.10+ and Linux are supported. `rvcbench[eval]` installs the package **with all seven public metrics**;
+plain `rvcbench` installs the runner and datasets without the optional scoring dependencies.
+`setup-scorers` downloads and verifies the metric models once. They are reused from your local cache.
+A GPU is optional; choose `device="cpu"` or `--device cpu` to score on CPU.
 
-| Suite | Utterances | Use it for |
-| --- | ---: | --- |
-| `onboarding-v1` | 52 | checking the workflow end to end |
-| `core-v1` | 480 | a quick evaluation covering 16 of the 18 evaluations (about 35 min of scoring) |
-| `full-v1` | 12,724 | every pair of the paper's datasets, without the protection tasks for now (about a day of scoring) |
+For a smaller initial download, select only the metrics you need:
+`rvcbench setup-scorers --metrics sim wer speechmos`.
+See the [installation guide](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/installation.md)
+for CPU/GPU installation, caches and troubleshooting.
 
-The same metrics are available in your own code, with the same models and definitions:
+## Score your own audio
 
 ```python
 from rvcbench import metrics
 
-with metrics.Evaluator(["sim", "wer", "speechmos"], device="cuda") as evaluator:
-    evaluator.score("generated.wav", reference="reference.wav", text="Hello there.", language="en")
+with metrics.Evaluator(["sim", "wer", "speechmos"], device="cpu") as evaluator:
+    scores = evaluator.score(
+        "generated.wav",
+        reference="speaker_reference.wav",  # a recording of the intended speaker
+        text="Hello there.",                 # what the generated audio should say
+        language="en",
+    )
+    print(scores)  # dictionary with sim, wer and speechmos
 ```
 
-See the [metrics API](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/metrics.md) for every metric and the one-line functions.
+Reuse the evaluator for a whole dataset: call `score()` for each file, and each metric model loads once.
+For every available metric, use `metrics.Evaluator("all")` and also pass
+`target="same_text_recording.wav"` for MCD and STOI. The target is a recording of the **same text** as the
+synthesized audio; the speaker reference may contain different words.
 
-Requires Linux, Python 3.10+ and FFmpeg; a GPU is recommended for scoring. More in
-[Evaluate your own model](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/adding_a_model.md) and the [Core suite](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/core_suite.md) guide.
+| Metric | Evaluates | Required input besides generated audio |
+| --- | --- | --- |
+| `sim`, `sva` | Speaker similarity and speaker verification | Speaker reference recording |
+| `wer` | Pronunciation/content accuracy via ASR word error rate | Expected text; optional language |
+| `speechmos` | Predicted perceptual quality (UTMOS) | None |
+| `mcd`, `stoi` | Acoustic distortion and intelligibility | Same-text target recording |
+| `emotion` | Emotion consistency | Reference recording |
 
-## What it measures
+The [metrics guide](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/metrics.md)
+includes one-line functions, scoring all metrics, a batch example and metric definitions.
+No RVCBench dataset or model adapter is needed for this workflow.
 
-| Dimension | Paper evaluations |
-| --- | --- |
-| **Input** | Reference audio across 12 accents, gender and age; hallucination-style and scam text prompts |
-| **Generation** | English, Chinese and cross-lingual cloning; long text and long references; expressive and persuasive speech |
-| **Output** | MP3, AAC, Opus and telephone-band compression; deepfake detectability |
-| **Perturbation** | Background noise and overlapping speakers; Gaussian noise, SPEC, SafeSpeech, POP and Enkidu protection; denoising of protected references |
+## Evaluate your model
 
-Metrics: speaker similarity (SIM, ECAPA-TDNN), naturalness (MOS, UTMOS), word error rate (WER, Whisper
-medium), mel-cepstral distortion (MCD), emotion consistency and STOI.
+RVCBench downloads the selected data, prepares reference clips and texts, and scores the audio your model generates.
+Start with the 52-utterance onboarding suite:
+
+```bash
+rvcbench prompts --suite onboarding-v1 --output prompts/
+# Generate every prompt with your model. Save outputs as <id>.wav in outputs/my-model/.
+rvcbench score --suite onboarding-v1 --generated outputs/my-model --output results/my-model --device cpu
+```
+
+`prompts/` contains `prompts.jsonl`, `prompts.tsv` (ZipVoice) and `prompts.lst` (Seed-TTS-style scripts
+such as F5-TTS and CosyVoice). For example, a model environment with ZipVoice installed can run:
+
+```bash
+python3 -m zipvoice.bin.infer_zipvoice --model-name zipvoice \
+  --test-list prompts/prompts.tsv --res-dir outputs/my-model
+```
+
+The [model evaluation guide](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/adding_a_model.md)
+shows the exact file format and an example loop for your own inference function.
+Model inference is the step supplied by you; data preparation, metric scoring and report generation are automatic.
+
+| Suite | Utterances to generate | Use it for |
+| --- | ---: | --- |
+| `onboarding-v1` | 52 | Check the complete workflow |
+| `core-v1` | 480 | Broad evaluation across languages, speaker groups, long speech, noise, compression and protection |
+| `full-v1` | 12,724 | The larger evaluation datasets; protection tasks are currently covered by `core-v1` |
+
+Use the same suite name for `prompts` and `score`. Every input is checked against a fixed dataset revision;
+target recordings stay in the scoring data and are not exported with the prompts.
+`submission.json` contains per-task scores, coverage and failures. Task directories include per-sample scores
+and bootstrap confidence intervals. These suites are currently previews; published paper results use a separate protocol.
+
+Resume an interrupted or partial evaluation with the original command plus `--resume`:
+
+```bash
+rvcbench score --suite onboarding-v1 --generated outputs/my-model --output results/my-model --device cpu --resume
+```
+
+Compare several models in one call, or compare reports you already have:
+
+```bash
+rvcbench score --suite core-v1 --generated outputs/model-a outputs/model-b --output results/comparison --device cuda
+rvcbench compare results/model-a results/model-b --output results/compare
+```
+
+Comparison checks both the suite and scoring fingerprints. Different scoring environments must be rescored
+together, or explicitly inspected with `--allow-incompatible`, which disables ranking.
+The [suite guide](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/core_suite.md)
+lists tasks, coverage and approximate scoring costs.
+
+## Evaluation coverage
+
+The package covers clean voice cloning, multilingual and cross-lingual speech, speaker demographics,
+long-form speech, unusual text, background noise, overlapping speakers, compression, and protected references.
+Its seven public metrics cover identity, content, quality, intelligibility and emotion.
+The paper additionally studies deepfake detectability and an audio-LLM expression judge; these two components
+are not yet available through the packaged suites.
+
+The [paper](https://arxiv.org/abs/2602.00443) defines 18 evaluations over 14,370 utterances from 204 speakers.
+The package also includes adapters for running existing models and tools for protection and denoising research.
 
 ## Results
 
@@ -187,8 +257,10 @@ coverage. See [Running the built-in models](https://github.com/Nanboy-Ronan/RVCB
 
 | Guide | Covers |
 | --- | --- |
+| [Getting started](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/quickstart.md) · [中文](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/quickstart_zh.md) | Your first evaluation, from installation to results |
 | [Evaluate your own model](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/adding_a_model.md) | Prompt and output formats, batch lists, several models, adapters |
 | [Core and full suites](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/core_suite.md) | Tasks, data, metrics and scoring time |
+| [Install the package](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/installation.md) | pip installation, CPU/GPU, downloads and troubleshooting |
 | [Metrics API](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/metrics.md) | Speaker similarity, WER, MOS, MCD, STOI and emotion in your own code |
 | [Running the built-in models](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/models.md) | Installation options, supported models, protection and denoising |
 | [Datasets](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/datasets.md) | Hub folders, manifest format, preprocessing |

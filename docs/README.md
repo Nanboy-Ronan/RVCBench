@@ -1,52 +1,30 @@
-# RVCBench homepage
+# Using RVCBench
 
-`index.html` is the built homepage. It's a complete, standalone HTML5
-document — full `<head>` (meta description, Open Graph/Twitter cards,
-`citation_*` tags for Google Scholar, canonical URL, JSON-LD structured
-data) plus `robots.txt`, `sitemap.xml`, and `llms.txt` alongside it.
+RVCBench provides automatic speech metrics and datasets for comprehensive voice cloning evaluation.
+Both workflows are available through `pip install "rvcbench[eval]"`; a repository checkout is optional.
 
-**All content is server-rendered at build time** — the leaderboard,
-robustness chart, cross-dataset heatmap, model/protection/dataset lists,
-and FAQ are real HTML in the document, not populated by JavaScript after
-load. JS only *enhances* what's already there (column sorting, richer
-hover tooltips). This matters for both classic search crawlers and AI
-answer-engine crawlers (GPTBot, ClaudeBot, PerplexityBot, …), most of
-which don't execute JavaScript — verified by loading the built page with
-JS disabled and checking the real numbers are still in the text.
+## Start here
 
-## Enable on GitHub Pages
+1. **[Getting started](quickstart.md)** / **[中文入门指南](quickstart_zh.md)**: install, score your first audio,
+   evaluate a model with our data, and read the results.
+2. **[Installation](installation.md)**: CPU/GPU setup, model downloads, offline use, upgrades and troubleshooting.
+3. Choose the workflow you need:
 
-1. Push this `docs/` folder to the `main` branch.
-2. In the GitHub repo: **Settings → Pages → Build and deployment → Source:
-   "Deploy from a branch"**, then set **Branch: `main` / folder: `/docs`**.
-3. GitHub publishes it at `https://nanboy-ronan.github.io/RVCBench/`.
-4. Once live, submit `sitemap.xml` in Google Search Console (optional but
-   speeds up indexing).
+| Your goal | Guide |
+| --- | --- |
+| Score files you already have | [Metrics API](metrics.md): seven metrics, required inputs and batch scoring |
+| Evaluate your model using benchmark data | [Model evaluation](adding_a_model.md): prompts, inference and output formats |
+| Choose evaluation coverage | [Suites](core_suite.md): onboarding, core and full datasets |
+| Understand and reuse the data | [Datasets](datasets.md): source folders and metadata |
+| Run a supported model inside RVCBench | [Built-in models](models.md) and [model environments](model_environments.md) |
+| Inspect, resume or audit an adapter run | [Run guide](run_protocol.md) |
+| Reproduce the published paper | [Codebase versions](versions.md): use the frozen `v1` branch |
 
-## Editing the page
+The current public API has seven metrics. Packaged suites are previews and have their own fixed selections;
+they should not be presented as reproductions of the paper's results. See [suite coverage](core_suite.md).
 
-Source lives in `site-src/`:
+## Contribute
 
-- `site-src/data.py` — every number/string on the page (leaderboard,
-  robustness table, cross-dataset matrix, model list, protection methods,
-  datasets, FAQ, citation). **Single source of truth** — update this when
-  new results land, sourced from the root `README.md`.
-- `site-src/render.py` — turns `data.py` into the static HTML fragments
-  (table rows, the dumbbell SVG, the heatmap, JSON-LD, `llms.txt`).
-- `site-src/template.html` — page markup, CSS, and the (small,
-  enhancement-only) client-side JS.
-- `site-src/build.py` — assembles everything into `docs/index.html` (+
-  `docs/llms.txt`, `docs/assets/`) and a separate
-  `site-src/artifact.html` (fonts/logo inlined as base64, for a
-  single-file preview — not committed, rebuilt on demand).
-- `site-src/assets/` — self-hosted `.woff2` fonts and the logo.
-
-Rebuild after any edit:
-
-```bash
-python3 docs/site-src/build.py
-```
-
-The social-share card (`assets/og-image.png`, referenced by the Open
-Graph/Twitter meta tags) is a one-off Playwright screenshot, not part of
-the regular build — regenerate it by hand if the brand visuals change.
+See [CONTRIBUTING](../CONTRIBUTING.md) for development checks and release validation,
+[model integration](adding_a_model.md#route-2-built-in-integration) for adding an adapter, and
+[website maintenance](site-src/README.md) for rebuilding the homepage.

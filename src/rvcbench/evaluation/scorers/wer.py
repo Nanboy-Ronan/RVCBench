@@ -19,8 +19,11 @@ class WERScorer:
 
     def prepare(self):
         import whisper
-        self.model = whisper.load_model('medium', device=self.device)
-        self.model_provenance = {'model': 'whisper-medium', 'weights_url': whisper._MODELS['medium']}
+        from ..locked_assets import scorer_lock, whisper_path, verify_files
+        spec, path = scorer_lock('wer'), whisper_path()
+        verify_files(path.parent, {path.name: spec['weights_sha256']})
+        self.model = whisper.load_model(str(path), device=self.device)
+        self.model_provenance = dict(spec)
 
     def score(self, request):
         import jiwer

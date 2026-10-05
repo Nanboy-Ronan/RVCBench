@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rvcbench"
-version = "2.0.0"
-description = "Voice cloning robustness benchmark with auditable sample-level runs"
+version = "2.1.0"
+description = "Comprehensive voice cloning evaluation: automatic speech metrics and ready-to-use benchmark datasets"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "CC0-1.0"
@@ -48,7 +48,7 @@ qwen3 = ["numpy==1.26.4", "qwen-tts==0.1.1", "torch==2.6.0", "torchaudio==2.6.0"
 eval = [
   "numpy>=1.24,<2.3", "numba>=0.59", "torch>=2.3,<2.10", "torchaudio>=2.3,<2.10", "jiwer>=3.0.3,<4",
   "librosa>=0.10,<0.12", "openai-whisper", "pymcd>=0.2.1,<0.3", "pysptk>=1.0", "setuptools<81",
-  "speechbrain>=1.0.3,<2", "torch-stoi>=0.2", "scipy", "matplotlib", "jieba", "onnxruntime", "requests",
+  "speechbrain>=1.1.1,<2", "torch-stoi>=0.2", "scipy", "matplotlib", "jieba", "onnxruntime", "requests",
   "transformers>=4.40,<5"
 ]
 test = ["pytest>=8", "jiwer>=3.0.3,<4", "json5>=0.9", "tomli>=2; python_version < '3.11'"]
@@ -56,6 +56,7 @@ dev = ["rvcbench[test]", "ruff>=0.6", "pre-commit>=3.5", "build>=1.2", "twine>=5
 
 [project.urls]
 Homepage = "https://nanboy-ronan.github.io/RVCBench/"
+Documentation = "https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/README.md"
 Repository = "https://github.com/Nanboy-Ronan/RVCBench"
 Issues = "https://github.com/Nanboy-Ronan/RVCBench/issues"
 Paper = "https://arxiv.org/abs/2602.00443"
@@ -69,6 +70,7 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 rvcbench = [
+  "evaluation/scorer_lock.json",
   "configs/**/*.yaml",
   "configs/**/*.md",
   "benchmark/model_catalog.json",

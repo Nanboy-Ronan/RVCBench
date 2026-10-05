@@ -13,6 +13,7 @@ import json
 import logging
 import re
 import shutil
+from contextlib import contextmanager
 from pathlib import Path
 
 from omegaconf import OmegaConf
@@ -431,7 +432,59 @@ def _check_generated(spec, generated):
                          f"as listed by `rvcbench prompts`.")
 
 
-def score_submission(suite, generated, output, *, model, device='cpu', data_root=None, logger=None, scorers=None):
+def _score_request(spec, generated, model):
+    files = {task[key]: file_hash(spec['_directory'] / task[key]) for task in spec['tasks']
+             for key in ('manifest', 'selection') if key in task}
+    return {'protocol': PROTOCOL, **suite_record(spec), 'suite_files': files,
+            'model': str(model), 'generated': str(Path(generated).resolve())}
+
+
+def _check_resume(output, request):
+    path = Path(output) / 'score_request.json'
+    if not path.is_file() or read_json(path) != request:
+        raise ValueError(f'{output}: cannot resume; suite, model or generated directory differs, '
+                         'or score_request.json is missing. Choose a new output directory.')
+
+
+@contextmanager
+def _score_directory(output, request, resume):
+    """One writer per output; resume is explicit and bound to the original inputs."""
+    import fcntl
+    try:
+        output.mkdir(parents=True, exist_ok=False)
+        existed = False
+    except FileExistsError:
+        if not resume:
+            raise
+        existed = True
+    with (output / '.score.lock').open('a') as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as exc:
+            raise ValueError(f'{output}: another scoring process is using this directory') from exc
+        try:
+            if existed:
+                _check_resume(output, request)
+            else:
+                atomic_json(output / 'score_request.json', request)
+            yield
+        finally:
+            fcntl.flock(lock, fcntl.LOCK_UN)
+
+
+def score_submission(suite, generated, output, *, model, device='cpu', data_root=None, logger=None, scorers=None,
+                     resume=False):
+    """Score a suite; --resume revalidates inputs and reuses only matching successful metric caches."""
+    spec = load_suite(suite)
+    _check_generated(spec, generated)
+    if not str(model).strip():
+        raise ValueError('A model name is required')
+    with _score_directory(Path(output), _score_request(spec, generated, model), resume):
+        return _score_submission(suite, generated, output, model=model, device=device, data_root=data_root,
+                                 logger=logger, scorers=scorers)
+
+
+def _score_submission(suite, generated, output, *, model, device='cpu', data_root=None, logger=None, scorers=None):
     """Score externally generated audio; writes one run per task and ``submission.json``.
 
     Each metric model is loaded once for the whole suite; pass a ``ScorerPool`` as
@@ -447,19 +500,26 @@ def score_submission(suite, generated, output, *, model, device='cpu', data_root
     if any(task.get('derived_from') for task in spec['tasks']):
         _ffmpeg()
     output = Path(output)
-    output.mkdir(parents=True, exist_ok=False)
     pool = scorers if scorers is not None else ScorerPool(device, logger, seed=int(spec['evaluation'].get('seed', 42)))
     tasks, task_rows = {}, {}
+    submission = {'schema_version': 1, 'protocol': PROTOCOL, **suite_record(spec), 'model': str(model),
+                  'rvcbench_version': rvcbench.__version__, 'status': 'running', 'tasks': tasks}
+    atomic_json(output / 'submission.json', submission)
     try:
         for task in sorted(spec['tasks'], key=lambda t: bool(t.get('derived_from'))):
             audio_dir = output / task['task'] / 'generated_audio'
-            audio_dir.mkdir(parents=True)
+            audio_dir.mkdir(parents=True, exist_ok=True)
             if task.get('derived_from'):
                 rows, details = _derived_rows(task, task_rows[task['derived_from']], audio_dir), {}
             else:
                 rows, details = _submitted_rows(spec, task, generated, audio_dir, data_root, logger)
             tasks[task['task']], task_rows[task['task']] = _run_task(
                 spec, task, rows, details, output / task['task'], str(model), device, logger, scorers=pool)
+            atomic_json(output / 'submission.json', submission)
+    except BaseException as exc:
+        submission.update(status='failed', error=f'{type(exc).__name__}: {exc}')
+        atomic_json(output / 'submission.json', submission)
+        raise
     finally:
         if scorers is None:
             pool.close()
@@ -476,7 +536,25 @@ def score_submission(suite, generated, output, *, model, device='cpu', data_root
     return submission
 
 
-def score_submissions(suite, generated_dirs, output, *, models=None, device='cpu', data_root=None, logger=None):
+def score_submissions(suite, generated_dirs, output, *, models=None, device='cpu', data_root=None, logger=None,
+                      resume=False):
+    import fcntl
+    output = Path(output)
+    output.mkdir(parents=True, exist_ok=True)
+    with (output / '.batch.lock').open('a') as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as exc:
+            raise ValueError(f'{output}: another scoring process is using this directory') from exc
+        try:
+            return _score_submissions(suite, generated_dirs, output, models=models, device=device,
+                                      data_root=data_root, logger=logger, resume=resume)
+        finally:
+            fcntl.flock(lock, fcntl.LOCK_UN)
+
+
+def _score_submissions(suite, generated_dirs, output, *, models=None, device='cpu', data_root=None, logger=None,
+                       resume=False):
     """Score several models' outputs with one load of each metric model.
 
     Writes ``<output>/<model>/`` per model (as ``score_submission``) and a comparison of
@@ -498,13 +576,20 @@ def score_submissions(suite, generated_dirs, output, *, models=None, device='cpu
     output = Path(output)
     output.mkdir(parents=True, exist_ok=True)
     taken = [m for m in models if (output / m).exists()]
-    if taken or (output / 'comparison.json').exists():
+    if not resume and (taken or (output / 'comparison.json').exists()):
         raise ValueError(f'{output} already holds results for {taken or "a comparison"}; choose a new directory')
+    if resume:
+        for model, directory in zip(models, generated_dirs):
+            if (output / model).exists():
+                _check_resume(output / model, _score_request(spec, directory, model))
+        # Never leave a previous complete comparison visible while its inputs are being rescored.
+        for suffix in ('json', 'csv', 'md'):
+            (output / f'comparison.{suffix}').unlink(missing_ok=True)
     results = []
     with ScorerPool(device, logger, seed=int(spec['evaluation'].get('seed', 42))) as pool:
         for model, directory in zip(models, generated_dirs):
             logger.info('Scoring %s from %s', model, directory)
             score_submission(suite, directory, output / model, model=model, device=device, data_root=data_root,
-                             logger=logger, scorers=pool)
+                             logger=logger, scorers=pool, resume=resume)
             results.append(output / model / 'submission.json')
     return compare_submissions(results, output)

@@ -56,6 +56,8 @@ class Evaluator:
 
     def __init__(self, metrics=('sim', 'wer', 'speechmos'), *, device='cpu', seed=42, logger=None):
         from rvcbench.evaluation.pipeline import ScorerPool
+        if isinstance(metrics, str):
+            metrics = available() if metrics == 'all' else [metrics]
         unknown = [m for m in metrics if m not in METRICS]
         if unknown or not metrics:
             raise ValueError(f'Unknown metrics {unknown}; available: {", ".join(METRICS)}')
@@ -63,32 +65,38 @@ class Evaluator:
         self.seed = seed
         self._pool = ScorerPool(device, logger or logging.getLogger('rvcbench.metrics'), seed=seed)
 
-    def score(self, generated, *, reference=None, text=None, language=None):
+    def score(self, generated, *, reference=None, target=None, text=None, language=None):
         """Return ``{metric: value}`` for one generated file.
 
-        ``reference`` is a recording of the target speaker (for ``mcd`` and ``stoi``, of the same
-        text); ``text`` is what the generated audio should say; ``language`` is a code such as
+        ``reference`` is a recording of the target speaker. ``target`` is a recording of the same
+        text for MCD/STOI (defaults to ``reference`` for compatibility). ``text`` is what the generated
+        audio should say; ``language`` is a code such as
         ``"en"`` or ``"zh"`` that Whisper uses as a hint.
         """
-        from rvcbench.benchmark.artifacts import METRIC_COLUMNS
+        from rvcbench.benchmark.artifacts import METRIC_COLUMNS, metric_value_valid
         from rvcbench.evaluation.scorers import ScoreInput
-        from rvcbench.utils.seeding import configure_seeds
-        missing = sorted({METRICS[m][1] for m in self.metrics} - {None}
-                         - ({'reference'} if reference is not None else set()) - ({'text'} if text else set()))
+        from rvcbench.utils.seeding import isolated_seed
+        needs = {('target' if m in ('mcd', 'stoi') and target is not None else METRICS[m][1]) for m in self.metrics}
+        missing = sorted(needs - {None} - ({'reference'} if reference is not None else set())
+                         - ({'target'} if target is not None else set()) - ({'text'} if text else set()))
         if missing:
             raise ValueError(f'{", ".join(missing)} is required for {", ".join(self.metrics)}')
         generated = Path(generated)
         if not generated.is_file():
             raise FileNotFoundError(generated)
-        request = ScoreInput(Path(reference) if reference is not None else None, generated, text or '',
-                             language)
         scores = {}
         for group in dict.fromkeys(_SHARED_MODEL.get(m, m) for m in self.metrics):
-            configure_seeds(self.seed, logger=None)
-            values = self._pool.get(group).score(request)
+            compared = target if group in ('mcd', 'stoi') and target is not None else reference
+            if compared is not None and not Path(compared).is_file():
+                raise FileNotFoundError(compared)
+            request = ScoreInput(Path(compared) if compared is not None else None, generated, text or '', language)
+            with isolated_seed(self.seed, device=self._pool.device):
+                values = self._pool.get(group).score(request)
             for metric in self.metrics:
                 if _SHARED_MODEL.get(metric, metric) == group:
                     value = values[METRIC_COLUMNS[metric]]
+                    if not metric_value_valid(metric, value):
+                        raise ValueError(f'{metric} returned an invalid score: {value!r}')
                     scores[metric] = value if isinstance(value, bool) else float(value)
         return scores
 

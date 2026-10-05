@@ -1,0 +1,22 @@
+{
+  "fixture": "onboarding-v1 LibriTTS-121-000039 target, gain 0.9 plus sine noise",
+  "generated_sha256": "9f70f76ef704bb929eb6213774aef74cff4d7a2577fdfc0538a79e70d521ef65",
+  "scores": {
+    "sim": 0.9809654355049133,
+    "sva": true,
+    "wer": 0.0,
+    "speechmos": 3.9918203353881836,
+    "mcd": 2.8826046956472706,
+    "stoi": 0.9985398054122925,
+    "emotion": true
+  },
+  "absolute_tolerance": {
+    "sim": 0.002,
+    "sva": 0,
+    "wer": 0.001,
+    "speechmos": 0.02,
+    "mcd": 0.02,
+    "stoi": 0.002,
+    "emotion": 0
+  }
+}

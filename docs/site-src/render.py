@@ -39,7 +39,7 @@ def render_why_table():
     return (
         '<table class="why-table">'
         '<thead><tr><th scope="col"></th>'
-        '<th scope="col">Typical single-paper eval</th>'
+        '<th scope="col">You provide</th>'
         '<th scope="col">RVCBench</th></tr></thead>'
         f'<tbody>{rows}</tbody></table>'
     )
@@ -241,9 +241,9 @@ def render_jsonld():
             "@type": "Dataset",
             "@id": D.SITE["url"] + "#dataset",
             "name": "RVCBench",
-            "alternateName": "RVCBench: Voice Cloning Robustness Benchmark",
+            "alternateName": "RVCBench: Comprehensive Voice Cloning Evaluation",
             "description": (
-                "A benchmark for voice-cloning robustness, speaker privacy, and audio-protection methods, "
+                "A package for comprehensive voice cloning evaluation, with automatic speech metrics and ready-to-use datasets, "
                 "covering 32 TTS/VC models, 10 dataset configurations, and 5 audio-protection methods."
             ),
             "url": D.SITE["url"],
@@ -299,14 +299,14 @@ def render_llms_txt():
     lines = [
         "# RVCBench",
         "",
-        "> A benchmark for voice-cloning robustness, speaker privacy, and audio-protection "
-        "methods, covering 32 TTS/VC models, 5 protection methods, and 10 dataset configurations.",
+        "> A comprehensive voice cloning evaluation package with automatic speech metrics and datasets. "
+        "Supports scoring your own audio and evaluating models with versioned benchmark suites.",
         "",
-        "RVCBench applies audio-protection perturbations to source speech, runs zero-shot and "
-        "fine-tuning voice-cloning models against clean and protected prompts, optionally denoises "
-        "protected audio, and scores every run on speaker similarity (SIM), word error rate (WER), "
-        "SpeechMOS (MOS), mel-cepstral distortion (MCD), raw real-time factor (RTF; historical scopes are incomparable and cannot rank speed), speaker-verification "
-        "accuracy (SVA), and emotion match rate.",
+        "Install with `pip install \"rvcbench[eval]\"` and run `rvcbench setup-scorers`. "
+        "Use `rvcbench.metrics.Evaluator` with your own audio, or `rvcbench prompts` and `rvcbench score` "
+        "with onboarding-v1 (52 utterances), core-v1 (480), or full-v1 (12,724). "
+        "Metrics include SIM, SVA, WER, MOS, MCD, STOI and emotion consistency. "
+        "Dataset scoring supports --resume; comparison validates scoring fingerprints.",
         "",
         "## Key facts",
         "",
