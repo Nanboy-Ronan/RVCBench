@@ -1,0 +1,4 @@
+# Documentation builds are independent of the speech/model environments.
+mkdocs==1.6.1
+mkdocs-material==9.7.6
+jieba==0.42.1

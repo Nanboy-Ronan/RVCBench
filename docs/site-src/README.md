@@ -14,14 +14,30 @@ answer-engine crawlers (GPTBot, ClaudeBot, PerplexityBot, …), most of
 which don't execute JavaScript — verified by loading the built page with
 JS disabled and checking the real numbers are still in the text.
 
-## Enable on GitHub Pages
+## Build and publish the documentation website
 
-1. Push this `docs/` folder to the `main` branch.
-2. In the GitHub repo: **Settings → Pages → Build and deployment → Source:
-   "Deploy from a branch"**, then set **Branch: `main` / folder: `/docs`**.
-3. GitHub publishes it at `https://nanboy-ronan.github.io/RVCBench/`.
-4. Once live, submit `sitemap.xml` in Google Search Console (optional but
-   speeds up indexing).
+The homepage stays at `https://nanboy-ronan.github.io/RVCBench/`. The searchable user documentation
+is at `https://nanboy-ronan.github.io/RVCBench/docs/`, built with Material for MkDocs from the existing
+Markdown guides in `docs/`. `mkdocs.yml` defines the navigation, theme, search and strict link checks.
+
+```bash
+python -m pip install -r docs/requirements.txt
+python scripts/build_website.py
+python scripts/check_website.py
+```
+
+The generated `site/` directory contains both the homepage and the documentation. It is ignored by Git.
+For a live documentation preview, run `python -m mkdocs serve` and open the URL it prints.
+
+`.github/workflows/docs.yml` checks every PR and deploys `main` through GitHub Pages. The repository's
+**Settings → Pages → Build and deployment → Source** must be **GitHub Actions**. Deployment uploads
+only the built `site/` artifact. It does not install RVCBench, download model weights or publish PyPI.
+The existing CPU CI still checks the homepage's committed generated HTML.
+
+Edit the Markdown guide once to update its GitHub view and its website page. Add new top-level guides
+to `mkdocs.yml`; advanced linked guides are still built and searchable even when omitted from the sidebar.
+Keep links between guides relative (`metrics.md`); MkDocs turns them into website URLs.
+`scripts/docs_hooks.py` keeps links to source code and notebooks pointing to GitHub.
 
 ## Editing the page
 

@@ -14,7 +14,7 @@
 [![CI](https://github.com/Nanboy-Ronan/RVCBench/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Nanboy-Ronan/RVCBench/actions/workflows/ci.yml)
 [![License: CC0-1.0](https://img.shields.io/badge/License-CC0--1.0-lightgrey.svg)](https://github.com/Nanboy-Ronan/RVCBench/blob/main/LICENSE)
 
-[**Paper**](https://arxiv.org/abs/2602.00443) · [**Website**](https://nanboy-ronan.github.io/RVCBench/) · [**Dataset**](https://huggingface.co/datasets/Nanboy/RVCBench) · [**Demo**](https://huggingface.co/spaces/Nanboy/RVCBench) · [**Evaluate your model**](#evaluate-your-model) · [**Reproduce the paper**](#reproduce-the-paper)
+[**Documentation**](https://nanboy-ronan.github.io/RVCBench/docs/) · [**Paper**](https://arxiv.org/abs/2602.00443) · [**Website**](https://nanboy-ronan.github.io/RVCBench/) · [**Dataset**](https://huggingface.co/datasets/Nanboy/RVCBench) · [**Demo**](https://huggingface.co/spaces/Nanboy/RVCBench) · [**Evaluate your model**](#evaluate-your-model) · [**Reproduce the paper**](#reproduce-the-paper)
 
 </div>
 
@@ -35,8 +35,8 @@ and provides ready-to-use datasets for evaluating a model across languages, spea
 Both workflows are included in the pip package. Your model can run in its own environment or through an API;
 RVCBench scores the audio it produces.
 
-**First time here?** Follow the complete [getting started guide](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/quickstart.md)
-or [中文入门指南](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/quickstart_zh.md).
+**First time here?** Follow the complete [getting started guide](https://nanboy-ronan.github.io/RVCBench/docs/quickstart/)
+or [中文入门指南](https://nanboy-ronan.github.io/RVCBench/docs/quickstart_zh/).
 They walk through installation, required files, both workflows and reading the results.
 
 ## Install
@@ -54,7 +54,7 @@ A GPU is optional; choose `device="cpu"` or `--device cpu` to score on CPU.
 
 For a smaller initial download, select only the metrics you need:
 `rvcbench setup-scorers --metrics sim wer speechmos`.
-See the [installation guide](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/installation.md)
+See the [installation guide](https://nanboy-ronan.github.io/RVCBench/docs/installation/)
 for CPU/GPU installation, caches and troubleshooting.
 
 ## Score your own audio
@@ -85,7 +85,7 @@ synthesized audio; the speaker reference may contain different words.
 | `mcd`, `stoi` | Acoustic distortion and intelligibility | Same-text target recording |
 | `emotion` | Emotion consistency | Reference recording |
 
-The [metrics guide](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/metrics.md)
+The [metrics guide](https://nanboy-ronan.github.io/RVCBench/docs/metrics/)
 includes one-line functions, scoring all metrics, a batch example and metric definitions.
 No RVCBench dataset or model adapter is needed for this workflow.
 
@@ -108,7 +108,7 @@ python3 -m zipvoice.bin.infer_zipvoice --model-name zipvoice \
   --test-list prompts/prompts.tsv --res-dir outputs/my-model
 ```
 
-The [model evaluation guide](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/adding_a_model.md)
+The [model evaluation guide](https://nanboy-ronan.github.io/RVCBench/docs/adding_a_model/)
 shows the exact file format and an example loop for your own inference function.
 Model inference is the step supplied by you; data preparation, metric scoring and report generation are automatic.
 
@@ -138,7 +138,7 @@ rvcbench compare results/model-a results/model-b --output results/compare
 
 Comparison checks both the suite and scoring fingerprints. Different scoring environments must be rescored
 together, or explicitly inspected with `--allow-incompatible`, which disables ranking.
-The [suite guide](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/core_suite.md)
+The [suite guide](https://nanboy-ronan.github.io/RVCBench/docs/core_suite/)
 lists tasks, coverage and approximate scoring costs.
 
 ## Evaluation coverage
@@ -251,21 +251,21 @@ rvcbench run --config-name ots_vc/clean/libritts/qwen3_tts_ots dataset.speaker_i
 ```
 
 Every run writes a per-sample `run_manifest.json` with input and output hashes, seeds, failures and metric
-coverage. See [Running the built-in models](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/models.md) and the [run guide](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/run_protocol.md).
+coverage. See [Running the built-in models](https://nanboy-ronan.github.io/RVCBench/docs/models/) and the [run guide](https://nanboy-ronan.github.io/RVCBench/docs/run_protocol/).
 
 ## Documentation
 
 | Guide | Covers |
 | --- | --- |
-| [Getting started](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/quickstart.md) · [中文](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/quickstart_zh.md) | Your first evaluation, from installation to results |
-| [Evaluate your own model](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/adding_a_model.md) | Prompt and output formats, batch lists, several models, adapters |
-| [Core and full suites](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/core_suite.md) | Tasks, data, metrics and scoring time |
-| [Install the package](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/installation.md) | pip installation, CPU/GPU, downloads and troubleshooting |
-| [Metrics API](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/metrics.md) | Speaker similarity, WER, MOS, MCD, STOI and emotion in your own code |
-| [Running the built-in models](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/models.md) | Installation options, supported models, protection and denoising |
-| [Datasets](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/datasets.md) | Hub folders, manifest format, preprocessing |
-| [Run guide](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/run_protocol.md) | Run records, resuming, scoring saved audio, timing |
-| [Codebase versions](https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/versions.md) | What changed between v1 and v2 |
+| [Getting started](https://nanboy-ronan.github.io/RVCBench/docs/quickstart/) · [中文](https://nanboy-ronan.github.io/RVCBench/docs/quickstart_zh/) | Your first evaluation, from installation to results |
+| [Evaluate your own model](https://nanboy-ronan.github.io/RVCBench/docs/adding_a_model/) | Prompt and output formats, batch lists, several models, adapters |
+| [Core and full suites](https://nanboy-ronan.github.io/RVCBench/docs/core_suite/) | Tasks, data, metrics and scoring time |
+| [Install the package](https://nanboy-ronan.github.io/RVCBench/docs/installation/) | pip installation, CPU/GPU, downloads and troubleshooting |
+| [Metrics API](https://nanboy-ronan.github.io/RVCBench/docs/metrics/) | Speaker similarity, WER, MOS, MCD, STOI and emotion in your own code |
+| [Running the built-in models](https://nanboy-ronan.github.io/RVCBench/docs/models/) | Installation options, supported models, protection and denoising |
+| [Datasets](https://nanboy-ronan.github.io/RVCBench/docs/datasets/) | Hub folders, manifest format, preprocessing |
+| [Run guide](https://nanboy-ronan.github.io/RVCBench/docs/run_protocol/) | Run records, resuming, scoring saved audio, timing |
+| [Codebase versions](https://nanboy-ronan.github.io/RVCBench/docs/versions/) | What changed between v1 and v2 |
 | [Contributing](https://github.com/Nanboy-Ronan/RVCBench/blob/main/CONTRIBUTING.md) | Development setup, checks and repository layout |
 
 ## Citation

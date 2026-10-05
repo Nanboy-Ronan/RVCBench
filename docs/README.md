@@ -1,5 +1,8 @@
 # Using RVCBench
 
+[Read the documentation website](https://nanboy-ronan.github.io/RVCBench/docs/) ·
+[Project homepage](https://nanboy-ronan.github.io/RVCBench/) · [PyPI](https://pypi.org/project/rvcbench/)
+
 RVCBench provides automatic speech metrics and datasets for comprehensive voice cloning evaluation.
 Both workflows are available through `pip install "rvcbench[eval]"`; a repository checkout is optional.
 
@@ -16,6 +19,7 @@ Both workflows are available through `pip install "rvcbench[eval]"`; a repositor
 | Evaluate your model using benchmark data | [Model evaluation](adding_a_model.md): prompts, inference and output formats |
 | Choose evaluation coverage | [Suites](core_suite.md): onboarding, core and full datasets |
 | Understand and reuse the data | [Datasets](datasets.md): source folders and metadata |
+| Look up an argument or command | [Python API](api.md) and [command-line reference](cli.md) |
 | Run a supported model inside RVCBench | [Built-in models](models.md) and [model environments](model_environments.md) |
 | Inspect, resume or audit an adapter run | [Run guide](run_protocol.md) |
 | Reproduce the published paper | [Codebase versions](versions.md): use the frozen `v1` branch |

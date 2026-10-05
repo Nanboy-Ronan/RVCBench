@@ -21,6 +21,9 @@ Install with `pip install "rvcbench[eval]"` and run `rvcbench setup-scorers`. Us
 - [Dataset (Hugging Face)](https://huggingface.co/datasets/Nanboy/RVCBench)
 - [Interactive demo](https://huggingface.co/spaces/Nanboy/RVCBench)
 - [Code repository](https://github.com/Nanboy-Ronan/RVCBench)
+- [Documentation](https://nanboy-ronan.github.io/RVCBench/docs/)
+- [Quickstart](https://nanboy-ronan.github.io/RVCBench/docs/quickstart/)
+- [Chinese quickstart](https://nanboy-ronan.github.io/RVCBench/docs/quickstart_zh/)
 
 ## Citation
 
