@@ -271,7 +271,8 @@ def render_jsonld():
                             "speakers and recording conditions. Packaged suites provide fixed input selections."),
             "url": D.SITE["dataset"], "license": "https://creativecommons.org/publicdomain/zero/1.0/",
             "creator": authors, "keywords": ["voice cloning evaluation", "speech evaluation", "benchmark datasets"],
-            "distribution": {"@type": "DataDownload", "contentUrl": D.SITE["dataset"]},
+            "includedInDataCatalog": {"@type": "DataCatalog", "name": "Hugging Face Datasets",
+                                      "url": "https://huggingface.co/datasets"},
         },
         {
             "@type": "ScholarlyArticle", "@id": base + "#paper", "headline": D.CITATION["title"],
