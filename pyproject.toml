@@ -56,7 +56,7 @@ dev = ["rvcbench[test]", "ruff>=0.6", "pre-commit>=3.5", "build>=1.2", "twine>=5
 
 [project.urls]
 Homepage = "https://nanboy-ronan.github.io/RVCBench/"
-Documentation = "https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/README.md"
+Documentation = "https://nanboy-ronan.github.io/RVCBench/docs/"
 Repository = "https://github.com/Nanboy-Ronan/RVCBench"
 Issues = "https://github.com/Nanboy-Ronan/RVCBench/issues"
 Paper = "https://arxiv.org/abs/2602.00443"

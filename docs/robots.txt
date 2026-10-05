@@ -19,3 +19,4 @@ User-agent: CCBot
 Allow: /
 
 Sitemap: https://nanboy-ronan.github.io/RVCBench/sitemap.xml
+Sitemap: https://nanboy-ronan.github.io/RVCBench/docs/sitemap.xml

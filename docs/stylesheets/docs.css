@@ -1,0 +1,19 @@
+:root {
+  --md-primary-fg-color: #813e39;
+  --md-accent-fg-color: #ad5147;
+  --md-text-font: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --md-code-font: ui-monospace, "SFMono-Regular", Consolas, monospace;
+}
+[data-md-color-scheme="default"] {
+  --md-default-bg-color: #fcfaf6;
+  --md-code-bg-color: #f1ede7;
+}
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #663632;
+  --md-accent-fg-color: #efaaa0;
+}
+.md-header__button.md-logo img { width: 1.8rem; height: 1.8rem; }
+.md-typeset h1 { color: var(--md-default-fg-color); font-weight: 700; }
+.md-typeset h2 { font-weight: 650; }
+.md-typeset .admonition { font-size: .75rem; }
+.md-grid { max-width: 76rem; }
