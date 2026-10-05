@@ -22,7 +22,7 @@ python -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install torch==2.6.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cpu
-python -m pip install "rvcbench[eval]==2.1.1"
+python -m pip install "rvcbench[eval]==2.2.0"
 rvcbench doctor --eval --imports
 rvcbench setup-scorers
 ```
@@ -96,6 +96,10 @@ loop to score many files without reloading models. See [metric definitions and b
 ## 2B. Evaluate a model with our data
 
 ### Export prompts
+
+To run only selected scenarios, use `rvcbench tasks --suite core-v1` to list them, then pass
+`--tasks chinese` (or several task IDs) to both `prompts` and `score`. See the
+[scenario selection guide](core_suite.md#run-specific-scenarios).
 
 Start with the 52-utterance onboarding suite:
 

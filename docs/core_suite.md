@@ -20,6 +20,64 @@ See [Evaluate your own model](adding_a_model.md#route-0-score-audio-you-generate
 format. `core-v1` is not yet a leaderboard suite: its scores become comparable leaderboard results once
 baseline results for the paper's models are published.
 
+## Run specific scenarios
+
+Since version 2.2.0, choose one or more task IDs with `--tasks`. List the available IDs and their
+paper evaluations without downloading audio or loading models:
+
+```bash
+rvcbench tasks --suite core-v1
+rvcbench tasks --suite full-v1 --json
+```
+
+For example, evaluate only Chinese voice cloning:
+
+```bash
+rvcbench prompts --suite core-v1 --tasks chinese --output prompts-chinese/
+# Generate every exported prompt with your model; preserve its id/output_file.
+rvcbench score --suite core-v1 --tasks chinese \
+  --generated outputs/chinese --output results/chinese --device cuda
+```
+
+Use the same suite and task selection for prompt export and scoring. Replace `chinese` in **both**
+commands with the task IDs below; use separate output directories for each evaluation.
+
+| Paper scenario | Value after `--tasks` | Automatically included |
+| --- | --- | --- |
+| AudioShift: demographics | `audioshift` | None; reports accent, gender and age groups |
+| TextShift: hallucination | `textshift-hallucination` | `textshift-standard` |
+| TextShift: scam / Expression: persuasion | `textshift-scam` | `textshift-scam-standard`; EMC only, not the audio-LLM judge |
+| Multilingual: English | `english-libritts` | None |
+| Multilingual: Chinese | `chinese` | None |
+| Multilingual: French | `french` | None |
+| Multilingual: cross-language | `crosslingual` | None |
+| LongContext: long text / long reference audio | `longtext longaudio` | None |
+| PassiveNoise: background | `background` | `background-clean` |
+| PassiveNoise: multiple speakers | `multispeaker` | `multispeaker-clean` |
+| AdvNoise: Gaussian / adversarial | `adv-gaussian adv-spec adv-safespeech adv-pop adv-enkidu` | `adv-clean`; core only |
+| AntiProtect | `antiprotect-spec` | `adv-clean`; core only |
+| Compression: codec (example) | `compression-mp3-64k` | `audioshift` |
+| Compression: narrowband | `compression-narrowband` | `audioshift` |
+| Detectability | Unavailable | Deepfake detectors are not included |
+
+The task table below lists every supported codec and bitrate. You may select any combination of task
+IDs, for example `--tasks chinese crosslingual background`. Omit `--tasks` to run the whole suite.
+`onboarding-v1` uses its own IDs: `libritts`, `vctk`, and `robotcall`.
+
+Clean anchors and source tasks are included automatically, including their dependencies. Generate all
+exported prompts, including clean anchors. Compression outputs are produced automatically during scoring
+using ffmpeg; you generate only their `audioshift` source audio. Selecting `audioshift` alone does not
+include compression tasks. Unselected tasks do not download or score their data.
+
+Each included task has its own results in `submission.json`; anchors enable percentage changes and
+configured groups retain their breakdowns. A subset can be `complete` when all **selected tasks and
+dependencies** are complete. It is labelled as a selection, not a complete-suite benchmark result.
+The JSON records `selected_tasks`, `parent_suite_sha256` and a selection-specific `suite_sha256`.
+Selecting every task retains the original full-suite identity. Task order and duplicate IDs do not
+change the effective selection. Resume and model comparisons require the same effective selection;
+pass `--tasks` again when using `--resume` or scoring several models with `--generated`.
+Unknown IDs and tasks unavailable in the chosen suite are rejected rather than silently skipped.
+
 ## Tasks
 
 | Task | Dimension | Paper evaluation | Data | Utterances | Metrics | Clean anchor | Reported by |
@@ -86,8 +144,8 @@ mean of each metric per task; each task's run directory also records 95% bootstr
 
 ## Full suite
 
-`full-v1` has the same tasks, metrics and anchors as `core-v1`, with every pair of each task's dataset
-instead of a sample. Every `core-v1` pair is also in `full-v1`, with the same identifier and inputs.
+`full-v1` expands the shared tasks to the full frozen task populations, retaining their metrics and
+anchors. It excludes the AdvNoise and AntiProtect tasks included in `core-v1`. Every `core-v1` pair is also in `full-v1`, with the same identifier and inputs.
 
 | Task | Utterances | Task | Utterances |
 | --- | ---: | --- | ---: |

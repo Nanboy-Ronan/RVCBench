@@ -10,6 +10,7 @@ while scoring.
 from __future__ import annotations
 
 import json
+import shlex
 import logging
 import re
 import shutil
@@ -58,8 +59,8 @@ def available_suites():
     return sorted(path.parent.name.replace('_', '-') for path in SUITES_DIR.glob('*/suite.json'))
 
 
-def load_suite(name_or_path):
-    """Load a packaged suite by name (``onboarding-v1``) or a ``suite.json`` path."""
+def load_suite(name_or_path, *, tasks=None):
+    """Load a suite, optionally selecting task IDs plus their anchors and source tasks."""
     path = Path(str(name_or_path))
     if path.suffix != '.json':
         path = SUITES_DIR / str(name_or_path).replace('-', '_') / 'suite.json'
@@ -70,26 +71,50 @@ def load_suite(name_or_path):
     for key in ('suite', 'version', 'leaderboard', 'label', 'evaluation', 'tasks'):
         if key not in spec:
             raise ValueError(f'Suite {path} is missing {key!r}')
-    tasks = [task['task'] for task in spec['tasks']]
-    if not tasks or len(set(tasks)) != len(tasks) or not all(_safe(t) for t in tasks):
+    names = [task['task'] for task in spec['tasks']]
+    if not names or len(set(names)) != len(names) or not all(_safe(t) for t in names):
         raise ValueError(f'Suite {path} needs unique, file-name-safe task names without {ID_SEPARATOR!r}')
     generated = {task['task'] for task in spec['tasks'] if not task.get('derived_from')}
     for task in spec['tasks']:
         if task.get('derived_from') and (task['derived_from'] not in generated or 'transform' not in task):
             raise ValueError(f"Task {task['task']}: derived_from must name a generated task and come with a transform")
-        if task.get('anchor') and task['anchor'] not in tasks:
+        if task.get('anchor') and task['anchor'] not in names:
             raise ValueError(f"Task {task['task']}: anchor {task['anchor']!r} is not a task of this suite")
         unknown = set(task.get('required_metrics') or ()) - set(METRIC_COLUMNS)
         if unknown:
             raise ValueError(f"Task {task['task']}: unknown metrics {sorted(unknown)}")
     spec['_directory'] = path.parent
     spec['_sha256'] = file_hash(path)
+    if tasks is not None:
+        requested = [tasks] if isinstance(tasks, str) else list(tasks)
+        unknown = set(requested) - set(names)
+        if not requested or unknown:
+            raise ValueError(f'Unknown or empty task selection: {sorted(unknown)}. Available: {", ".join(names)}')
+        selected = set(requested)
+        by_name = {task['task']: task for task in spec['tasks']}
+        pending = list(selected)
+        while pending:
+            task = by_name[pending.pop()]
+            for key in ('anchor', 'derived_from'):
+                dependency = task.get(key)
+                if dependency and dependency not in selected:
+                    selected.add(dependency)
+                    pending.append(dependency)
+        if selected != set(names):
+            spec['tasks'] = [task for task in spec['tasks'] if task['task'] in selected]
+            spec['parent_suite_sha256'] = spec['_sha256']
+            spec['selected_tasks'] = [task['task'] for task in spec['tasks']]
+            spec['_sha256'] = digest({'parent_suite_sha256': spec['parent_suite_sha256'],
+                                      'selected_tasks': spec['selected_tasks']})
+            spec['leaderboard'] = False
+            spec['label'] += ' Selected tasks only: ' + ', '.join(spec['selected_tasks']) + '.'
     return spec
 
 
 def suite_record(spec):
     return {'suite': spec['suite'], 'version': spec['version'], 'leaderboard': bool(spec['leaderboard']),
-            'label': spec['label'], 'suite_sha256': spec['_sha256']}
+            'label': spec['label'], 'suite_sha256': spec['_sha256'],
+            **{key: spec[key] for key in ('parent_suite_sha256', 'selected_tasks') if key in spec}}
 
 
 def _frozen_selection(spec, task):
@@ -161,10 +186,10 @@ def _task_samples(spec, task, data_root, logger):
     return dataset, samples, records
 
 
-def export_prompts(suite, output, *, data_root=None, logger=None):
+def export_prompts(suite, output, *, data_root=None, logger=None, tasks=None):
     """Write reference audio, transcripts and expected output names; never target audio."""
     logger = logger or logging.getLogger('rvcbench.prompts')
-    spec = load_suite(suite)
+    spec = load_suite(suite, tasks=tasks)
     output = Path(output)
     if output.exists() and any(output.iterdir()):
         raise ValueError(f'{output} is not empty; choose a new directory')
@@ -192,7 +217,10 @@ def export_prompts(suite, output, *, data_root=None, logger=None):
     atomic_json(output / 'suite.json', {**suite_record(spec), 'tasks': [t['task'] for t in spec['tasks'] if not t.get('derived_from')],
                                         'prompts': len(entries)})
     (output / 'README.md').write_text(_PROMPTS_README.format(
-        suite=spec['suite'], label=spec['label'], count=len(entries)), encoding='utf-8')
+        suite=spec['suite'], label=spec['label'], count=len(entries),
+        suite_arg=shlex.quote(str(suite)),
+        tasks_arg=(' --tasks ' + shlex.join(spec['selected_tasks'])) if 'selected_tasks' in spec else ''),
+        encoding='utf-8')
     return {'suite': spec['suite'], 'prompts': len(entries), 'output': str(output.resolve())}
 
 
@@ -246,7 +274,7 @@ inside a text is written as a space in the lists; `prompts.jsonl` keeps the exac
 Save each result as a mono WAV file, either as `<output directory>/<id>.wav` (one flat
 directory, as batch scripts write it) or as `<output directory>/<output_file>`. Then score:
 
-    rvcbench score --suite {suite} --generated <output directory> --output <results directory>
+    rvcbench score --suite {suite_arg}{tasks_arg} --generated <output directory> --output <results directory>
 
 A missing or invalid file counts as a failed sample. Do not use the target recordings of
 the dataset; a file identical to a target recording that was not exported is rejected.
@@ -473,18 +501,19 @@ def _score_directory(output, request, resume):
 
 
 def score_submission(suite, generated, output, *, model, device='cpu', data_root=None, logger=None, scorers=None,
-                     resume=False):
+                     resume=False, tasks=None):
     """Score a suite; --resume revalidates inputs and reuses only matching successful metric caches."""
-    spec = load_suite(suite)
+    spec = load_suite(suite, tasks=tasks)
     _check_generated(spec, generated)
     if not str(model).strip():
         raise ValueError('A model name is required')
     with _score_directory(Path(output), _score_request(spec, generated, model), resume):
         return _score_submission(suite, generated, output, model=model, device=device, data_root=data_root,
-                                 logger=logger, scorers=scorers)
+                                 logger=logger, scorers=scorers, tasks=tasks)
 
 
-def _score_submission(suite, generated, output, *, model, device='cpu', data_root=None, logger=None, scorers=None):
+def _score_submission(suite, generated, output, *, model, device='cpu', data_root=None, logger=None, scorers=None,
+                      tasks=None):
     """Score externally generated audio; writes one run per task and ``submission.json``.
 
     Each metric model is loaded once for the whole suite; pass a ``ScorerPool`` as
@@ -493,7 +522,7 @@ def _score_submission(suite, generated, output, *, model, device='cpu', data_roo
     import rvcbench
     from rvcbench.evaluation.pipeline import ScorerPool
     logger = logger or logging.getLogger('rvcbench.score')
-    spec = load_suite(suite)
+    spec = load_suite(suite, tasks=tasks)
     if not str(model).strip():
         raise ValueError('A model name is required')
     _check_generated(spec, generated)
@@ -537,7 +566,7 @@ def _score_submission(suite, generated, output, *, model, device='cpu', data_roo
 
 
 def score_submissions(suite, generated_dirs, output, *, models=None, device='cpu', data_root=None, logger=None,
-                      resume=False):
+                      resume=False, tasks=None):
     import fcntl
     output = Path(output)
     output.mkdir(parents=True, exist_ok=True)
@@ -548,13 +577,13 @@ def score_submissions(suite, generated_dirs, output, *, models=None, device='cpu
             raise ValueError(f'{output}: another scoring process is using this directory') from exc
         try:
             return _score_submissions(suite, generated_dirs, output, models=models, device=device,
-                                      data_root=data_root, logger=logger, resume=resume)
+                                      data_root=data_root, logger=logger, resume=resume, tasks=tasks)
         finally:
             fcntl.flock(lock, fcntl.LOCK_UN)
 
 
 def _score_submissions(suite, generated_dirs, output, *, models=None, device='cpu', data_root=None, logger=None,
-                       resume=False):
+                       resume=False, tasks=None):
     """Score several models' outputs with one load of each metric model.
 
     Writes ``<output>/<model>/`` per model (as ``score_submission``) and a comparison of
@@ -570,7 +599,7 @@ def _score_submissions(suite, generated_dirs, output, *, models=None, device='cp
         raise ValueError(f'{len(generated_dirs)} output directories but {len(models)} model names')
     if len(set(models)) != len(models) or not all(_safe(m) for m in models):
         raise ValueError(f'Model names must be unique and file-name safe: {models}')
-    spec = load_suite(suite)
+    spec = load_suite(suite, tasks=tasks)
     for directory in generated_dirs:
         _check_generated(spec, directory)  # fail before scoring anything
     output = Path(output)
@@ -590,6 +619,6 @@ def _score_submissions(suite, generated_dirs, output, *, models=None, device='cp
         for model, directory in zip(models, generated_dirs):
             logger.info('Scoring %s from %s', model, directory)
             score_submission(suite, directory, output / model, model=model, device=device, data_root=data_root,
-                             logger=logger, scorers=pool, resume=resume)
+                             logger=logger, scorers=pool, resume=resume, tasks=tasks)
             results.append(output / model / 'submission.json')
     return compare_submissions(results, output)
