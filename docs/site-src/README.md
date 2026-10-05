@@ -3,7 +3,8 @@
 `index.html` is the built homepage. It's a complete, standalone HTML5
 document — full `<head>` (meta description, Open Graph/Twitter cards,
 `citation_*` tags for Google Scholar, canonical URL, JSON-LD structured
-data) plus `robots.txt`, `sitemap.xml`, and `llms.txt` alongside it.
+data) plus `robots.txt` and `llms.txt` alongside it. The combined website build produces
+the complete `sitemap.xml` and `llms-full.txt` in its deployment artifact.
 
 **All content is server-rendered at build time** — the leaderboard,
 robustness chart, cross-dataset heatmap, model/protection/dataset lists,
@@ -63,6 +64,9 @@ Rebuild after any edit:
 python3 docs/site-src/build.py
 ```
 
-The social-share card (`assets/og-image.png`, referenced by the Open
-Graph/Twitter meta tags) is a one-off Playwright screenshot, not part of
-the regular build — regenerate it by hand if the brand visuals change.
+The social-share card (`assets/og-image.png`, referenced by the Open Graph/Twitter meta tags)
+is generated from `social-card.html`. Run `python scripts/build_social_card.py` after editing it
+(requires Playwright and Chromium). The PNG is committed, so regular builds need no browser.
+
+See [search and AI discoverability](discoverability.md) for the product-claim mapping, metadata checks,
+GitHub Pages robots scope and the authenticated indexing steps that must be tracked separately.

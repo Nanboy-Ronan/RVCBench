@@ -1,3 +1,8 @@
+---
+title: "Voice cloning evaluation quickstart"
+description: "Install RVCBench, score your audio with the Python API, then evaluate your model on benchmark data. Learn input formats, reports, resume and comparison."
+---
+
 # Getting started with RVCBench
 
 [All documentation](README.md)

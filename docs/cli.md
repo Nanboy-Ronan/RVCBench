@@ -1,3 +1,8 @@
+---
+title: "RVCBench command-line reference"
+description: "Use rvcbench prompts, score, compare and setup-scorers. Find CLI options for benchmark suites, multiple models, devices, local data, reports and resume."
+---
+
 # Command-line reference
 
 Run `rvcbench --help` to list commands and `rvcbench <command> --help` for the current options.

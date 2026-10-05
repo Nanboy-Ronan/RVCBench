@@ -7,6 +7,12 @@ see them (crawlers, AI answer engines, and no-JS browsers all get the real
 content; JS only adds sorting/hover polish on top).
 """
 
+import re
+from pathlib import Path
+
+VERSION = re.search(r'^version = "([^"]+)"', (Path(__file__).resolve().parents[2] / 'pyproject.toml').read_text(),
+                    re.MULTILINE).group(1)
+
 SITE = {
     "url": "https://nanboy-ronan.github.io/RVCBench/",
     "repo": "https://github.com/Nanboy-Ronan/RVCBench",
@@ -14,6 +20,8 @@ SITE = {
     "arxiv_id": "2602.00443",
     "dataset": "https://huggingface.co/datasets/Nanboy/RVCBench",
     "demo": "https://huggingface.co/spaces/Nanboy/RVCBench",
+    "docs": "https://nanboy-ronan.github.io/RVCBench/docs/",
+    "pypi": "https://pypi.org/project/rvcbench/",
 }
 
 # The benchmark's four robustness dimensions (from the paper's framework figure,

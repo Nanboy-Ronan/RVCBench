@@ -1,3 +1,8 @@
+---
+title: "Voice cloning evaluation with RVCBench"
+description: "Evaluate voice cloning with seven automatic speech metrics and ready-to-use benchmark datasets. Use your own audio or export prompts, generate and score."
+---
+
 # Using RVCBench
 
 [Read the documentation website](https://nanboy-ronan.github.io/RVCBench/docs/) ·
@@ -5,6 +10,19 @@
 
 RVCBench provides automatic speech metrics and datasets for comprehensive voice cloning evaluation.
 Both workflows are available through `pip install "rvcbench[eval]"`; a repository checkout is optional.
+
+## Two ways to evaluate voice cloning
+
+**Automatic metrics for your audio.** Score speaker identity, content accuracy, predicted naturalness,
+acoustic fidelity, intelligibility and emotion with seven metrics in one Python API. Reuse the same
+evaluator across files. [Start with the metrics API](metrics.md).
+
+**Benchmark data for your model.** Export reference audio and text, generate speech using any model
+or API, then get per-task scores, coverage and comparison reports. Start with 52 onboarding samples
+and expand to the core or full suite. [Evaluate your model](adding_a_model.md).
+
+Your model can run in a separate environment. No built-in adapter is required to score its outputs.
+See the [evaluation FAQ](faq.md) for metric inputs, coverage and choosing a suite.
 
 ## Start here
 

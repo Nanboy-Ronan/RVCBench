@@ -6,8 +6,9 @@
 <title>RVCBench | Comprehensive Voice Cloning Evaluation</title>
 <meta name="description" content="RVCBench provides automatic speech metrics and ready-to-use datasets for comprehensive voice cloning evaluation. Score your own audio or evaluate a model with versioned benchmark suites. Install with pip.">
 <meta name="robots" content="index, follow">
-<meta name="keywords" content="voice cloning benchmark, TTS robustness, speaker privacy, audio deepfake, adversarial audio, speaker verification, voice cloning protection, RVCBench">
 <link rel="canonical" href="https://nanboy-ronan.github.io/RVCBench/">
+<link rel="sitemap" type="application/xml" href="https://nanboy-ronan.github.io/RVCBench/sitemap.xml">
+<link rel="alternate" type="text/plain" title="RVCBench documentation summary" href="https://nanboy-ronan.github.io/RVCBench/llms.txt">
 <link rel="icon" href="assets/logo.png" type="image/png">
 <link rel="apple-touch-icon" href="assets/logo.png">
 
@@ -19,6 +20,7 @@
 <meta property="og:image" content="https://nanboy-ronan.github.io/RVCBench/assets/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="RVCBench: automatic speech metrics and ready-to-use benchmark datasets">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="RVCBench | Comprehensive Voice Cloning Evaluation">
 <meta name="twitter:description" content="RVCBench provides automatic speech metrics and ready-to-use datasets for comprehensive voice cloning evaluation. Score your own audio or evaluate a model with versioned benchmark suites. Install with pip.">
@@ -40,17 +42,78 @@
   "@context": "https://schema.org",
   "@graph": [
     {
-      "@type": "Dataset",
-      "@id": "https://nanboy-ronan.github.io/RVCBench/#dataset",
-      "name": "RVCBench",
-      "alternateName": "RVCBench: Comprehensive Voice Cloning Evaluation",
-      "description": "A package for comprehensive voice cloning evaluation, with automatic speech metrics and ready-to-use datasets, covering 32 TTS/VC models, 10 dataset configurations, and 5 audio-protection methods.",
+      "@type": "WebSite",
+      "@id": "https://nanboy-ronan.github.io/RVCBench/#website",
       "url": "https://nanboy-ronan.github.io/RVCBench/",
+      "name": "RVCBench",
+      "description": "Comprehensive voice cloning evaluation with seven automatic speech metrics and ready-to-use benchmark datasets. Score your own audio or evaluate model outputs with provided data.",
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://nanboy-ronan.github.io/RVCBench/#webpage",
+      "url": "https://nanboy-ronan.github.io/RVCBench/",
+      "name": "RVCBench | Comprehensive Voice Cloning Evaluation",
+      "description": "Comprehensive voice cloning evaluation with seven automatic speech metrics and ready-to-use benchmark datasets. Score your own audio or evaluate model outputs with provided data.",
+      "isPartOf": {
+        "@id": "https://nanboy-ronan.github.io/RVCBench/#website"
+      },
+      "mainEntity": {
+        "@id": "https://nanboy-ronan.github.io/RVCBench/#software"
+      }
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://nanboy-ronan.github.io/RVCBench/#software",
+      "name": "RVCBench",
+      "description": "Comprehensive voice cloning evaluation with seven automatic speech metrics and ready-to-use benchmark datasets. Score your own audio or evaluate model outputs with provided data.",
+      "url": "https://nanboy-ronan.github.io/RVCBench/",
+      "softwareVersion": "2.1.1",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Linux",
+      "softwareRequirements": "Python 3.10 or newer; FFmpeg for speech scoring",
+      "installUrl": "https://pypi.org/project/rvcbench/",
+      "softwareHelp": "https://nanboy-ronan.github.io/RVCBench/docs/",
+      "license": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "author": [
+        {
+          "@type": "Person",
+          "name": "Ruinan Jin"
+        },
+        {
+          "@type": "Person",
+          "name": "Xinting Liao"
+        },
+        {
+          "@type": "Person",
+          "name": "Hanlin Yu"
+        },
+        {
+          "@type": "Person",
+          "name": "Deval Pandya"
+        },
+        {
+          "@type": "Person",
+          "name": "Xiaoxiao Li"
+        }
+      ],
+      "isAccessibleForFree": true,
+      "featureList": [
+        "Automatic speech metrics: SIM, SVA, WER, SpeechMOS (UTMOS), MCD, STOI and emotion consistency",
+        "Dataset-backed evaluation: export prompts, generate with your model, score and compare",
+        "CPU or GPU scoring, cached scorer models and resumable dataset evaluations"
+      ],
       "sameAs": [
         "https://github.com/Nanboy-Ronan/RVCBench",
-        "https://huggingface.co/datasets/Nanboy/RVCBench",
-        "https://arxiv.org/abs/2602.00443"
-      ],
+        "https://pypi.org/project/rvcbench/"
+      ]
+    },
+    {
+      "@type": "Dataset",
+      "@id": "https://nanboy-ronan.github.io/RVCBench/#dataset",
+      "name": "RVCBench evaluation datasets",
+      "description": "Reference audio, transcripts and evaluation data for voice cloning across languages, speakers and recording conditions. Packaged suites provide fixed input selections.",
+      "url": "https://huggingface.co/datasets/Nanboy/RVCBench",
       "license": "https://creativecommons.org/publicdomain/zero/1.0/",
       "creator": [
         {
@@ -75,19 +138,13 @@
         }
       ],
       "keywords": [
-        "voice cloning",
-        "text-to-speech",
-        "speaker privacy",
-        "audio deepfake",
-        "adversarial audio",
-        "speaker verification",
-        "audio protection",
-        "TTS benchmark"
+        "voice cloning evaluation",
+        "speech evaluation",
+        "benchmark datasets"
       ],
       "distribution": {
         "@type": "DataDownload",
-        "contentUrl": "https://huggingface.co/datasets/Nanboy/RVCBench",
-        "encodingFormat": "application/x-parquet"
+        "contentUrl": "https://huggingface.co/datasets/Nanboy/RVCBench"
       }
     },
     {
@@ -134,6 +191,10 @@
       "name": "RVCBench",
       "codeRepository": "https://github.com/Nanboy-Ronan/RVCBench",
       "programmingLanguage": "Python",
+      "softwareVersion": "2.1.1",
+      "targetProduct": {
+        "@id": "https://nanboy-ronan.github.io/RVCBench/#software"
+      },
       "license": "https://creativecommons.org/publicdomain/zero/1.0/"
     },
     {

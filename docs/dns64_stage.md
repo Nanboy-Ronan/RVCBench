@@ -1,3 +1,8 @@
+---
+title: "Denoise benchmark references with DNS64"
+description: "Enhance frozen voice cloning reference selections using explicit DNS64 weights. Track reference lineage, model hashes and output validation in RVCBench."
+---
+
 # DNS64 reference production
 
 `rvcbench denoise-dns64` enhances the references selected by a frozen manifest.

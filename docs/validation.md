@@ -1,3 +1,8 @@
+---
+title: "Voice cloning integration validation coverage"
+description: "Review RVCBench model integration checks and fixed-subset validation. Distinguish tested generation and scoring from full benchmark or paper reproduction."
+---
+
 # Validation coverage
 
 The repository exposes 32 model integrations. Currently, 27 have completed

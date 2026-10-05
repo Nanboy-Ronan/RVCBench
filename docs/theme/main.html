@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block extrahead %}
+  {{ super() }}
+  {% if page and page.canonical_url %}
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="RVCBench">
+  <meta property="og:title" content="{{ page.title | e }} | RVCBench Docs">
+  <meta property="og:description" content="{{ page.meta.description | e }}">
+  <meta property="og:url" content="{{ page.canonical_url | e }}">
+  <meta property="og:image" content="https://nanboy-ronan.github.io/RVCBench/assets/og-image.png">
+  <meta property="og:image:alt" content="RVCBench: automatic speech metrics and ready-to-use benchmark datasets">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ page.title | e }} | RVCBench Docs">
+  <meta name="twitter:description" content="{{ page.meta.description | e }}">
+  <meta name="twitter:image" content="https://nanboy-ronan.github.io/RVCBench/assets/og-image.png">
+  <link rel="sitemap" type="application/xml" href="https://nanboy-ronan.github.io/RVCBench/sitemap.xml">
+  <link rel="alternate" type="text/plain" title="RVCBench documentation text" href="https://nanboy-ronan.github.io/RVCBench/llms-full.txt">
+  <script type="application/ld+json">{{ page.meta.seo_jsonld | safe }}</script>
+  {% endif %}
+{% endblock %}

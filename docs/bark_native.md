@@ -1,3 +1,8 @@
+---
+title: "Native Bark voice cloning integration"
+description: "Inspect the pinned Bark runtime, semantic tokenizer and codec used by RVCBench, with explicit setup requirements and measured validation boundaries."
+---
+
 # Native Bark voice cloning
 
 The measured implementation uses the serp-ai Bark fork at commit

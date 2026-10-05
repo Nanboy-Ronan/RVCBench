@@ -1,3 +1,8 @@
+---
+title: "RVCBench Python metrics API reference"
+description: "Look up Evaluator arguments, score inputs, return values and convenience functions for speaker similarity, WER, speech quality, MCD, STOI and emotion."
+---
+
 # Python API reference
 
 For a worked example, start with [Score your own audio](metrics.md). This page describes the public

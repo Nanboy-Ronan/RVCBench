@@ -1,3 +1,8 @@
+---
+title: "Set up built-in voice cloning models"
+description: "Prepare the runtime and checkpoints used by RVCBench model quickstarts, including Qwen3-TTS, FishSpeech, voice protection and scoring dependencies."
+---
+
 # Quickstart Model Setup
 
 This repository publishes the benchmark dataset on Hugging Face, but the model

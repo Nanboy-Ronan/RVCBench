@@ -10,6 +10,7 @@ strict: true
 
 theme:
   name: material
+  custom_dir: docs/theme
   font: false
   logo: assets/logo.png
   favicon: assets/logo.png
@@ -62,12 +63,14 @@ extra_css:
 exclude_docs: |
   /index.html
   /site-src/
+  /theme/
   /audits/
   /validated_runs/
   /robots.txt
   /sitemap.xml
   /llms.txt
   /discoverability.md
+  /model_sizes.md
 
 validation:
   nav:
@@ -86,6 +89,7 @@ nav:
       - Evaluate your model: adding_a_model.md
       - Benchmark suites: core_suite.md
       - Datasets: datasets.md
+      - Evaluation FAQ: faq.md
   - Reference:
       - Python API: api.md
       - Command line: cli.md

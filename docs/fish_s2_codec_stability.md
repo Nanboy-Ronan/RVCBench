@@ -1,3 +1,8 @@
+---
+title: "Fish Audio S2 codec stability"
+description: "Understand the numerical stability variant for the Fish Audio S2 codec, its motivation, explicit runtime settings and limits of comparison with native results."
+---
+
 # Fish S2 codec numerical stability
 
 Cold and warm requests to the pinned official S2 server initially returned

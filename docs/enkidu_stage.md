@@ -1,3 +1,8 @@
+---
+title: "Produce Enkidu-protected voice references"
+description: "Create Enkidu protected references for RVCBench using a defined speaker cohort, frozen sample selection and recorded training and generation provenance."
+---
+
 # Enkidu reference production
 
 Install the model dependencies with `python -m pip install -e '.[enkidu]'`.
