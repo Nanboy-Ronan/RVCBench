@@ -6,7 +6,7 @@ description: "Look up Evaluator arguments, score inputs, return values and conve
 # Python API reference
 
 For a worked example, start with [Score your own audio](metrics.md). This page describes the public
-metrics API in RVCBench 2.1.0. Import it with:
+metrics API in RVCBench 2.1.x. Import it with:
 
 ```python
 from rvcbench import metrics

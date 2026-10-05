@@ -22,7 +22,7 @@ python -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install torch==2.6.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cpu
-python -m pip install "rvcbench[eval]==2.1.0"
+python -m pip install "rvcbench[eval]==2.1.1"
 rvcbench doctor --eval --imports
 rvcbench setup-scorers
 ```
