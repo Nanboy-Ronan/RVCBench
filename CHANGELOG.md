@@ -2,10 +2,12 @@
 
 Notable changes to the RVCBench codebase. Paper results are not affected by entries here unless stated.
 
-## Unreleased
+## 2.1.0 (2026-10-05)
 
 - Present RVCBench as a general-purpose voice cloning evaluation package, with two documented pip workflows:
   automatic metrics for your audio, and automatic scoring with the packaged datasets.
+- Add English and Chinese step-by-step quickstarts and a user documentation index covering installation,
+  audio inputs, inference, result inspection, comparison and recovery.
 - Pin and hash-verify SpeechMOS source/weights, ECAPA speaker assets and the emotion base initializer;
   verify cached Whisper weights during setup. Check-only setup does not download missing assets.
 - Require matching per-task scoring fingerprints for comparison. `--allow-incompatible` produces an

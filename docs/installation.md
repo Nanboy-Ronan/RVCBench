@@ -64,7 +64,7 @@ SpeechMOS assets use `RVCBENCH_ASSET_DIR` when set, otherwise a per-user cache u
 Set `XDG_CACHE_HOME` to relocate both default caches.
 
 ```bash
-export RVCBENCH_ASSET_DIR=/your/cache/rvcbench
+export RVCBENCH_ASSET_DIR="$HOME/.cache/rvcbench"
 rvcbench setup-scorers
 rvcbench setup-scorers --check-only
 ```
@@ -76,6 +76,18 @@ Dataset audio is downloaded from Hugging Face when you run `rvcbench prompts` or
 Only the suite's files are requested. To use an existing dataset copy, pass `--data-root` to both
 commands; see the [suite guide](core_suite.md). Log in with `hf auth login` if downloads are rate-limited.
 After preparing the assets and data, scoring can run offline.
+
+## Upgrade from 2.0.0
+
+```bash
+python -m pip install --upgrade "rvcbench[eval]==2.1.0"
+rvcbench setup-scorers
+rvcbench doctor --eval --imports
+```
+
+Use a new results directory for the first 2.1.0 evaluation. Earlier reports remain readable, but scorer
+fingerprints have changed: rescore all models in the same environment before comparing them. `--resume`
+requires the request journal written by 2.1.0. Keep your existing generated WAV files; they can be scored again.
 
 ## Troubleshooting
 

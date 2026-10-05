@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rvcbench"
-version = "2.0.0"
+version = "2.1.0"
 description = "Comprehensive voice cloning evaluation: automatic speech metrics and ready-to-use benchmark datasets"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -56,6 +56,7 @@ dev = ["rvcbench[test]", "ruff>=0.6", "pre-commit>=3.5", "build>=1.2", "twine>=5
 
 [project.urls]
 Homepage = "https://nanboy-ronan.github.io/RVCBench/"
+Documentation = "https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/README.md"
 Repository = "https://github.com/Nanboy-Ronan/RVCBench"
 Issues = "https://github.com/Nanboy-Ronan/RVCBench/issues"
 Paper = "https://arxiv.org/abs/2602.00443"
