@@ -2,7 +2,7 @@
   "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
   "@type": "SoftwareSourceCode",
   "name": "RVCBench",
-  "description": "Open-source benchmark for robust voice cloning, speaker privacy, audio protection, adversarial audio perturbations, and multi-model TTS/VC evaluation.",
+  "description": "General-purpose voice cloning evaluation: automatic speech metrics and ready-to-use datasets for assessing speaker identity, quality, intelligibility, content and expression.",
   "codeRepository": "https://github.com/Nanboy-Ronan/RVCBench",
   "issueTracker": "https://github.com/Nanboy-Ronan/RVCBench/issues",
   "license": "https://spdx.org/licenses/CC0-1.0",

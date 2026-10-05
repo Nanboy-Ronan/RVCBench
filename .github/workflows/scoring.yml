@@ -1,0 +1,43 @@
+name: Real speech scoring regression
+on:
+  workflow_call:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 5 * * 1'
+jobs:
+  scoring:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/rvcbench
+            ~/.cache/whisper
+            ~/.cache/huggingface
+          key: scorers-${{ runner.os }}-${{ hashFiles('src/rvcbench/evaluation/scorer_lock.json') }}
+      - run: python -m pip install torch==2.6.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cpu
+      - run: python -m pip install build && python -m build
+      - name: Install the wheel with evaluation dependencies
+        run: |
+          python -c "import glob, subprocess, sys; subprocess.check_call([sys.executable, '-m', 'pip', 'install', glob.glob('dist/*.whl')[0] + '[eval]'])"
+          python -m pip check
+      - run: rvcbench setup-scorers
+      - name: Score real speech through both public workflows outside the checkout
+        run: |
+          cd "$RUNNER_TEMP"
+          python "$GITHUB_WORKSPACE/scripts/check_scoring.py" --output scoring-regression
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: scoring-regression
+          path: ${{ runner.temp }}/scoring-regression

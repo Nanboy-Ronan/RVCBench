@@ -20,6 +20,12 @@ def test_speechmos_asset_scope_and_loaded_weights(tmp_path, monkeypatch):
     (hub / 'checkpoints').mkdir()
     weights = hub / 'checkpoints/utmos22_strong_step7459_v1.pt'
     torch.save({'weight': torch.tensor(2.)}, weights)
+    from rvcbench.benchmark.artifacts import file_hash
+    from rvcbench.evaluation import locked_assets
+    spec = {'revision': 'test-revision', 'files': {'model.py': file_hash(source)},
+            'weights_sha256': file_hash(weights)}
+    monkeypatch.setattr(locked_assets, 'scorer_lock', lambda _: spec)
+    monkeypatch.setattr(locked_assets, 'speechmos_paths', lambda: (root, weights))
 
     class Model(torch.nn.Module):
         def __init__(self):
@@ -39,9 +45,8 @@ def test_speechmos_asset_scope_and_loaded_weights(tmp_path, monkeypatch):
     assert scorer.model_provenance == baseline
     scorer.close()
     torch.save({'weight': torch.tensor(3.)}, weights)
-    scorer.prepare()
-    assert scorer.model.weight.item() == 3.
-    assert scorer.model_provenance['weights'] != baseline['weights']
+    with pytest.raises(ValueError, match='differs from the pinned'):
+        scorer.prepare()
     scorer.close()
 
 

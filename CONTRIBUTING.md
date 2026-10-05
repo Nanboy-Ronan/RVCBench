@@ -34,7 +34,7 @@ CI runs these on Python 3.10 and 3.12, builds the wheel, installs it and runs th
 
 ## Rules for changes
 
-- **Tests do not load models.** Use fake modules, stub worker processes and the fixtures in `tests/test_benchmark.py`.
+- **Unit tests do not load models.** Use fake modules, stub worker processes and the fixtures in `tests/test_benchmark.py`.
 - **Fail loudly.** Inputs that cannot be processed raise an error instead of being skipped, clipped or replaced.
 - **No machine-specific paths** in tracked files. `tests/test_public_paths.py` enforces this.
 - **State what was verified.** A subset validation is not a paper-table reproduction; a contract test is not a model run. Say which one a change has.
@@ -65,3 +65,18 @@ envs/              one environment file per model
 scripts/           quickstarts, model workers and maintenance tools
 docs/              guides and the project website
 ```
+
+## Real scoring regression and releases
+
+The release workflow calls the CPU checks and `.github/workflows/scoring.yml` before building the
+published distributions. The scoring workflow also runs weekly and can be started manually. It installs
+the wheel with `[eval]`, verifies the pinned scorer assets and runs `scripts/check_scoring.py` outside the
+checkout. A fixed public LibriTTS recording is transformed into a regression fixture; its scores are
+compared with `scripts/scoring_golden.json`, including agreement between the API and suite scoring and a
+cached resume. This fixture is not a voice-cloning model result.
+
+When intentionally changing metric definitions or assets, review the upstream revisions and SHA-256
+hashes in `src/rvcbench/evaluation/scorer_lock.json`. Run the regression with `--record --output <new-dir>`
+to produce candidate values, inspect the differences and update the golden file only after review.
+Do not refresh golden values merely to make a dependency regression pass. The suite/package protocol
+boundary and changed comparison fingerprints must be documented in the changelog.

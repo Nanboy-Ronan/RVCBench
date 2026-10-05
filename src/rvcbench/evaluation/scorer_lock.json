@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "speechmos": {
+    "repo": "tarepan/SpeechMOS",
+    "revision": "ed25eacbfa42b99156c36ebec67a733b5dbb9b79",
+    "files": {
+      "LICENSE": "e1d12ebf2e1c689a168a3990982a638894ec1e2edaafdee9b36b24b9226c78c7",
+      "hubconf.py": "6720a77483b46844b8652ce47271339536edc45055feed76749278bd96cc5c14",
+      "speechmos/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "speechmos/utmos22/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "speechmos/utmos22/fairseq_alt.py": "a554d47bebef0eb764a048d58dbb7e1e1fca316d627c571add54faa42fe5f45b",
+      "speechmos/utmos22/strong/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "speechmos/utmos22/strong/model.py": "bffb8eba14e74e4f228684280cbd295ecffbfcd0414a5a460ca55c94f2f0a0e4",
+      "speechmos/utmos22/strong/model_test.py": "0bfe63b9ff9875a90c9ec2475837f9b44890566a68c685b9c7230f4411518041"
+    },
+    "weights_url": "https://github.com/tarepan/SpeechMOS/releases/download/v1.0.0/utmos22_strong_step7459_v1.pt",
+    "weights_sha256": "38aa51ab79e2a4e09a1449758a4b37e9cbb2e8235a49662a732d33a9ba1e9bff"
+  },
+  "sim": {
+    "repo": "speechbrain/spkrec-ecapa-voxceleb",
+    "revision": "0f99f2d0ebe89ac095bcc5903c4dd8f72b367286",
+    "files": {
+      "classifier.ckpt": "fd9e3634fe68bd0a427c95e354c0c677374f62b3f434e45b78599950d860d535",
+      "embedding_model.ckpt": "0575cb64845e6b9a10db9bcb74d5ac32b326b8dc90352671d345e2ee3d0126a2",
+      "hyperparams.yaml": "6f78854fa04ba59e761437b76a2575d3aba5e5016de3e9b69f0c9a5077fb1a41",
+      "label_encoder.txt": "e13c3a167bb4112685670ee896d20e2b565af16b3a4ceeaa8689fa4d22adb8b9",
+      "mean_var_norm_emb.ckpt": "cd70225b05b37be64fc5a95e24395d804231d43f74b2e1e5a513db7b69b34c33"
+    }
+  },
+  "emotion_base": {
+    "revision": "0b5b8e868dd84f03fd87d01f9c4ff0f080fecfe8",
+    "files": {
+      "config.json": "4937977e24d12d1bba70cdce8709c3c04807a8e4ae8ddac4229c48c436ae99ae",
+      "preprocessor_config.json": "b225d617c025463b9e157e06afea8b90dc7078fc70b013c533328423e0486b4a",
+      "pytorch_model.bin": "3249fe98bfc62fcbc26067f724716a6ec49d12c4728a2af1df659013905dff21"
+    }
+  },
+  "wer": {
+    "model": "whisper-medium",
+    "weights_url": "https://openaipublic.azureedge.net/main/whisper/models/345ae4da62f9b3d59415adc60127b97c714f32e89e936602e85993674d08dcb1/medium.pt",
+    "weights_sha256": "345ae4da62f9b3d59415adc60127b97c714f32e89e936602e85993674d08dcb1"
+  }
+}

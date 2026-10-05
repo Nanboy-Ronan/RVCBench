@@ -117,9 +117,10 @@ def test_model_names_must_match_the_directories(suite):
 
 def fake_submission(path, model, means, *, suite_sha='abc', changes=None):
     tasks = {'clean': {'evaluation': 'Clean', 'required_metrics': ['sim', 'wer'], 'status': 'complete',
-                       'means': means['clean']},
+                       'means': means['clean'], 'evaluation_fingerprint': 'fixed-test-scorer'},
              'noisy': {'evaluation': 'Noisy', 'anchor': 'clean', 'required_metrics': ['sim', 'wer'],
-                       'status': 'complete', 'means': means['noisy'], 'relative_change_percent': changes or {}}}
+                       'status': 'complete', 'means': means['noisy'], 'evaluation_fingerprint': 'fixed-test-scorer',
+                       'relative_change_percent': changes or {}}}
     path.mkdir(parents=True)
     (path / 'submission.json').write_text(json.dumps({
         'schema_version': 1, 'protocol': 'rvcbench-submission-v1', 'suite': 'toy-v1', 'version': 1,
@@ -238,3 +239,20 @@ def test_a_gzipped_suite_exports_and_scores_like_a_plain_one(suite):
     with patch('rvcbench.evaluation.pipeline.evaluate_run', side_effect=fake_evaluate):
         result = submission.score_submission(spec_path, tmp / 'flat', tmp / 'scored', model='echo', data_root=data_root)
     assert result['status'] == 'complete'
+
+
+@pytest.mark.parametrize('fingerprint', ['different-scorer', None])
+def test_different_or_missing_scorers_require_explicit_unranked_comparison(tmp_path, fingerprint):
+    means = {'clean': {'sim': 0.6, 'wer': 0.1}, 'noisy': {'sim': 0.3, 'wer': 0.2}}
+    a = fake_submission(tmp_path / 'a', 'a', means)
+    b = fake_submission(tmp_path / 'b', 'b', means)
+    path = b / 'submission.json'
+    record = json.loads(path.read_text())
+    record['tasks']['clean']['evaluation_fingerprint'] = fingerprint
+    path.write_text(json.dumps(record))
+    with pytest.raises(ValueError, match='Incompatible scoring protocols'):
+        comparison.compare_submissions([a, b], tmp_path / 'refused')
+    assert not (tmp_path / 'refused').exists()
+    result = comparison.compare_submissions([a, b], allow_incompatible=True)
+    assert not result['protocol_compatible'] and not result['leaderboard']
+    assert 'unranked inspection' in result['label'] and '**0.600**' not in result['markdown']

@@ -51,25 +51,31 @@ def speechbrain(monkeypatch):
                'speechbrain.utils.fetching': ModuleType('speechbrain.utils.fetching')}
     modules['speechbrain.inference.speaker'].SpeakerRecognition = SpeakerRecognition
     modules['speechbrain.utils.fetching'].LocalStrategy = strategy
+    modules['speechbrain.utils.fetching'].FetchConfig = lambda **kwargs: SimpleNamespace(**kwargs)
     for name, module in modules.items():
         monkeypatch.setitem(sys.modules, name, module)
     return calls
 
 
-def test_speaker_model_fetched_from_the_hub_is_copied(workdir, speechbrain):
-    SpeakerScorer('cpu', None).prepare()
-    call, = speechbrain
-    assert call['source'] == 'speechbrain/spkrec-ecapa-voxceleb' and call['local_strategy'] == 'copy'
-    assert call['savedir'] == str(workdir / 'cache' / 'rvcbench' / 'spkrec-ecapa-voxceleb')
+def test_speaker_missing_assets_request_setup_without_network(workdir, speechbrain):
+    with pytest.raises(FileNotFoundError):
+        SpeakerScorer('cpu', None).prepare()
+    assert speechbrain == []
 
 
-def test_complete_local_speaker_model_is_loaded_in_place(workdir, speechbrain):
+def test_complete_local_speaker_model_is_loaded_in_place(workdir, speechbrain, monkeypatch):
+    from rvcbench.benchmark.artifacts import file_hash
     root = workdir / 'checkpoints' / 'spkrec-ecapa-voxceleb'
     root.mkdir(parents=True)
     for name in SPEAKER_FILES:
         (root / name).write_text(name)
+    spec = {'repo': 'fixture', 'revision': 'test-revision', 'files': {n: file_hash(root / n) for n in SPEAKER_FILES}}
+    monkeypatch.setattr('rvcbench.evaluation.setup.scorer_lock', lambda _: spec)
+    monkeypatch.setattr('rvcbench.evaluation.locked_assets.scorer_lock', lambda _: spec)
     scorer = SpeakerScorer('cpu', None)
     scorer.prepare()
     call, = speechbrain
-    assert call['source'] == str(root) and 'local_strategy' not in call
+    assert call['source'] == str(root) and call['local_strategy'] == 'copy'
+    assert call['overrides']['pretrained_path'] == str(root)
+    assert call['fetch_config'].allow_network is False
     assert set(scorer.model_provenance['files']) == set(SPEAKER_FILES)

@@ -40,6 +40,10 @@ def pin_assets(monkeypatch, tmp_path):
         sample.write_text(f'speechbrain/emotion-recognition-wav2vec2-IEMOCAP/{name}')
         hashes[name] = file_hash(sample)
     monkeypatch.setattr(emotion, 'ASSETS', hashes)
+    base = {n: __import__('hashlib').sha256(f'facebook/wav2vec2-base/{n}'.encode()).hexdigest()
+            for n in setup.BASE_FILES}
+    original = setup.scorer_lock
+    monkeypatch.setattr(setup, 'scorer_lock', lambda n: {'files': base} if n == 'emotion_base' else original(n))
     return hashes
 
 
@@ -116,6 +120,61 @@ def test_setup_scorers_command(monkeypatch, capsys):
 def test_missing_speechmos_points_to_the_setup_command(tmp_path, monkeypatch):
     torch = pytest.importorskip('torch')
     monkeypatch.setattr(torch.hub, 'get_dir', lambda: str(tmp_path))
+    monkeypatch.setenv('RVCBENCH_ASSET_DIR', str(tmp_path / 'assets'))
     from rvcbench.evaluation.scorers.auxiliary import AuxiliaryScorer
     with pytest.raises(FileNotFoundError, match='rvcbench setup-scorers'):
         AuxiliaryScorer('speechmos', 'cpu', SimpleNamespace(info=lambda *a: None)).prepare()
+
+
+def test_speaker_setup_uses_pinned_revision_and_checks_cached_bytes(assets, hub, monkeypatch):
+    import hashlib
+    repo = 'speechbrain/spkrec-ecapa-voxceleb'
+    names = ['hyperparams.yaml', 'embedding_model.ckpt']
+    spec = {'repo': repo, 'revision': 'immutable-revision',
+            'files': {n: hashlib.sha256(f'{repo}/{n}'.encode()).hexdigest() for n in names}}
+    monkeypatch.setattr(setup, 'scorer_lock', lambda _: spec)
+    setup.setup_speaker()
+    assert {(r, rev) for r, _, rev in hub} == {(repo, 'immutable-revision')}
+    hub.clear()
+    setup.setup_speaker(check_only=True)
+    assert hub == []
+    (assets / 'spkrec-ecapa-voxceleb' / 'embedding_model.ckpt').write_text('corrupted')
+    with pytest.raises(ValueError, match='differs from the pinned'):
+        setup.setup_speaker(check_only=True)
+
+
+def test_pinned_url_reuses_only_verified_cache_and_cleans_partial_downloads(tmp_path, monkeypatch):
+    import hashlib
+    from rvcbench.evaluation import locked_assets
+    source, target = tmp_path / 'cached', tmp_path / 'new/file'
+    source.write_bytes(b'verified')
+    sha = hashlib.sha256(b'verified').hexdigest()
+    monkeypatch.setattr(locked_assets, 'urlopen', lambda *a, **k: pytest.fail('network not expected'))
+    locked_assets.fetch_url('unused', target, sha, cached=source)
+    assert target.read_bytes() == b'verified'
+    target.write_bytes(b'corrupt')
+    with pytest.raises(ValueError, match='differs from the pinned'):
+        locked_assets.fetch_url('unused', target, sha, cached=source)
+    assert target.read_bytes() == b'corrupt'
+    target.unlink()
+    import io
+    monkeypatch.setattr(locked_assets, 'urlopen', lambda *a, **k: io.BytesIO(b'wrong download'))
+    with pytest.raises(ValueError, match='differs from the pinned'):
+        locked_assets.fetch_url('unused', target, sha)
+    assert not target.exists() and not list(target.parent.glob('.download-*'))
+
+
+def test_whisper_check_only_rejects_corruption_without_downloading(tmp_path, monkeypatch):
+    import hashlib
+    from rvcbench.evaluation import locked_assets
+    path = tmp_path / 'whisper/medium.pt'
+    path.parent.mkdir()
+    path.write_bytes(b'pinned weights')
+    sha = hashlib.sha256(path.read_bytes()).hexdigest()
+    monkeypatch.setattr(locked_assets, 'whisper_path', lambda: path)
+    monkeypatch.setattr(setup, 'scorer_lock', lambda _: {'weights_url': 'unused', 'weights_sha256': sha})
+    monkeypatch.setattr(locked_assets, 'urlopen', lambda *a, **k: pytest.fail('check-only downloaded weights'))
+    assert setup.setup_whisper(check_only=True)['files']['medium.pt'] == sha
+    path.write_bytes(b'corrupt')
+    with pytest.raises(ValueError, match='differs from the pinned'):
+        setup.setup_whisper(check_only=True)

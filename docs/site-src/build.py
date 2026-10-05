@@ -66,11 +66,10 @@ def render_body(template: str) -> str:
 
 
 def build_head(canonical: bool = True) -> str:
-    title = "RVCBench — NeurIPS 2026 | Voice Cloning Robustness Benchmark"
+    title = "RVCBench | Comprehensive Voice Cloning Evaluation"
     desc = (
-        "Accepted to NeurIPS 2026. RVCBench benchmarks voice-cloning robustness, speaker privacy, and audio-protection methods "
-        "with 32 TTS/VC integration entries, 5 protection methods, and 10 dataset conditions, with a public "
-        "leaderboard, dataset, and reproducible evaluation pipeline."
+        "RVCBench provides automatic speech metrics and ready-to-use datasets for comprehensive voice cloning evaluation. "
+        "Score your own audio or evaluate a model with versioned benchmark suites. Install with pip."
     )
     url = D.SITE["url"]
     og_image = url + "assets/og-image.png"

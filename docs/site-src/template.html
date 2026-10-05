@@ -506,11 +506,12 @@
     <section class="hero">
       <div class="wrap hero-grid">
         <div>
-          <span class="eyebrow">Voice-cloning robustness benchmark</span>
-          <h1>How robust is voice cloning? <span class="sig">5</span> defenses try to stop them.</h1>
-          <p class="hero-lead">RVCBench is a unified, reproducible pipeline for evaluating voice-cloning robustness, speaker privacy, and audio-protection methods — spanning <strong>32 TTS/VC integration entries</strong>, <strong>10 dataset conditions</strong>, and <strong>5 protection algorithms</strong>, scored on speaker similarity, intelligibility, perceptual quality, and runtime.</p>
+          <span class="eyebrow">Comprehensive voice cloning evaluation</span>
+          <h1>Evaluate voice cloning.<br><span class="sig">Metrics and datasets</span> in one package.</h1>
+          <p class="hero-lead">RVCBench brings <strong>automatic speech metrics</strong> and <strong>ready-to-use evaluation datasets</strong> together. Score your own audio, or evaluate a model across speaker identity, speech quality, intelligibility, languages, expression and recording conditions — with one pip package.</p>
           <div class="hero-ctas">
-            <a class="btn btn-primary" href="#leaderboard">See the leaderboard</a>
+            <a class="btn btn-primary" href="#quickstart">Start evaluating</a>
+            <a class="btn" href="https://github.com/Nanboy-Ronan/RVCBench/blob/main/docs/metrics.md">Use the metrics API</a>
             <a class="btn" href="https://huggingface.co/datasets/Nanboy/RVCBench" target="_blank" rel="noopener">Get the dataset ↗</a>
             <a class="btn" href="https://huggingface.co/spaces/Nanboy/RVCBench" target="_blank" rel="noopener">Try the demo ↗</a>
           </div>
@@ -518,11 +519,11 @@
         </div>
 
         <div class="scope-panel">
-          <div class="scope-head"><span><span class="dot"></span>signal.monitor — source → protection → clone</span><span>live</span></div>
+          <div class="scope-head"><span><span class="dot"></span>signal.monitor — reference → generate → score</span><span>live</span></div>
           <canvas id="wave" aria-hidden="true"></canvas>
           <div class="scope-foot">
             <span><span class="sig">■</span> clean signal (SIM ↑)</span>
-            <span><span class="prot">■</span> after protection (SIM ↓)</span>
+            <span><span class="prot">■</span> processed speech</span>
           </div>
         </div>
       </div>
@@ -541,11 +542,11 @@
       <div class="wrap">
         <div class="section-head">
           <span class="eyebrow">Why RVCBench</span>
-          <h2>One surrogate model is not a threat model.</h2>
-          <p>Most protection papers evaluate against one or two VC models on one dataset. A defense that looks strong there can fail completely against a model or language it was never tested on.</p>
+          <h2>One package, two ways to evaluate.</h2>
+          <p>Use the metrics in an existing evaluation script, or use the packaged datasets to evaluate a new model. Your model keeps its own inference code and environment.</p>
         </div>
         <div class="why-table-wrap">__WHY_TABLE__</div>
-        <p class="why-quote">“If you're deciding whether a protection method actually generalises — or whether a new TTS model breaks existing defenses — this is the benchmark to run it against.”</p>
+        <p class="why-quote">“Bring your model or your audio. RVCBench provides the scoring and the evaluation data.”</p>
       </div>
     </section>
 
@@ -554,40 +555,15 @@
       <div class="wrap">
         <div class="section-head">
           <span class="eyebrow">How it works</span>
-          <h2>Source audio → protect → (denoise) → clone → evaluate.</h2>
-          <p>Every run walks the same five-stage path, so protection methods and cloning adversaries are always compared on equal footing.</p>
+          <h2>Prepare prompts → generate speech → get your report.</h2>
+          <p>Use your own files directly with the metrics API, or follow the dataset workflow below. Model inference runs with your code; RVCBench prepares inputs and computes the scores.</p>
         </div>
         <div class="pipeline-rail">
-          <div class="pstep src">
-            <div class="num">1</div>
-            <h3>Source audio</h3>
-            <p>Reference speaker prompt drawn from one of 10 benchmark dataset configs.</p>
-            <span class="tag">run_vc.py</span>
-          </div>
-          <div class="pstep protect">
-            <div class="num">2</div>
-            <h3>Protection</h3>
-            <p>An adversarial perturbation degrades the prompt: SafeSpeech, Enkidu, EM, Spectral, or Gaussian noise.</p>
-            <span class="tag">run_protect.py</span>
-          </div>
-          <div class="pstep denoise">
-            <div class="num">3</div>
-            <h3>Denoise <span style="font-weight:400;color:var(--text-muted);">(optional)</span></h3>
-            <p>An adaptive attacker tries to clean the protected prompt before cloning — a realistic worst case.</p>
-            <span class="tag">run_denoiser.py</span>
-          </div>
-          <div class="pstep clone">
-            <div class="num">4</div>
-            <h3>Voice cloning</h3>
-            <p>One of 32 zero-shot or fine-tuning TTS/VC adversaries attempts to reproduce the speaker.</p>
-            <span class="tag">run_vc_protect.py</span>
-          </div>
-          <div class="pstep eval">
-            <div class="num">5</div>
-            <h3>Evaluation</h3>
-            <p>SIM, WER, MOS, MCD, RTF, SVA and emotion match, with bootstrap confidence intervals.</p>
-            <span class="tag">metrics.json</span>
-          </div>
+          <div class="pstep src"><div class="num">1</div><h3>Choose data</h3><p>Use your own recordings, or select onboarding-v1, core-v1 or full-v1.</p><span class="tag">3 packaged suites</span></div>
+          <div class="pstep protect"><div class="num">2</div><h3>Prepare prompts</h3><p>Download verified reference clips and export texts in JSONL or native batch-list formats.</p><span class="tag">rvcbench prompts</span></div>
+          <div class="pstep clone"><div class="num">3</div><h3>Generate speech</h3><p>Run your model locally or through an API. Save the output WAV files using the prompt identifiers.</p><span class="tag">your inference code</span></div>
+          <div class="pstep eval"><div class="num">4</div><h3>Score automatically</h3><p>Compute the task metrics with pinned scoring models. Resume interrupted scoring.</p><span class="tag">rvcbench score</span></div>
+          <div class="pstep denoise"><div class="num">5</div><h3>Compare results</h3><p>Read per-task means, sample scores and coverage; compare models with checked scoring protocols.</p><span class="tag">rvcbench compare</span></div>
         </div>
       </div>
     </section>
@@ -598,7 +574,7 @@
         <div class="section-head">
           <span class="eyebrow">The framework</span>
           <h2>Four dimensions, one benchmark.</h2>
-          <p>Every result on this page demonstrates one of four robustness axes. This is the map — each card links to the visualization that proves it.</p>
+          <p>Evaluate speaker identity, content and quality across input conditions, languages, output processing and protected references. The tables below show published paper results; packaged-suite results use their own versioned protocol.</p>
         </div>
         <div class="dim-grid">__DIMENSIONS_GRID__</div>
       </div>
@@ -764,27 +740,24 @@
       <div class="wrap">
         <div class="section-head">
           <span class="eyebrow">Getting started</span>
-          <h2>One clone, protected, in under a minute.</h2>
-          <p>All outputs — data, generated audio, metrics — are written inside the repository. No checkpoint bundle required to start.</p>
+          <h2>Install once. Score your audio or evaluate with our data.</h2>
+          <p>Both workflows work from the pip package. Install with scoring dependencies, then download the metric models once. Linux, Python 3.10+ and FFmpeg are required.</p>
         </div>
+        <div class="code-block"><pre>python -m pip install "rvcbench[eval]"
+rvcbench setup-scorers</pre></div>
         <div class="qs-steps">
-          <div>
-            <div class="code-block">
-              <button class="copy-btn" data-copy="git clone https://github.com/Nanboy-Ronan/RVCBench.git&#10;cd RVCBench&#10;conda env create -f envs/qwen3-tts.yml && conda activate qwen3">Copy</button>
-              <pre><span class="c1"># clone + environment</span>
-git clone https://github.com/Nanboy-Ronan/RVCBench.git
-cd RVCBench
-conda env create -f envs/qwen3-tts.yml && conda activate qwen3</pre>
-            </div>
-          </div>
-          <div>
-            <div class="code-block">
-              <button class="copy-btn" data-copy="python scripts/run_qwen3tts_quickstart.py --max-samples 5&#10;python scripts/run_protect_qwen3tts_quickstart.py --max-samples 5">Copy</button>
-              <pre><span class="c1"># zero-shot clone, then protect + clone</span>
-python scripts/run_qwen3tts_quickstart.py --max-samples 5
-python scripts/run_protect_qwen3tts_quickstart.py --max-samples 5</pre>
-            </div>
-          </div>
+          <div><h3>1. Automatic metrics for your audio</h3><div class="code-block"><pre>from rvcbench import metrics
+
+with metrics.Evaluator(["sim", "wer", "speechmos"]) as e:
+    scores = e.score("generated.wav",
+        reference="reference.wav", text="Hello there.",
+        language="en")
+    print(scores)</pre></div></div>
+          <div><h3>2. Evaluate with our datasets</h3><div class="code-block"><pre>rvcbench prompts --suite onboarding-v1 --output prompts/
+# Generate each prompt with your model into outputs/my-model/.
+rvcbench score --suite onboarding-v1 \
+  --generated outputs/my-model --output results/my-model
+# Add --resume to continue an interrupted evaluation.</pre></div></div>
         </div>
         <div class="hero-ctas" style="margin-top:1.8rem;">
           <a class="btn" href="https://github.com/Nanboy-Ronan/RVCBench#evaluate-your-model" target="_blank" rel="noopener">Full quickstart guide ↗</a>
@@ -838,7 +811,7 @@ python scripts/run_protect_qwen3tts_quickstart.py --max-samples 5</pre>
         </div>
       </div>
       <div class="foot-bottom">
-        <span>CC0-1.0 · Built for researchers working on voice-cloning robustness, speaker privacy, and audio-deepfake defense.</span>
+        <span>CC0-1.0 · Comprehensive voice cloning evaluation with automatic metrics and ready-to-use datasets.</span>
       </div>
     </div>
   </footer>

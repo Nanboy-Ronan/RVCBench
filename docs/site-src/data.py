@@ -23,7 +23,7 @@ DIMENSIONS = [
     {
         "key": "input",
         "token": "judge",
-        "name": "Input Robustness",
+        "name": "Inputs and speakers",
         "question": "Does it still work when the reference audio or text prompt isn't clean studio speech?",
         "subtests": [
             "Reference-audio shifts — accents, ages, multi-speaker clips, café/station/train noise",
@@ -35,7 +35,7 @@ DIMENSIONS = [
     {
         "key": "generation",
         "token": "signal",
-        "name": "Generation Robustness",
+        "name": "Languages and expression",
         "question": "Does cloning quality hold up across model architectures, languages, and utterance length?",
         "subtests": [
             "32 integration entries spanning codec-LM, diffusion, and hybrid architectures",
@@ -47,7 +47,7 @@ DIMENSIONS = [
     {
         "key": "output",
         "token": "counter",
-        "name": "Output Robustness",
+        "name": "Output processing",
         "question": "Does the cloned output survive real-world post-processing, and can it be told apart from the real speaker?",
         "subtests": [
             "Post-processing resilience — MP3/AAC/Opus compression, phone-narrowband simulation",
@@ -59,7 +59,7 @@ DIMENSIONS = [
     {
         "key": "perturbation",
         "token": "protect",
-        "name": "Audio Perturbation Robustness",
+        "name": "Noise and protection",
         "question": "Can a protection method actually stop a clone — and survive an attacker trying to denoise it back out?",
         "subtests": [
             "Passive perturbation — natural multi-speaker interference and environmental noise",
@@ -82,12 +82,10 @@ CROSS_DATASET_GROUPS = [
 # "Why RVCBench" comparison — a real table (not two parallel lists) so each
 # row pairs its two values directly, both visually and when read as plain text.
 WHY_COMPARISON = [
-    {"dim": "Adversary models", "typical": "1–3", "rvcbench": "32 integration entries; 22 models with paper results"},
-    {"dim": "Datasets / languages", "typical": "1", "rvcbench": "10, incl. ZH / FR / bilingual / noisy"},
-    {"dim": "Protection methods compared", "typical": "usually own only", "rvcbench": "5, equal footing"},
-    {"dim": "Denoising-adaptive attacker", "typical": "rarely modeled", "rvcbench": "built into the pipeline"},
-    {"dim": "Metrics", "typical": "ad hoc", "rvcbench": "standardised + bootstrap CIs"},
-    {"dim": "Reproducibility", "typical": "custom scripts", "rvcbench": "one Hydra pipeline, public HF data"},
+    {"dim": "Score your audio", "typical": "Generated audio, references and text", "rvcbench": "7 automatic speech metrics through one Python API"},
+    {"dim": "Evaluate with our data", "typical": "A model that generates WAV files", "rvcbench": "3 versioned suites, prepared prompts and automatic scoring"},
+    {"dim": "Compare models", "typical": "Output folders or existing reports", "rvcbench": "Checked scoring protocols, per-task comparisons and coverage"},
+    {"dim": "Reproduce a run", "typical": "The original data and model settings", "rvcbench": "Input hashes, scoring provenance and interruption recovery"},
 ]
 
 STATS = [
@@ -208,15 +206,21 @@ DATASETS = [
 
 FAQ = [
     {
-        "q": "What four dimensions of robustness does RVCBench test?",
-        "a": "Input Robustness (reference-audio and text-prompt shifts), Generation Robustness (model "
-             "architecture, multilingual, long-form, and expressive generalisation), Output Robustness "
-             "(post-processing resilience and deepfake detectability), and Audio Perturbation Robustness "
-             "(passive noise, proactive protection methods, and counteract/denoising attacks).",
+        "q": "Can I score my own audio without using the datasets?",
+        "a": "Yes. Install rvcbench[eval], prepare the scorers with rvcbench setup-scorers, and use "
+             "rvcbench.metrics.Evaluator. Choose from SIM, SVA, WER, MOS, MCD, STOI and emotion consistency. "
+             "MCD and STOI require a recording of the same text; other metrics use the reference voice or expected text.",
+    },
+    {
+        "q": "How do I evaluate a model using RVCBench data?",
+        "a": "Run rvcbench prompts to prepare a versioned suite, synthesize the listed texts with your model, "
+             "and run rvcbench score on its WAV files. Start with onboarding-v1 (52 utterances), then use "
+             "core-v1 (480) or full-v1 (12,724). Scoring, reports and --resume are included in the pip package. "
+             "The packaged suites are previews; paper results use a separate protocol.",
     },
     {
         "q": "What is RVCBench?",
-        "a": "RVCBench is a benchmark for voice-cloning robustness, speaker privacy, and audio-protection methods. "
+        "a": "RVCBench is a general-purpose package for voice cloning evaluation, with automatic speech metrics and ready-to-use datasets. "
              "It provides 32 integration entries and paper results for 22 models (18 in the main results, 4 in the appendix), with 5 audio-protection methods across "
              "10 dataset configurations, scoring speaker similarity, intelligibility, perceptual quality, and runtime.",
     },
@@ -228,7 +232,7 @@ FAQ = [
     {
         "q": "What audio-protection methods does RVCBench compare?",
         "a": "Five methods on equal footing: SafeSpeech (adversarial perturbation against a surrogate VC model), "
-             "Enkidu (perceptual-loss adversarial perturbation), EM (Expectation–Maximisation perturbation), "
+             "Enkidu (perceptual-loss adversarial perturbation), POP (error-minimizing perturbation, named em in the code), "
              "Spectral (SafeSpeech's spectral perturbation mode), and GR-Noise (Gaussian random noise).",
     },
     {

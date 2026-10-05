@@ -2,6 +2,25 @@
 
 Notable changes to the RVCBench codebase. Paper results are not affected by entries here unless stated.
 
+## Unreleased
+
+- Present RVCBench as a general-purpose voice cloning evaluation package, with two documented pip workflows:
+  automatic metrics for your audio, and automatic scoring with the packaged datasets.
+- Pin and hash-verify SpeechMOS source/weights, ECAPA speaker assets and the emotion base initializer;
+  verify cached Whisper weights during setup. Check-only setup does not download missing assets.
+- Require matching per-task scoring fingerprints for comparison. `--allow-incompatible` produces an
+  explicitly unranked inspection; it cannot create leaderboard results.
+- Add `rvcbench score --resume` for one or several models, with input validation, per-metric cache reuse,
+  failed-sample retry, a durable request journal and protection against concurrent writes per model.
+- Preserve caller RNG states and cuDNN flags when using the metrics API, including on failures, without
+  initializing unrelated CUDA devices. Add `Evaluator("all")` and a separate same-text `target` for MCD/STOI.
+- Require SpeechBrain 1.1.1 or newer in the evaluation extra for its offline fetching interface.
+- Gate publishing on the CPU checks and a real-speech scoring regression through the installed wheel's
+  API and dataset workflows. Run the same scoring regression weekly.
+
+Scoring fingerprints change with these fixes. Existing reports remain readable; rescore models in the
+same environment to compare them. Resume applies to runs with the new `score_request.json` journal.
+
 ## 2.0.0 (2026-10-03)
 
 First release on PyPI: `pip install rvcbench`.

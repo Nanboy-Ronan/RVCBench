@@ -5,7 +5,12 @@ on:
   push:
     tags: ['v*']
 jobs:
+  checks:
+    uses: ./.github/workflows/ci.yml
+  scoring:
+    uses: ./.github/workflows/scoring.yml
   build:
+    needs: [checks, scoring]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

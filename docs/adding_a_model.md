@@ -17,6 +17,7 @@ resulting WAV files.
 
 ```bash
 python -m pip install 'rvcbench[eval]'
+rvcbench setup-scorers
 rvcbench prompts --suite core-v1 --output prompts/
 ```
 
@@ -76,7 +77,48 @@ To compare results scored at different times, for example a new checkpoint again
 rvcbench compare results/*/submission.json --output results/
 ```
 
-Only submissions of the same suite version are compared.
+Comparison requires the same suite and matching per-task scoring fingerprints, including scorer code,
+assets, dependencies and settings. Rescore models together after an environment upgrade.
+`--allow-incompatible` explicitly produces an unranked inspection with the differences listed.
+
+### Resume a stopped evaluation
+
+Repeat the original scoring command with `--resume`:
+
+```bash
+rvcbench score --suite core-v1 --generated my_outputs/ --output results/my-model/ --device cuda --resume
+```
+
+The output directory must belong to the same suite, model name and generated-audio directory.
+Inputs are checked again. Successful scores with matching audio and scorer fingerprints are reused;
+missing outputs and failed scores are retried. After replacing a bad WAV, the changed sample is rescored.
+The same flag works with several model directories. Results from releases before the resume journal
+was introduced need a new output directory. Avoid simultaneous writers to the same results directory.
+
+### Your own inference loop
+
+Read `prompts.jsonl` and call the inference function from your model's environment:
+
+```python
+import json
+from pathlib import Path
+import soundfile as sf
+
+prompts = Path("prompts")
+outputs = Path("my_outputs")
+outputs.mkdir(exist_ok=True)
+for line in (prompts / "prompts.jsonl").read_text().splitlines():
+    item = json.loads(line)
+    waveform, sample_rate = your_model.synthesize(  # replace with your model's API
+        text=item["text"],
+        reference_audio=str(prompts / item["reference_audio"]),
+        reference_text=item["reference_text"],
+        language=item["language"],
+    )
+    sf.write(outputs / f"{item['id']}.wav", waveform, sample_rate)
+```
+
+Then run `rvcbench score` in the scoring environment. A model's native batch script is equally valid.
 
 ### Results
 
@@ -92,9 +134,8 @@ Only submissions of the same suite version are compared.
 ### 1. Install
 
 ```bash
-git clone https://github.com/Nanboy-Ronan/RVCBench.git
-python -m pip install -e RVCBench            # runner and generation
-python -m pip install -e 'RVCBench[eval]'    # add the scoring stack (Whisper, speaker verification, ...)
+python -m pip install "rvcbench[eval]"
+rvcbench setup-scorers
 rvcbench doctor
 ```
 
