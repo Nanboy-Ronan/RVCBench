@@ -23,7 +23,6 @@ Install with `pip install "rvcbench[eval]"` and run `rvcbench setup-scorers`. Us
 - [Code repository](https://github.com/Nanboy-Ronan/RVCBench)
 - [Documentation](https://nanboy-ronan.github.io/RVCBench/docs/)
 - [Quickstart](https://nanboy-ronan.github.io/RVCBench/docs/quickstart/)
-- [Chinese quickstart](https://nanboy-ronan.github.io/RVCBench/docs/quickstart_zh/)
 
 ## Citation
 

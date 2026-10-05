@@ -8,7 +8,7 @@ Both workflows are available through `pip install "rvcbench[eval]"`; a repositor
 
 ## Start here
 
-1. **[Getting started](quickstart.md)** / **[中文入门指南](quickstart_zh.md)**: install, score your first audio,
+1. **[Getting started](quickstart.md)**: install, score your first audio,
    evaluate a model with our data, and read the results.
 2. **[Installation](installation.md)**: CPU/GPU setup, model downloads, offline use, upgrades and troubleshooting.
 3. Choose the workflow you need:

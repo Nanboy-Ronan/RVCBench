@@ -323,7 +323,6 @@ def render_llms_txt():
         f"- [Code repository]({D.SITE['repo']})",
         f"- [Documentation]({D.SITE['url']}docs/)",
         f"- [Quickstart]({D.SITE['url']}docs/quickstart/)",
-        f"- [Chinese quickstart]({D.SITE['url']}docs/quickstart_zh/)",
         "",
         "## Citation",
         "",
