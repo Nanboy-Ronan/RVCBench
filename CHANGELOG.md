@@ -2,6 +2,17 @@
 
 Notable changes to the RVCBench codebase. Paper results are not affected by entries here unless stated.
 
+## Unreleased
+
+- Cap PyTorch below 2.10 in the core dependencies, matching the evaluation extra, so that installing
+  `rvcbench` and then `rvcbench[eval]` no longer downgrades PyTorch.
+- The `qwen3` and `enkidu` extras use version ranges instead of exact pins and no longer replace an installed
+  PyTorch build. `envs/qwen3-tts.yml` and the new `envs/enkidu.yml` keep the exact versions used for the
+  published runs. `rvcbench[enkidu,eval]` can now be installed together.
+- Stop shipping the 6 MB CMU dictionary pickle; it is built from `cmudict.rep` in the user cache when needed
+  instead of being written into the package directory.
+- Test Python 3.13 in CI and mark the package as Production/Stable. Scoring behavior is unchanged.
+
 ## 2.2.0 (2026-10-05)
 
 - Add `rvcbench tasks --suite ...` with paper scenario mappings, metrics and dependencies, plus JSON output.

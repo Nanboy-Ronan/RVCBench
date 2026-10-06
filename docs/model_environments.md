@@ -103,8 +103,9 @@ users who need to adapt paths, CUDA versions, or local checkpoint locations.
 
 For models requiring a different Torch version, generate with `+vc.generate_only=true`
 in that model's environment and evaluate in a separate environment containing
-`.[eval]`. The Qwen and evaluation extras pin a matched Torch/Torchaudio 2.6 pair;
-other model base templates do not install the evaluation stack automatically.
+`.[eval]`. The Qwen, Enkidu and evaluation extras accept PyTorch 2.3–2.9 and keep an existing build;
+`envs/qwen3-tts.yml` and `envs/enkidu.yml` pin the exact versions used for the published runs.
+Other model base templates do not install the evaluation stack automatically.
 
 Generation provenance records statically discovered `unmapped_imports` separately
 from distribution versions. These names may be authored upstream namespaces,

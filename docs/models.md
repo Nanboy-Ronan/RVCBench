@@ -149,7 +149,8 @@ including gated downloads.
 ## Model-specific notes
 
 - **Qwen3-TTS** accepts the Hugging Face ID `Qwen/Qwen3-TTS-12Hz-1.7B-Base` or a local directory via
-  `adversary.checkpoint_path`, and needs the `qwen-tts` package (`.[qwen3]` extra).
+  `adversary.checkpoint_path`, and needs the `qwen-tts` package (`.[qwen3]` extra). `envs/qwen3-tts.yml`
+  pins the exact versions used for the published runs.
 - **FishSpeech** needs a checkout of `fishaudio/fish-speech` and the `fishaudio/s1-mini` checkpoint, passed
   with `adversary.code_path`, `adversary.llama_checkpoint_path` and `adversary.decoder_checkpoint_path`.
 - **Fish Audio S2** ([paper](https://arxiv.org/abs/2603.08823)) needs a separate S2-compatible checkout and

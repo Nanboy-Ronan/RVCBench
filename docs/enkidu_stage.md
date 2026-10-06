@@ -5,7 +5,8 @@ description: "Create Enkidu protected references for RVCBench using a defined sp
 
 # Enkidu reference production
 
-Install the model dependencies with `python -m pip install -e '.[enkidu]'`.
+Install the model dependencies with `python -m pip install -e '.[enkidu]'`. For the exact versions used
+for the published references, create the environment from `envs/enkidu.yml` instead.
 
 `protect-enkidu` trains universal spectral perturbations on the dataset's full
 speaker cohort, then writes only the references selected by a frozen manifest.
