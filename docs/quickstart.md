@@ -1,21 +1,19 @@
 ---
 title: "Voice cloning evaluation quickstart"
-description: "Install RVCBench, score your audio with the Python API, then evaluate your model on benchmark data. Learn input formats, reports, resume and comparison."
+description: "Install RVCBench, choose your tasks, generate audio and read per-task scores. Copy commands for scoring your own audio or benchmark data."
 ---
 
-# Getting started with RVCBench
+# Quickstart
 
-[All documentation](README.md)
-
-RVCBench has two entry points. **Use the Python metrics API** if you already have generated audio and
-your own data. **Use a benchmark suite** if you want us to supply the evaluation inputs and produce
-task-level reports. Both work with audio from any voice cloning model, including hosted APIs.
+| You have | Use |
+| --- | --- |
+| Generated audio and your own reference data | [Score your own audio](#2a-score-your-own-audio) |
+| A model to evaluate on RVCBench data | [Export, generate, score](#2b-evaluate-a-model-with-our-data) |
+| A parameter to look up | [CLI values and defaults](cli.md) or [Python API arguments](api.md) |
 
 ## 1. Install and prepare the scorers
 
-Use Linux and Python 3.10–3.12. These commands create a CPU scoring environment; no GPU or repository
-checkout is needed. Install FFmpeg with your system package manager first (on Ubuntu/Debian,
-`sudo apt-get install ffmpeg`).
+Linux, Python 3.10–3.12, FFmpeg. CPU installation:
 
 ```bash
 python -m venv .venv
@@ -23,30 +21,17 @@ source .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install torch==2.6.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cpu
 python -m pip install "rvcbench[eval]==2.2.0"
-rvcbench doctor --eval --imports
 rvcbench setup-scorers
 ```
 
-The last command downloads and verifies the scorer models. Allow several GB of cache space and time
-for the initial downloads; subsequent runs reuse them. All examples below run from your working
-directory, with the environment activated. For GPU setup or installation errors, see
-[installation](installation.md).
+Install FFmpeg with your system package manager, e.g. `sudo apt-get install ffmpeg` on Ubuntu.
+Scorer downloads need several GB of cache space. [GPU installation](installation.md).
 
 ## 2A. Score your own audio
 
-Prepare three inputs:
-
-| Input | What it is |
-| --- | --- |
-| `generated.wav` | Speech produced by your model |
-| `speaker_reference.wav` | A recording of the speaker you want to clone; it may say different words |
-| Expected text | The words you asked your model to generate |
-
-Use real audio files, preferably mono WAV. Save the following as `score_audio.py`, replacing the
-filenames and expected text with yours:
+Replace the file paths and text, then run this Python code:
 
 ```python
-import json
 from rvcbench import metrics
 
 with metrics.Evaluator(["sim", "wer", "speechmos"], device="cpu") as evaluator:
@@ -56,66 +41,41 @@ with metrics.Evaluator(["sim", "wer", "speechmos"], device="cpu") as evaluator:
         text="Hello there.",
         language="en",
     )
-
-print(json.dumps(scores, indent=2))
+print(scores)
 ```
 
-```bash
-python score_audio.py
-```
+| Argument | Values |
+| --- | --- |
+| `metrics` | `sim`, `sva`, `wer`, `speechmos`, `mcd`, `stoi`, `emotion`; pass one name, a list, or `"all"` |
+| `device` | `cpu`, `cuda`, `cuda:N` |
+| `language` | `en` (English), `zh` (Chinese), `fr` (French), or `None` for detection; other Whisper languages also work |
 
-The result is a dictionary of scalar scores, for example this **illustrative, non-benchmark** output:
-
-```json
-{"sim": 0.72, "wer": 0.1, "speechmos": 3.9}
-```
-
-Higher `sim` means more similar speaker embeddings. `wer` is an error rate (`0.1` means 10%, and it can
-exceed 1); lower is better. `speechmos` estimates speech naturalness; higher is better. Compare models
-on the same inputs with the same scoring environment. These metrics do not combine into a universal
-single quality score.
-
-For **all seven metrics**, use the same import and change the evaluation block to:
-
-```python
-with metrics.Evaluator("all", device="cpu") as evaluator:
-    scores = evaluator.score(
-        "generated.wav",
-        reference="speaker_reference.wav",
-        target="same_text_recording.wav",
-        text="Hello there.",
-        language="en",
-    )
-```
-
-The extra `target` recording must contain the **same words** as `generated.wav`; it is used for MCD
-and STOI. Emotion compares against `reference`, so choose one with the intended expression. If you do
-not have a same-text recording, select the metrics your inputs support. Reuse one `Evaluator` in a
-loop to score many files without reloading models. See [metric definitions and batch scoring](metrics.md).
+`sim`: higher speaker similarity is better. `wer`: lower error rate is better. `speechmos`: higher
+predicted naturalness is better. MCD/STOI also need a same-text recording via `target=`.
+[All inputs and defaults](api.md).
 
 ## 2B. Evaluate a model with our data
 
 ### Export prompts
 
-To run only selected scenarios, use `rvcbench tasks --suite core-v1` to list them, then pass
-`--tasks chinese` (or several task IDs) to both `prompts` and `score`. See the
-[scenario selection guide](core_suite.md#run-specific-scenarios).
-
-Start with the 52-utterance onboarding suite:
-
 ```bash
-rvcbench prompts --suite onboarding-v1 --output prompts/
+rvcbench tasks --suite core-v1
+rvcbench prompts --suite core-v1 --tasks chinese --output prompts/
 ```
 
-This downloads the selected data and creates `prompts.jsonl`, `prompts.tsv`, `prompts.lst`, and
-reference WAV files under `prompts/`. Your model needs only the exported reference audio, reference
-transcript and requested text. Evaluation target recordings are kept out of the prompt export.
+| Argument | Values |
+| --- | --- |
+| `--suite` | `onboarding-v1` (52 prompts), `core-v1` (480), `full-v1` (12,724); counts are for whole suites |
+| `--tasks` | Space-separated task IDs, e.g. `chinese french background`; omit for all tasks. [Complete list](cli.md#task-values) |
+| `--output` | New or empty directory for prompt lists and reference audio |
+
+The example exports 24 Chinese prompts. Some tasks automatically add clean controls; generate all
+exported prompts. [Task counts and paper scenarios](core_suite.md#tasks).
 
 ### Generate with your model
 
-Run inference in your model's environment. If its script accepts ZipVoice or Seed-TTS-style batch
-lists, use `prompts/prompts.tsv` or `prompts/prompts.lst`; see [batch inference](adding_a_model.md#batch-inference-scripts).
-Otherwise adapt this loop to your own model API:
+Read `prompts/prompts.jsonl`, synthesize each entry, and save `outputs/my-model/<id>.wav`.
+Replace `model.synthesize` below with your model's API:
 
 ```python
 import json
@@ -139,81 +99,46 @@ for line in (prompts / "prompts.jsonl").read_text().splitlines():
     sf.write(outputs / f"{item['id']}.wav", waveform, sample_rate)
 ```
 
-Return a mono waveform and its actual sample rate. Write one `<id>.wav` per prompt, using the exported
-`id` unchanged. Do not rename outputs sequentially or copy reference/target audio as model predictions.
-RVCBench handles data preparation and scoring; you supply this inference step.
+Use the exported `id` unchanged. Write mono audio at the model's actual sample rate.
+Native batch scripts can use `prompts.tsv` or `prompts.lst`; see [batch formats](adding_a_model.md#batch-inference-scripts).
 
 ### Score and inspect results
 
-Return to the RVCBench environment and use the **same suite** as the export:
-
 ```bash
-rvcbench score --suite onboarding-v1 \
+rvcbench score --suite core-v1 --tasks chinese \
   --generated outputs/my-model --output results/my-model --device cpu
 ```
 
-Open `results/my-model/submission.json`, or print a compact summary:
+Use the same `--suite` and `--tasks` as export. Set `--device cuda` or `--device cuda:1` to score on a GPU.
 
-```python
-import json
-from pathlib import Path
+| Read | Contains |
+| --- | --- |
+| `results/my-model/submission.json` | Per-task metrics, completion status and coverage |
+| `results/my-model/chinese/run_manifest.json` | Per-sample scores and errors |
 
-report = json.loads(Path("results/my-model/submission.json").read_text())
-print(report["model"], report["status"])
-for task, result in report["tasks"].items():
-    print(task, result["status"], result.get("means", {}))
-    if result["status"] != "complete":
-        print("Coverage:", result["coverage"])
-        print("Failures:", result["failures"])
-```
-
-`complete` means all required samples and metrics succeeded. `partial` means some inputs or scores
-failed; inspect each task's `run_manifest.json` for per-sample errors, including scorer errors.
-Completed tasks have `means`; incomplete tasks do not get a misleading successful-only mean.
-The task folders also contain detailed metric reports and uncertainty estimates. There is no single
-overall score that substitutes for the individual dimensions.
-
-Fix missing/invalid outputs, then continue with:
-
-```bash
-rvcbench score --suite onboarding-v1 \
-  --generated outputs/my-model --output results/my-model --device cpu --resume
-```
-
-Keep the same suite, model name, input directory and output directory. Matching successful scores are
-reused; missing, changed or failed samples are checked again.
+`complete`: all selected samples and metrics succeeded. `partial`: some failed; incomplete tasks have
+no mean score. Fix the failed outputs, then repeat the score command with `--resume`.
 
 ### Compare models and expand coverage
 
-Generate the same prompts with a second model, then score both into a fresh directory:
+Score several models with the same suite and tasks:
 
 ```bash
-rvcbench score --suite onboarding-v1 \
+rvcbench score --suite core-v1 --tasks chinese \
   --generated outputs/model-a outputs/model-b --output results/comparison --device cpu
 ```
 
-Read `results/comparison/comparison.md` for the side-by-side table, or use `.csv` and `.json` for analysis.
-Each model also has its own `submission.json` under `results/comparison/<model>/`. To compare existing
-reports from the same suite and scoring environment:
+Read `results/comparison/comparison.md` (also `.csv` and `.json`).
+To compare existing results:
 
 ```bash
-rvcbench compare results/model-a/submission.json results/model-b/submission.json --output results/compare
+rvcbench compare results/model-a results/model-b --output results/compare
 ```
 
-After onboarding, choose a larger suite and **export its prompts again**:
-
-| Suite | Outputs to generate per model | Purpose |
-| --- | ---: | --- |
-| `onboarding-v1` | 52 | Verify your integration |
-| `core-v1` | 480 | Broader languages, speakers and recording conditions, including protected references |
-| `full-v1` | 12,724 | Larger datasets; use `core-v1` separately for protection tasks |
-
-Both export and scoring must use that suite name. Larger suites require more data, inference and scoring
-time. See [suite coverage and costs](core_suite.md). The suites are currently previews; paper reproduction
-uses the separate [v1 codebase](versions.md).
+To change tasks or suites, export new prompts and use new output directories.
 
 ## Next steps
 
-- [Metrics API](metrics.md): metric meanings, required inputs and batch scoring.
-- [Model evaluation](adding_a_model.md): output layouts, external APIs and adapters.
-- [Installation](installation.md): GPU, cache locations, offline use and upgrading old results.
+- [CLI reference](cli.md): every argument, accepted value and default.
+- [Scenarios](core_suite.md): task IDs, counts, controls and metrics.
+- [Metrics API](api.md): Python arguments and input requirements.

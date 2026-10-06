@@ -8,42 +8,35 @@ description: "Evaluate voice cloning with seven automatic speech metrics and rea
 [Read the documentation website](https://nanboy-ronan.github.io/RVCBench/docs/) ·
 [Project homepage](https://nanboy-ronan.github.io/RVCBench/) · [PyPI](https://pypi.org/project/rvcbench/)
 
-RVCBench provides automatic speech metrics and datasets for comprehensive voice cloning evaluation.
-Both workflows are available through `pip install "rvcbench[eval]"`; a repository checkout is optional.
+Score generated speech, or evaluate a model on RVCBench data.
 
-## Two ways to evaluate voice cloning
-
-**Automatic metrics for your audio.** Score speaker identity, content accuracy, predicted naturalness,
-acoustic fidelity, intelligibility and emotion with seven metrics in one Python API. Reuse the same
-evaluator across files. [Start with the metrics API](metrics.md).
-
-**Benchmark data for your model.** Export reference audio and text, generate speech using any model
-or API, then get per-task scores, coverage and comparison reports. Start with 52 onboarding samples
-and expand to the core or full suite. [Evaluate your model](adding_a_model.md).
-
-Your model can run in a separate environment. No built-in adapter is required to score its outputs.
-See the [evaluation FAQ](faq.md) for metric inputs, coverage and choosing a suite.
-
-## Start here
-
-1. **[Getting started](quickstart.md)**: install, score your first audio,
-   evaluate a model with our data, and read the results.
-2. **[Installation](installation.md)**: CPU/GPU setup, model downloads, offline use, upgrades and troubleshooting.
-3. Choose the workflow you need:
-
-| Your goal | Guide |
+| I want to… | Open |
 | --- | --- |
-| Score files you already have | [Metrics API](metrics.md): seven metrics, required inputs and batch scoring |
-| Evaluate your model using benchmark data | [Model evaluation](adding_a_model.md): prompts, inference and output formats |
-| Choose evaluation coverage | [Suites](core_suite.md): onboarding, core and full datasets |
-| Understand and reuse the data | [Datasets](datasets.md): source folders and metadata |
-| Look up an argument or command | [Python API](api.md) and [command-line reference](cli.md) |
-| Run a supported model inside RVCBench | [Built-in models](models.md) and [model environments](model_environments.md) |
-| Inspect, resume or audit an adapter run | [Run guide](run_protocol.md) |
-| Reproduce the published paper | [Codebase versions](versions.md): use the frozen `v1` branch |
+| Install and run my first evaluation | [Quickstart](quickstart.md) |
+| Look up a command argument, its values or its default | [CLI reference](cli.md) |
+| Choose a paper scenario | [Scenarios and task IDs](core_suite.md) |
+| Score audio from my own dataset | [Python API arguments](api.md) and [metric examples](metrics.md) |
+| Connect my model or use a batch inference script | [Model evaluation](adding_a_model.md) |
+| Set up GPU scoring or fix installation | [Installation](installation.md) |
+| Find dataset names and file formats | [Datasets](datasets.md) |
+| Run a built-in model | [Models](models.md) and [environments](model_environments.md) |
+| Inspect or resume a run | [Run guide](run_protocol.md) |
+| Reproduce the paper's results | [Frozen v1 codebase](versions.md) |
 
-The current public API has seven metrics. Packaged suites are previews and have their own fixed selections;
-they should not be presented as reproductions of the paper's results. See [suite coverage](core_suite.md).
+## Run one scenario
+
+After [installation](installation.md):
+
+```bash
+rvcbench tasks --suite core-v1
+rvcbench prompts --suite core-v1 --tasks chinese --output prompts/
+# Generate every prompt with your model in outputs/my-model/.
+rvcbench score --suite core-v1 --tasks chinese \
+  --generated outputs/my-model --output results/my-model --device cpu
+```
+
+Read `results/my-model/submission.json` for per-task scores.
+Replace `chinese` with [task IDs](cli.md#task-values), separated by spaces.
 
 ## Contribute
 

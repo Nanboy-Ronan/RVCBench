@@ -1,188 +1,184 @@
 ---
-title: "Voice cloning benchmark suites and coverage"
-description: "Compare onboarding, core and full RVCBench suites: 52, 480 and 12,724 generated outputs. Review languages, speaker groups, tasks, metrics and scoring costs."
+title: "RVCBench scenarios and task values"
+description: "Choose a suite and task IDs. Copy a command for one scenario, check sample counts, and see which controls are included automatically."
 ---
 
-# Core suite (`core-v1`)
-
-`core-v1` is a small, fixed version of the robustness evaluations in the
-[RVCBench paper](https://arxiv.org/abs/2602.00443). It has 480 utterances to generate (20 of them
-long-form) and reports the paper's metrics per evaluation. It ships with the `rvcbench` package; the audio comes from the
-[Hugging Face dataset](https://huggingface.co/datasets/Nanboy/RVCBench) at a pinned revision.
-
-```bash
-rvcbench prompts --suite core-v1 --output prompts/
-# synthesize every line of prompts/prompts.jsonl with your model
-rvcbench score --suite core-v1 --generated my_outputs/ --model my-model --output results/my-model/ --device cuda
-```
-
-See [Evaluate your own model](adding_a_model.md#route-0-score-audio-you-generated-anywhere) for the file
-format. `core-v1` is not yet a leaderboard suite: its scores become comparable leaderboard results once
-baseline results for the paper's models are published.
+# Scenarios and tasks
 
 ## Run specific scenarios
 
-Since version 2.2.0, choose one or more task IDs with `--tasks`. List the available IDs and their
-paper evaluations without downloading audio or loading models:
-
 ```bash
+# List available task IDs.
 rvcbench tasks --suite core-v1
-rvcbench tasks --suite full-v1 --json
-```
 
-For example, evaluate only Chinese voice cloning:
-
-```bash
+# Export Chinese voice-cloning inputs.
 rvcbench prompts --suite core-v1 --tasks chinese --output prompts-chinese/
-# Generate every exported prompt with your model; preserve its id/output_file.
+
+# Generate one <id>.wav per prompt with your model in outputs/chinese/.
+
+# Score the generated audio.
 rvcbench score --suite core-v1 --tasks chinese \
   --generated outputs/chinese --output results/chinese --device cuda
 ```
 
-Use the same suite and task selection for prompt export and scoring. Replace `chinese` in **both**
-commands with the task IDs below; use separate output directories for each evaluation.
+Read `results/chinese/submission.json` for per-task scores.
 
-| Paper scenario | Value after `--tasks` | Automatically included |
-| --- | --- | --- |
-| AudioShift: demographics | `audioshift` | None; reports accent, gender and age groups |
-| TextShift: hallucination | `textshift-hallucination` | `textshift-standard` |
-| TextShift: scam / Expression: persuasion | `textshift-scam` | `textshift-scam-standard`; EMC only, not the audio-LLM judge |
-| Multilingual: English | `english-libritts` | None |
-| Multilingual: Chinese | `chinese` | None |
-| Multilingual: French | `french` | None |
-| Multilingual: cross-language | `crosslingual` | None |
-| LongContext: long text / long reference audio | `longtext longaudio` | None |
-| PassiveNoise: background | `background` | `background-clean` |
-| PassiveNoise: multiple speakers | `multispeaker` | `multispeaker-clean` |
-| AdvNoise: Gaussian / adversarial | `adv-gaussian adv-spec adv-safespeech adv-pop adv-enkidu` | `adv-clean`; core only |
-| AntiProtect | `antiprotect-spec` | `adv-clean`; core only |
-| Compression: codec (example) | `compression-mp3-64k` | `audioshift` |
-| Compression: narrowband | `compression-narrowband` | `audioshift` |
-| Detectability | Unavailable | Deepfake detectors are not included |
+| Argument | What to pass |
+| --- | --- |
+| `--suite` | `onboarding-v1`, `core-v1` or `full-v1` |
+| `--tasks` | IDs from the table below, separated by spaces; e.g. `chinese french background` |
+| `--output` | A new output directory |
+| `--generated` | Directory containing your model's WAV files |
+| `--device` | `cpu`, `cuda` or `cuda:N`, e.g. `cuda:1`; default `cpu` |
 
-The task table below lists every supported codec and bitrate. You may select any combination of task
-IDs, for example `--tasks chinese crosslingual background`. Omit `--tasks` to run the whole suite.
-`onboarding-v1` uses its own IDs: `libritts`, `vctk`, and `robotcall`.
+Use the same `--suite` and `--tasks` for export and scoring. Omit `--tasks` to run the whole suite.
+For all arguments, see the [CLI reference](cli.md).
 
-Clean anchors and source tasks are included automatically, including their dependencies. Generate all
-exported prompts, including clean anchors. Compression outputs are produced automatically during scoring
-using ffmpeg; you generate only their `audioshift` source audio. Selecting `audioshift` alone does not
-include compression tasks. Unselected tasks do not download or score their data.
+## Choose a suite
 
-Each included task has its own results in `submission.json`; anchors enable percentage changes and
-configured groups retain their breakdowns. A subset can be `complete` when all **selected tasks and
-dependencies** are complete. It is labelled as a selection, not a complete-suite benchmark result.
-The JSON records `selected_tasks`, `parent_suite_sha256` and a selection-specific `suite_sha256`.
-Selecting every task retains the original full-suite identity. Task order and duplicate IDs do not
-change the effective selection. Resume and model comparisons require the same effective selection;
-pass `--tasks` again when using `--resume` or scoring several models with `--generated`.
-Unknown IDs and tasks unavailable in the chosen suite are rejected rather than silently skipped.
+| `--suite` | Audio files to generate | Use |
+| --- | ---: | --- |
+| `onboarding-v1` | 52 | Quick integration check: `libritts` (16), `vctk` (16), `robotcall` (20) |
+| `core-v1` | 480 | Small evaluation across the scenarios below |
+| `full-v1` | 12,724 | Larger evaluation; excludes AdvNoise and AntiProtect |
+
+Counts above are for a whole suite. Selecting tasks reduces the workload.
+These suites are evaluation previews. To reproduce the paper's reported results, use [v1](versions.md).
 
 ## Tasks
 
-| Task | Dimension | Paper evaluation | Data | Utterances | Metrics | Clean anchor | Reported by |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| `audioshift` | input | RVC-AudioShift/Demography | VCTK | 24 | SIM, MOS, WER, MCD |  | accent, gender, age_group |
-| `textshift-standard` | input | RVC-TextShift/Standard prompts (reference for Hallucination) | VCTK | 24 | SIM, MOS, WER, MCD |  |  |
-| `textshift-hallucination` | input | RVC-TextShift/Hallucination | VCTK (hallucination prompts) | 24 | SIM, MOS, WER, MCD | `textshift-standard` |  |
-| `textshift-scam` | input | RVC-TextShift/Scam; RVC-Expression/Persuasion | Robocall scripts, VCTK voices | 20 | SIM, MOS, WER, SVA, EMC | `textshift-scam-standard` | spam_type |
-| `textshift-scam-standard` | input | RVC-Expression/Normal VCTK context (reference for Scam) | Robocall scripts, VCTK voices | 20 | SIM, MOS, WER, SVA, EMC |  |  |
-| `english-libritts` | generation | RVC-Multilingual/English-VC | LibriTTS | 24 | SIM, MOS, WER, MCD |  | gender |
-| `chinese` | generation | RVC-Multilingual/Chinese-VC | AISHELL-1 | 24 | SIM, MOS, WER, MCD |  |  |
-| `crosslingual` | generation | RVC-Multilingual/CrossLingual | EMIME bilingual | 24 | SIM, MOS, WER, MCD |  | direction |
-| `french` | generation | RVC-Multilingual/French (Appendix Table 38) | Common Voice FR | 24 | SIM, MOS, WER, MCD |  |  |
-| `longtext` | generation | RVC-LongContext/LongText | LibriSpeech-Long | 20 | SIM, MOS, WER, MCD |  |  |
-| `longaudio` | generation | RVC-LongContext/LongAudio | LibriTTS | 24 | SIM, MOS, WER, MCD |  | reference_duration_bin |
-| `background-clean` | perturbation | RVC-PassiveNoise/Background (clean references) | VoiceBank+DEMAND | 20 | SIM, MOS, WER, MCD |  |  |
-| `background` | perturbation | RVC-PassiveNoise/Background | VoiceBank+DEMAND | 20 | SIM, MOS, WER, MCD | `background-clean` | noise |
-| `multispeaker-clean` | perturbation | RVC-PassiveNoise/MultiSpeaker (clean references) | Multispeaker Libri | 24 | SIM, MOS, WER, MCD |  |  |
-| `multispeaker` | perturbation | RVC-PassiveNoise/MultiSpeaker | Multispeaker Libri | 24 | SIM, MOS, WER, MCD | `multispeaker-clean` | snr, interferer |
-| `adv-clean` | perturbation | RVC-AdvNoise (clean references) | LibriTTS + protected references | 20 | SIM, MOS, WER, MCD |  |  |
-| `adv-gaussian` | perturbation | RVC-AdvNoise/Gaussian | LibriTTS + protected references | 20 | SIM, MOS, WER, MCD | `adv-clean` |  |
-| `adv-spec` | perturbation | RVC-AdvNoise/Adversary (SPEC) | LibriTTS + protected references | 20 | SIM, MOS, WER, MCD | `adv-clean` |  |
-| `adv-safespeech` | perturbation | RVC-AdvNoise/Adversary (SafeSpeech) | LibriTTS + protected references | 20 | SIM, MOS, WER, MCD | `adv-clean` |  |
-| `adv-pop` | perturbation | RVC-AdvNoise/Adversary (POP) | LibriTTS + protected references | 20 | SIM, MOS, WER, MCD | `adv-clean` |  |
-| `adv-enkidu` | perturbation | RVC-AdvNoise/Adversary (Enkidu) | LibriTTS + protected references | 20 | SIM, MOS, WER, MCD | `adv-clean` |  |
-| `antiprotect-spec` | perturbation | RVC-AntiProtect/AntiProtection (DEMUCS on SPEC) | LibriTTS + protected references | 20 | SIM, MOS, WER, MCD | `adv-clean` |  |
-| `compression-mp3-64k` | output | RVC-Compression/CodecCompression | `audioshift` outputs, processed | 24 | STOI, MCD, SIM, WER |  |  |
-| `compression-aac-64k` | output | RVC-Compression/CodecCompression | `audioshift` outputs, processed | 24 | STOI, MCD, SIM, WER |  |  |
-| `compression-opus-24k` | output | RVC-Compression/CodecCompression | `audioshift` outputs, processed | 24 | STOI, MCD, SIM, WER |  |  |
-| `compression-mp3-32k` | output | RVC-Compression/CodecCompression | `audioshift` outputs, processed | 24 | STOI, MCD, SIM, WER |  |  |
-| `compression-aac-32k` | output | RVC-Compression/CodecCompression | `audioshift` outputs, processed | 24 | STOI, MCD, SIM, WER |  |  |
-| `compression-opus-16k` | output | RVC-Compression/CodecCompression | `audioshift` outputs, processed | 24 | STOI, MCD, SIM, WER |  |  |
-| `compression-narrowband` | output | RVC-Compression/NarrowBand | `audioshift` outputs, processed | 24 | STOI, MCD, SIM, WER |  |  |
+Each row is one accepted `--tasks` value for `core-v1`. The Full column shows availability in `full-v1`.
+Counts are WAV files **you generate**, excluding automatically added tasks. `Auto` means RVCBench
+creates that task's audio during scoring; ffmpeg is required.
 
-Metrics: SIM and SVA (ECAPA speaker similarity and verification), MOS (UTMOS via SpeechMOS), WER (Whisper
-medium), MCD (DTW mel-cepstral distortion), EMC (emotion label agreement) and STOI. `submission.json` reports the
-mean of each metric per task; each task's run directory also records 95% bootstrap intervals.
+| `--tasks` value | Paper scenario | Core | Full | Automatically added |
+| --- | --- | ---: | ---: | --- |
+| `audioshift` | AudioShift: accent, gender and age | 24 | 2000 | — |
+| `textshift-standard` | TextShift: standard-text control | 24 | 200 | — |
+| `textshift-hallucination` | TextShift: hallucination prompts | 24 | 200 | `textshift-standard` |
+| `textshift-scam` | TextShift / Expression: scam scripts | 20 | 200 | `textshift-scam-standard` |
+| `textshift-scam-standard` | Expression: normal-text control | 20 | 100 | — |
+| `english-libritts` | Multilingual: English | 24 | 2000 | — |
+| `chinese` | Multilingual: Chinese | 24 | 1998 | — |
+| `crosslingual` | Multilingual: English ↔ Chinese | 24 | 650 | — |
+| `french` | Multilingual: French | 24 | 2000 | — |
+| `longtext` | LongContext: long target text | 20 | 20 | — |
+| `longaudio` | LongContext: long reference audio | 24 | 156 | — |
+| `background-clean` | PassiveNoise: clean background control | 20 | 800 | — |
+| `background` | PassiveNoise: background noise | 20 | 800 | `background-clean` |
+| `multispeaker-clean` | PassiveNoise: single-speaker control | 24 | 800 | — |
+| `multispeaker` | PassiveNoise: competing speakers | 24 | 800 | `multispeaker-clean` |
+| `adv-clean` | AdvNoise / AntiProtect: clean control | 20 | Unavailable | — |
+| `adv-gaussian` | AdvNoise: Gaussian noise | 20 | Unavailable | `adv-clean` |
+| `adv-spec` | AdvNoise: SPEC | 20 | Unavailable | `adv-clean` |
+| `adv-safespeech` | AdvNoise: SafeSpeech | 20 | Unavailable | `adv-clean` |
+| `adv-pop` | AdvNoise: POP | 20 | Unavailable | `adv-clean` |
+| `adv-enkidu` | AdvNoise: Enkidu | 20 | Unavailable | `adv-clean` |
+| `antiprotect-spec` | AntiProtect: DEMUCS on SPEC | 20 | Unavailable | `adv-clean` |
+| `compression-mp3-64k` | Compression: MP3 64 kbps | Auto | Auto | `audioshift` |
+| `compression-aac-64k` | Compression: AAC 64 kbps | Auto | Auto | `audioshift` |
+| `compression-opus-24k` | Compression: OPUS 24 kbps | Auto | Auto | `audioshift` |
+| `compression-mp3-32k` | Compression: MP3 32 kbps | Auto | Auto | `audioshift` |
+| `compression-aac-32k` | Compression: AAC 32 kbps | Auto | Auto | `audioshift` |
+| `compression-opus-16k` | Compression: OPUS 16 kbps | Auto | Auto | `audioshift` |
+| `compression-narrowband` | Compression: telephone band | Auto | Auto | `audioshift` |
 
-## How it is built
+Examples:
 
-- **Selection.** `scripts/build_core_suite.py` selects pairs from the dataset metadata with seeded SHA-256
-  ranking (seed 20261002), stratified as listed under "Reported by". It never looks at model outputs.
-- **Pinned inputs.** The suite pins the dataset revision and the SHA-256 of every reference and target;
-  `rvcbench prompts` and `rvcbench score` refuse to run when any input differs.
-- **Paired anchors.** Each perturbed task uses the same targets as its clean anchor, and
-  `submission.json` reports the percentage change of every shared metric against the anchor, as in the
-  paper's Figures 4 and 7.
-- **Post-processing.** The seven compression tasks re-encode the submitted `audioshift` outputs (MP3 and
-  AAC at 64 and 32 kbps, Opus at 24 and 16 kbps, all at 24 kHz, and an 8 kHz 300-3400 Hz telephone
-  channel) and compare each processed clone with the unprocessed one (paper Tables 43-44).
-- **Protected references.** The AdvNoise and AntiProtect tasks use the protected references from the
-  paper's runs, published under `Protected_LibriTTS/` in the dataset. POP is the method implemented as
-  the error-minimizing protector (`em`) in the codebase.
+```bash
+# Chinese and French: 24 + 24 = 48 generations.
+rvcbench prompts --suite core-v1 --tasks chinese french --output prompts-languages/
 
-## Things to know when reading results
+# Background noise: 20 noisy + 20 clean = 40 generations.
+rvcbench prompts --suite core-v1 --tasks background --output prompts-noise/
 
-- The Enkidu and DEMUCS references are 16 kHz while the clean LibriTTS references are 24 kHz, so part of
-  their change against `adv-clean` comes from the lower bandwidth. This matches the paper's runs.
-- In `textshift-scam` the target recording is the reference recording itself: the script text has no
-  recording of its own. SIM and EMC there measure agreement with the reference, and MCD is not computed
-  (paper Table 25). Returning the reference unchanged scores SIM 1.0 on this task; WER exposes it.
-- Not included in `core-v1`: RVC-Detectability (deepfake detectors) and the audio-LLM emotion-alignment judge
-  of RVC-Expression. Both are planned for `core-v1.1`.
+# MP3 compression: generate 24 audioshift prompts; scoring creates the MP3 versions.
+rvcbench prompts --suite core-v1 --tasks compression-mp3-64k --output prompts-mp3/
+```
+
+Generate every exported prompt, including automatically added controls. Selecting `audioshift` alone
+does not run compression tasks. `onboarding-v1` accepts only `libritts`, `vctk`, and `robotcall`.
+
+## Metrics and results
+
+| Tasks | Reported metrics |
+| --- | --- |
+| Most tasks | `sim`, `speechmos`, `wer`, `mcd` |
+| `textshift-scam`, `textshift-scam-standard` | `sim`, `speechmos`, `wer`, `sva`, `emotion` |
+| `compression-*` | `stoi`, `mcd`, `sim`, `wer` |
+
+Metric definitions: [SIM, SVA, WER, MOS, MCD, STOI and emotion](metrics.md#metric-definitions).
+The suite chooses the metrics; `score` has no `--metrics` argument.
+
+| Result | Where to find it |
+| --- | --- |
+| Per-task means and completion status | `submission.json` → `tasks` → task ID |
+| Change from the clean control | Task's `relative_change_percent` |
+| Accent, gender and age breakdown | `audioshift` → `group_means` |
+| Other group breakdowns | `english-libritts`: gender; `crosslingual`: direction; `longaudio`: reference duration; `background`: noise; `multispeaker`: SNR/interferer; `textshift-scam`: scam type |
+| Per-sample scores, errors and coverage | `<task>/run_manifest.json` |
+| 95% bootstrap intervals | Metric reports in the task directory |
+
+`complete` means every selected task and automatically added dependency succeeded. Incomplete tasks
+have no `means`. Resume with the original command plus `--resume`. Compare models using the same
+suite, task selection and scoring setup.
+
+## Coverage limits
+
+- Deepfake detection and the audio-LLM emotion-alignment judge are not included.
+- `core-v1` includes AdvNoise and AntiProtect; `full-v1` does not.
+- For shared tasks, core pairs are included in full with the same IDs and inputs.
 
 ## Full suite
 
-`full-v1` expands the shared tasks to the full frozen task populations, retaining their metrics and
-anchors. It excludes the AdvNoise and AntiProtect tasks included in `core-v1`. Every `core-v1` pair is also in `full-v1`, with the same identifier and inputs.
+```bash
+rvcbench prompts --suite full-v1 --output prompts-full/
+# Generate all exported prompts in outputs/my-model/.
+rvcbench score --suite full-v1 --generated outputs/my-model \
+  --output results-full/my-model --device cuda
+```
 
-| Task | Utterances | Task | Utterances |
-| --- | ---: | --- | ---: |
-| `audioshift` | 2,000 | `french` | 2,000 |
-| `textshift-standard` | 200 | `longtext` | 20 |
-| `textshift-hallucination` | 200 | `longaudio` | 156 |
-| `textshift-scam` | 200 | `background-clean` | 800 |
-| `textshift-scam-standard` | 100 | `background` | 800 |
-| `english-libritts` | 2,000 | `multispeaker-clean` | 800 |
-| `chinese` | 1,998 | `multispeaker` | 800 |
-| `crosslingual` | 650 | **Total** | **12,724** |
+The full suite needs 12,724 generated WAVs and scores 26,724 files including compression variants.
+You can still select a smaller set with `--tasks`.
 
-The seven compression tasks re-encode all 2,000 `audioshift` outputs, so `rvcbench score` scores 26,724
-files, about 41 times as many as for `core-v1`. On a shared RTX A6000, `core-v1` took about 35 minutes
-per model with 4 GB of GPU memory; plan for about a day for `full-v1` on similar hardware. The metric
-models stay loaded for the whole call, including across models.
-
-Not yet in `full-v1`: the AdvNoise and AntiProtect tasks. The protected versions of all 2,000 LibriTTS
-references are not yet in the Hub dataset; `core-v1` covers these evaluations.
-
-Download the dataset once (12.6 GB) and pass it to both commands:
+To use a local dataset copy:
 
 ```bash
 hf download Nanboy/RVCBench --repo-type dataset --revision a932bd08d6858f14bdda52356dde5a7b771f0245 \
   --local-dir rvcbench-data
-rvcbench prompts --suite full-v1 --output prompts-full/ --data-root rvcbench-data
-rvcbench score --suite full-v1 --generated outputs/my-model --output results-full/my-model \
-  --data-root rvcbench-data --device cuda
+rvcbench prompts --suite full-v1 --tasks chinese --output prompts-local/ --data-root rvcbench-data
 ```
 
-Log in first (`hf auth login`): the Hub rate-limits large anonymous downloads. With `huggingface_hub`
-older than 0.34, use `huggingface-cli login` and `huggingface-cli download` instead. If the download stops,
-run it again; files already present are kept. Both commands check every input against the frozen
-hashes, so a local copy that differs from the pinned revision is refused.
+Pass the same `--data-root rvcbench-data` to `score`. Downloads require about 12.6 GB for the whole
+snapshot; use `hf auth login` if the Hub rate-limits requests.
 
-- `english-libritts` includes the 19 speakers without a gender label in the dataset; they appear as
-  `unknown` in the gender breakdown.
-- 22 `textshift-hallucination` texts span several lines. `prompts.jsonl` keeps them as they are; the batch
-  lists (`prompts.tsv`, `prompts.lst`) write the line breaks as spaces. WER treats a line break as a space,
-  so the scores do not depend on which file you used.
+## How it is built
+
+<details markdown="1">
+<summary>Sampling, input verification and comparison details</summary>
+
+- Core selections are fixed before looking at model outputs, using seeded SHA-256 ranking
+  (seed 20261002). Audio and metadata are checked against the suite's recorded hashes.
+- Noisy and protected tasks use matched clean controls. Compression tasks compare processed
+  generated audio with its unprocessed version.
+- Selected runs record `selected_tasks`, `parent_suite_sha256` and `suite_sha256`. Different task
+  selections cannot share a resumed run or a ranked comparison. Selecting all tasks keeps the
+  whole-suite identity.
+- Protected references come from `Protected_LibriTTS/`. POP is called `em` in the protection code.
+
+</details>
+
+## Things to know when reading results
+
+<details markdown="1">
+<summary>Task-specific interpretation</summary>
+
+- Enkidu and DEMUCS references are 16 kHz; clean LibriTTS references are 24 kHz.
+  Their comparison includes the bandwidth difference.
+- Scam scripts have no same-text target recording. SIM and emotion compare with the speaker
+  reference; MCD is omitted. WER checks whether the generated speech follows the script.
+- In full English-LibriTTS, 19 speakers have no gender annotation and appear as `unknown`.
+- Multi-line text is preserved in `prompts.jsonl`; TSV/LST exports replace line breaks with spaces.
+  WER treats these line breaks as spaces.
+
+</details>

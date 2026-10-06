@@ -5,8 +5,7 @@ description: "Look up Evaluator arguments, score inputs, return values and conve
 
 # Python API reference
 
-For a worked example, start with [Score your own audio](metrics.md). This page describes the public
-metrics API in RVCBench 2.1.x. Import it with:
+Import the metrics API:
 
 ```python
 from rvcbench import metrics
@@ -33,12 +32,15 @@ metrics.Evaluator(
 )
 ```
 
-| Argument | Meaning |
-| --- | --- |
-| `metrics` | A list/tuple of metric names, a single name, or `"all"`. Unknown names and empty selections raise `ValueError`. |
-| `device` | PyTorch device, such as `"cpu"`, `"cuda"` or `"cuda:0"`. |
-| `seed` | Seed applied during each scoring call; default `42`. |
-| `logger` | Optional Python logger for scoring messages. |
+| Argument | Accepted values | Default |
+| --- | --- | --- |
+| `metrics` | `"sim"`, `"sva"`, `"wer"`, `"speechmos"`, `"mcd"`, `"stoi"`, `"emotion"`; a list/tuple of these; or `"all"` | `("sim", "wer", "speechmos")` |
+| `device` | `"cpu"`, `"cuda"`, `"cuda:N"` (e.g. `"cuda:1"`), or a compatible `torch.device` | `"cpu"` |
+| `seed` | Integer | `42` |
+| `logger` | `logging.Logger` or `None` | `None` |
+
+Example: `metrics.Evaluator(["sim", "wer"], device="cuda")`.
+Unknown metric names and empty lists raise `ValueError`.
 
 Scorer models load on first use and are reused. Use the evaluator as a context manager so its resources
 are released, including when a call raises an error:
@@ -54,13 +56,23 @@ with metrics.Evaluator("speechmos", device="cpu") as evaluator:
 evaluator.score(generated, *, reference=None, target=None, text=None, language=None)
 ```
 
-| Argument | Type / meaning |
-| --- | --- |
-| `generated` | Audio file path (`str` or `pathlib.Path`). |
-| `reference` | Recording of the intended speaker; also the comparison recording for emotion. |
-| `target` | Same-text recording for MCD/STOI. If omitted, these metrics use `reference`. |
-| `text` | Expected transcript, required by `wer`. |
-| `language` | Optional Whisper language hint, such as `"en"` or `"zh"`. |
+| Argument | Accepted values | Required / default |
+| --- | --- | --- |
+| `generated` | Audio file path: `str` or `pathlib.Path`, e.g. `"generated.wav"` | **Required** |
+| `reference` | Speaker reference audio path: `str`, `Path` or `None` | Required for `sim`, `sva`, `emotion`; default `None` |
+| `target` | Same-text target audio path: `str`, `Path` or `None` | Used by `mcd` and `stoi`; falls back to `reference` |
+| `text` | Nonempty transcript string, e.g. `"Hello there."`, or `None` | Required for `wer`; default `None` |
+| `language` | Whisper language code/name; benchmark languages are `"en"`, `"zh"`, `"fr"`; `None` or `"auto"` for detection | `None` |
+
+`target` must contain the same words as `generated`. `reference` may contain different words.
+For MCD/STOI, provide either `target` or a same-text `reference`.
+
+```python
+with metrics.Evaluator(["sim", "wer"], device="cpu") as evaluator:
+    scores = evaluator.score(
+        "generated.wav", reference="speaker.wav", text="Hello there.", language="en"
+    )
+```
 
 Returns a dictionary with exactly the selected metric names. Values are Python floats; `sva` and
 `emotion` are booleans. Missing required arguments raise `ValueError`; missing files raise
