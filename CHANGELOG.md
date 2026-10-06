@@ -2,7 +2,7 @@
 
 Notable changes to the RVCBench codebase. Paper results are not affected by entries here unless stated.
 
-## Unreleased
+## 2.2.1 (2026-10-06)
 
 - Cap PyTorch below 2.10 in the core dependencies, matching the evaluation extra, so that installing
   `rvcbench` and then `rvcbench[eval]` no longer downgrades PyTorch.
