@@ -11,7 +11,8 @@ Notable changes to the RVCBench codebase. Paper results are not affected by entr
   published runs. `rvcbench[enkidu,eval]` can now be installed together.
 - Stop shipping the 6 MB CMU dictionary pickle; it is built from `cmudict.rep` in the user cache when needed
   instead of being written into the package directory.
-- Test Python 3.13 in CI and mark the package as Production/Stable. Scoring behavior is unchanged.
+- Support Python 3.13 (tested in CI; the scoring regression also passes on 3.13) and mark the package as
+  Production/Stable. Scoring behavior is unchanged.
 
 ## 2.2.0 (2026-10-05)
 

@@ -13,7 +13,7 @@ description: "Install RVCBench, choose your tasks, generate audio and read per-t
 
 ## 1. Install and prepare the scorers
 
-Linux, Python 3.10–3.12, FFmpeg. CPU installation:
+Linux, Python 3.10–3.13, FFmpeg. CPU installation:
 
 ```bash
 python -m venv .venv

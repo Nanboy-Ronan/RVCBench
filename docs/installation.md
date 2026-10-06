@@ -10,7 +10,7 @@ model evaluation. Neither requires cloning this repository.
 
 ## Recommended installation
 
-Use Python 3.10–3.12 on Linux. Start in a separate environment:
+Use Python 3.10–3.13 on Linux. Start in a separate environment:
 
 ```bash
 python -m venv .venv
