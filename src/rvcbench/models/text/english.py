@@ -200,13 +200,20 @@ def cache_dict(g2p_dict, file_path):
 
 
 def get_dict():
-    if os.path.exists(CACHE_PATH):
-        with open(CACHE_PATH, "rb") as pickle_file:
-            g2p_dict = pickle.load(pickle_file)
-    else:
-        g2p_dict = read_dict()
-        cache_dict(g2p_dict, CACHE_PATH)
-
+    # Parsing cmudict.rep is slow, so the result is cached per user; the package directory may be read-only.
+    # CACHE_PATH is still read if an older checkout left a pickle there.
+    user_cache = os.path.join(os.environ.get("XDG_CACHE_HOME") or os.path.expanduser("~/.cache"),
+                              "rvcbench", "cmudict_cache.pickle")
+    for path in (CACHE_PATH, user_cache):
+        if os.path.exists(path):
+            with open(path, "rb") as pickle_file:
+                return pickle.load(pickle_file)
+    g2p_dict = read_dict()
+    try:
+        os.makedirs(os.path.dirname(user_cache), exist_ok=True)
+        cache_dict(g2p_dict, user_cache)
+    except OSError:
+        pass
     return g2p_dict
 
 

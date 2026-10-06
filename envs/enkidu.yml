@@ -1,16 +1,15 @@
-name: qwen3
+name: enkidu
 channels:
   - conda-forge
 dependencies:
   - python=3.10
   - pip
   - ffmpeg
-  - sox
   - libsndfile
   - pip:
-      # Versions used for the published Qwen3-TTS runs.
+      # Versions used for the published Enkidu references.
       - numpy==1.26.4
       - torch==2.6.0
       - torchaudio==2.6.0
-      - qwen-tts==0.1.1
-      - -e ..[qwen3]
+      - speechbrain==1.0.3
+      - -e ..[enkidu]

@@ -50,6 +50,9 @@ Install the runtime package:
 python -m pip install -e '.[qwen3]'
 ```
 
+The extra keeps an installed PyTorch 2.3–2.9 build. For the exact versions used for the published runs,
+create the environment from `envs/qwen3-tts.yml` instead.
+
 Optional but recommended: pre-download the gated checkpoint into the repo so
 the notebook/script does not need live network access during generation.
 
