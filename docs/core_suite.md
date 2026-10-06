@@ -154,7 +154,7 @@ snapshot; use `hf auth login` if the Hub rate-limits requests.
 
 ## How it is built
 
-<details>
+<details markdown="1">
 <summary>Sampling, input verification and comparison details</summary>
 
 - Core selections are fixed before looking at model outputs, using seeded SHA-256 ranking
@@ -170,7 +170,7 @@ snapshot; use `hf auth login` if the Hub rate-limits requests.
 
 ## Things to know when reading results
 
-<details>
+<details markdown="1">
 <summary>Task-specific interpretation</summary>
 
 - Enkidu and DEMUCS references are 16 kHz; clean LibriTTS references are 24 kHz.
