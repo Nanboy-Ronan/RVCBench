@@ -146,6 +146,8 @@ lists tasks, coverage and approximate scoring costs.
 
 ## Evaluation coverage
 
+[![RVCBench overview: input, generation, output and audio perturbation robustness](figs/main.svg)](figs/main.svg)
+
 The package covers clean voice cloning, multilingual and cross-lingual speech, speaker demographics,
 long-form speech, unusual text, background noise, overlapping speakers, compression, and protected references.
 Its seven public metrics cover identity, content, quality, intelligibility and emotion.
