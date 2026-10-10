@@ -1,3 +1,8 @@
+---
+title: "RVCBench paper results"
+description: "Published voice-cloning utility and anti-cloning protection results from RVCBench, with dataset and metric context."
+---
+
 # Paper results
 
 
