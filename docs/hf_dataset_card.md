@@ -26,43 +26,63 @@ configs:
   - config_name: AISHELL1_dev
     data_files:
       - split: default
-        path: AISHELL1_dev/metadata.parquet
+        path:
+          - AISHELL1_dev/metadata.parquet
+          - AISHELL1_dev/audios/**/*.wav
   - config_name: Background_noise
     data_files:
       - split: default
-        path: Background_noise/metadata.parquet
+        path:
+          - Background_noise/metadata.parquet
+          - Background_noise/audios/**/*.wav
   - config_name: Bilingual_uedin
     data_files:
       - split: default
-        path: Bilingual_uedin/metadata.parquet
+        path:
+          - Bilingual_uedin/metadata.parquet
+          - Bilingual_uedin/audios/**/*.wav
   - config_name: CommonVoiceFR_dev
     data_files:
       - split: default
-        path: CommonVoiceFR_dev/metadata.parquet
+        path:
+          - CommonVoiceFR_dev/metadata.parquet
+          - CommonVoiceFR_dev/audios/**/*.mp3
   - config_name: Libritts
     data_files:
       - split: default
-        path: Libritts/metadata.parquet
+        path:
+          - Libritts/metadata.parquet
+          - Libritts/audios/**/*.wav
   - config_name: Long_context
     data_files:
       - split: default
-        path: Long_context/metadata.parquet
+        path:
+          - Long_context/metadata.parquet
+          - Long_context/audios/**/*.wav
   - config_name: Multispeaker_libri
     data_files:
       - split: default
-        path: Multispeaker_libri/metadata.parquet
+        path:
+          - Multispeaker_libri/metadata.parquet
+          - Multispeaker_libri/audios/**/*.wav
   - config_name: VCTK
     data_files:
       - split: default
-        path: VCTK/metadata.parquet
+        path:
+          - VCTK/metadata.parquet
+          - VCTK/audios/**/*.wav
   - config_name: robotcall
     data_files:
       - split: default
-        path: robotcall/metadata.parquet
+        path:
+          - robotcall/metadata.parquet
+          - robotcall/audios/**/*.wav
   - config_name: vctk_text_robust
     data_files:
       - split: default
-        path: vctk_text_robust/metadata.parquet
+        path:
+          - vctk_text_robust/metadata.parquet
+          - vctk_text_robust/audios/**/*.wav
 ---
 
 # RVCBench
@@ -103,6 +123,10 @@ When available, training-oriented annotations are also preserved:
 - `target_phonemes`, `target_tone`, `target_word2ph`
 
 Some subsets include additional task-specific metadata, for example `spam_type` in `robotcall`.
+
+The dataset viewer and `datasets.load_dataset` load `prompt_file_name` and `target_file_name` as playable
+`prompt` and `target` audio columns. In `robotcall`, the scam-script rows have no target recording, so their
+target repeats the prompt audio.
 
 ## Available Configs
 
