@@ -1,6 +1,6 @@
 ---
 title: "Voice cloning evaluation datasets"
-description: "Use RVCBench datasets from Hugging Face or a local copy. Find dataset layouts, language coverage, metadata and references for voice cloning evaluation."
+description: "Use RVCBench datasets from Hugging Face or a local copy: layouts, language coverage, metadata and references for voice cloning evaluation, plus cloned speech for deepfake detection research."
 ---
 
 # Datasets
@@ -64,3 +64,26 @@ To rebuild canonical manifests from legacy per-speaker JSON files:
 ```bash
 python src/rvcbench/datasets/build_canonical_manifests.py --force
 ```
+
+## Cloned speech samples
+
+[RVCBench Cloned Speech Samples](https://huggingface.co/datasets/Nanboy/RVCBench-Cloned-Speech) is a separate
+dataset of voice-cloned speech for audio deepfake detection, source tracing and anti-spoofing research. It has
+51,562 synthetic clips from 19 open-source text-to-speech and voice cloning systems, generated from prompts and
+texts of this dataset. Each clip comes with the prompt the system was given and, except in the `unusual_text`
+configuration, a real recording of the same text by the same speaker.
+
+| Configuration | Conditions | Audio columns |
+| --- | --- | --- |
+| `default` | Clean (LibriTTS, VCTK, AISHELL-1, Common Voice French), cross-lingual, long-form, noisy and multi-speaker prompts, and prompts protected by Gaussian noise, POP, Enkidu, SafeSpeech, SPEC and denoised SPEC | `audio`, `prompt`, `ground_truth` |
+| `unusual_text` | Texts with numbers, dates, symbols and unusual strings, which have no real recording | `audio`, `prompt` |
+
+```python
+from datasets import load_dataset
+
+ds = load_dataset("Nanboy/RVCBench-Cloned-Speech", split="train", streaming=True)
+row = next(iter(ds))  # row["audio"], row["prompt"], row["ground_truth"], row["model"], row["condition"]
+```
+
+`protocol.txt` in the dataset lists real and synthetic files in an ASVspoof-style format. The clips are licensed
+CC BY-NC 4.0, with additional terms for some systems listed on the dataset card.

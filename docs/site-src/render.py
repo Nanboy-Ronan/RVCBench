@@ -275,6 +275,18 @@ def render_jsonld():
                                       "url": "https://huggingface.co/datasets"},
         },
         {
+            "@type": "Dataset", "@id": base + "#cloned-speech", "name": "RVCBench Cloned Speech Samples",
+            "description": ("Voice-cloned speech from 19 open-source text-to-speech and voice cloning systems, with each "
+                            "clip's prompt and a real recording of the same text, for audio deepfake detection, "
+                            "source tracing and anti-spoofing research in English, Mandarin and French."),
+            "url": D.SITE["cloned_speech"], "license": "https://creativecommons.org/licenses/by-nc/4.0/",
+            "creator": authors, "isBasedOn": {"@id": base + "#dataset"}, "citation": {"@id": base + "#paper"},
+            "keywords": ["audio deepfake detection", "synthetic speech", "voice cloning", "anti-spoofing",
+                         "source tracing"],
+            "includedInDataCatalog": {"@type": "DataCatalog", "name": "Hugging Face Datasets",
+                                      "url": "https://huggingface.co/datasets"},
+        },
+        {
             "@type": "ScholarlyArticle", "@id": base + "#paper", "headline": D.CITATION["title"],
             "author": authors, "datePublished": D.CITATION["year"], "url": D.SITE["paper"],
             "identifier": f"arXiv:{D.CITATION['arxiv_id']}",
@@ -322,6 +334,7 @@ def render_llms_txt():
         "",
         f"- [Paper (arXiv:{D.CITATION['arxiv_id']})]({D.SITE['paper']})",
         f"- [Dataset (Hugging Face)]({D.SITE['dataset']})",
+        f"- [Cloned speech for deepfake detection (Hugging Face)]({D.SITE['cloned_speech']})",
         f"- [Interactive demo]({D.SITE['demo']})",
         f"- [Code repository]({D.SITE['repo']})",
         f"- [Documentation]({D.SITE['url']}docs/)",

@@ -19,6 +19,7 @@ SITE = {
     "paper": "https://arxiv.org/abs/2602.00443",
     "arxiv_id": "2602.00443",
     "dataset": "https://huggingface.co/datasets/Nanboy/RVCBench",
+    "cloned_speech": "https://huggingface.co/datasets/Nanboy/RVCBench-Cloned-Speech",
     "demo": "https://huggingface.co/spaces/Nanboy/RVCBench",
     "docs": "https://nanboy-ronan.github.io/RVCBench/docs/",
     "pypi": "https://pypi.org/project/rvcbench/",
@@ -252,6 +253,15 @@ FAQ = [
         "q": "Is the RVCBench dataset public?",
         "a": "Yes. The benchmark dataset is hosted on Hugging Face at huggingface.co/datasets/Nanboy/RVCBench under "
              "a CC0-1.0 license, with 10 dataset configurations spanning English, Mandarin, and French.",
+    },
+    {
+        "q": "Does RVCBench provide synthetic speech for deepfake detection?",
+        "a": "Yes. RVCBench Cloned Speech Samples (huggingface.co/datasets/Nanboy/RVCBench-Cloned-Speech) has "
+             "51,562 voice-cloned clips from 19 open-source text-to-speech and voice cloning systems for audio deepfake "
+             "detection, source tracing and anti-spoofing research. Each clip comes with the prompt the system was "
+             "given and a real recording of the same text by the same speaker. It covers 12 conditions, including "
+             "noisy, multi-speaker and anti-cloning-protected prompts, in English, Mandarin and French, under "
+             "CC BY-NC 4.0 with additional terms for some systems.",
     },
     {
         "q": "How do I cite RVCBench?",

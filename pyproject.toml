@@ -64,6 +64,7 @@ Repository = "https://github.com/Nanboy-Ronan/RVCBench"
 Issues = "https://github.com/Nanboy-Ronan/RVCBench/issues"
 Paper = "https://arxiv.org/abs/2602.00443"
 Dataset = "https://huggingface.co/datasets/Nanboy/RVCBench"
+"Cloned speech dataset" = "https://huggingface.co/datasets/Nanboy/RVCBench-Cloned-Speech"
 
 [project.scripts]
 rvcbench = "rvcbench.benchmark.cli:main"

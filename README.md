@@ -10,9 +10,10 @@
 [![arXiv](https://img.shields.io/badge/arXiv-2602.00443-b31b1b.svg)](https://arxiv.org/abs/2602.00443)
 [![PyPI](https://img.shields.io/pypi/v/rvcbench.svg)](https://pypi.org/project/rvcbench/)
 [![Dataset](https://img.shields.io/badge/Hugging%20Face-Dataset-ffcc00.svg)](https://huggingface.co/datasets/Nanboy/RVCBench)
+[![Cloned speech](https://img.shields.io/badge/Hugging%20Face-Cloned%20Speech-ffcc00.svg)](https://huggingface.co/datasets/Nanboy/RVCBench-Cloned-Speech)
 [![CI](https://github.com/Nanboy-Ronan/RVCBench/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Nanboy-Ronan/RVCBench/actions/workflows/ci.yml)
 
-[**Paper**](https://arxiv.org/abs/2602.00443) · [**Dataset**](https://huggingface.co/datasets/Nanboy/RVCBench) · [**Documentation**](https://nanboy-ronan.github.io/RVCBench/docs/) · [**Website & results**](https://nanboy-ronan.github.io/RVCBench/) · [**Audio demo**](https://huggingface.co/spaces/Nanboy/RVCBench)
+[**Paper**](https://arxiv.org/abs/2602.00443) · [**Dataset**](https://huggingface.co/datasets/Nanboy/RVCBench) · [**Cloned speech**](https://huggingface.co/datasets/Nanboy/RVCBench-Cloned-Speech) · [**Documentation**](https://nanboy-ronan.github.io/RVCBench/docs/) · [**Website & results**](https://nanboy-ronan.github.io/RVCBench/) · [**Audio demo**](https://huggingface.co/spaces/Nanboy/RVCBench)
 
 </div>
 
@@ -24,6 +25,8 @@ with tests across speakers, languages and real-world audio conditions.
   unusual text, speaker demographics and multilingual/cross-lingual coverage.
 - **Automated evaluation:** a pip package with seven metrics, prompt export and evaluation reports.
   Use our datasets or score your own audio.
+- **Cloned speech for deepfake research:** 51,562 voice-cloned clips from 19 open-source systems, each with
+  its prompt and a real recording of the same text.
 
 [![RVCBench overview: input, generation, output and audio perturbation robustness](figs/main.svg)](figs/main.svg)
 
@@ -46,6 +49,7 @@ and download requirements, see the [installation guide](https://nanboy-ronan.git
 | Score generated audio with your own reference data | [Score your own audio](#score-your-own-audio) |
 | Test a model on RVCBench datasets | [Evaluate your model](#evaluate-your-model) |
 | Reproduce the published experiments | [Reproduce the paper](#reproduce-the-paper) |
+| Get cloned speech for deepfake detection or source tracing | [Cloned speech dataset](#cloned-speech-dataset) |
 
 ### Score your own audio
 
@@ -87,6 +91,23 @@ and [resume and model comparison](https://nanboy-ronan.github.io/RVCBench/docs/a
 **Packaged suites are currently previews and use a separate protocol from the paper.**
 The paper's deepfake-detectability evaluation and audio-LLM expression judge are not included in these suites.
 
+### Cloned speech dataset
+
+[RVCBench Cloned Speech Samples](https://huggingface.co/datasets/Nanboy/RVCBench-Cloned-Speech) provides
+51,562 synthetic clips from 19 open-source voice cloning systems for audio deepfake detection, source tracing
+and anti-spoofing research. Each clip comes with the prompt the system was given and a real recording of the
+same text by the same speaker. The 12 conditions include clean, cross-lingual, long-form, noisy, multi-speaker
+and anti-cloning-protected prompts in English, Mandarin and French.
+
+```python
+from datasets import load_dataset
+
+ds = load_dataset("Nanboy/RVCBench-Cloned-Speech", split="train", streaming=True)
+row = next(iter(ds))  # row["audio"], row["prompt"] and row["ground_truth"]
+```
+
+The clips are licensed CC BY-NC 4.0, with additional terms for some systems listed on the dataset card.
+
 ## Results
 
 The paper defines **18 evaluations**, **14,370 utterances** and **204 speakers**.
@@ -120,6 +141,7 @@ See [versions and reproduction](https://nanboy-ronan.github.io/RVCBench/docs/ver
 
 ## License & contact
 
-[CC0-1.0](LICENSE). Models, upstream code and source corpora retain their own licenses.
+[CC0-1.0](LICENSE). Models, upstream code and source corpora retain their own licenses. The cloned speech
+dataset is licensed separately under CC BY-NC 4.0.
 Questions and contributions are welcome through [issues](https://github.com/Nanboy-Ronan/RVCBench/issues)
 or **ruinanjin@alumni.ubc.ca**.
