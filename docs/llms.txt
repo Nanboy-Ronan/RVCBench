@@ -34,6 +34,10 @@ Across the LibriTTS leaderboard, StyleTTS 2 and OpenVoice V2 have the lowest cle
 
 Yes. The benchmark dataset is hosted on Hugging Face at huggingface.co/datasets/Nanboy/RVCBench under a CC0-1.0 license, with 10 dataset configurations spanning English, Mandarin, and French.
 
+### Does RVCBench provide synthetic speech for deepfake detection?
+
+Yes. RVCBench Cloned Speech Samples (huggingface.co/datasets/Nanboy/RVCBench-Cloned-Speech) has 51,562 voice-cloned clips from 19 open-source text-to-speech and voice cloning systems for audio deepfake detection, source tracing and anti-spoofing research. Each clip comes with the prompt the system was given and a real recording of the same text by the same speaker. It covers 12 conditions, including noisy, multi-speaker and anti-cloning-protected prompts, in English, Mandarin and French, under CC BY-NC 4.0 with additional terms for some systems.
+
 ### How do I cite RVCBench?
 
 Cite the NeurIPS 2026 paper: Jin, Ruinan; Liao, Xinting; Yu, Hanlin; Pandya, Deval; Li, Xiaoxiao. “RVCBench: Benchmarking the Robustness of Voice Cloning Across Modern Audio Generation Models.” Advances in Neural Information Processing Systems (NeurIPS), 2026. arXiv:2602.00443.
@@ -43,6 +47,7 @@ Cite the NeurIPS 2026 paper: Jin, Ruinan; Liao, Xinting; Yu, Hanlin; Pandya, Dev
 
 - [Paper (arXiv:2602.00443)](https://arxiv.org/abs/2602.00443)
 - [Dataset (Hugging Face)](https://huggingface.co/datasets/Nanboy/RVCBench)
+- [Cloned speech for deepfake detection (Hugging Face)](https://huggingface.co/datasets/Nanboy/RVCBench-Cloned-Speech)
 - [Interactive demo](https://huggingface.co/spaces/Nanboy/RVCBench)
 - [Code repository](https://github.com/Nanboy-Ronan/RVCBench)
 - [Documentation](https://nanboy-ronan.github.io/RVCBench/docs/)
