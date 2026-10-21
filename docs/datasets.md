@@ -77,12 +77,14 @@ configuration, a real recording of the same text by the same speaker.
 | --- | --- | --- |
 | `default` | Clean (LibriTTS, VCTK, AISHELL-1, Common Voice French), cross-lingual, long-form, noisy and multi-speaker prompts, and prompts protected by Gaussian noise, POP, Enkidu, SafeSpeech, SPEC and denoised SPEC | `audio`, `prompt`, `ground_truth` |
 | `unusual_text` | Texts with numbers, dates, symbols and unusual strings, which have no real recording | `audio`, `prompt` |
+| `clean-Libritts`, `protected-pop`, ... | One subset per condition, with `clean` split by source dataset ([all 14](https://huggingface.co/datasets/Nanboy/RVCBench-Cloned-Speech#conditions)) | `audio`, `prompt`, `ground_truth` |
 
 ```python
 from datasets import load_dataset
 
 ds = load_dataset("Nanboy/RVCBench-Cloned-Speech", split="train", streaming=True)
 row = next(iter(ds))  # row["audio"], row["prompt"], row["ground_truth"], row["model"], row["condition"]
+pop = load_dataset("Nanboy/RVCBench-Cloned-Speech", "protected-pop", split="train", streaming=True)
 ```
 
 `protocol.txt` in the dataset lists real and synthetic files in an ASVspoof-style format. The clips are licensed
