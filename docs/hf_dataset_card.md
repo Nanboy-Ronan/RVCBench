@@ -96,8 +96,14 @@ RVCBench is a benchmark dataset for studying robustness in voice cloning, text-t
 Dataset page: https://huggingface.co/datasets/Nanboy/RVCBench
 Code repository: https://github.com/Nanboy-Ronan/RVCBench
 Paper: https://arxiv.org/abs/2602.00443
+Cloned speech samples: https://huggingface.co/datasets/Nanboy/RVCBench-Cloned-Speech
 
 RVCBench is designed for evaluating how modern voice cloning (VC), TTS, and audio generation systems behave under clean prompts, protected prompts, and denoised protected prompts. It supports research on audio deepfake robustness, anti-spoofing, speaker verification resilience, privacy-preserving speech generation, and standardized benchmark evaluation.
+
+For audio deepfake detection and source tracing, [RVCBench Cloned Speech Samples](https://huggingface.co/datasets/Nanboy/RVCBench-Cloned-Speech)
+provides synthetic clips from 19 open-source voice cloning systems, generated from references and texts in this
+dataset. Each clip comes with its prompt and a real recording of the same text. That dataset is licensed
+separately under CC BY-NC 4.0.
 
 Each subset is exposed as its own Hugging Face dataset configuration. Most subsets contain:
 
