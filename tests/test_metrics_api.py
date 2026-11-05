@@ -76,7 +76,7 @@ def test_every_metric_has_a_description_and_a_scored_column():
 
 
 @pytest.mark.parametrize('failure', [False, True])
-def test_scoring_preserves_callers_rng_and_backend_flags(fake, monkeypatch, failure):
+def test_scoring_preserves_callers_rng_and_backend_flags(fake, monkeypatch, failure, request):
     import os
     import random
     import torch
@@ -84,7 +84,11 @@ def test_scoring_preserves_callers_rng_and_backend_flags(fake, monkeypatch, fail
     monkeypatch.setattr(torch.backends.cudnn, 'deterministic', False)
     monkeypatch.setattr(torch.backends.cudnn, 'benchmark', True)
     monkeypatch.setattr(torch.backends.cudnn, 'allow_tf32', False)
-    monkeypatch.setattr(torch.backends.cuda.matmul, 'allow_tf32', False)
+    # PyTorch exposes this flag through dynamic attribute access. Recent pytest
+    # treats it as a newly added attribute and tries to delete it at teardown.
+    original_matmul_tf32 = torch.backends.cuda.matmul.allow_tf32
+    torch.backends.cuda.matmul.allow_tf32 = False
+    request.addfinalizer(lambda: setattr(torch.backends.cuda.matmul, 'allow_tf32', original_matmul_tf32))
     random.seed(123)
     np.random.seed(321)
     torch.manual_seed(456)
