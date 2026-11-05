@@ -9,7 +9,7 @@ def main():
     with sync_playwright() as playwright:
         browser = playwright.chromium.launch(headless=True)
         page = browser.new_page(viewport={'width': 1200, 'height': 630}, device_scale_factor=1)
-        page.goto((root / 'docs/site-src/social-card.html').as_uri(), wait_until='networkidle')
+        page.goto((root / 'website/social-card.html').as_uri(), wait_until='networkidle')
         page.screenshot(path=str(root / 'docs/assets/og-image.png'))
         browser.close()
 

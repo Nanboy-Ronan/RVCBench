@@ -82,26 +82,26 @@ validation:
 nav:
   - Overview: README.md
   - Get started:
-      - Quickstart: quickstart.md
-      - Installation & upgrades: installation.md
+      - Quickstart: getting-started/quickstart.md
+      - Installation & upgrades: getting-started/installation.md
   - Evaluate:
-      - Score your own audio: metrics.md
-      - Evaluate your model: adding_a_model.md
-      - Benchmark suites: core_suite.md
-      - Datasets: datasets.md
-      - Evaluation FAQ: faq.md
+      - Score your own audio: evaluation/metrics.md
+      - Evaluate your model: evaluation/adding_a_model.md
+      - Benchmark suites: evaluation/core_suite.md
+      - Datasets: evaluation/datasets.md
+      - Evaluation FAQ: evaluation/faq.md
   - Reference:
-      - Python API: api.md
-      - Command line: cli.md
-      - Runs, reports & resume: run_protocol.md
+      - Python API: reference/api.md
+      - Command line: reference/cli.md
+      - Runs, reports & resume: reference/run_protocol.md
   - Built-in models:
-      - Supported models: models.md
-      - Model environments: model_environments.md
-      - Model setup: quickstart_model_setup.md
-      - Validation coverage: validation.md
+      - Supported models: integrations/models.md
+      - Model environments: integrations/model_environments.md
+      - Model setup: integrations/quickstart_model_setup.md
+      - Validation coverage: integrations/validation.md
   - Project:
-      - Paper results: paper_results.md
-      - Versions & paper reproduction: versions.md
+      - Paper results: reproduction/paper_results.md
+      - Versions & paper reproduction: reproduction/versions.md
       - Homepage: https://nanboy-ronan.github.io/RVCBench/
       - Changelog: https://github.com/Nanboy-Ronan/RVCBench/blob/main/CHANGELOG.md
       - Contributing: https://github.com/Nanboy-Ronan/RVCBench/blob/main/CONTRIBUTING.md

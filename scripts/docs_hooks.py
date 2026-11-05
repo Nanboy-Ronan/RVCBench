@@ -4,14 +4,45 @@ import re
 import json
 
 
+GROUPED_DOC_DIRS = {
+    'datasets',
+    'evaluation',
+    'getting-started',
+    'integrations',
+    'reference',
+    'reproduction',
+}
+def on_files(files, *, config):
+    """Keep public document URLs flat while organizing their source files.
+
+    GitHub readers see topic-based directories under ``docs/``. MkDocs still
+    treats each Markdown file as if it lived at the documentation root, so
+    existing URLs such as ``/docs/metrics/`` and existing relative links remain
+    stable.
+    """
+    for file in files:
+        parts = file.src_uri.split('/')
+        if len(parts) != 2 or parts[0] not in GROUPED_DOC_DIRS or not file.is_documentation_page():
+            continue
+        stem = posixpath.splitext(parts[1])[0]
+        file.dest_uri = stem + '/index.html'
+    return files
+
+
 def on_page_markdown(markdown, *, page, config, files):
     def repository_link(match):
         target = match.group(1)
+        if '://' in target or target.startswith(('#', 'mailto:')):
+            return match.group(0)
+        path, _, _ = target.partition('#')
+        source_uri = page.file.edit_uri or page.file.src_uri
+        resolved = posixpath.normpath(posixpath.join(posixpath.dirname(source_uri), path))
+
         # These files live outside the reader documentation. Keep code, notebooks
         # and website-maintenance links on GitHub; MkDocs handles guide links.
-        if target.startswith('../') or target.startswith('site-src/'):
-            path = posixpath.normpath(posixpath.join('docs', posixpath.dirname(page.file.src_uri), target))
-            return '](' + config.repo_url + '/blob/main/' + path + ')'
+        if resolved.startswith('../'):
+            repository_path = posixpath.normpath(posixpath.join('docs', resolved))
+            return '](' + config.repo_url + '/blob/main/' + repository_path + ')'
         return match.group(0)
 
     return re.sub(r'\]\(([^)\s]+)\)', repository_link, markdown)

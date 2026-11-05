@@ -14,4 +14,4 @@ labels: enhancement
 
 **Can you contribute the adapter?**
 
-<!-- see docs/adding_a_model.md -->
+<!-- see docs/evaluation/adding_a_model.md -->

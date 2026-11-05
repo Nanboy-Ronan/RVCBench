@@ -344,7 +344,7 @@ def test_report_export_and_site_gate(setup_run, monkeypatch):
     main()
     payload = json.loads(result.read_text())
     assert payload['means'] == {'sim': .5}
-    monkeypatch.syspath_prepend(str(Path('docs/site-src').resolve()))
+    monkeypatch.syspath_prepend(str(Path('website').resolve()))
     import render
     assert 'test-adapter' in render.render_validated_runs(reports)
     payload['means']['sim'] = .9
