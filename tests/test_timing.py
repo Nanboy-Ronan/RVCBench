@@ -1,5 +1,8 @@
 """CPU-only timing evidence and publication regressions; no model loading."""
 from pathlib import Path
+import subprocess
+import sys
+import tempfile
 import unittest
 
 from rvcbench.benchmark.timing import timing_summary, compare_timing
@@ -95,11 +98,17 @@ class TimingTests(unittest.TestCase):
             self.assertIsNone(mixed['rtf'])
 
     def test_site_has_no_rtf_sort_control_or_sort_data(self):
-        for path in ('docs/site-src/template.html', 'docs/index.html'):
-            source = (ROOT / path).read_text()
+        with tempfile.TemporaryDirectory() as directory:
+            subprocess.run(
+                [sys.executable, 'website/build.py', '--output', directory],
+                cwd=ROOT,
+                check=True,
+            )
+            built = (Path(directory) / 'index.html').read_text()
+        for source in ((ROOT / 'website/template.html').read_text(), built):
             self.assertNotIn('data-key="rtf"', source)
             self.assertIn('RTF (raw, incomparable)', source)
-        self.assertNotIn('data-rtf=', (ROOT / 'docs/index.html').read_text())
+        self.assertNotIn('data-rtf=', built)
         readme = (ROOT / 'README.md').read_text()
         if 'RTF' in readme:  # the README may omit RTF; when shown it must be marked incomparable
             self.assertIn('RTF (raw, incomparable)', readme)

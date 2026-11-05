@@ -25,8 +25,9 @@ jobs:
       - run: python -m pytest -q
       - run: python scripts/validate_quickstarts.py
       - run: rvcbench smoke --output results/ci-smoke
-      - run: python docs/site-src/build.py
-      - run: git diff --exit-code -- docs/index.html docs/llms.txt
+      - run: python -m pip install -r docs/requirements.txt
+      - run: python scripts/build_website.py
+      - run: python scripts/check_website.py
       - name: Build the distributions
         run: |
           python -m pip install build twine

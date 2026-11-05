@@ -221,8 +221,8 @@ logs/
 /tmp_bert_vits2/bert_gen.py
 /tmp_bert_vits2/
 /outputs/
-/docs/site-src/artifact.html
-/docs/site-src/__pycache__/
+/website/artifact.html
+/website/__pycache__/
 wav2vec2_checkpoints/
 .cache/
 .idea/

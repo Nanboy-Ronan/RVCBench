@@ -12,20 +12,20 @@ Score generated speech, or evaluate a model on RVCBench data.
 
 | I want to… | Open |
 | --- | --- |
-| Install and run my first evaluation | [Quickstart](quickstart.md) |
-| Look up a command argument, its values or its default | [CLI reference](cli.md) |
-| Choose a paper scenario | [Scenarios and task IDs](core_suite.md) |
-| Score audio from my own dataset | [Python API arguments](api.md) and [metric examples](metrics.md) |
-| Connect my model or use a batch inference script | [Model evaluation](adding_a_model.md) |
-| Set up GPU scoring or fix installation | [Installation](installation.md) |
-| Find dataset names and file formats | [Datasets](datasets.md) |
-| Run a built-in model | [Models](models.md) and [environments](model_environments.md) |
-| Inspect or resume a run | [Run guide](run_protocol.md) |
-| Reproduce the paper's results | [Frozen v1 codebase](versions.md) |
+| Install and run my first evaluation | [Quickstart](getting-started/quickstart.md) |
+| Look up a command argument, its values or its default | [CLI reference](reference/cli.md) |
+| Choose a paper scenario | [Scenarios and task IDs](evaluation/core_suite.md) |
+| Score audio from my own dataset | [Python API arguments](reference/api.md) and [metric examples](evaluation/metrics.md) |
+| Connect my model or use a batch inference script | [Model evaluation](evaluation/adding_a_model.md) |
+| Set up GPU scoring or fix installation | [Installation](getting-started/installation.md) |
+| Find dataset names and file formats | [Datasets](evaluation/datasets.md) |
+| Run a built-in model | [Models](integrations/models.md) and [environments](integrations/model_environments.md) |
+| Inspect or resume a run | [Run guide](reference/run_protocol.md) |
+| Reproduce the paper's results | [Frozen v1 codebase](reproduction/versions.md) |
 
 ## Run one scenario
 
-After [installation](installation.md):
+After [installation](getting-started/installation.md):
 
 ```bash
 rvcbench tasks --suite core-v1
@@ -36,10 +36,10 @@ rvcbench score --suite core-v1 --tasks chinese \
 ```
 
 Read `results/my-model/submission.json` for per-task scores.
-Replace `chinese` with [task IDs](cli.md#task-values), separated by spaces.
+Replace `chinese` with [task IDs](reference/cli.md#task-values), separated by spaces.
 
 ## Contribute
 
 See [CONTRIBUTING](../CONTRIBUTING.md) for development checks and release validation,
-[model integration](adding_a_model.md#route-2-built-in-integration) for adding an adapter, and
-[website maintenance](site-src/README.md) for rebuilding the homepage.
+[model integration](evaluation/adding_a_model.md#route-2-built-in-integration) for adding an adapter, and
+[website maintenance](../website/README.md) for rebuilding the homepage.

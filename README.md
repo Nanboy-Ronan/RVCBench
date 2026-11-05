@@ -112,7 +112,7 @@ The clips are licensed CC BY-NC 4.0, with additional terms for some systems list
 
 The paper defines **18 evaluations**, **14,370 utterances** and **204 speakers**.
 Browse [interactive results and audio examples](https://nanboy-ronan.github.io/RVCBench/),
-[paper result tables](docs/paper_results.md), or the [paper](https://arxiv.org/abs/2602.00443) for the full analysis.
+[paper result tables](docs/reproduction/paper_results.md), or the [paper](https://arxiv.org/abs/2602.00443) for the full analysis.
 
 ## Reproduce the paper
 

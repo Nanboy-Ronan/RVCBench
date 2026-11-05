@@ -88,7 +88,7 @@ First release on PyPI: `pip install rvcbench`.
 - Run records list `stoi` in `coverage.metric_valid`.
 - `rvcbench score` loads each metric model once per call instead of once per task, and fails before writing results when the directory holds none of the suite's files. `--model` is optional and defaults to the directory name.
 - Scorer model files live in `$RVCBENCH_ASSET_DIR/<name>`, else `./checkpoints/<name>` when present, else `~/.cache/rvcbench/<name>`; a speaker model fetched from the Hub is copied there.
-- Maintainer files moved out of the repository root: `upload_data.py` to `scripts/upload_hf_dataset.py`, `README_HF_DATASET.md` to `docs/hf_dataset_card.md`, and `data/dataset.md` to `docs/dataset_preprocessing.md`.
+- Maintainer files moved out of the repository root: `upload_data.py` to `scripts/upload_hf_dataset.py`, `README_HF_DATASET.md` to `docs/datasets/hf_dataset_card.md`, and `data/dataset.md` to `docs/reproduction/dataset_preprocessing.md`.
 - The evaluation extras use version ranges instead of exact pins: scores were checked to be identical up to float rounding with torch 2.6 and 2.9 and numpy 1.26 and 2.2. They require `pysptk>=1.0`, `speechbrain>=1.0.3`, `transformers` (for the emotion metric) and `setuptools<81` (pysptk imports `pkg_resources`).
 - Scorers read audio with soundfile instead of `torchaudio.load`, which needs `torchcodec` from torchaudio 2.9; the samples, and therefore the scores, are unchanged.
 - README links and images are absolute, so the page also renders on PyPI.

@@ -1,0 +1,91 @@
+---
+title: "Voice cloning evaluation datasets"
+description: "Use RVCBench datasets from Hugging Face or a local copy: layouts, language coverage, metadata and references for voice cloning evaluation, plus cloned speech for deepfake detection research."
+---
+
+# Datasets
+
+The benchmark data is on Hugging Face at
+[Nanboy/RVCBench](https://huggingface.co/datasets/Nanboy/RVCBench). Dataset configs download it
+automatically (`use_hf_dataset: true`, the default); `rvcbench prompts` and `rvcbench score` download only
+the files a suite uses. An offline snapshot is also available on
+[Google Drive](https://drive.google.com/file/d/1ZDOMorDGV8i5oVNtA5BaJLbFj2dVo5AU/view?usp=drive_link).
+How each source corpus was selected and preprocessed is described in
+[dataset preprocessing](../reproduction/dataset_preprocessing.md).
+
+## Folders and the paper's evaluations
+
+| Hub folder | Source | Used for (paper evaluation) | Dataset config |
+| --- | --- | --- | --- |
+| `Libritts` | LibriTTS test/dev-clean, 40 speakers | English-VC, LongAudio, AdvNoise and AntiProtect references | `libritts` |
+| `VCTK` | VCTK, 40 speakers, 12 accents | AudioShift (accent, gender, age), English-VC | `vctk` |
+| `vctk_text_robust` | VCTK voices, hallucination-style prompts | TextShift: Hallucination | `vctk_text_robust` |
+| `robotcall` | Robocall scam scripts, VCTK voices | TextShift: Scam, Expression | `robotcall` |
+| `AISHELL1_dev` | AISHELL-1, 40 speakers | Multilingual: Chinese-VC | `aishell` |
+| `Bilingual_uedin` | EMIME English-Mandarin, 13 speakers | Multilingual: CrossLingual | `bilingual_uedin` |
+| `CommonVoiceFR_dev` | Common Voice French, 40 speakers | Multilingual: French (appendix) | `french` |
+| `Long_context` | LibriSpeech-Long, 10 speakers | LongContext: LongText | `long_librispeech` |
+| `Background_noise` | VoiceBank+DEMAND, 10 noise types at 10 dB | PassiveNoise: Background | `background_noise`, `background_clean` |
+| `Multispeaker_libri` | LibriTTS mixed with two interferers at four SNRs | PassiveNoise: MultiSpeaker | `multispeaker_libri` |
+| `Protected_LibriTTS` | Protected references of the `core-v1` suite | AdvNoise, AntiProtect | used by `core-v1` |
+
+Dataset configs live in [`src/rvcbench/configs/dataset/`](../../src/rvcbench/configs/dataset/). To use a local
+copy, pass `dataset.use_hf_dataset=false dataset.root_path=/path/to/<folder>`.
+
+## Format
+
+Each folder follows one layout:
+
+```text
+<folder>/
+├── audios/<speaker_id>/*.wav
+├── filelists/          # legacy per-speaker JSON manifests, kept for compatibility
+└── metadata.parquet    # canonical manifest read by all loaders
+```
+
+`metadata.parquet` has one row per evaluation pair:
+
+| Column | Description |
+| --- | --- |
+| `speaker_id` | Target speaker |
+| `prompt_file_name` | Reference (prompt) audio |
+| `prompt_text`, `prompt_language` | Transcript and language of the reference |
+| `target_file_name` | Ground-truth target audio |
+| `target_text`, `target_language` | Text to synthesize and its language |
+| `pair_id`, `dataset_name`, `split` | Provenance |
+
+Phoneme and alignment annotations (`prompt_phonemes`, `prompt_tone`, `prompt_word2ph` and their `target_*`
+counterparts) are kept when available, and dataset-specific fields such as `spam_type` in `robotcall` are
+extra columns. LibriTTS has two annotation exports (`speaker` and `speaker_text`); they stay distinct, see
+the [run guide](../reference/run_protocol.md#libritts-manifest-variants).
+
+To rebuild canonical manifests from legacy per-speaker JSON files:
+
+```bash
+python src/rvcbench/datasets/build_canonical_manifests.py --force
+```
+
+## Cloned speech samples
+
+[RVCBench Cloned Speech Samples](https://huggingface.co/datasets/Nanboy/RVCBench-Cloned-Speech) is a separate
+dataset of voice-cloned speech for audio deepfake detection, source tracing and anti-spoofing research. It has
+51,562 synthetic clips from 19 open-source text-to-speech and voice cloning systems, generated from prompts and
+texts of this dataset. Each clip comes with the prompt the system was given and, except in the `unusual_text`
+configuration, a real recording of the same text by the same speaker.
+
+| Configuration | Conditions | Audio columns |
+| --- | --- | --- |
+| `default` | Clean (LibriTTS, VCTK, AISHELL-1, Common Voice French), cross-lingual, long-form, noisy and multi-speaker prompts, and prompts protected by Gaussian noise, POP, Enkidu, SafeSpeech, SPEC and denoised SPEC | `audio`, `prompt`, `ground_truth` |
+| `unusual_text` | Texts with numbers, dates, symbols and unusual strings, which have no real recording | `audio`, `prompt` |
+| `clean-Libritts`, `protected-pop`, ... | One subset per condition, with `clean` split by source dataset ([all 14](https://huggingface.co/datasets/Nanboy/RVCBench-Cloned-Speech#conditions)) | `audio`, `prompt`, `ground_truth` |
+
+```python
+from datasets import load_dataset
+
+ds = load_dataset("Nanboy/RVCBench-Cloned-Speech", split="train", streaming=True)
+row = next(iter(ds))  # row["audio"], row["prompt"], row["ground_truth"], row["model"], row["condition"]
+pop = load_dataset("Nanboy/RVCBench-Cloned-Speech", "protected-pop", split="train", streaming=True)
+```
+
+`protocol.txt` in the dataset lists real and synthetic files in an ASVspoof-style format. The clips are licensed
+CC BY-NC 4.0, with additional terms for some systems listed on the dataset card.
